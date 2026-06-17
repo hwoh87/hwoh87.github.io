@@ -5,8 +5,8 @@
       "namespace": "android_app",
       "package_name": "com.samramanshang.manseryeok",
       "sha256_cert_fingerprints": [
-        "REPLACE_WITH_PLAY_APP_SIGNING_SHA256",
-        "OPTIONAL_REPLACE_WITH_DEBUG_KEYSTORE_SHA256_FOR_LOCAL_TESTING"
+        "D3:4A:2F:D9:6A:BB:8C:C8:E0:73:98:C5:92:FD:37:E1:1F:F4:C2:39:11:CB:37:74:5E:86:E4:B4:82:2E:3F:42",
+        "3E:93:85:0E:07:2A:DA:79:C9:D7:01:FC:40:B9:21:48:A5:88:8F:90:6F:EB:A9:60:C9:E2:EA:B9:89:A3:A6:7B"
       ]
     }
   }
