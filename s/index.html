@@ -3,56 +3,189 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>궁합 결과 | 만세력</title>
+  <title>공유 결과 | 만세력</title>
 
-  <!-- 카톡/인스타/메신저 리치 미리보기 (Open Graph) -->
+  <!-- 카톡/인스타/메신저 리치 미리보기 (Open Graph) — 정적 공통(개별 결과 OG는 정적 호스팅 한계) -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="만세력" />
-  <meta property="og:title" content="우리 궁합, 앱에서 확인해보세요 | 만세력" />
-  <meta property="og:description" content="사주로 보는 궁합 점수와 풀이. 만세력 앱에서 내 사주로 직접 확인하세요." />
+  <meta property="og:title" content="사주 분석 결과를 공유받았어요 | 만세력" />
+  <meta property="og:description" content="사주 · 자미두수 · 별자리 AI 융합 분석. 만세력 앱에서 내 사주로 직접 확인하세요." />
   <meta property="og:image" content="https://hwoh87.github.io/og-share.png" />
   <meta property="og:url" content="https://hwoh87.github.io/s/" />
   <meta name="twitter:card" content="summary_large_image" />
 
   <style>
     :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
     body {
-      margin: 0; min-height: 100vh; box-sizing: border-box;
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+      margin: 0; min-height: 100vh; background: #0A0820; color: #EDEBF5;
       font-family: -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-      background: #0A0820; color: #EDEBF5; text-align: center; padding: 32px;
+    }
+    /* 씬/폴백 센터 카드 */
+    .center {
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 18px; text-align: center; padding: 32px;
     }
     .logo { font-size: 44px; }
-    h1 { font-size: 20px; font-weight: 700; margin: 0; }
-    p { font-size: 14px; line-height: 1.6; color: #B8B2D6; margin: 0; max-width: 320px; }
+    .center h1 { font-size: 20px; font-weight: 700; margin: 0; }
+    .center p { font-size: 14px; line-height: 1.6; color: #B8B2D6; margin: 0; max-width: 320px; }
     a.cta {
       display: inline-block; margin-top: 6px; padding: 14px 28px; border-radius: 999px;
       background: #7C5CFF; color: #fff; font-weight: 700; text-decoration: none; font-size: 15px;
     }
+    /* sid 스냅샷(리포트/궁합) 뷰 */
+    .wrap { max-width: 720px; margin: 0 auto; padding: 28px 22px 140px; display: none; }
+    .brand { font-size: 13px; letter-spacing: 0.14em; color: #B8A46B; font-weight: 700; }
+    .subject { font-size: 22px; font-weight: 800; margin: 14px 0 4px; }
+    .subject .accent { color: #C9B2FF; }
+    .sig {
+      margin: 18px 0 6px; padding: 18px 20px; border-radius: 16px;
+      background: rgba(124, 92, 255, 0.12); border: 1px solid rgba(124, 92, 255, 0.35);
+      font-family: Georgia, "Noto Serif KR", serif; font-size: 17px; line-height: 1.7; color: #E9E2FF;
+    }
+    .cardimg { width: 100%; border-radius: 20px; margin-top: 14px; display: block; }
+    .score { font-size: 44px; font-weight: 800; color: #C9B2FF; margin: 16px 0 2px; text-align: center; }
+    .scorelabel { font-size: 13px; color: #B8B2D6; text-align: center; }
+    .report { margin-top: 10px; }
+    .report h2 {
+      font-size: 18px; margin: 34px 0 10px; color: #E8C36B;
+      padding-bottom: 8px; border-bottom: 1px solid rgba(232, 195, 107, 0.22);
+    }
+    .report h3 { font-size: 16px; margin: 24px 0 8px; color: #C9B2FF; }
+    .report p { font-size: 15px; line-height: 1.85; color: #D8D3EA; margin: 0 0 14px; }
+    .report ul { margin: 0 0 14px; padding-left: 20px; }
+    .report li { font-size: 15px; line-height: 1.8; color: #D8D3EA; margin-bottom: 6px; }
+    .report strong { color: #F3EEDA; }
+    .term { color: #C9B2FF; border-bottom: 1px dashed rgba(201, 178, 255, 0.5); font-weight: 600; }
+    .meta { margin-top: 30px; font-size: 12px; color: #6E678F; line-height: 1.6; }
+    .ctabar {
+      position: fixed; left: 0; right: 0; bottom: 0; display: none;
+      background: rgba(10, 8, 32, 0.92); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(124, 92, 255, 0.30);
+      padding: 12px 18px calc(12px + env(safe-area-inset-bottom));
+    }
+    .ctabar .inner { max-width: 720px; margin: 0 auto; display: flex; gap: 10px; align-items: center; }
+    .ctabar .hint { flex: 1; font-size: 12.5px; line-height: 1.5; color: #B8B2D6; min-width: 0; }
+    .ctabar a.cta { margin-top: 0; padding: 13px 22px; font-size: 14px; white-space: nowrap; flex-shrink: 0; }
   </style>
 </head>
 <body>
-  <div class="logo">💞</div>
-  <h1>만세력 궁합</h1>
-  <p>내 사주로 직접 궁합을 확인할 수 있어요.<br />잠시 후 자동으로 이동합니다…</p>
-  <a id="cta" class="cta" href="#">앱에서 보기</a>
+  <!-- sid 스냅샷 뷰(JS가 채움) -->
+  <div class="wrap" id="snap"></div>
+  <div class="ctabar" id="ctabar">
+    <div class="inner">
+      <div class="hint" id="ctahint">내 사주도 이렇게 깊이 분석받고 싶다면</div>
+      <a id="ctabtn" class="cta" href="#">앱에서 분석하기</a>
+    </div>
+  </div>
+
+  <!-- 씬 링크/로딩/폴백 센터 카드 -->
+  <div class="center" id="center">
+    <div class="logo">🔮</div>
+    <h1 id="centerTitle">만세력</h1>
+    <p id="centerDesc">결과를 불러오는 중이에요…</p>
+    <a id="centerCta" class="cta" href="#" style="display:none">앱에서 보기</a>
+  </div>
 
   <script>
     (function () {
       var PKG = 'com.samramanshang.manseryeok';
+      var API = 'https://sidxbzpbesbaiokxrqsf.supabase.co/functions/v1/s/';
       var params = new URLSearchParams(location.search);
+      var sid = params.get('sid');
       var scene = params.get('scene');
-      // 경로형(/s/one-to-one)도 지원.
-      if (!scene) { var m = location.pathname.match(/\/s\/([a-z-]+)/); if (m) scene = m[1]; }
+      // 경로형(/s/one-to-one)도 지원(구링크 하위호환).
+      if (!sid && !scene) { var m = location.pathname.match(/\/s\/([a-z-]+)/); if (m) scene = m[1]; }
 
-      var ref = scene ? ('&referrer=' + encodeURIComponent('s_' + scene)) : '';
-      var STORE = 'https://play.google.com/store/apps/details?id=' + PKG + ref;
+      function esc(s) {
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      }
+      function mdInline(s) {
+        return esc(s)
+          .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+          .replace(/\[\[([^\]]+)\]\]/g, '<span class="term">$1</span>');
+      }
+      // AI 융합 본문이 실제로 쓰는 마크다운 부분집합만: #/##/### 헤딩, - 불릿, 빈 줄 단락, **굵게**, [[용어]].
+      function mdToHtml(md) {
+        var out = [], para = [], inList = false;
+        function flushPara() { if (para.length) { out.push('<p>' + para.map(mdInline).join('<br />') + '</p>'); para = []; } }
+        function closeList() { if (inList) { out.push('</ul>'); inList = false; } }
+        md.split('\n').forEach(function (raw) {
+          var line = raw.replace(/^\s+/, '');
+          if (line.indexOf('### ') === 0) { flushPara(); closeList(); out.push('<h3>' + mdInline(line.slice(4)) + '</h3>'); }
+          else if (line.indexOf('## ') === 0) { flushPara(); closeList(); out.push('<h2>' + mdInline(line.slice(3)) + '</h2>'); }
+          else if (line.indexOf('# ') === 0) { flushPara(); closeList(); out.push('<h2>' + mdInline(line.slice(2)) + '</h2>'); }
+          else if (line.indexOf('- ') === 0 || line.indexOf('* ') === 0) {
+            flushPara();
+            if (!inList) { out.push('<ul>'); inList = true; }
+            out.push('<li>' + mdInline(line.slice(2)) + '</li>');
+          } else if (line === '') { flushPara(); closeList(); }
+          else { closeList(); para.push(line); }
+        });
+        flushPara(); closeList();
+        return out.join('\n');
+      }
+      function storeUrl(ref) {
+        return 'https://play.google.com/store/apps/details?id=' + PKG +
+          (ref ? '&referrer=' + encodeURIComponent(ref) : '');
+      }
+      function showCenter(title, desc, ctaHref) {
+        document.getElementById('centerTitle').textContent = title;
+        document.getElementById('centerDesc').innerHTML = desc;
+        var a = document.getElementById('centerCta');
+        a.setAttribute('href', ctaHref);
+        a.style.display = 'inline-block';
+      }
+
+      // ── sid 스냅샷: 서버 JSON 을 받아 웹에서 결과를 그대로 보여준다(자동 리다이렉트 없음) ──
+      if (sid) {
+        var store = storeUrl('sid_' + sid);
+        fetch(API + encodeURIComponent(sid), { headers: { 'Accept': 'application/json' } })
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (!d || d.expired) {
+              showCenter('결과를 불러올 수 없어요', '링크가 만료되었거나 잘못된 주소일 수 있어요.<br />만세력 앱에서 내 사주로 직접 확인해 보세요.', store);
+              return;
+            }
+            var html = '';
+            if (d.scene_type === 'saju-fusion' && d.body_md) {
+              document.title = d.name_a + '님의 사주 AI 융합 해석 | 만세력';
+              html += '<div class="brand">☯ 만세력 · AI 융합 해석</div>';
+              html += '<div class="subject"><span class="accent">' + esc(d.name_a) + '</span>님의 사주 리포트</div>';
+              html += '<div class="sig">“' + esc(d.one_liner) + '”</div>';
+              html += '<div class="report">' + mdToHtml(d.body_md) + '</div>';
+              html += '<p class="meta">이 리포트는 만세력 앱의 AI 융합 해석(사주 · 자미두수 · 별자리)으로 생성됐어요.<br />공유한 사람이 직접 공개한 결과이며, 링크는 일정 기간 후 만료됩니다.</p>';
+            } else {
+              document.title = d.name_a + ' × ' + d.name_b + ' 궁합 | 만세력';
+              html += '<div class="brand">💞 만세력 · 사주 궁합</div>';
+              html += '<div class="subject"><span class="accent">' + esc(d.name_a) + ' × ' + esc(d.name_b) + '</span>' +
+                (d.relation_label ? ' · ' + esc(d.relation_label) : '') + '</div>';
+              if (d.card_url) html += '<img class="cardimg" alt="궁합 카드" src="' + esc(d.card_url) + '" />';
+              html += '<div class="score">' + esc(d.score) + '점</div>';
+              html += '<div class="scorelabel">사주로 본 궁합 점수</div>';
+              html += '<div class="sig">“' + esc(d.one_liner) + '”</div>';
+              html += '<p class="meta">공유한 사람이 공개한 결과예요. 만세력 앱에서 내 사주로 직접 궁합을 확인할 수 있어요.</p>';
+              document.getElementById('ctahint').textContent = '내 사주로 우리 궁합을 확인하고 싶다면';
+            }
+            document.getElementById('snap').innerHTML = html;
+            document.getElementById('snap').style.display = 'block';
+            document.getElementById('ctabtn').setAttribute('href', store);
+            document.getElementById('ctabar').style.display = 'block';
+            document.getElementById('center').style.display = 'none';
+          })
+          .catch(function () {
+            showCenter('결과를 불러올 수 없어요', '네트워크 상태를 확인하거나 잠시 후 다시 시도해 주세요.', store);
+          });
+        return;
+      }
+
+      // ── 씬 링크(구형): 스킴 바운스 → 스토어 ──
+      var ref = scene ? ('s_' + scene) : null;
+      var STORE = storeUrl(ref);
       var SCHEME = scene ? ('ohhyo://share/' + scene) : null;
-
-      document.getElementById('cta').setAttribute('href', STORE);
-
+      showCenter('만세력', scene ? '내 사주로 직접 확인할 수 있어요.<br />잠시 후 자동으로 이동합니다…' : '사주 · 자미두수 · 별자리 통합 분석', STORE);
       function toStore() { location.href = STORE; }
-
       if (SCHEME) {
         var timer = setTimeout(toStore, 1500);
         document.addEventListener('visibilitychange', function () {
