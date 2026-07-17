@@ -5,23 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>공유 결과 | 만세력</title>
 
-  <!-- 카톡/인스타/메신저 리치 미리보기 (Open Graph) — 정적 공통(개별 결과 OG는 정적 호스팅 한계) -->
+  <!-- 카톡/인스타/메신저 리치 미리보기 (Open Graph) — 정적 공통.
+       종류별 미리보기는 /s/<kind>/ OG 셸(fusion·compat·group·pair)이 담당(정적 호스팅 한계 내 최대치). -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="만세력" />
   <meta property="og:title" content="사주 분석 결과를 공유받았어요 | 만세력" />
   <meta property="og:description" content="사주 · 자미두수 · 별자리 AI 융합 분석. 만세력 앱에서 내 사주로 직접 확인하세요." />
   <meta property="og:image" content="https://hwoh87.github.io/og-share.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
   <meta property="og:url" content="https://hwoh87.github.io/s/" />
   <meta name="twitter:card" content="summary_large_image" />
 
   <style>
-    :root { color-scheme: dark; }
+    /* 앱 리뉴얼 디자인 언어의 2-레이어를 웹으로 옮김:
+       딥네이비 코스믹 모먼트(히어로) + 웜 페이퍼 에디토리얼(본문). */
     * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
     body {
       margin: 0; min-height: 100vh; background: #0A0820; color: #EDEBF5;
       font-family: -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
     }
-    /* 씬/폴백 센터 카드 */
+
+    /* ── 씬/로딩/폴백 센터 카드(다크) ── */
     .center {
       min-height: 100vh; display: flex; flex-direction: column;
       align-items: center; justify-content: center; gap: 18px; text-align: center; padding: 32px;
@@ -31,36 +37,103 @@
     .center p { font-size: 14px; line-height: 1.6; color: #B8B2D6; margin: 0; max-width: 320px; }
     a.cta {
       display: inline-block; margin-top: 6px; padding: 14px 28px; border-radius: 999px;
-      background: #7C5CFF; color: #fff; font-weight: 700; text-decoration: none; font-size: 15px;
+      background: linear-gradient(135deg, #8B6BFF, #6E48F2); color: #fff; font-weight: 700;
+      text-decoration: none; font-size: 15px;
+      box-shadow: 0 6px 18px rgba(110, 72, 242, 0.35);
     }
-    /* sid 스냅샷(리포트/궁합) 뷰 */
-    .wrap { max-width: 720px; margin: 0 auto; padding: 28px 22px 140px; display: none; }
-    .brand { font-size: 13px; letter-spacing: 0.14em; color: #B8A46B; font-weight: 700; }
-    .subject { font-size: 22px; font-weight: 800; margin: 14px 0 4px; }
+
+    /* ── sid 스냅샷 뷰 ── */
+    .wrap { display: none; }
+
+    /* 코스믹 히어로 — 딥네이비 그라데이션 + 별가루 + 글로우 오브 */
+    .hero {
+      position: relative; overflow: hidden; text-align: center;
+      background:
+        radial-gradient(ellipse 120% 70% at 50% -10%, #2A2158 0%, #171040 45%, #0A0820 100%);
+      padding: 52px 22px 44px;
+    }
+    .hero::before {
+      /* 은은한 성운 글로우 */
+      content: ""; position: absolute; left: 50%; top: -80px; transform: translateX(-50%);
+      width: 420px; height: 260px; border-radius: 50%;
+      background: radial-gradient(closest-side, rgba(124, 92, 255, 0.28), transparent 70%);
+      pointer-events: none;
+    }
+    .stars, .stars2 { position: absolute; inset: 0; pointer-events: none; }
+    .star { position: absolute; border-radius: 50%; background: #EDEBF5; opacity: 0.8; }
+    .star.tw { animation: tw 3.2s ease-in-out infinite; }
+    @keyframes tw { 0%,100% { opacity: 0.25; } 50% { opacity: 0.9; } }
+    @media (prefers-reduced-motion: reduce) { .star.tw { animation: none; } }
+    .hero-inner { position: relative; max-width: 720px; margin: 0 auto; }
+    .orb {
+      width: 64px; height: 64px; margin: 0 auto 16px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-size: 30px;
+      background: radial-gradient(circle at 32% 28%, #3B2F73, #1B1443 68%);
+      border: 1px solid rgba(201, 178, 255, 0.35);
+      box-shadow: 0 0 28px rgba(124, 92, 255, 0.45), inset 0 0 18px rgba(124, 92, 255, 0.25);
+    }
+    .brand {
+      font-size: 12px; letter-spacing: 0.22em; color: #D9C58A; font-weight: 700;
+      text-transform: uppercase;
+    }
+    .subject { font-size: 24px; font-weight: 800; margin: 12px 0 0; line-height: 1.35; }
     .subject .accent { color: #C9B2FF; }
     .sig {
-      margin: 18px 0 6px; padding: 18px 20px; border-radius: 16px;
-      background: rgba(124, 92, 255, 0.12); border: 1px solid rgba(124, 92, 255, 0.35);
-      font-family: Georgia, "Noto Serif KR", serif; font-size: 17px; line-height: 1.7; color: #E9E2FF;
+      margin: 20px auto 0; max-width: 560px;
+      font-family: Georgia, "Noto Serif KR", serif; font-size: 17.5px; line-height: 1.75;
+      color: #EFE9FF;
     }
-    .cardimg { width: 100%; border-radius: 20px; margin-top: 14px; display: block; }
-    .score { font-size: 44px; font-weight: 800; color: #C9B2FF; margin: 16px 0 2px; text-align: center; }
-    .scorelabel { font-size: 13px; color: #B8B2D6; text-align: center; }
-    .report { margin-top: 10px; }
+    .sig::before, .sig::after { color: #D9C58A; font-size: 20px; }
+    .sig::before { content: "“ "; }
+    .sig::after { content: " ”"; }
+    /* 궁합 점수(스냅샷 뷰) — 히어로 안 골드 링 */
+    .scorering {
+      width: 118px; height: 118px; margin: 24px auto 0; border-radius: 50%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      position: relative;
+    }
+    .scorering::before {
+      content: ""; position: absolute; inset: 0; border-radius: 50%;
+      background: conic-gradient(#E8C36B calc(var(--pct) * 1%), rgba(237, 235, 245, 0.14) 0);
+      -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
+      mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
+    }
+    .scorering .num { font-size: 38px; font-weight: 800; color: #F3E6C2; line-height: 1; }
+    .scorering .unit { font-size: 12px; color: #B8B2D6; margin-top: 6px; }
+    .heroband {
+      /* 히어로 → 페이퍼 이음새 */
+      height: 18px; background: linear-gradient(#0A0820, rgba(10, 8, 32, 0));
+      position: relative; z-index: 1; margin-bottom: -18px;
+    }
+
+    /* 웜 페이퍼 본문 */
+    .paper { background: #FAF7F0; color: #33302B; padding: 30px 22px 150px; }
+    .paper-inner { max-width: 720px; margin: 0 auto; }
+    .cardimg {
+      width: 100%; border-radius: 18px; display: block; margin: 2px 0 18px;
+      box-shadow: 0 10px 26px rgba(23, 16, 64, 0.18);
+    }
     .report h2 {
-      font-size: 18px; margin: 34px 0 10px; color: #E8C36B;
-      padding-bottom: 8px; border-bottom: 1px solid rgba(232, 195, 107, 0.22);
+      font-size: 18.5px; margin: 36px 0 12px; color: #7A5E1E; font-weight: 800;
+      padding-bottom: 8px; border-bottom: 1px solid rgba(122, 94, 30, 0.22);
     }
-    .report h3 { font-size: 16px; margin: 24px 0 8px; color: #C9B2FF; }
-    .report p { font-size: 15px; line-height: 1.85; color: #D8D3EA; margin: 0 0 14px; }
-    .report ul { margin: 0 0 14px; padding-left: 20px; }
-    .report li { font-size: 15px; line-height: 1.8; color: #D8D3EA; margin-bottom: 6px; }
-    .report strong { color: #F3EEDA; }
-    .term { color: #C9B2FF; border-bottom: 1px dashed rgba(201, 178, 255, 0.5); font-weight: 600; }
-    .meta { margin-top: 30px; font-size: 12px; color: #6E678F; line-height: 1.6; }
+    .report h2:first-child { margin-top: 4px; }
+    .report h2::before { content: "✦ "; color: #C7A94F; font-size: 14px; }
+    .report h3 { font-size: 16px; margin: 26px 0 8px; color: #5D43C9; font-weight: 700; }
+    .report p { font-size: 15.5px; line-height: 1.9; color: #45403A; margin: 0 0 15px; }
+    .report ul { margin: 0 0 15px; padding-left: 20px; }
+    .report li { font-size: 15.5px; line-height: 1.85; color: #45403A; margin-bottom: 6px; }
+    .report strong { color: #201C17; }
+    .term { color: #5D43C9; border-bottom: 1px dashed rgba(93, 67, 201, 0.45); font-weight: 600; }
+    .meta {
+      margin-top: 34px; padding-top: 14px; border-top: 1px solid rgba(51, 48, 43, 0.12);
+      font-size: 12px; color: #8D8578; line-height: 1.7;
+    }
+
+    /* 하단 고정 CTA 독(다크 글래스 — 페이퍼 위에서 대비) */
     .ctabar {
       position: fixed; left: 0; right: 0; bottom: 0; display: none;
-      background: rgba(10, 8, 32, 0.92); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+      background: rgba(10, 8, 32, 0.94); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
       border-top: 1px solid rgba(124, 92, 255, 0.30);
       padding: 12px 18px calc(12px + env(safe-area-inset-bottom));
     }
@@ -70,8 +143,15 @@
   </style>
 </head>
 <body>
-  <!-- sid 스냅샷 뷰(JS가 채움) -->
-  <div class="wrap" id="snap"></div>
+  <!-- sid 스냅샷 뷰(JS가 채움): 코스믹 히어로 + 웜 페이퍼 본문 -->
+  <div class="wrap" id="snap">
+    <div class="hero">
+      <div class="stars" id="stars"></div>
+      <div class="hero-inner" id="heroInner"></div>
+    </div>
+    <div class="heroband"></div>
+    <div class="paper"><div class="paper-inner" id="paperInner"></div></div>
+  </div>
   <div class="ctabar" id="ctabar">
     <div class="inner">
       <div class="hint" id="ctahint">내 사주도 이렇게 깊이 분석받고 싶다면</div>
@@ -130,12 +210,38 @@
         return 'https://play.google.com/store/apps/details?id=' + PKG +
           (ref ? '&referrer=' + encodeURIComponent(ref) : '');
       }
+      // 안드로이드 설치자: intent:// 로 앱 직행, 미설치자: 스토어 폴백. 그 외 플랫폼: 스토어.
+      function ctaHref(store, sid) {
+        var isAndroid = /android/i.test(navigator.userAgent);
+        if (!isAndroid || !sid) return store;
+        return 'intent://share/report?sid=' + encodeURIComponent(sid) +
+          '#Intent;scheme=ohhyo;package=' + PKG +
+          ';S.browser_fallback_url=' + encodeURIComponent(store) + ';end';
+      }
       function showCenter(title, desc, ctaHref) {
         document.getElementById('centerTitle').textContent = title;
         document.getElementById('centerDesc').innerHTML = desc;
         var a = document.getElementById('centerCta');
         a.setAttribute('href', ctaHref);
         a.style.display = 'inline-block';
+      }
+      // 별가루 — sid 시드 기반 결정적 배치(리로드마다 흔들리지 않게).
+      function sprinkleStars(seedStr) {
+        var host = document.getElementById('stars');
+        var seed = 0;
+        for (var i = 0; i < seedStr.length; i++) seed = (seed * 31 + seedStr.charCodeAt(i)) >>> 0;
+        function rnd() { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }
+        for (var n = 0; n < 46; n++) {
+          var s = document.createElement('span');
+          var size = rnd() < 0.82 ? 1.5 : 2.5;
+          s.className = 'star' + (rnd() < 0.4 ? ' tw' : '');
+          s.style.width = size + 'px'; s.style.height = size + 'px';
+          s.style.left = (rnd() * 100).toFixed(2) + '%';
+          s.style.top = (rnd() * 100).toFixed(2) + '%';
+          s.style.opacity = (0.25 + rnd() * 0.6).toFixed(2);
+          if (s.classList.contains('tw')) s.style.animationDelay = (rnd() * 3).toFixed(2) + 's';
+          host.appendChild(s);
+        }
       }
 
       // ── sid 스냅샷: 서버 JSON 을 받아 웹에서 결과를 그대로 보여준다(자동 리다이렉트 없음) ──
@@ -148,7 +254,7 @@
               showCenter('결과를 불러올 수 없어요', '링크가 만료되었거나 잘못된 주소일 수 있어요.<br />만세력 앱에서 내 사주로 직접 확인해 보세요.', store);
               return;
             }
-            var html = '';
+            var hero = '', paper = '';
             // AI 리포트(ai-report + report_kind). 'saju-fusion' 은 일반화 이전 구행 하위호환.
             var isAiReport = (d.scene_type === 'ai-report' || d.scene_type === 'saju-fusion') && d.body_md;
             if (isAiReport) {
@@ -174,29 +280,34 @@
               };
               var b = KIND[d.report_kind] || KIND['fusion'];
               document.title = d.name_a + b.titleSuffix + ' | 만세력';
-              html += '<div class="brand">' + b.glyph + ' 만세력 · ' + b.label + '</div>';
-              html += '<div class="subject"><span class="accent">' + esc(d.name_a) + '</span>' + b.subjectSuffix + '</div>';
-              html += '<div class="sig">“' + esc(d.one_liner) + '”</div>';
-              html += '<div class="report">' + mdToHtml(d.body_md) + '</div>';
-              html += '<p class="meta">' + b.meta + '<br />공유한 사람이 직접 공개한 결과이며, 링크는 일정 기간 후 만료됩니다.</p>';
+              hero += '<div class="orb">' + b.glyph + '</div>';
+              hero += '<div class="brand">만세력 · ' + b.label + '</div>';
+              hero += '<div class="subject"><span class="accent">' + esc(d.name_a) + '</span>' + b.subjectSuffix + '</div>';
+              hero += '<div class="sig">' + esc(d.one_liner) + '</div>';
+              paper += '<div class="report">' + mdToHtml(d.body_md) + '</div>';
+              paper += '<p class="meta">' + b.meta + '<br />공유한 사람이 직접 공개한 결과이며, 링크는 일정 기간 후 만료됩니다.</p>';
               document.getElementById('ctahint').textContent = b.hint;
             } else {
               document.title = d.name_a + ' × ' + d.name_b + ' 궁합 | 만세력';
-              html += '<div class="brand">💞 만세력 · 사주 궁합</div>';
-              html += '<div class="subject"><span class="accent">' + esc(d.name_a) + ' × ' + esc(d.name_b) + '</span>' +
+              var pct = Math.max(0, Math.min(100, Number(d.score) || 0));
+              hero += '<div class="orb">💞</div>';
+              hero += '<div class="brand">만세력 · 사주 궁합</div>';
+              hero += '<div class="subject"><span class="accent">' + esc(d.name_a) + ' × ' + esc(d.name_b) + '</span>' +
                 (d.relation_label ? ' · ' + esc(d.relation_label) : '') + '</div>';
-              if (d.card_url) html += '<img class="cardimg" alt="궁합 카드" src="' + esc(d.card_url) + '" />';
-              html += '<div class="score">' + esc(d.score) + '점</div>';
-              html += '<div class="scorelabel">사주로 본 궁합 점수</div>';
-              html += '<div class="sig">“' + esc(d.one_liner) + '”</div>';
-              html += '<p class="meta">공유한 사람이 공개한 결과예요. 만세력 앱에서 내 사주로 직접 궁합을 확인할 수 있어요.</p>';
+              hero += '<div class="scorering" style="--pct:' + pct + '"><span class="num">' + esc(d.score) + '</span><span class="unit">사주로 본 궁합 점수</span></div>';
+              hero += '<div class="sig">' + esc(d.one_liner) + '</div>';
+              if (d.card_url) paper += '<img class="cardimg" alt="궁합 카드" src="' + esc(d.card_url) + '" />';
+              paper += '<p class="meta">공유한 사람이 공개한 결과예요. 만세력 앱에서 내 사주로 직접 궁합을 확인할 수 있어요.</p>';
               document.getElementById('ctahint').textContent = '내 사주로 우리 궁합을 확인하고 싶다면';
             }
-            document.getElementById('snap').innerHTML = html;
+            document.getElementById('heroInner').innerHTML = hero;
+            document.getElementById('paperInner').innerHTML = paper;
+            sprinkleStars(sid);
             document.getElementById('snap').style.display = 'block';
-            document.getElementById('ctabtn').setAttribute('href', store);
+            document.getElementById('ctabtn').setAttribute('href', ctaHref(store, sid));
             document.getElementById('ctabar').style.display = 'block';
             document.getElementById('center').style.display = 'none';
+            document.body.style.background = '#FAF7F0';
           })
           .catch(function () {
             showCenter('결과를 불러올 수 없어요', '네트워크 상태를 확인하거나 잠시 후 다시 시도해 주세요.', store);

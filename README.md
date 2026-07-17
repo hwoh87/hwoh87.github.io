@@ -15,7 +15,9 @@
 | 경로 | 역할 |
 |---|---|
 | `m/index.html` | 매거진 랜딩. `https://hwoh87.github.io/m/?id=<id>` |
-| `s/index.html` | 공유 결과(궁합 등) 랜딩. `https://hwoh87.github.io/s/?scene=<scene>` |
+| `s/index.html` | 공유 결과 뷰어(sid 스냅샷 + 구형 scene 바운스). `https://hwoh87.github.io/s/?sid=<sid>` |
+| `s/{fusion,compat,group,pair}/index.html` | **종류별 OG 셸** — 크롤러엔 종류별 미리보기, 사람은 즉시 `/s/?sid=` 로 리다이렉트. `DeepLink.buildSharedResultUrl(sid, kind)` 가 내보냄 |
+| `og-*.png` | 브랜디드 OG 카드(1200×630). share=공용·fusion·compat·group·magazine. 원본 템플릿은 세션 스크래치 `og-card.html`(headless Chrome 렌더) |
 | `index.html` | 루트 → 스토어 리다이렉트 |
 | `.well-known/assetlinks.json` | **App Links 검증 파일** (SHA-256 채워야 동작) |
 | `.nojekyll` | **필수.** GitHub Pages(Jekyll)가 `.well-known` 같은 점(.) 디렉터리를 무시하는 걸 막는다 |
