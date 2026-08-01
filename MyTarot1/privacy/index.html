@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>개인정보처리방침 · 마이타로 (MyTarot)</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0;
+    background: #0b0b1a;
+    color: #e7e6f0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    line-height: 1.72;
+    font-size: 16px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 32px 20px 96px; }
+  header { border-bottom: 1px solid #2a2a44; padding-bottom: 20px; margin-bottom: 8px; }
+  h1 { font-size: 1.5rem; margin: 0 0 12px; color: #f2e9c9; letter-spacing: .2px; }
+  h2 { font-size: 1.18rem; margin: 40px 0 10px; color: #cbb6ff; border-left: 3px solid #6c5ce7; padding-left: 10px; }
+  h3 { font-size: 1.02rem; margin: 24px 0 6px; color: #e7e6f0; }
+  p, li { color: #c9c7da; }
+  a { color: #9db4ff; }
+  code { background: #16162b; padding: 1px 6px; border-radius: 5px; color: #f2e9c9; font-size: .92em; }
+  .meta { color: #8f8da8; font-size: .9rem; }
+  .meta strong { color: #c9c7da; }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: .95rem; }
+  th, td { border: 1px solid #2a2a44; padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: #16162b; color: #cbb6ff; }
+  .disclaimer { background: #16162b; border: 1px solid #3a3357; border-radius: 12px; padding: 16px 18px; margin: 20px 0; }
+  .lang-sep { margin: 56px 0 0; border: 0; border-top: 1px dashed #3a3357; }
+  .note { color: #8f8da8; font-size: .85rem; margin-top: 40px; }
+  ul { padding-left: 20px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>개인정보처리방침 · Privacy Policy</h1>
+  <p class="meta">
+    <strong>앱 / App:</strong> 마이타로 (MyTarot)<br>
+    <strong>패키지 / Package:</strong> <code>io.github.hwoh87.mytarot</code><br>
+    <strong>시행일 / Effective date:</strong> 2026-08-10<br>
+    <strong>문의 / Contact:</strong> ohy8504@gmail.com
+  </p>
+</header>
+
+<!-- ==================== 한국어 ==================== -->
+<h2>🇰🇷 한국어</h2>
+
+<h3>1. 개요</h3>
+<p>마이타로(MyTarot, 이하 "본 앱")는 이용자의 개인정보를 소중히 여기며 최소한의 데이터만 처리합니다. 본 앱은 <strong>회원가입·로그인·계정 생성 절차가 없으며</strong>, 이름·이메일·전화번호 등 이용자를 직접 식별하는 개인정보를 <strong>수집하지 않습니다</strong>. 본 방침은 본 앱이 어떤 데이터를 어떤 목적으로 처리하는지, 어떤 제3자 서비스를 이용하는지, 이용자가 어떤 선택권을 갖는지를 설명합니다.</p>
+
+<h3>2. 수집·처리하는 정보와 목적</h3>
+
+<h4>2-1. 기기에 로컬로만 저장되는 정보 (외부 전송 없음)</h4>
+<p>아래 정보는 <strong>이용자의 기기 내부(DataStore 및 로컬 파일)에만 저장되며 서버로 업로드되지 않습니다.</strong></p>
+<table>
+  <tr><th>항목</th><th>목적</th></tr>
+  <tr><td>앱 설정(테마, 덱 선택, 알림 설정 등)</td><td>앱 환경 유지</td></tr>
+  <tr><td>저널(저장한 리딩 기록), 오늘의 카드</td><td>이용자가 본인 기록을 다시 볼 수 있도록 기기에 보관</td></tr>
+</table>
+<p>이 데이터는 이용자 본인의 기기에만 존재하며 개발자나 제3자가 접근할 수 없습니다.</p>
+
+<h4>2-2. AI 해석 요청 시 전송되는 정보</h4>
+<p>이용자가 <strong>AI 해석 기능을 직접 실행할 때에 한하여</strong>, 해석 생성을 위해 아래 정보가 백엔드(Supabase Edge Function)를 거쳐 대규모 언어모델(Google Gemini)로 전송됩니다.</p>
+<ul>
+  <li>뽑힌 카드 정보</li>
+  <li>스프레드(배열) 종류</li>
+  <li>이용자가 입력한 질문 텍스트</li>
+</ul>
+<p>이때 <strong>이름·이메일·기기 식별자 등 개인 식별 정보는 함께 전송되지 않습니다.</strong> 전송된 정보는 해석 문구 생성 목적으로만 사용됩니다. 이용자가 질문 입력란에 스스로 개인정보를 적을 경우 해당 텍스트가 전송될 수 있으므로, 질문에 개인 식별 정보를 입력하지 않도록 권장합니다. 백엔드가 미설정 상태이거나 오프라인일 경우 외부 전송 없이 <strong>기기 내부 로직으로 해석이 대체(폴백)</strong>됩니다.</p>
+
+<h4>2-3. 광고 (Google AdMob)</h4>
+<p>본 앱은 Google AdMob을 통해 광고를 게재합니다. AdMob은 광고 노출·측정·부정 방지를 위해 <strong>광고 식별자(Advertising ID, AD_ID)</strong> 및 기기·이용 관련 데이터를 수집할 수 있습니다. 유럽경제지역(EEA) 등 필요한 지역에서는 앱 실행 시 <strong>UMP 동의 화면</strong>이 표시되며, 동의 여부에 따라 맞춤형/비맞춤형 광고가 제공됩니다. <strong>Plus 구독 이용자에게는 광고가 표시되지 않습니다.</strong></p>
+
+<h4>2-4. 알림</h4>
+<p>본 앱의 알림은 <strong>기기 내에서 동작하는 로컬 '오늘의 카드' 리마인더</strong>뿐입니다. 푸시 서버를 운영하지 않으며 알림을 위해 개인정보를 수집·전송하지 않습니다.</p>
+
+<h4>2-5. 분석 SDK</h4>
+<p>본 앱은 별도의 <strong>제3자 분석 SDK를 사용하지 않습니다.</strong></p>
+
+<h3>3. 제3자 서비스</h3>
+<ul>
+  <li><strong>Google AdMob</strong> — 광고 게재 및 측정 · <a href="https://policies.google.com/privacy">policies.google.com/privacy</a></li>
+  <li><strong>Supabase (Edge Functions)</strong> — AI 해석 요청 중계 백엔드 · <a href="https://supabase.com/privacy">supabase.com/privacy</a></li>
+  <li><strong>Google Gemini API</strong> — AI 해석 문구 생성 · <a href="https://ai.google.dev/gemini-api/terms">ai.google.dev/gemini-api/terms</a></li>
+  <li><strong>Google Play (인앱 결제)</strong> — 향후 구독 결제 처리 (아래 6항)</li>
+</ul>
+
+<h3>4. 데이터 보관 및 삭제</h3>
+<ul>
+  <li><strong>로컬 데이터(설정·저널·오늘의 카드):</strong> 이용자가 삭제하거나 앱을 제거하기 전까지 기기에 보관되며 개발자 서버에는 저장되지 않습니다.</li>
+  <li><strong>AI 해석 요청 데이터:</strong> 해석 문구 생성 목적으로만 처리되며 본 앱은 이를 별도로 축적·보관하지 않습니다. 처리 과정의 데이터 취급은 Supabase 및 Google Gemini의 정책을 따릅니다.</li>
+</ul>
+
+<h3>5. 국외 이전 안내 (AI 백엔드)</h3>
+<p>AI 해석 기능 이용 시 2-2항의 정보(카드·스프레드·질문 텍스트)는 <strong>Supabase 및 Google의 서버로 전송·처리되며, 이 과정에서 데이터가 대한민국 외 국가(예: 미국 등)로 이전·처리될 수 있습니다.</strong> AI 해석 기능을 사용하지 않으면 해당 정보는 국외로 전송되지 않습니다.</p>
+
+<h3>6. 향후 기능 — 구독 결제 (Google Play Billing)</h3>
+<p>향후 Plus 구독 기능이 도입될 예정입니다. 결제는 <strong>Google Play를 통해 처리되며 본 앱은 이용자의 카드번호 등 결제 수단 정보를 확인하거나 저장하지 않습니다.</strong> 결제 관련 개인정보 처리는 Google Play의 정책을 따릅니다.</p>
+
+<h3>7. 아동에 대한 정책</h3>
+<p>본 앱은 <strong>아동을 대상으로 하지 않으며</strong>, 만 14세 미만(또는 거주 국가에서 정한 연령 미만) 아동으로부터 개인정보를 고의로 수집하지 않습니다. 앱 스토어의 연령 등급 정책을 따르며 미성년자는 보호자의 지도 하에 이용할 것을 권장합니다.</p>
+
+<h3>8. 이용자의 선택권</h3>
+<ul>
+  <li><strong>광고 동의 재설정:</strong> 기기의 <em>설정 → 개인정보 보호 → 광고</em>에서 광고 식별자를 초기화하거나 맞춤형 광고를 해제할 수 있습니다.</li>
+  <li><strong>로컬 데이터 삭제:</strong> <em>설정 → 앱 → 마이타로 → 저장공간 → 데이터 삭제</em>로 저장된 설정·저널 등을 삭제할 수 있습니다.</li>
+  <li><strong>앱 제거:</strong> 앱을 제거하면 기기에 저장된 로컬 데이터가 함께 삭제됩니다.</li>
+</ul>
+
+<h3>9. 방침의 변경</h3>
+<p>본 방침은 법령 또는 서비스 변경에 따라 개정될 수 있으며, 개정 시 본 페이지를 통해 시행일과 함께 공지합니다.</p>
+
+<h3>10. 문의</h3>
+<p><strong>문의: ohy8504@gmail.com</strong></p>
+
+<div class="disclaimer">
+  <strong>11. 엔터테인먼트 목적 고지</strong>
+  <p>마이타로는 오락 및 자기 성찰을 위한 목적으로만 제공됩니다. 카드 해석과 AI가 생성한 문구는 재미를 위한 것으로, 의학적·법률적·재정적·심리적 조언이나 미래에 대한 사실적 예측이 아닙니다. 어떠한 결정도 본 앱의 결과에 근거하여 내리지 마시고, 전문적 판단이 필요한 사안은 반드시 해당 분야 전문가와 상담하십시오. 만 19세 이상 성인의 이용을 권장합니다.</p>
+</div>
+
+<hr class="lang-sep">
+
+<!-- ==================== English ==================== -->
+<h2>🇬🇧 English</h2>
+
+<h3>1. Overview</h3>
+<p>MyTarot ("마이타로", the "App") respects your privacy and processes only the minimum necessary data. The App has <strong>no user accounts, no login, and no sign-up</strong>, and it does <strong>not collect</strong> directly identifying personal information such as your name, email address, or phone number. This policy explains what data the App processes and why, which third-party services it uses, and the choices available to you.</p>
+
+<h3>2. Information We Process and Why</h3>
+
+<h4>2-1. Information stored locally on your device (never uploaded)</h4>
+<table>
+  <tr><th>Item</th><th>Purpose</th></tr>
+  <tr><td>App settings (theme, selected deck, notification preferences)</td><td>Preserving your app experience</td></tr>
+  <tr><td>Journal (saved readings) and daily card</td><td>Keeping your records on-device so you can revisit them</td></tr>
+</table>
+<p>This data lives solely on your device and is not accessible to the developer or any third party.</p>
+
+<h4>2-2. Information sent when you request an AI reading</h4>
+<p><strong>Only when you actively request an AI interpretation</strong>, the following is sent — via a backend (Supabase Edge Function) — to a large language model (Google Gemini) to generate the interpretation text:</p>
+<ul>
+  <li>The drawn cards</li>
+  <li>The spread type</li>
+  <li>The question text you typed</li>
+</ul>
+<p><strong>No personal identifiers (name, email, device identifiers) are attached</strong> to this request. The data is used solely to generate interpretation prose. Because any text you type into the question field is transmitted, please avoid entering personal or identifying information. If the backend is not configured or you are offline, the App <strong>falls back to on-device logic with no external transmission.</strong></p>
+
+<h4>2-3. Advertising (Google AdMob)</h4>
+<p>The App serves ads through Google AdMob. AdMob may collect the device <strong>Advertising ID (AD_ID)</strong> and device/usage data to serve, measure, and protect ads. Where required (e.g., the EEA), a <strong>UMP consent screen</strong> is shown, and personalized or non-personalized ads are served based on your choice. <strong>Plus subscribers see no ads.</strong></p>
+
+<h4>2-4. Notifications</h4>
+<p>The App's only notification is a <strong>local "daily card" reminder that runs on your device.</strong> There is no push server, and no personal data is collected or transmitted for notifications.</p>
+
+<h4>2-5. Analytics SDKs</h4>
+<p>The App uses <strong>no third-party analytics SDK.</strong></p>
+
+<h3>3. Third-Party Services</h3>
+<ul>
+  <li><strong>Google AdMob</strong> — ad serving and measurement · <a href="https://policies.google.com/privacy">policies.google.com/privacy</a></li>
+  <li><strong>Supabase (Edge Functions)</strong> — backend relaying AI interpretation requests · <a href="https://supabase.com/privacy">supabase.com/privacy</a></li>
+  <li><strong>Google Gemini API</strong> — generation of AI interpretation text · <a href="https://ai.google.dev/gemini-api/terms">ai.google.dev/gemini-api/terms</a></li>
+  <li><strong>Google Play (In-App Billing)</strong> — future subscription payments (Section 6)</li>
+</ul>
+
+<h3>4. Data Retention &amp; Storage</h3>
+<ul>
+  <li><strong>Local data (settings, journal, daily card):</strong> Retained on your device until you delete it or uninstall the App. Not stored on any developer-operated server.</li>
+  <li><strong>AI request data:</strong> Processed only to generate interpretation text; the App does not separately accumulate or retain it. Handling during processing is subject to the policies of Supabase and Google Gemini.</li>
+</ul>
+
+<h3>5. International Transfer Note (AI Backend)</h3>
+<p>When you use the AI interpretation feature, the information in Section 2-2 (cards, spread, question text) is <strong>sent to and processed on servers operated by Supabase and Google, and may therefore be transferred to and processed in countries outside your own (e.g., the United States).</strong> If you do not use the AI feature, no such information is transferred internationally.</p>
+
+<h3>6. Future Feature — Subscription Billing (Google Play Billing)</h3>
+<p>A Plus subscription may be introduced in the future. Payments will be <strong>processed by Google Play; the App does not see or store your card details or other payment credentials.</strong> Payment-related data is handled under Google Play's policies.</p>
+
+<h3>7. Children</h3>
+<p>The App is <strong>not directed to children</strong> and does not knowingly collect personal information from children under the age of 14 (or the minimum age set by your country of residence). We follow the app store's age-rating requirements, and minors should use the App under the guidance of a parent or guardian.</p>
+
+<h3>8. Your Choices</h3>
+<ul>
+  <li><strong>Reset ad personalization:</strong> Reset your Advertising ID or opt out of personalized ads via your device's <em>Settings → Privacy → Ads</em>.</li>
+  <li><strong>Delete local data:</strong> Clear stored settings, journal, and other local data via <em>Settings → Apps → 마이타로 (MyTarot) → Storage → Clear data</em>.</li>
+  <li><strong>Uninstall:</strong> Uninstalling the App removes the local data stored on your device.</li>
+</ul>
+
+<h3>9. Changes to This Policy</h3>
+<p>This policy may be updated to reflect legal or service changes. Updates will be posted on this page with a revised effective date.</p>
+
+<h3>10. Contact</h3>
+<p><strong>Contact: ohy8504@gmail.com</strong></p>
+
+<div class="disclaimer">
+  <strong>11. Entertainment-Only Disclaimer</strong>
+  <p>MyTarot is provided for entertainment and self-reflection purposes only. Card interpretations and AI-generated text are for enjoyment and do not constitute medical, legal, financial, or psychological advice, nor any factual prediction of the future. Do not make any decision based on the App's output; for matters requiring professional judgment, always consult a qualified expert. Intended for adult users (19+).</p>
+</div>
+
+</div>
+</body>
+</html>
