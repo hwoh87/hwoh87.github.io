@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MyTarot — AI 융합해석 결과</title>
+<meta name="description" content="MyTarot 앱으로 뽑은 타로 리딩의 AI 융합해석 결과예요. 카드별 의미를 보고, 전체 융합해석은 앱에서 확인하세요.">
+<meta property="og:title" content="🔮 MyTarot AI 융합해석 결과">
+<meta property="og:description" content="타로 카드 리딩의 AI 융합해석 — 카드별 키워드와 해석을 확인해 보세요.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://hwoh87.github.io/MyTarot1/share/">
+<meta property="og:image" content="https://hwoh87.github.io/MyTarot1/share/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="MyTarot — AI 융합 타로 해석">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="🔮 MyTarot AI 융합해석 결과">
+<meta name="twitter:description" content="타로 카드 리딩의 AI 융합해석 — 카드별 키워드와 해석을 확인해 보세요.">
+<meta name="twitter:image" content="https://hwoh87.github.io/MyTarot1/share/og.png">
+<style>
+  :root {
+    --bg: #0d0b1e;
+    --bg2: #1a1533;
+    --surface: rgba(255, 255, 255, 0.06);
+    --border: rgba(255, 213, 79, 0.25);
+    --gold: #ffd54f;
+    --text: #ece7f5;
+    --muted: #a89fc0;
+    --accent: #8e7cc3;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    background: radial-gradient(ellipse at 50% -10%, var(--bg2) 0%, var(--bg) 60%);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.65;
+    /* 하단 고정 설치 배너에 가려지지 않도록 여유를 둔다 */
+    padding-bottom: 110px;
+  }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 28px 20px; }
+  header { text-align: center; margin-bottom: 8px; }
+  .logo { font-size: 34px; }
+  h1 { font-size: 20px; color: var(--gold); font-weight: 700; margin-top: 6px; letter-spacing: 0.02em; }
+  .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    margin-top: 18px;
+  }
+  .q-label { color: var(--gold); font-size: 12px; font-weight: 700; letter-spacing: 0.08em; }
+  .q-text { font-size: 16px; margin-top: 4px; }
+  .spread-name { text-align: center; color: var(--accent); font-size: 14px; margin-top: 20px; }
+  .card-row { display: flex; gap: 14px; margin-top: 14px; }
+  .mini-card {
+    flex: 0 0 64px; height: 106px; border-radius: 10px;
+    background: linear-gradient(160deg, #2b2350, #171232);
+    border: 1px solid var(--border);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 6px; font-size: 11px; color: var(--gold); text-align: center; padding: 6px;
+  }
+  .mini-card .star { font-size: 20px; }
+  .mini-card.rev { transform: rotate(180deg); }
+  .mini-card.rev > * { transform: rotate(180deg); }
+  .pos-name { color: var(--gold); font-size: 13px; font-weight: 700; }
+  .card-name { font-size: 16px; font-weight: 700; margin-top: 2px; }
+  .badge {
+    display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 999px;
+    border: 1px solid var(--border); color: var(--muted); margin-left: 6px; vertical-align: 2px;
+  }
+  .badge.rev { color: #ff8a80; border-color: rgba(255, 138, 128, 0.4); }
+  .keywords { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .kw { font-size: 12px; color: var(--accent); background: rgba(142, 124, 195, 0.12); padding: 2px 9px; border-radius: 999px; }
+  .card-text { font-size: 14px; color: var(--text); margin-top: 8px; }
+  .locked {
+    text-align: center; margin-top: 26px; padding: 26px 18px;
+    border: 1px dashed var(--border); border-radius: 16px;
+  }
+  .locked .lock { font-size: 26px; }
+  .locked p { color: var(--muted); font-size: 14px; margin-top: 8px; }
+  .cta {
+    display: block; width: 100%; margin-top: 16px; padding: 15px;
+    background: linear-gradient(135deg, #ffd54f, #ffb300);
+    color: #241a00; font-size: 16px; font-weight: 800; text-align: center;
+    border: none; border-radius: 14px; cursor: pointer; text-decoration: none;
+  }
+  .disclaimer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 26px; }
+  .error { text-align: center; margin-top: 40px; color: var(--muted); }
+  /* 하단 고정 스토어 설치 배너 */
+  .install-bar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+    background: rgba(13, 11, 30, 0.92);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--border);
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  }
+  .install-inner { max-width: 560px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+  .install-icon {
+    flex: 0 0 44px; height: 44px; border-radius: 12px; font-size: 24px;
+    background: linear-gradient(160deg, #2b2350, #171232);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .install-text { flex: 1; min-width: 0; }
+  .install-text b { font-size: 14px; display: block; }
+  .install-text span { font-size: 12px; color: var(--muted); }
+  .install-btn {
+    flex: 0 0 auto; padding: 10px 18px; border-radius: 999px;
+    background: var(--gold); color: #241a00; font-weight: 800; font-size: 14px;
+    text-decoration: none; border: none; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">🔮</div>
+    <h1>MyTarot AI 융합해석</h1>
+    <div class="sub" id="subtitle">친구가 공유한 타로 리딩 결과예요</div>
+  </header>
+  <main id="content"></main>
+  <p class="disclaimer">해석은 타로 전통 의미를 재구성한 참고용 이야기예요.</p>
+</div>
+
+<div class="install-bar">
+  <div class="install-inner">
+    <div class="install-icon">🔮</div>
+    <div class="install-text">
+      <b>MyTarot — 타로 &amp; AI 융합해석</b>
+      <span>내 카드로 직접 리딩하고 전체 해석 받기</span>
+    </div>
+    <a class="install-btn" id="installBtn" href="#">설치</a>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script>
+// ===== 배포 설정 — 스토어 출시 후 이 블록만 실제 값으로 교체 =====
+// (app/src/main/java/com/example/mytarot/data/ShareLinks.kt 의 STORE_URL 과 함께 맞출 것)
+const PACKAGE_ID = "io.github.hwoh87.mytarot";
+const APP_SCHEME = "mytarot";
+const STORE_URL = "https://play.google.com/store/apps/details?id=" + PACKAGE_ID;
+// =================================================================
+
+const isAndroid = /android/i.test(navigator.userAgent);
+
+// 스토어로 보낼 때 referrer 하나에 두 가지를 싣는다:
+//  · utm_* → Play 콘솔 '획득' 리포트에 공유 유입이 그대로 집계된다(백엔드 불요).
+//  · r=<토큰> → 설치 후 첫 실행에서 InstallReferrer API 로 앱이 읽어, 공유받은
+//    리딩으로 곧장 딥링크한다(설치 경계를 넘는 deferred deep link).
+function storeUrl(token) {
+  var ref = "utm_source=share&utm_medium=web&utm_campaign=reading";
+  if (token) ref += "&r=" + token;
+  return STORE_URL + "&referrer=" + encodeURIComponent(ref);
+}
+
+function decodeToken(token) {
+  try {
+    const b64 = token.replace(/-/g, "+").replace(/_/g, "/");
+    const bin = atob(b64);
+    const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+    const raw = new TextDecoder("utf-8").decode(bytes);
+    const parts = raw.split("|");
+    if (parts.length < 4 || parts[0] !== "1") return null;
+    const spreadId = parts[1];
+    const drawsField = parts[2];
+    const question = parts.slice(3).join("|"); // 질문에 '|' 가 있어도 복원
+    const draws = drawsField.split(",").map((tok) => {
+      const p = tok.split(":");
+      if (p.length !== 3) return null;
+      return { pos: parseInt(p[0], 10), cardId: parseInt(p[1], 10), reversed: p[2] === "1" };
+    });
+    if (draws.some((d) => !d || isNaN(d.pos) || isNaN(d.cardId))) return null;
+    return { spreadId, draws, question };
+  } catch (e) {
+    return null;
+  }
+}
+
+function appLink(token) {
+  // Android 브라우저: 앱이 있으면 딥링크로 열고, 없으면 스토어로 폴백
+  return "intent://share?r=" + encodeURIComponent(token) +
+    "#Intent;scheme=" + APP_SCHEME +
+    ";package=" + PACKAGE_ID +
+    ";S.browser_fallback_url=" + encodeURIComponent(storeUrl(token)) +
+    ";end";
+}
+
+function esc(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function render() {
+  const content = document.getElementById("content");
+  const installBtn = document.getElementById("installBtn");
+  const token = new URLSearchParams(location.search).get("r");
+  const reading = token ? decodeToken(token) : null;
+
+  // 설치 버튼: 안드로이드에서 토큰이 있으면 딥링크(폴백=스토어), 그 외엔 스토어(referrer 포함)
+  installBtn.href = isAndroid && token ? appLink(token) : storeUrl(token);
+
+  if (!reading) {
+    document.getElementById("subtitle").textContent = "타로 & AI 융합해석 앱";
+    content.innerHTML =
+      '<div class="error">' +
+      "<p>공유된 리딩을 찾을 수 없어요.</p>" +
+      "<p style=\"margin-top:8px\">MyTarot 앱에서 직접 카드를 뽑고<br>AI 융합해석을 받아보세요.</p>" +
+      "</div>" +
+      '<a class="cta" href="' + esc(storeUrl(null)) + '">📲 MyTarot 설치하기</a>';
+    return;
+  }
+
+  const spread = SPREADS[reading.spreadId] || { name: reading.spreadId, positions: [] };
+  let html = "";
+
+  if (reading.question) {
+    html += '<div class="panel"><div class="q-label">QUESTION</div>' +
+      '<div class="q-text">' + esc(reading.question) + "</div></div>";
+  }
+  html += '<div class="spread-name">✦ ' + esc(spread.name) + " · " + reading.draws.length + "장 ✦</div>";
+
+  reading.draws.forEach(function (d) {
+    const card = CARDS[String(d.cardId)];
+    const posName = spread.positions[d.pos] || "포지션 " + (d.pos + 1);
+    if (!card) return;
+    const kws = (d.reversed ? card.rvk : card.upk)
+      .map(function (k) { return '<span class="kw">' + esc(k) + "</span>"; }).join("");
+    html +=
+      '<div class="panel"><div class="card-row">' +
+      '<div class="mini-card' + (d.reversed ? " rev" : "") + '">' +
+      '<div class="star">✦</div><div>' + esc(card.ko) + "</div></div>" +
+      "<div>" +
+      '<div class="pos-name">' + esc(posName) + "</div>" +
+      '<div class="card-name">' + esc(card.ko) +
+      '<span class="badge' + (d.reversed ? " rev" : "") + '">' + (d.reversed ? "역방향" : "정방향") + "</span></div>" +
+      '<div class="keywords">' + kws + "</div>" +
+      "</div></div>" +
+      '<div class="card-text">' + esc(d.reversed ? card.rv : card.up) + "</div>" +
+      "</div>";
+  });
+
+  // 융합해석(카드 연결·페르소나 조언)은 앱 전용 — 설치 전환 포인트
+  html +=
+    '<div class="locked"><div class="lock">🔒</div>' +
+    "<p><b>카드 사이의 연결</b>과 <b>AI 페르소나의 융합해석 · 조언</b>은<br>MyTarot 앱에서 확인할 수 있어요.</p>" +
+    "</div>" +
+    '<a class="cta" id="openApp" href="' +
+    (isAndroid ? esc(appLink(token)) : esc(storeUrl(token))) +
+    '">🔮 앱에서 전체 융합해석 보기</a>';
+
+  content.innerHTML = html;
+}
+
+render();
+</script>
+</body>
+</html>
