@@ -42,7 +42,7 @@
   <p class="meta">
     <strong>앱 / App:</strong> 마이타로 (MyTarot)<br>
     <strong>패키지 / Package:</strong> <code>io.github.hwoh87.mytarot</code><br>
-    <strong>시행일 / Effective date:</strong> 2026-08-10<br>
+    <strong>시행일 / Effective date:</strong> 2026-08-06<br>
     <strong>문의 / Contact:</strong> ohy8504@gmail.com
   </p>
 </header>
@@ -74,7 +74,7 @@
 <p>이때 <strong>이름·이메일·기기 식별자 등 개인 식별 정보는 함께 전송되지 않습니다.</strong> 전송된 정보는 해석 문구 생성 목적으로만 사용됩니다. 이용자가 질문 입력란에 스스로 개인정보를 적을 경우 해당 텍스트가 전송될 수 있으므로, 질문에 개인 식별 정보를 입력하지 않도록 권장합니다. 백엔드가 미설정 상태이거나 오프라인일 경우 외부 전송 없이 <strong>기기 내부 로직으로 해석이 대체(폴백)</strong>됩니다.</p>
 
 <h4>2-3. 광고 (Google AdMob)</h4>
-<p>본 앱은 Google AdMob을 통해 광고를 게재합니다. AdMob은 광고 노출·측정·부정 방지를 위해 <strong>광고 식별자(Advertising ID, AD_ID)</strong> 및 기기·이용 관련 데이터를 수집할 수 있습니다. 유럽경제지역(EEA) 등 필요한 지역에서는 앱 실행 시 <strong>UMP 동의 화면</strong>이 표시되며, 동의 여부에 따라 맞춤형/비맞춤형 광고가 제공됩니다. <strong>Plus 구독 이용자에게는 광고가 표시되지 않습니다.</strong></p>
+<p>본 앱은 Google AdMob을 통해 광고를 게재합니다. AdMob은 광고 노출·측정·부정 방지를 위해 <strong>광고 식별자(Advertising ID, AD_ID)</strong> 및 기기·이용 관련 데이터를 수집할 수 있습니다. 유럽경제지역(EEA) 등 필요한 지역에서는 앱 실행 시 <strong>UMP 동의 화면</strong>이 표시되며, 동의 여부에 따라 맞춤형/비맞춤형 광고가 제공됩니다. <strong>‘광고 제거’ 또는 ‘올액세스’를 구매한 이용자에게는 광고가 표시되지 않습니다.</strong></p>
 
 <h4>2-4. 알림</h4>
 <p>본 앱의 알림은 <strong>기기 내에서 동작하는 로컬 '오늘의 카드' 리마인더</strong>뿐입니다. 푸시 서버를 운영하지 않으며 알림을 위해 개인정보를 수집·전송하지 않습니다.</p>
@@ -88,7 +88,7 @@
   <li><strong>Google Firebase (Analytics · Crashlytics)</strong> — 사용 통계·비정상 종료 진단 · <a href="https://firebase.google.com/support/privacy">firebase.google.com/support/privacy</a></li>
   <li><strong>Supabase (Edge Functions)</strong> — AI 해석 요청 중계 백엔드 · <a href="https://supabase.com/privacy">supabase.com/privacy</a></li>
   <li><strong>Google Gemini API</strong> — AI 해석 문구 생성 · <a href="https://ai.google.dev/gemini-api/terms">ai.google.dev/gemini-api/terms</a></li>
-  <li><strong>Google Play (인앱 결제)</strong> — 향후 구독 결제 처리 (아래 6항)</li>
+  <li><strong>Google Play (인앱 결제)</strong> — 인앱 결제 처리 (아래 6항)</li>
 </ul>
 
 <h3>4. 데이터 보관 및 삭제</h3>
@@ -100,15 +100,16 @@
 <h3>5. 국외 이전 안내 (AI 백엔드)</h3>
 <p>AI 해석 기능 이용 시 2-2항의 정보(카드·스프레드·질문 텍스트)는 <strong>Supabase 및 Google의 서버로 전송·처리되며, 이 과정에서 데이터가 대한민국 외 국가(예: 미국 등)로 이전·처리될 수 있습니다.</strong> AI 해석 기능을 사용하지 않으면 해당 정보는 국외로 전송되지 않습니다.</p>
 
-<h3>6. 향후 기능 — 구독 결제 (Google Play Billing)</h3>
-<p>향후 Plus 구독 기능이 도입될 예정입니다. 결제는 <strong>Google Play를 통해 처리되며 본 앱은 이용자의 카드번호 등 결제 수단 정보를 확인하거나 저장하지 않습니다.</strong> 결제 관련 개인정보 처리는 Google Play의 정책을 따릅니다.</p>
+<h3>6. 인앱 결제 (Google Play Billing)</h3>
+<p>본 앱은 광고 제거·유료 덱·올액세스의 <strong>1회성 인앱 상품</strong>을 판매합니다(구독 상품은 없습니다). 결제는 <strong>Google Play를 통해 처리되며 본 앱은 이용자의 카드번호 등 결제 수단 정보를 확인하거나 저장하지 않고, 보유 상품 ID만 기기에 저장합니다.</strong> 결제 관련 개인정보 처리는 Google Play의 정책을 따릅니다.</p>
 
 <h3>7. 아동에 대한 정책</h3>
 <p>본 앱은 <strong>아동을 대상으로 하지 않으며</strong>, 만 14세 미만(또는 거주 국가에서 정한 연령 미만) 아동으로부터 개인정보를 고의로 수집하지 않습니다. 앱 스토어의 연령 등급 정책을 따르며 미성년자는 보호자의 지도 하에 이용할 것을 권장합니다.</p>
 
 <h3>8. 이용자의 선택권</h3>
 <ul>
-  <li><strong>광고 동의 재설정:</strong> 기기의 <em>설정 → 개인정보 보호 → 광고</em>에서 광고 식별자를 초기화하거나 맞춤형 광고를 해제할 수 있습니다.</li>
+  <li><strong>광고 동의 다시 선택:</strong> 앱의 <em>설정 → 광고 개인정보 설정</em>에서 UMP 동의 화면을 다시 열어 맞춤형 광고 동의를 변경하거나 철회할 수 있습니다(해당 지역에 한함).</li>
+  <li><strong>광고 식별자 초기화:</strong> 기기의 <em>설정 → 개인정보 보호 → 광고</em>에서 광고 식별자를 초기화하거나 맞춤형 광고를 해제할 수 있습니다.</li>
   <li><strong>로컬 데이터 삭제:</strong> <em>설정 → 앱 → 마이타로 → 저장공간 → 데이터 삭제</em>로 저장된 설정·저널 등을 삭제할 수 있습니다.</li>
   <li><strong>앱 제거:</strong> 앱을 제거하면 기기에 저장된 로컬 데이터가 함께 삭제됩니다.</li>
 </ul>
@@ -152,7 +153,7 @@
 <p><strong>No personal identifiers (name, email, device identifiers) are attached</strong> to this request. The data is used solely to generate interpretation prose. Because any text you type into the question field is transmitted, please avoid entering personal or identifying information. If the backend is not configured or you are offline, the App <strong>falls back to on-device logic with no external transmission.</strong></p>
 
 <h4>2-3. Advertising (Google AdMob)</h4>
-<p>The App serves ads through Google AdMob. AdMob may collect the device <strong>Advertising ID (AD_ID)</strong> and device/usage data to serve, measure, and protect ads. Where required (e.g., the EEA), a <strong>UMP consent screen</strong> is shown, and personalized or non-personalized ads are served based on your choice. <strong>Plus subscribers see no ads.</strong></p>
+<p>The App serves ads through Google AdMob. AdMob may collect the device <strong>Advertising ID (AD_ID)</strong> and device/usage data to serve, measure, and protect ads. Where required (e.g., the EEA), a <strong>UMP consent screen</strong> is shown, and personalized or non-personalized ads are served based on your choice. <strong>Users who purchased “Remove ads” or “All access” see no ads.</strong></p>
 
 <h4>2-4. Notifications</h4>
 <p>The App's only notification is a <strong>local "daily card" reminder that runs on your device.</strong> There is no push server, and no personal data is collected or transmitted for notifications.</p>
@@ -166,7 +167,7 @@
   <li><strong>Google Firebase (Analytics · Crashlytics)</strong> — usage statistics &amp; crash diagnostics · <a href="https://firebase.google.com/support/privacy">firebase.google.com/support/privacy</a></li>
   <li><strong>Supabase (Edge Functions)</strong> — backend relaying AI interpretation requests · <a href="https://supabase.com/privacy">supabase.com/privacy</a></li>
   <li><strong>Google Gemini API</strong> — generation of AI interpretation text · <a href="https://ai.google.dev/gemini-api/terms">ai.google.dev/gemini-api/terms</a></li>
-  <li><strong>Google Play (In-App Billing)</strong> — future subscription payments (Section 6)</li>
+  <li><strong>Google Play (In-App Billing)</strong> — in-app purchases (Section 6)</li>
 </ul>
 
 <h3>4. Data Retention &amp; Storage</h3>
@@ -178,15 +179,16 @@
 <h3>5. International Transfer Note (AI Backend)</h3>
 <p>When you use the AI interpretation feature, the information in Sect ion 2-2 (cards, spread, question text) is <strong>sent to and processed on servers operated by Supabase and Google, and may therefore be transferred to and processed in countries outside your own (e.g., the United States).</strong> If you do not use the AI feature, no such information is transferred internationally.</p>
 
-<h3>6. Future Feature — Subscription Billing (Google Play Billing)</h3>
-<p>A Plus subscription may be introduced in the future. Payments will be <strong>processed by Google Play; the App does not see or store your card details or other payment credentials.</strong> Payment-related data is handled under Google Play's policies.</p>
+<h3>6. In-App Purchases (Google Play Billing)</h3>
+<p>The App offers <strong>one-time in-app purchases</strong> — remove ads, individual premium decks, and All Access (there are no subscriptions). Payments are <strong>processed by Google Play; the App does not see or store your card details or other payment credentials, and keeps only the IDs of the products you own on your device.</strong> Payment-related data is handled under Google Play's policies.</p>
 
 <h3>7. Children</h3>
 <p>The App is <strong>not directed to children</strong> and does not knowingly collect personal information from children under the age of 14 (or the minimum age set by your country of residence). We follow the app store's age-rating requirements, and minors should use the App under the guidance of a parent or guardian.</p>
 
 <h3>8. Your Choices</h3>
 <ul>
-  <li><strong>Reset ad personalization:</strong> Reset your Advertising ID or opt out of personalized ads via your device's <em>Settings → Privacy → Ads</em>.</li>
+  <li><strong>Review your ads consent:</strong> Open <em>Settings → Ad privacy settings</em> inside the App to bring back the UMP consent form and change or withdraw your personalized-ads consent (where applicable in your region).</li>
+  <li><strong>Reset your Advertising ID:</strong> Reset your Advertising ID or opt out of personalized ads via your device's <em>Settings → Privacy → Ads</em>.</li>
   <li><strong>Delete local data:</strong> Clear stored settings, journal, and other local data via <em>Settings → Apps → 마이타로 (MyTarot) → Storage → Clear data</em>.</li>
   <li><strong>Uninstall:</strong> Uninstalling the App removes the local data stored on your device.</li>
 </ul>
