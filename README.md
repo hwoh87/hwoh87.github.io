@@ -1,5 +1,11 @@
 # 만세력 공유 랜딩 + App Links (설치 유도)
 
+> ⚠️ **이 폴더에는 자동 생성물이 섞여 있다.** `ilju/` `cheongan/` `jiji/` `term/` `assets/` 디렉터리와
+> 루트 `index.html`·`sitemap.xml`·`robots.txt` 는 [scripts/build_seo_site.py](../scripts/build_seo_site.py) 가
+> 매번 지우고 다시 만든다 — **손으로 고치지 말 것.** 생성·배포·색인 등록 절차는
+> [docs/marketing/pseo-playbook.md](../docs/marketing/pseo-playbook.md) 참고.
+> 아래 문서가 다루는 공유 퍼널(`m/` `c/` `s/` `og-*.png` `.well-known/`)은 생성기가 건드리지 않는다.
+
 이 폴더는 **공유 링크 설치 퍼널**의 웹 파트 정본이다.
 앱은 공유 시 `ohhyo://` 커스텀 스킴 대신 `https://hwoh87.github.io/...` 링크를 내보낸다.
 
@@ -18,7 +24,9 @@
 | `s/index.html` | 공유 결과 뷰어(sid 스냅샷 + 구형 scene 바운스). `https://hwoh87.github.io/s/?sid=<sid>` |
 | `s/{fusion,compat,group,pair}/index.html` | **종류별 OG 셸** — 크롤러엔 종류별 미리보기, 사람은 즉시 `/s/?sid=` 로 리다이렉트. `DeepLink.buildSharedResultUrl(sid, kind)` 가 내보냄 |
 | `og-*.png` | 브랜디드 OG 카드(1200×630). share=공용·fusion·compat·group·magazine. 원본 템플릿은 세션 스크래치 `og-card.html`(headless Chrome 렌더) |
-| `index.html` | 루트 → 스토어 리다이렉트 |
+| `index.html` | **(생성물)** 사이트 홈 — 예전엔 스토어 리다이렉트였으나 pSEO 사이트의 홈이 됐다. 리다이렉트 홈은 색인이 안 돼 사이트 전체가 크롤되지 않는다 |
+| `ilju/` `cheongan/` `jiji/` `term/` `assets/` | **(생성물)** pSEO 페이지 133쪽 — [pseo-playbook](../docs/marketing/pseo-playbook.md) |
+| `sitemap.xml` · `robots.txt` | **(생성물)** 색인 제출용 |
 | `.well-known/assetlinks.json` | **App Links 검증 파일** (SHA-256 채워야 동작) |
 | `.nojekyll` | **필수.** GitHub Pages(Jekyll)가 `.well-known` 같은 점(.) 디렉터리를 무시하는 걸 막는다 |
 
