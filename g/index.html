@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>사주 해석 선물 | 만세력</title>
+
+  <!-- 카톡/메신저 리치 미리보기 (개별 선물 OG는 정적 호스팅 한계 — 공통 문구) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="만세력" />
+  <meta property="og:title" content="사주 해석 한 장 선물받았어요 🎁 | 만세력" />
+  <meta property="og:description" content="친구가 보낸 AI 사주 해석 이용권이에요. 앱에서 열면 내 사주 풀이를 볼 수 있어요." />
+  <meta property="og:image" content="https://hwoh87.github.io/og-share.png" />
+  <meta property="og:url" content="https://hwoh87.github.io/g/" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; background: #0A0820; color: #EDEBF5;
+      font-family: -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    }
+    .wrap { max-width: 460px; margin: 0 auto; padding: 40px 22px 60px; }
+    .logo { font-size: 40px; text-align: center; }
+    .brand { text-align: center; font-size: 12px; letter-spacing: 0.16em; color: #B8A46B; font-weight: 700; margin-top: 6px; }
+    .center { text-align: center; padding: 22px 0 0; }
+    .center .big { font-size: 52px; }
+    .center h1 { font-size: 21px; font-weight: 800; margin: 16px 0 8px; line-height: 1.45; }
+    .center h1 .accent { color: #C9B2FF; }
+    .center p { font-size: 14px; line-height: 1.75; color: #B8B2D6; margin: 0 auto; max-width: 320px; }
+    .card {
+      margin-top: 22px; background: rgba(184, 164, 107, 0.08); border: 1px solid rgba(184, 164, 107, 0.30);
+      border-radius: 18px; padding: 18px 16px; text-align: left;
+    }
+    .card ul { margin: 0; padding-left: 18px; }
+    .card li { font-size: 13.5px; line-height: 1.85; color: #D6D1EA; }
+    a.cta {
+      display: inline-block; margin-top: 24px; padding: 15px 32px; border-radius: 999px;
+      background: #B8A46B; color: #17122E; font-weight: 800; text-decoration: none; font-size: 15.5px;
+    }
+    .note { font-size: 11.5px; color: #6E678F; line-height: 1.7; margin-top: 18px; }
+    .hide { display: none; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="logo">🔮</div>
+    <div class="brand">만세력 · 사주 선물</div>
+
+    <div id="vLoading" class="center"><p>선물을 확인하는 중…</p></div>
+
+    <!-- 유효한 선물 -->
+    <div id="vGift" class="center hide">
+      <div class="big">🎁</div>
+      <h1><span class="accent" id="giverName">친구</span>가<br/>사주 해석을 선물했어요</h1>
+      <p>만세력 앱에서 내 사주를 AI가 풀어주는 해석 2회예요. 앱을 설치하고 이 링크를 다시 누르면 선물이 열려요.</p>
+      <div class="card">
+        <ul>
+          <li>생년월일만 넣으면 사주·자미두수·별자리까지 무료</li>
+          <li>선물은 AI 심층 해석에 쓸 수 있어요 (만료 없음)</li>
+          <li>선물 링크는 보낸 날부터 14일간 유효해요</li>
+        </ul>
+      </div>
+      <a class="cta" id="ctaGift" href="#">앱 열고 선물 받기</a>
+      <div class="note">이미 앱이 있다면 이 링크를 누르는 순간 앱에서 바로 열려요.</div>
+    </div>
+
+    <!-- 이미 열린 선물 -->
+    <div id="vUsed" class="center hide">
+      <div class="big">✅</div>
+      <h1>이미 열린 선물이에요</h1>
+      <p>선물은 한 번만 열 수 있어요. 내 사주는 만세력에서 무료로 볼 수 있어요.</p>
+      <a class="cta" id="ctaUsed" href="#">내 사주 무료로 보기</a>
+    </div>
+
+    <!-- 만료·없음 -->
+    <div id="vInvalid" class="center hide">
+      <div class="big">🌫️</div>
+      <h1>선물을 찾을 수 없어요</h1>
+      <p>링크가 만료됐거나 잘못됐어요(선물은 14일간 유효해요). 보내주신 분께 새 링크를 부탁해 보세요.</p>
+      <a class="cta" id="ctaInvalid" href="#">내 사주 무료로 보기</a>
+    </div>
+  </div>
+
+  <script>
+    const API = "https://sidxbzpbesbaiokxrqsf.supabase.co/functions/v1/gift-pass";
+    const PKG = "com.samramanshang.manseryeok";
+    const code = (new URLSearchParams(location.search).get("code") || "").trim();
+    // 설치 후 첫 실행에서 InstallReferrerHandler 가 읽어 수령 화면으로 보낸다(payload 규약: g_<code>).
+    const store = (ref) =>
+      `https://play.google.com/store/apps/details?id=${PKG}&referrer=${encodeURIComponent(ref)}`;
+
+    const $ = (s) => document.getElementById(s);
+    const show = (v) => {
+      ["vLoading", "vGift", "vUsed", "vInvalid"].forEach((x) => $(x).classList.toggle("hide", x !== v));
+    };
+
+    $("ctaUsed").href = store("s_daily");
+    $("ctaInvalid").href = store("s_daily");
+
+    (async () => {
+      if (!/^[0-9a-f]{12}$/.test(code)) return show("vInvalid");
+      $("ctaGift").href = store(`g_${code}`);
+      try {
+        const r = await fetch(`${API}?code=${code}`);
+        const j = await r.json();
+        if (!r.ok || !j || !j.status) return show("vInvalid");
+        if (j.status === "redeemed") return show("vUsed");
+        if (j.status === "expired") return show("vInvalid");
+        if (j.giver_name) $("giverName").textContent = `${j.giver_name}님`;
+        show("vGift");
+      } catch (e) {
+        // 서버 조회 실패 — 그래도 스토어로는 보낸다(코드는 referrer 에 실려 앱에서 다시 시도된다).
+        show("vGift");
+      }
+    })();
+  </script>
+</body>
+</html>
