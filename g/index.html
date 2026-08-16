@@ -53,7 +53,9 @@
     <!-- 유효한 선물 -->
     <div id="vGift" class="center hide">
       <div class="big">🎁</div>
-      <h1><span class="accent" id="giverName">친구</span>가<br/>사주 해석을 선물했어요</h1>
+      <!-- 주격 조사는 span 안에 함께 둔다 — 밖에 "가"를 고정하면 이름이 들어갔을 때
+           "수현님가"가 된다("님"은 받침이라 "이"). 기본값(친구)은 받침이 없어 "가". -->
+      <h1><span class="accent" id="giverName">친구가</span><br/>사주 해석을 선물했어요</h1>
       <p>만세력 앱에서 내 사주를 AI가 풀어주는 해석 2회예요. 앱을 설치하고 이 링크를 다시 누르면 선물이 열려요.</p>
       <div class="card">
         <ul>
@@ -108,7 +110,7 @@
         if (!r.ok || !j || !j.status) return show("vInvalid");
         if (j.status === "redeemed") return show("vUsed");
         if (j.status === "expired") return show("vInvalid");
-        if (j.giver_name) $("giverName").textContent = `${j.giver_name}님`;
+        if (j.giver_name) $("giverName").textContent = `${j.giver_name}님이`;
         show("vGift");
       } catch (e) {
         // 서버 조회 실패 — 그래도 스토어로는 보낸다(코드는 referrer 에 실려 앱에서 다시 시도된다).
