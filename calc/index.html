@@ -44,6 +44,21 @@
 .dw-cell .s{font-size:11.5px;color:#5B43C4;margin-top:1px}
 #result{display:none}
 .err{color:#B4574B;font-size:14px;margin:8px 0 0;display:none}
+.read-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 8px}
+.read-card{background:#fff;border:1px solid #E8E0D0;border-radius:14px;padding:13px 14px}
+.read-card .rk{display:block;font-size:11.5px;font-weight:800;color:#8A7C5F;letter-spacing:.04em}
+.read-card strong{display:block;font-size:19px;font-weight:800;color:#33302B;margin:3px 0 4px}
+.read-card p{margin:0;font-size:12.5px;color:#6B5C3A;line-height:1.55}
+.ohang{display:flex;flex-direction:column;gap:6px;margin:0 0 8px}
+.ohang .row2{display:flex;align-items:center;gap:9px}
+.ohang .nm{width:44px;font-size:13px;font-weight:700;color:#5A4E33;flex:none}
+.ohang .bar{flex:1;height:11px;background:#F0E9DB;border-radius:999px;overflow:hidden}
+.ohang .bar i{display:block;height:100%;background:var(--el,#8A7C5F);border-radius:999px}
+.ohang .pc{width:38px;text-align:right;font-size:12px;color:#8A7C5F;flex:none}
+.share-row{display:flex;align-items:center;gap:10px;margin:16px 0 0;flex-wrap:wrap}
+.share-btn{padding:11px 18px;border:1px solid #D8CFBC;background:#fff;color:#5B43C4;
+  border-radius:999px;font-size:14px;font-weight:800;cursor:pointer}
+.share-msg{font-size:13px;color:#8A7C5F}
 </style>
 </head>
 <body>
@@ -79,7 +94,7 @@
   </div>
   <button class="calc-btn" id="go">내 사주 계산하기</button>
   <p class="err" id="err"></p>
-  <p class="note" style="margin-top:14px">양력 생일 기준이에요. 음력 변환·야자시 설정·격국·용신 분석은 만세력 앱에서 지원해요.</p>
+  <p class="note" style="margin-top:14px">양력 생일 기준이에요. 음력 변환·야자시 설정·AI 해석은 만세력 앱에서 지원해요.</p>
 </form>
 
 <section id="result">
@@ -101,10 +116,27 @@
   <div class="dw-strip" id="dw"></div>
   <p class="note" id="gmLine"></p>
 
+  <h2>내 사주 읽기</h2>
+  <div class="read-grid">
+    <div class="read-card"><span class="rk">격국</span><strong id="ggLabel">—</strong><p id="ggWhy"></p></div>
+    <div class="read-card"><span class="rk">일간 강약</span><strong id="stLabel">—</strong><p id="stWhy"></p></div>
+    <div class="read-card"><span class="rk">용신 · 억부</span><strong id="ysYong">—</strong><p id="ysGi"></p></div>
+    <div class="read-card" id="johuCard" style="display:none"><span class="rk">조후</span><strong id="johuEl">—</strong><p id="johuWhy"></p></div>
+  </div>
+  <p class="note" id="stHint"></p>
+  <h3>오행 분포</h3>
+  <div class="ohang" id="ohang"></div>
+  <p class="note" id="ohangNote"></p>
+
+  <div class="share-row">
+    <button class="share-btn" id="share" type="button">결과 링크 공유</button>
+    <span class="share-msg" id="shareMsg"></span>
+  </div>
+
   <aside class="cta-box">
-    <p class="cta-lead">여기까지가 무료 명식이에요</p>
-    <p class="cta-sub">격국·용신, AI 해석, 궁합, 오늘의 운세까지 — 같은 엔진의 전체 분석은 만세력 앱에서.</p>
-    <a class="cta" href="https://play.google.com/store/apps/details?id=com.samramanshang.manseryeok&referrer=utm_source%3Dseo%26utm_medium%3Dweb%26utm_campaign%3Dcalc" rel="nofollow">만세력 앱에서 전체 분석 보기</a>
+    <p class="cta-lead">여기까지 무료예요</p>
+    <p class="cta-sub">AI 해석·궁합·오늘의 운세·자미두수·별자리까지 — 같은 엔진의 전체 분석은 만세력 앱에서.</p>
+    <a class="cta" id="storeCta" href="https://play.google.com/store/apps/details?id=com.samramanshang.manseryeok&referrer=utm_source%3Dseo%26utm_medium%3Dweb%26utm_campaign%3Dcalc" rel="nofollow" data-cta="store-calc">만세력 앱에서 전체 분석 보기</a>
   </aside>
 </section>
 
@@ -114,9 +146,10 @@
   <p class="fine">이 계산기는 만세력 앱과 같은 엔진(절입시각·진태양시 반영)을 브라우저에서 실행해요. 입력한 생년월일은 서버로 전송되지 않습니다.</p>
 </footer>
 
-<script src="/calc/saju-engine.js"></script>
+<script src="/calc/saju-engine.js" defer></script>
 <script>
 var LINKS = {"ilju": {"갑자": "/ilju/gapja/", "갑인": "/ilju/gapin/", "갑진": "/ilju/gapjin/", "갑오": "/ilju/gapo/", "갑신": "/ilju/gapsin/", "갑술": "/ilju/gapsul/", "을축": "/ilju/eulchuk/", "을묘": "/ilju/eulmyo/", "을사": "/ilju/eulsa/", "을미": "/ilju/eulmi/", "을유": "/ilju/eulyu/", "을해": "/ilju/eulhae/", "병자": "/ilju/byeongja/", "병인": "/ilju/byeongin/", "병진": "/ilju/byeongjin/", "병오": "/ilju/byeongo/", "병신": "/ilju/byeongsin/", "병술": "/ilju/byeongsul/", "정축": "/ilju/jeongchuk/", "정묘": "/ilju/jeongmyo/", "정사": "/ilju/jeongsa/", "정미": "/ilju/jeongmi/", "정유": "/ilju/jeongyu/", "정해": "/ilju/jeonghae/", "무자": "/ilju/muja/", "무인": "/ilju/muin/", "무진": "/ilju/mujin/", "무오": "/ilju/muo/", "무신": "/ilju/musin/", "무술": "/ilju/musul/", "기축": "/ilju/gichuk/", "기묘": "/ilju/gimyo/", "기사": "/ilju/gisa/", "기미": "/ilju/gimi/", "기유": "/ilju/giyu/", "기해": "/ilju/gihae/", "경자": "/ilju/gyeongja/", "경인": "/ilju/gyeongin/", "경진": "/ilju/gyeongjin/", "경오": "/ilju/gyeongo/", "경신": "/ilju/gyeongsin/", "경술": "/ilju/gyeongsul/", "신축": "/ilju/sinchuk/", "신묘": "/ilju/sinmyo/", "신사": "/ilju/sinsa/", "신미": "/ilju/sinmi/", "신유": "/ilju/sinyu/", "신해": "/ilju/sinhae/", "임자": "/ilju/imja/", "임인": "/ilju/imin/", "임진": "/ilju/imjin/", "임오": "/ilju/imo/", "임신": "/ilju/imsin/", "임술": "/ilju/imsul/", "계축": "/ilju/gyechuk/", "계묘": "/ilju/gyemyo/", "계사": "/ilju/gyesa/", "계미": "/ilju/gyemi/", "계유": "/ilju/gyeyu/", "계해": "/ilju/gyehae/"}, "sipsin": {"본원": "/term/bonwon/", "비견": "/term/bigyeon/", "겁재": "/term/geopjae/", "식신": "/term/siksin/", "상관": "/term/sanggwan/", "편재": "/term/pyeonjae/", "정재": "/term/jeongjae/", "편관": "/term/pyeongwan/", "정관": "/term/jeonggwan/", "편인": "/term/pyeonin/", "정인": "/term/jeongin/"}, "meteor": {"絶": {"kr": "절", "url": "/term/jeol/"}, "胎": {"kr": "태", "url": "/term/tae/"}, "養": {"kr": "양", "url": "/term/yang/"}, "長生": {"kr": "장생", "url": "/term/jangsaeng/"}, "沐浴": {"kr": "목욕", "url": "/term/mokyok/"}, "冠帶": {"kr": "관대", "url": "/term/gwandae/"}, "乾祿": {"kr": "건록", "url": "/term/geonrok/"}, "帝旺": {"kr": "제왕", "url": "/term/jewang/"}, "衰": {"kr": "쇠", "url": "/term/soe/"}, "病": {"kr": "병", "url": "/term/byeong/"}, "死": {"kr": "사", "url": "/term/sa/"}, "墓": {"kr": "묘", "url": "/term/myo/"}}, "spirit": {"劫殺": {"kr": "겁살", "url": "/term/geopsal/"}, "災殺": {"kr": "재살", "url": "/term/jaesal/"}, "天殺": {"kr": "천살", "url": "/term/cheonsal/"}, "地殺": {"kr": "지살", "url": "/term/jisal/"}, "年殺": {"kr": "연살", "url": "/term/yeonsal/"}, "月殺": {"kr": "월살", "url": "/term/wolsal/"}, "亡身": {"kr": "망신살", "url": "/term/mangsinsal/"}, "將星": {"kr": "장성살", "url": "/term/jangseongsal/"}, "攀鞍": {"kr": "반안살", "url": "/term/banansal/"}, "驛馬": {"kr": "역마살", "url": "/term/yeokmasal/"}, "六害": {"kr": "육해살", "url": "/term/yukhaesal/"}, "華蓋": {"kr": "화개살", "url": "/term/hwagaesal/"}}};
+var STORE = "https://play.google.com/store/apps/details?id=com.samramanshang.manseryeok&referrer=utm_source%3Dseo%26utm_medium%3Dweb%26utm_campaign%3Dcalc";
 function engine(){
   var root = window["engine-core"];
   return root.com.samramanshang.manseryeok.orrery.js.SajuCalc;
@@ -125,7 +158,8 @@ function opt(sel, vals, labels){
   vals.forEach(function(v,i){ var o=document.createElement("option"); o.value=v; o.textContent=labels?labels[i]:v; sel.appendChild(o); });
 }
 function pad(n){ return (n<10?"0":"")+n; }
-(function init(){
+// defer 스크립트(엔진)는 DOMContentLoaded 직전에 실행된다 — init 을 그 뒤로 미뤄야 engine() 이 산다.
+document.addEventListener("DOMContentLoaded", function init(){
   var mo=document.getElementById("mo"), d=document.getElementById("d"), h=document.getElementById("h"), mi=document.getElementById("mi");
   opt(mo, Array.from({length:12},function(_,i){return i+1;}));
   opt(d, Array.from({length:31},function(_,i){return i+1;}));
@@ -144,8 +178,133 @@ function pad(n){ return (n<10?"0":"")+n; }
     document.getElementById("mi").disabled = this.checked;
   });
   document.getElementById("go").addEventListener("click", run);
-})();
+  document.getElementById("share").addEventListener("click", share);
+  restoreFromUrl();
+});
 function link(url, text){ return url ? '<a href="'+url+'">'+text+'</a>' : text; }
+var EL_KR = {"木":"목","火":"화","土":"토","金":"금","水":"수"};
+var EL_CLS = {"木":"e-tree","火":"e-fire","土":"e-earth","金":"e-metal","水":"e-water"};
+function elName(h){ return h ? h+"("+(EL_KR[h]||"")+")" : "—"; }
+
+/** 폼의 현재 입력 — 계산·URL·공유가 같은 소스를 쓴다. */
+function readForm(){
+  var unk = document.getElementById("unk").checked;
+  return {
+    y:+document.getElementById("y").value,
+    mo:+document.getElementById("mo").value,
+    d:+document.getElementById("d").value,
+    unk:unk,
+    h:unk?-1:+document.getElementById("h").value,
+    mi:unk?0:+document.getElementById("mi").value,
+    g:document.getElementById("g").value,
+    tst:document.getElementById("tst").checked,
+    lon:document.getElementById("tst").checked ? +(document.getElementById("city").value||126.978) : 126.978
+  };
+}
+
+/** 계산 결과를 주소창에 반영 — 뒤로가기 복원·링크 공유가 가능해진다.
+ *  canonical 은 /calc/ 로 고정돼 있어 파라미터 URL 이 중복 색인되지 않는다. */
+function syncUrl(v){
+  var q = "?y="+v.y+"&mo="+v.mo+"&d="+v.d+"&g="+v.g
+        + (v.unk ? "&unk=1" : "&h="+v.h+"&mi="+v.mi)
+        + (v.tst ? "&tst=1&lon="+v.lon : "");
+  try { history.replaceState(null, "", location.pathname + q); } catch(e) {}
+}
+
+/** ?y=..&mo=.. 로 들어오면 폼을 채우고 바로 계산한다(공유 링크 수신). */
+function restoreFromUrl(){
+  var q = new URLSearchParams(location.search);
+  if (!q.get("y")) return;
+  var set = function(id, val){ if (val !== null && val !== "") document.getElementById(id).value = val; };
+  set("y", q.get("y")); set("mo", q.get("mo")); set("d", q.get("d")); set("g", q.get("g"));
+  if (q.get("unk") === "1"){
+    document.getElementById("unk").checked = true;
+    document.getElementById("h").disabled = true; document.getElementById("mi").disabled = true;
+  } else { set("h", q.get("h")); set("mi", q.get("mi")); }
+  if (q.get("tst") === "1"){
+    document.getElementById("tst").checked = true;
+    document.getElementById("cityWrap").style.display = "block";
+    set("city", q.get("lon"));
+  }
+  run();
+}
+
+function share(){
+  var msg = document.getElementById("shareMsg");
+  var url = location.href;
+  var text = "내 사주 명식 — 무료 만세력";
+  if (window.__track) window.__track("cta", "share-calc");
+  if (navigator.share){
+    navigator.share({title:text, url:url}).catch(function(){});
+    return;
+  }
+  var done = function(){ msg.textContent = "링크를 복사했어요"; setTimeout(function(){ msg.textContent=""; }, 2600); };
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(done, function(){ msg.textContent = url; });
+  } else { msg.textContent = url; }
+}
+
+/** 설치 후 첫 실행에서 앱이 생년월일을 복원하도록 레퍼러에 b_ payload 를 싣는다.
+ *  형식: b_<YYYYMMDD>-<HHMM|na>-<M|F> (앱 DeepLink.routeFromReferrer 가 같은 규약으로 파싱) */
+function storeUrlWith(v){
+  var pad2 = function(n){ return (n<10?"0":"")+n; };
+  var date = v.y + pad2(v.mo) + pad2(v.d);
+  var time = v.unk ? "na" : (pad2(v.h) + pad2(v.mi));
+  return STORE + encodeURIComponent("&b_" + date + "-" + time + "-" + v.g);
+}
+
+function renderInterpret(v){
+  var t;
+  try { t = JSON.parse(engine().interpret(v.y,v.mo,v.d,v.h,v.mi,v.g,v.tst,v.lon)); }
+  catch(e){ return; }
+
+  var gg = t.geokguk || {};
+  document.getElementById("ggLabel").textContent = gg.hangul || "—";
+  var why = [];
+  if (gg.resolvedBy) why.push(gg.resolvedBy + " 기준");
+  if (gg.transparentStem) why.push(gg.transparentStem + (gg.transparentPosition ? " " + gg.transparentPosition : "") + " 투출");
+  if (gg.category) why.push(gg.category);
+  document.getElementById("ggWhy").textContent = why.join(" · ");
+
+  var st = t.strength || {};
+  document.getElementById("stLabel").textContent = st.label || "—";
+  var tot = (st.help||0) + (st.weaken||0);
+  document.getElementById("stWhy").textContent = tot
+    ? "돕는 힘 " + Math.round(st.help*100/tot) + "% · 빼는 힘 " + Math.round(st.weaken*100/tot) + "%"
+    : "";
+  document.getElementById("stHint").textContent = t.hint || "";
+
+  // 중화 사주는 억부를 단정하지 않는다 — 용신을 보조 참고로 낮춰 적는다(엔진·앱과 같은 태도).
+  var ys = t.yongsin;
+  document.getElementById("ysYong").textContent = ys && ys.yong.length
+    ? ys.yong.map(elName).join(" · ") : "—";
+  var giText = ys && ys.gi.length ? "피할 오행 " + ys.gi.map(elName).join(" · ") : "";
+  document.getElementById("ysGi").textContent =
+    st.neutral ? (giText ? giText + " · 중화라 보조 참고예요" : "중화라 보조 참고예요") : giText;
+
+  var johu = t.johu, jc = document.getElementById("johuCard");
+  if (johu){
+    jc.style.display = "";
+    document.getElementById("johuEl").textContent = elName(johu.element);
+    document.getElementById("johuWhy").textContent = johu.reason || "";
+  } else { jc.style.display = "none"; }
+
+  var els = t.elements || {}, sum = 0;
+  ["木","火","土","金","水"].forEach(function(k){ sum += (els[k]||0); });
+  var box = document.getElementById("ohang"); box.innerHTML = "";
+  ["木","火","土","金","水"].forEach(function(k){
+    var n = els[k]||0, pc = sum ? Math.round(n*100/sum) : 0;
+    var row = document.createElement("div");
+    row.className = "row2 " + (EL_CLS[k]||"");
+    row.innerHTML = '<span class="nm">'+elName(k)+'</span>'
+      + '<span class="bar"><i style="width:'+pc+'%"></i></span>'
+      + '<span class="pc">'+pc+'%</span>';
+    box.appendChild(row);
+  });
+  document.getElementById("ohangNote").textContent =
+    t.unknownTime ? "시주를 뺀 세 기둥 기준이에요. 태어난 시간을 알면 결과가 달라질 수 있어요."
+                  : "천간과 지지 속 지장간까지 가중해 센 분포예요.";
+}
 function fillPillar(sfx, p){
   var q = function(id){ return document.getElementById(id+"-"+sfx); };
   if (!p){ ["ss","tg","jj","bs","us","sl"].forEach(function(k){ var el=q(k); if(el) el.innerHTML='<span class="kr">시간 미상</span>'; }); return; }
@@ -160,11 +319,8 @@ function fillPillar(sfx, p){
 }
 function run(){
   var err = document.getElementById("err"); err.style.display="none";
-  var y=+document.getElementById("y").value, mo=+document.getElementById("mo").value, d=+document.getElementById("d").value;
-  var unk=document.getElementById("unk").checked;
-  var h=unk?-1:+document.getElementById("h").value, mi=unk?0:+document.getElementById("mi").value;
-  var g=document.getElementById("g").value, tst=document.getElementById("tst").checked;
-  var lon=tst? +(document.getElementById("city").value||126.978) : 126.978;
+  var v = readForm();
+  var y=v.y, mo=v.mo, d=v.d, h=v.h, mi=v.mi, g=v.g, tst=v.tst, lon=v.lon;
   if (!y || y<1940 || y>2026){ err.textContent="1940~2026년 사이로 입력해 주세요."; err.style.display="block"; return; }
   var r;
   try { r = JSON.parse(engine().calculate(y,mo,d,h,mi,g,tst,lon)); }
@@ -183,6 +339,10 @@ function run(){
     dw.appendChild(c);
   });
   document.getElementById("gmLine").textContent = "공망: "+r.gongmang+" · 보정 적용 시각 "+r.adjusted.year+"."+pad(r.adjusted.month)+"."+pad(r.adjusted.day)+" "+pad(r.adjusted.hour)+":"+pad(r.adjusted.minute);
+  renderInterpret(v);
+  syncUrl(v);
+  var cta = document.getElementById("storeCta");
+  if (cta) cta.href = storeUrlWith(v);
   document.getElementById("result").style.display="block";
   document.getElementById("result").scrollIntoView({behavior:"smooth"});
   if (window.__track) window.__track("calc_done");
