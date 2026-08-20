@@ -76,6 +76,11 @@ p{margin:0 0 14px}
 .elpill{display:inline-block;font-size:12.5px;font-weight:700;padding:3px 10px;border-radius:999px;
   color:#fff;background:var(--el,#7A6E56)}
 
+.topbar nav a.nav-calc{color:#0A0820;background:#EFE7C8;border-radius:999px;
+  padding:3px 12px;font-weight:800}
+.topbar nav a.nav-calc:hover{background:#fff;color:#0A0820;text-decoration:none}
+.cta-alt{font-size:13px;color:#B8B2D6;margin:14px 0 0}
+.cta-alt a{color:#EFE7C8;font-weight:700;text-decoration:underline}
 .cta-box{margin:38px 0 0;background:#171040;color:#EDEBF5;border-radius:20px;padding:26px 22px;text-align:center}
 .cta-lead{font-size:18px;font-weight:800;margin:0 0 6px}
 .cta-sub{font-size:14px;color:#B8B2D6;margin:0 0 18px}

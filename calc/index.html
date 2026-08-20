@@ -14,6 +14,7 @@
 <meta property="og:image" content="https://hwoh87.github.io/og-share.png" />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="stylesheet" href="/assets/seo.css" />
+<script src="/assets/track.js" defer></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"만세력 사주 계산기","url":"https://hwoh87.github.io/calc/","applicationCategory":"LifestyleApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko","publisher":{"@type":"Organization","name":"만세력"}}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://hwoh87.github.io/"},{"@type":"ListItem","position":2,"name":"만세력 계산기"}]}</script>
 <style>
@@ -184,6 +185,7 @@ function run(){
   document.getElementById("gmLine").textContent = "공망: "+r.gongmang+" · 보정 적용 시각 "+r.adjusted.year+"."+pad(r.adjusted.month)+"."+pad(r.adjusted.day)+" "+pad(r.adjusted.hour)+":"+pad(r.adjusted.minute);
   document.getElementById("result").style.display="block";
   document.getElementById("result").scrollIntoView({behavior:"smooth"});
+  if (window.__track) window.__track("calc_done");
 }
 </script>
 </body>
