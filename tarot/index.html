@@ -31,7 +31,15 @@
     padding-bottom: 104px;          /* 하단 고정 설치 바에 가리지 않게 */
     -webkit-text-size-adjust: 100%;
   }
-  .wrap { max-width: 560px; margin: 0 auto; padding: 26px 20px 8px; }
+  .wrap {
+    max-width: 560px; margin: 0 auto; padding: 26px 20px 8px;
+    /* 카드를 화면 세로 중앙에 앉힌다. margin:auto 는 내용이 화면보다 길어지면
+       0 으로 접히므로, 결과가 펼쳐져도 윗부분이 잘리지 않는다. */
+    min-height: calc(100vh - 116px);
+    min-height: calc(100dvh - 116px);
+    display: flex; flex-direction: column;
+  }
+  .stack { margin: auto 0; width: 100%; }
 
   header { text-align: center; }
   .logo { color: var(--gold); font-size: 26px; letter-spacing: 0.3em; }
@@ -130,17 +138,19 @@
 <body>
 
 <div class="wrap">
-  <header>
-    <div class="logo">✦</div>
-    <div class="brand">천지신명 타로</div>
-  </header>
+  <div class="stack">
+    <header>
+      <div class="logo">✦</div>
+      <div class="brand">천지신명 타로</div>
+    </header>
 
-  <h1>3초 안에 하나만 고르세요</h1>
-  <p class="sub">생각하지 말고, 눈이 먼저 간 카드로.</p>
+    <h1>3초 안에 하나만 고르세요</h1>
+    <p class="sub">생각하지 말고, 눈이 먼저 간 카드로.</p>
 
-  <div class="row" id="row"></div>
+    <div class="row" id="row"></div>
 
-  <div id="result" hidden></div>
+    <div id="result" hidden></div>
+  </div>
 </div>
 
 <div class="bar">
