@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MyTarot — AI 융합해석 결과</title>
-<meta name="description" content="MyTarot 앱으로 뽑은 타로 리딩의 AI 융합해석 결과예요. 카드별 의미를 보고, 전체 융합해석은 앱에서 확인하세요.">
-<meta property="og:title" content="🔮 MyTarot AI 융합해석 결과">
+<title>천지신명 타로 — AI 융합해석 결과</title>
+<meta name="description" content="천지신명 타로 앱으로 뽑은 타로 리딩의 AI 융합해석 결과예요. 카드별 의미를 보고, 전체 융합해석은 앱에서 확인하세요.">
+<meta property="og:title" content="🔮 천지신명 타로 AI 융합해석 결과">
 <meta property="og:description" content="타로 카드 리딩의 AI 융합해석 — 카드별 키워드와 해석을 확인해 보세요.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://hwoh87.github.io/MyTarot1/share/">
 <meta property="og:image" content="https://hwoh87.github.io/MyTarot1/share/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="MyTarot — AI 융합 타로 해석">
+<meta property="og:image:alt" content="천지신명 타로 — AI 융합 타로 해석">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="🔮 MyTarot AI 융합해석 결과">
+<meta name="twitter:title" content="🔮 천지신명 타로 AI 융합해석 결과">
 <meta name="twitter:description" content="타로 카드 리딩의 AI 융합해석 — 카드별 키워드와 해석을 확인해 보세요.">
 <meta name="twitter:image" content="https://hwoh87.github.io/MyTarot1/share/og.png">
 <style>
@@ -117,7 +117,7 @@
 <div class="wrap">
   <header>
     <div class="logo">🔮</div>
-    <h1>MyTarot AI 융합해석</h1>
+    <h1>천지신명 타로 AI 융합해석</h1>
     <div class="sub" id="subtitle">친구가 공유한 타로 리딩 결과예요</div>
   </header>
   <main id="content"></main>
@@ -128,7 +128,7 @@
   <div class="install-inner">
     <div class="install-icon">🔮</div>
     <div class="install-text">
-      <b>MyTarot — 타로 &amp; AI 융합해석</b>
+      <b>천지신명 타로 — 타로 &amp; AI 융합해석</b>
       <span>내 카드로 직접 리딩하고 전체 해석 받기</span>
     </div>
     <a class="install-btn" id="installBtn" href="#">설치</a>
@@ -150,8 +150,18 @@ const isAndroid = /android/i.test(navigator.userAgent);
 //  · utm_* → Play 콘솔 '획득' 리포트에 공유 유입이 그대로 집계된다(백엔드 불요).
 //  · r=<토큰> → 설치 후 첫 실행에서 InstallReferrer API 로 앱이 읽어, 공유받은
 //    리딩으로 곧장 딥링크한다(설치 경계를 넘는 deferred deep link).
+// 유입 출처는 URL 의 s/m/c 로 덮어쓸 수 있다(없으면 앱 공유 기본값 — 기존 링크와 호환).
+//   ?r=<토큰>&s=ig&m=dm&c=s1  →  utm_source=ig&utm_medium=dm&utm_campaign=s1
+// 숏폼 DM·댓글·프로필 링크처럼 경로가 다른 유입을 Play 콘솔에서 따로 본다.
+function utmTag(name, fallback) {
+  var v = (new URLSearchParams(location.search).get(name) || "").replace(/[^A-Za-z0-9_-]/g, "");
+  return v ? v.slice(0, 40) : fallback;
+}
+
 function storeUrl(token) {
-  var ref = "utm_source=share&utm_medium=web&utm_campaign=reading";
+  var ref = "utm_source=" + utmTag("s", "share") +
+    "&utm_medium=" + utmTag("m", "web") +
+    "&utm_campaign=" + utmTag("c", "reading");
   if (token) ref += "&r=" + token;
   return STORE_URL + "&referrer=" + encodeURIComponent(ref);
 }
@@ -206,9 +216,9 @@ function render() {
     content.innerHTML =
       '<div class="error">' +
       "<p>공유된 리딩을 찾을 수 없어요.</p>" +
-      "<p style=\"margin-top:8px\">MyTarot 앱에서 직접 카드를 뽑고<br>AI 융합해석을 받아보세요.</p>" +
+      "<p style=\"margin-top:8px\">천지신명 타로 앱에서 직접 카드를 뽑고<br>AI 융합해석을 받아보세요.</p>" +
       "</div>" +
-      '<a class="cta" href="' + esc(storeUrl(null)) + '">📲 MyTarot 설치하기</a>';
+      '<a class="cta" href="' + esc(storeUrl(null)) + '">📲 천지신명 타로 설치하기</a>';
     return;
   }
 
@@ -244,7 +254,7 @@ function render() {
   // 융합해석(카드 연결·페르소나 조언)은 앱 전용 — 설치 전환 포인트
   html +=
     '<div class="locked"><div class="lock">🔒</div>' +
-    "<p><b>카드 사이의 연결</b>과 <b>AI 페르소나의 융합해석 · 조언</b>은<br>MyTarot 앱에서 확인할 수 있어요.</p>" +
+    "<p><b>카드 사이의 연결</b>과 <b>AI 페르소나의 융합해석 · 조언</b>은<br>천지신명 타로 앱에서 확인할 수 있어요.</p>" +
     "</div>" +
     '<a class="cta" id="openApp" href="' +
     (isAndroid ? esc(appLink(token)) : esc(storeUrl(token))) +
