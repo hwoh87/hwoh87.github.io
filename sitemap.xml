@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://hwoh87.github.io/calc/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://hwoh87.github.io/calc/jami/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/calc/star/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://hwoh87.github.io/</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>
   <url><loc>https://hwoh87.github.io/ilju/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://hwoh87.github.io/cheongan/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
@@ -66,6 +68,66 @@
   <url><loc>https://hwoh87.github.io/ilju/gyemi/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://hwoh87.github.io/ilju/gyeyu/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://hwoh87.github.io/ilju/gyehae/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/gapja/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/gapin/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/gapjin/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/gapo/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/gapsin/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/gapsul/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/eulchuk/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/eulmyo/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/eulsa/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/eulmi/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/eulyu/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/eulhae/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/byeongja/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/byeongin/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/byeongjin/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/byeongo/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/byeongsin/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/byeongsul/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/jeongchuk/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/jeongmyo/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/jeongsa/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/jeongmi/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/jeongyu/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/jeonghae/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/muja/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/muin/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/mujin/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/muo/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/musin/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/musul/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/gichuk/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/gimyo/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/gisa/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/gimi/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/giyu/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/gihae/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/gyeongja/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/gyeongin/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/gyeongjin/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/gyeongo/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/gyeongsin/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/gyeongsul/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/sinchuk/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/sinmyo/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/sinsa/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/sinmi/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/sinyu/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/sinhae/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/imja/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/imin/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/imjin/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/imo/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/imsin/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/imsul/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/gyechuk/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/gyemyo/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/gyesa/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/gyemi/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/gyeyu/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://hwoh87.github.io/ilju/gyehae/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://hwoh87.github.io/cheongan/gapmok/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://hwoh87.github.io/cheongan/eulmok/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://hwoh87.github.io/cheongan/byeonghwa/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>

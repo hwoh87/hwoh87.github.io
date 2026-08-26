@@ -70,6 +70,46 @@ p{margin:0 0 14px}
   padding:11px 12px;font-size:14.5px;font-weight:600;color:#33302B;text-align:center}
 .linkgrid a:hover{border-color:#B9A3F0;text-decoration:none}
 .linkgrid a .sub{display:block;font-size:12px;font-weight:500;color:#8A7C5F;margin-top:2px}
+.linkgrid.tools{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.linkgrid.tools a{text-align:left;padding:14px 15px;font-size:16px}
+
+/* 연예인 명식표 · 오행 바 (build_celeb_site.py 가 쓴다) */
+.myeongsik{width:100%;min-width:340px;border-collapse:collapse;background:#fff;
+  border:1px solid #E8E0D0;border-radius:14px;overflow:hidden;text-align:center;font-size:14px}
+.myeongsik th{background:#F3EDE0;color:#6B5C3A;font-size:12.5px;padding:8px 4px;font-weight:700}
+.myeongsik td{padding:8px 4px;border-top:1px solid #F0E9DB}
+.myeongsik .hj{font-size:26px;font-weight:800;line-height:1.2;color:#33302B}
+.myeongsik .kr{font-size:11.5px;color:#8A7C5F}
+.myeongsik td.ss{font-size:13px;font-weight:700;color:#5B43C4}
+.myeongsik td.ss a{color:inherit}
+.bars{display:flex;flex-direction:column;gap:6px;margin:0 0 10px}
+.bars .row2{display:flex;align-items:center;gap:9px}
+.bars .nm{width:66px;font-size:13px;font-weight:700;color:#5A4E33;flex:none}
+.bars .bar{flex:1;height:11px;background:#F0E9DB;border-radius:999px;overflow:hidden}
+.bars .bar i{display:block;height:100%;background:var(--el,#8A7C5F);border-radius:999px}
+.bars .pc{width:26px;text-align:right;font-size:12px;color:#8A7C5F;flex:none}
+
+/* 일주 궁합 */
+.gcards{list-style:none;margin:0 0 20px;padding:0;display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.gcard{background:#fff;border:1px solid #E8E0D0;border-left:4px solid var(--gb,#C8BFA8);
+  border-radius:14px;padding:13px 15px}
+.gcard .gname{display:block;font-size:16px;font-weight:800;color:#33302B}
+.gcard .gname .hanja{font-size:13px;color:#8A7C5F;font-weight:600}
+.gcard .gband{display:inline-block;margin:4px 0 0;font-size:12.5px;font-weight:800;color:var(--gb,#8A7C5F)}
+.gcard .badges{justify-content:flex-start;margin-top:7px}
+/* .badge 원본은 딥네이비 히어로용이라 웜 페이퍼 위에선 안 보인다 — 카드 안에서만 뒤집는다. */
+.gcard .badge{border-color:#E0D6BE;color:#6B5C3A;background:#F6F1E4}
+.gcard p{margin:8px 0 0;font-size:13px;color:#5A4E33;line-height:1.65}
+.b5{--gb:#3F7A45}.b4{--gb:#5B8C4F}.b3{--gb:#9A8B66}.b2{--gb:#C08A3E}.b1{--gb:#B4574B}
+.gpill{display:inline-block;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;
+  color:#fff;background:var(--gb,#8A7C5F);white-space:nowrap}
+.tablewrap{overflow-x:auto;margin:0 0 20px;-webkit-overflow-scrolling:touch}
+.gtable{width:100%;min-width:520px;border-collapse:collapse;background:#fff;
+  border:1px solid #E8E0D0;border-radius:14px;overflow:hidden;font-size:13.5px}
+.gtable th{background:#F3EDE0;color:#6B5C3A;font-size:12.5px;padding:9px 8px;text-align:left;white-space:nowrap}
+.gtable td{padding:8px;border-top:1px solid #F0E9DB;vertical-align:top}
+.gtable td .sub{display:block;font-size:11.5px;color:#8A7C5F}
 
 .e-tree{--el:#4E8C5B}.e-fire{--el:#B4574B}.e-earth{--el:#9A7A3C}
 .e-metal{--el:#6E7A8C}.e-water{--el:#4A6390}

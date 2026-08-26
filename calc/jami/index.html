@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>무료 자미두수 명반 — 12궁 · 사화 · 대한 | 만세력</title>
+<meta name="description" content="생년월일시로 자미두수 명반을 바로 세워요. 12궁 주성·사화·대한과 궁마다의 풀이까지 — 설치·회원가입 없이 무료." />
+<link rel="canonical" href="https://hwoh87.github.io/calc/jami/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="만세력" />
+<meta property="og:title" content="무료 자미두수 명반 — 12궁 · 사화 · 대한 | 만세력" />
+<meta property="og:description" content="생년월일시로 자미두수 명반을 바로 세워요. 12궁 주성·사화·대한과 궁마다의 풀이까지 — 설치·회원가입 없이 무료." />
+<meta property="og:url" content="https://hwoh87.github.io/calc/jami/" />
+<meta property="og:image" content="https://hwoh87.github.io/og-share.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="stylesheet" href="/assets/seo.css" />
+<script src="/assets/track.js" defer></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "만세력 자미두수 명반", "url": "https://hwoh87.github.io/calc/jami/", "applicationCategory": "LifestyleApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "KRW"}, "inLanguage": "ko", "publisher": {"@type": "Organization", "name": "만세력"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "홈", "item": "https://hwoh87.github.io/"}, {"@type": "ListItem", "position": 2, "name": "자미두수 명반"}]}</script>
+<style>
+.calc-form{background:#fff;border:1px solid #E8E0D0;border-radius:20px;padding:20px 18px;margin:0 0 26px}
+.calc-form .row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.calc-form label{font-size:13px;font-weight:700;color:#6B5C3A;display:block;margin-bottom:5px}
+.calc-form select,.calc-form input[type=number]{
+  padding:10px 12px;border:1px solid #D8CFBC;border-radius:12px;font-size:16px;background:#FDFCF8;color:#33302B}
+.calc-form .grow{flex:1;min-width:88px}
+.chk{display:flex;align-items:center;gap:7px;font-size:14px;color:#5A4E33;padding:6px 0}
+.chk input{width:18px;height:18px;accent-color:#6E48F2}
+.calc-btn{width:100%;padding:15px;border:0;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;
+  color:#fff;background:linear-gradient(135deg,#8B6BFF,#6E48F2);box-shadow:0 6px 18px rgba(110,72,242,.3)}
+.calc-btn[disabled]{opacity:.62;cursor:progress}
+.err{color:#B4574B;font-size:14px;margin:8px 0 0;display:none}
+#result{display:none}
+.read-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 8px}
+.read-card{background:#fff;border:1px solid #E8E0D0;border-radius:14px;padding:13px 14px}
+.read-card .rk{display:block;font-size:11.5px;font-weight:800;color:#8A7C5F;letter-spacing:.04em}
+.read-card strong{display:block;font-size:19px;font-weight:800;color:#33302B;margin:3px 0 4px}
+.read-card p{margin:0;font-size:12.5px;color:#6B5C3A;line-height:1.55}
+.bars{display:flex;flex-direction:column;gap:6px;margin:0 0 8px}
+.bars .row2{display:flex;align-items:center;gap:9px}
+.bars .nm{width:64px;font-size:13px;font-weight:700;color:#5A4E33;flex:none}
+.bars .bar{flex:1;height:11px;background:#F0E9DB;border-radius:999px;overflow:hidden}
+.bars .bar i{display:block;height:100%;background:var(--el,#8A7C5F);border-radius:999px}
+.bars .pc{width:42px;text-align:right;font-size:12px;color:#8A7C5F;flex:none}
+.share-row{display:flex;align-items:center;gap:10px;margin:16px 0 0;flex-wrap:wrap}
+.share-btn{padding:11px 18px;border:1px solid #D8CFBC;background:#fff;color:#5B43C4;
+  border-radius:999px;font-size:14px;font-weight:800;cursor:pointer}
+.share-msg{font-size:13px;color:#8A7C5F}
+.toolrail{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:26px 0 0}
+.toolrail a{display:block;background:#fff;border:1px solid #E8E0D0;border-radius:14px;padding:13px 15px;
+  text-decoration:none;color:#33302B}
+.toolrail a:hover{border-color:#C8B990}
+.toolrail .tk{display:block;font-size:11.5px;font-weight:800;color:#8A7C5F;letter-spacing:.04em}
+.toolrail strong{display:block;font-size:16px;margin:3px 0 3px}
+.toolrail span.sub{display:block;font-size:12.5px;color:#6B5C3A;line-height:1.5}
+
+.mb{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,minmax(96px,auto));
+  gap:6px;margin:0 0 16px}
+.mb .cell{background:#fff;border:1px solid #E8E0D0;border-radius:12px;padding:8px 8px 7px;
+  text-align:left;cursor:pointer;font:inherit;color:inherit;display:flex;flex-direction:column;gap:3px}
+.mb .cell:hover,.mb .cell[aria-pressed=true]{border-color:#6E48F2;box-shadow:0 0 0 2px rgba(110,72,242,.14)}
+.mb .cell .pn{font-size:12px;font-weight:800;color:#5B43C4}
+.mb .cell .gz{font-size:11px;color:#8A7C5F;margin-left:4px;font-weight:600}
+.mb .cell .ms{font-size:14px;font-weight:800;color:#33302B;line-height:1.35}
+.mb .cell .as{font-size:10.5px;color:#8A7C5F;line-height:1.4}
+.mb .cell .sh{font-size:10px;font-weight:800;color:#B4574B}
+.mb .cell .em{font-size:11.5px;color:#A79A7C}
+.mb .core{grid-column:2/4;grid-row:2/4;background:#F6F1E4;border:1px solid #E0D6BE;border-radius:14px;
+  padding:12px;display:flex;flex-direction:column;justify-content:center;gap:5px;text-align:center}
+.mb .core b{font-size:15px;color:#33302B}
+.mb .core span{font-size:12px;color:#6B5C3A;line-height:1.5}
+.pdetail{background:#fff;border:1px solid #E8E0D0;border-radius:16px;padding:16px 16px 14px;margin:0 0 18px}
+.pdetail h3{margin:0 0 4px;font-size:18px}
+.pdetail .role{margin:0 0 10px;font-size:13.5px;color:#6B5C3A;line-height:1.6}
+.pdetail .star{border-top:1px solid #F0E9DB;padding:10px 0 2px}
+.pdetail .star b{font-size:15px}
+.pdetail .star .nick{font-size:12px;color:#8A7C5F;margin-left:6px}
+.pdetail .star p{margin:4px 0 0;font-size:13px;color:#5A4E33;line-height:1.65}
+.pdetail .kw{margin:5px 0 0;font-size:12px;color:#8A7C5F}
+.pdetail ul{margin:10px 0 0;padding-left:18px}
+.pdetail li{font-size:13px;color:#5A4E33;line-height:1.7}
+.dx{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;margin:0 0 8px}
+.dx .c{flex:0 0 auto;min-width:86px;background:#fff;border:1px solid #E8E0D0;border-radius:12px;
+  padding:9px 10px;text-align:center}
+.dx .c .g{font-size:16px;font-weight:800}
+.dx .c .a{font-size:11.5px;color:#8A7C5F;margin-top:2px}
+.dx .c .s{font-size:11.5px;color:#5B43C4;margin-top:1px}
+.tagrow{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.tagrow span{font-size:12px;font-weight:700;background:#EFEAFB;color:#5B43C4;border-radius:999px;padding:5px 11px}
+@media(max-width:430px){
+  .mb{gap:4px;grid-template-rows:repeat(4,minmax(84px,auto))}
+  .mb .cell{padding:6px 5px}
+  .mb .cell .ms{font-size:12.5px}
+  .mb .cell .as{font-size:9.5px}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="wordmark" href="/">만세력</a>
+  <nav>
+    <a href="/calc/">사주</a><a href="/calc/jami/">자미두수</a><a href="/calc/star/">별자리</a>
+    <a href="/ilju/">일주</a><a href="/term/">용어</a>
+  </nav>
+</header>
+<section class="hero">
+  <div class="hero-inner">
+    <nav class="crumbs" aria-label="위치"><a href="/">홈</a> › <span>자미두수 명반</span></nav>
+    <p class="kicker">무료 자미두수</p>
+    <h1>자미두수 명반<small>12궁 · 주성 · 사화 · 대한을 브라우저에서 바로</small></h1>
+  </div>
+</section>
+<div class="heroband"></div>
+<main class="paper"><div class="paper-inner">
+
+<form class="calc-form" id="f" onsubmit="return false">
+  <div class="row">
+    <div class="grow"><label for="y">년</label><input id="y" type="number" min="1940" max="2026" value="1995" /></div>
+    <div class="grow"><label for="mo">월</label><select id="mo"></select></div>
+    <div class="grow"><label for="d">일</label><select id="d"></select></div>
+  </div>
+  <div class="row">
+    <div class="grow"><label for="h">시</label><select id="h"></select></div>
+    <div class="grow"><label for="mi">분</label><select id="mi"></select></div>
+    <div class="grow"><label for="g">성별</label><select id="g"><option value="M">남</option><option value="F">여</option></select></div>
+  </div>
+  <div class="row">
+    <div class="grow"><label for="city">출생 지역</label><select id="city" aria-label="출생 지역"></select></div>
+  </div>
+  <button class="calc-btn" id="go">내 명반 뽑기</button>
+  <p class="err" id="err"></p>
+  <p class="note" style="margin-top:14px">양력 생일 기준이에요. <strong>자미두수는 태어난 시(時)가 명궁을 정하기 때문에 시간이 꼭 필요해요</strong> — 시간을 모르면 사주 명식부터 보는 편이 나아요.</p>
+</form>
+
+<section id="result">
+  <h2>내 명반</h2>
+  <p class="note" id="leadLine"></p>
+  <div class="mb" id="mb"></div>
+  <div class="pdetail" id="pd"></div>
+
+  <h2>대한 흐름</h2>
+  <div class="dx" id="dx"></div>
+  <p class="note" id="dxNote">대한(大限)은 10년 단위로 명반을 옮겨 읽는 구간이에요. 칸의 궁이 그 10년의 주제가 돼요.</p>
+
+  <h2>삼방사정</h2>
+  <p class="note" id="sfLine"></p>
+  <div class="tagrow" id="tags"></div>
+
+  <div class="share-row">
+    <button class="share-btn" id="share" type="button">결과 링크 공유</button>
+    <span class="share-msg" id="shareMsg"></span>
+  </div>
+
+  <aside class="cta-box">
+    <p class="cta-lead">여기까지 무료예요</p>
+    <p class="cta-sub">궁별 AI 해석·유년 흐름·사주와 겹쳐 보기까지 — 같은 엔진의 전체 분석은 만세력 앱에서.</p>
+    <a class="cta" id="storeCta" href="https://play.google.com/store/apps/details?id=com.samramanshang.manseryeok&referrer=utm_source%3Dseo%26utm_medium%3Dweb%26utm_campaign%3Djami" rel="nofollow" data-cta="store-jami">만세력 앱에서 전체 분석 보기</a>
+  </aside>
+</section>
+
+<h2>자미두수 명반은 어떻게 읽나요</h2>
+<p>자미두수(紫微斗數)는 태어난 해·달·날·시로 <strong>12궁</strong>을 세우고, 그 위에 <strong>주성(主星) 14개</strong>와 보조성을 배치해 읽는 동양 점성술이에요. 사주가 여덟 글자의 <em>기운</em>을 본다면, 자미두수는 삶의 영역을 열둘로 나눠 <em>어디에 무엇이 놓였는지</em>를 봅니다.</p>
+<p><strong>명궁(命宮)</strong>은 운전석이에요. 여기 들어온 주성이 삶 전체의 기본 색을 정해요. 명궁에 주성이 없는 <strong>공궁(空宮)</strong>도 흔한데, 약하다는 뜻이 아니라 마주 보는 궁(대궁)의 별을 빌려 읽는 자리예요 — 상황에 따라 색이 달라지는 유연함으로 봅니다.</p>
+<p><strong>사화(四化)</strong>는 화록(祿)·화권(權)·화과(科)·화기(忌) 네 가지 변화예요. 같은 별이라도 사화가 붙으면 그 별의 작동 방식이 달라져요. <strong>대한(大限)</strong>은 10년 단위로 명반을 옮겨 읽는 구간이고요.</p>
+<p class="note">이 계산기는 절입시각과 음력 변환을 반영한 정통 배성법으로 명반을 세워요. 앱과 같은 엔진이에요.</p>
+
+<div class="toolrail"><a href="/calc/" data-cta="tool-saju"><span class="tk">사주</span><strong>사주팔자 명식</strong><span class="sub">명식·십신·12운성·신살·대운과 격국·용신까지</span></a><a href="/calc/star/" data-cta="tool-star"><span class="tk">별자리</span><strong>출생 차트</strong><span class="sub">행성 배치·ASC/MC·주요 각과 기질 해석</span></a></div>
+</div></main>
+<footer class="foot">
+  <p><a href="/">만세력</a> — 사주 · 자미두수 · 별자리 · 궁합</p>
+  <p class="fine">명반은 만세력 앱과 같은 엔진(음력 변환·절입시각 반영)으로 세워요. 입력한 생년월일은 서버로 전송되지 않습니다.</p>
+</footer>
+<script>
+
+/* 엔진 지연 로드 — 1.7MB 번들이 첫 페인트를 막지 않게 한다.
+   세 도구가 같은 URL 을 쓰므로 두 번째 쪽부터는 브라우저 캐시에서 즉시 온다. */
+var __engP = null;
+function loadEngine(){
+  if (__engP) return __engP;
+  __engP = new Promise(function(res, rej){
+    var s = document.createElement("script");
+    s.src = "/calc/saju-engine.js";
+    s.onload = function(){ res(window["engine-core"]); };
+    s.onerror = function(){ __engP = null; rej(new Error("engine")); };
+    document.head.appendChild(s);
+  });
+  return __engP;
+}
+/* 유휴 시간에 미리 받아 둔다 — 사용자가 폼을 채우는 동안 대개 도착한다. */
+function warmEngine(){
+  if (window.requestIdleCallback) requestIdleCallback(function(){ loadEngine(); }, {timeout: 2500});
+  else setTimeout(loadEngine, 700);
+}
+function jsRoot(){ return window["engine-core"].com.samramanshang.manseryeok.orrery.js; }
+function SajuCalc(){ return jsRoot().SajuCalc; }
+function ZiweiCalc(){ return jsRoot().ZiweiCalc; }
+function NatalCalc(){ return jsRoot().NatalCalc; }
+/* 계산 버튼 — 엔진이 아직이면 버튼을 잠그고 기다린다. */
+function withEngine(btnId, fn){
+  var btn = document.getElementById(btnId);
+  var label = btn ? btn.textContent : "";
+  if (btn){ btn.disabled = true; btn.textContent = "계산 준비 중…"; }
+  loadEngine().then(function(){
+    if (btn){ btn.disabled = false; btn.textContent = label; }
+    fn();
+  }, function(){
+    if (btn){ btn.disabled = false; btn.textContent = label; }
+    var err = document.getElementById("err");
+    if (err){ err.textContent = "계산 엔진을 불러오지 못했어요. 새로고침해 주세요."; err.style.display = "block"; }
+  });
+}
+function pad(n){ return (n<10?"0":"")+n; }
+function opt(sel, vals, labels){
+  vals.forEach(function(v,i){ var o=document.createElement("option"); o.value=v; o.textContent=labels?labels[i]:v; sel.appendChild(o); });
+}
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
+function fillCities(selId, useLat){
+  return loadEngine().then(function(){
+    var list = JSON.parse(useLat ? NatalCalc().cities() : SajuCalc().cities());
+    var sel = document.getElementById(selId);
+    if (!sel || sel.options.length) return;
+    list.forEach(function(c){
+      var o = document.createElement("option");
+      o.value = useLat ? (c.lat + "," + c.lon) : c.lon;
+      o.textContent = c.name;
+      sel.appendChild(o);
+    });
+  });
+}
+
+
+var STORE = "https://play.google.com/store/apps/details?id=com.samramanshang.manseryeok&referrer=utm_source%3Dseo%26utm_medium%3Dweb%26utm_campaign%3Djami";
+var ZPOS = {"巳":[1,1],"午":[1,2],"未":[1,3],"申":[1,4],"酉":[2,4],"戌":[3,4],
+            "亥":[4,4],"子":[4,3],"丑":[4,2],"寅":[4,1],"卯":[3,1],"辰":[2,1]};
+var HUA_KR = {"化祿":"화록","化權":"화권","化科":"화과","化忌":"화기"};
+var CHART = null, INTERP = null, SELECTED = "命宮";
+
+document.addEventListener("DOMContentLoaded", function(){
+  var mo=document.getElementById("mo"), d=document.getElementById("d"),
+      h=document.getElementById("h"), mi=document.getElementById("mi");
+  opt(mo, Array.from({length:12},function(_,i){return i+1;}));
+  opt(d, Array.from({length:31},function(_,i){return i+1;}));
+  opt(h, Array.from({length:24},function(_,i){return i;}), Array.from({length:24},function(_,i){return pad(i)+"시";}));
+  opt(mi, Array.from({length:60},function(_,i){return i;}), Array.from({length:60},function(_,i){return pad(i)+"분";}));
+  document.getElementById("go").addEventListener("click", run);
+  document.getElementById("share").addEventListener("click", share);
+  warmEngine();
+  fillCities("city", false).then(restoreFromUrl, function(){});
+});
+
+function readForm(){
+  return {
+    y:+document.getElementById("y").value,
+    mo:+document.getElementById("mo").value,
+    d:+document.getElementById("d").value,
+    h:+document.getElementById("h").value,
+    mi:+document.getElementById("mi").value,
+    g:document.getElementById("g").value,
+    lon:+(document.getElementById("city").value || 126.978)
+  };
+}
+function syncUrl(v){
+  var q = "?y="+v.y+"&mo="+v.mo+"&d="+v.d+"&h="+v.h+"&mi="+v.mi+"&g="+v.g+"&lon="+v.lon;
+  try { history.replaceState(null, "", location.pathname + q); } catch(e) {}
+}
+function restoreFromUrl(){
+  var q = new URLSearchParams(location.search);
+  if (!q.get("y")) return;
+  var set=function(id,val){ if(val!==null&&val!=="") document.getElementById(id).value=val; };
+  ["y","mo","d","h","mi","g"].forEach(function(k){ set(k, q.get(k)); });
+  set("city", q.get("lon"));
+  run();
+}
+function storeUrlWith(v){
+  var date = v.y + pad(v.mo) + pad(v.d), time = pad(v.h) + pad(v.mi);
+  return STORE + encodeURIComponent("&b_" + date + "-" + time + "-" + v.g);
+}
+
+function run(){ withEngine("go", runNow); }
+function runNow(){
+  var err = document.getElementById("err"); err.style.display = "none";
+  var v = readForm();
+  if (!v.y || v.y < 1940 || v.y > 2026){
+    err.textContent = "1940~2026년 사이로 입력해 주세요."; err.style.display = "block"; return;
+  }
+  var thisYear = new Date().getFullYear();
+  try {
+    CHART  = JSON.parse(ZiweiCalc().calculate(v.y,v.mo,v.d,v.h,v.mi, v.g === "M", v.lon, thisYear));
+    INTERP = JSON.parse(ZiweiCalc().interpret(v.y,v.mo,v.d,v.h,v.mi, v.g === "M", v.lon, thisYear));
+  } catch(e){
+    err.textContent = "명반을 세우는 중 오류가 났어요. 날짜를 확인해 주세요."; err.style.display = "block"; return;
+  }
+  renderBoard();
+  renderDaxian();
+  renderSanfang(thisYear);
+  selectPalace("命宮");
+  document.getElementById("leadLine").textContent =
+    INTERP.lead + " 오행국은 " + INTERP.wuXingJu.name + "(" + INTERP.wuXingJu.number + "국)이에요.";
+  syncUrl(v);
+  var cta = document.getElementById("storeCta");
+  if (cta) cta.href = storeUrlWith(v);
+  var res = document.getElementById("result");
+  res.style.display = "block";
+  res.scrollIntoView({behavior:"smooth"});
+  if (window.__track) window.__track("calc_done");
+}
+
+function interpOf(name){
+  var list = INTERP.palaces || [];
+  for (var i=0;i<list.length;i++) if (list[i] && list[i].name === name) return list[i];
+  return null;
+}
+function starLabel(s){
+  var br = s.brightness ? '<span class="em">' + esc(s.brightness) + '</span>' : "";
+  /* 명반 관례: 이름 → 밝기(廟旺得利平陷) → 사화 한 글자(祿權科忌) */
+  var hua = s.siHua ? '<span class="sh">' + esc(s.siHua.slice(-1)) + '</span>' : "";
+  return esc(s.name) + br + hua;
+}
+/* 서술격 조사 — 받침이 있으면 '이에요' */
+function eyo(word){
+  var c = word ? word.charCodeAt(word.length - 1) : 0;
+  if (c < 0xAC00 || c > 0xD7A3) return "이에요";
+  return ((c - 0xAC00) % 28) ? "이에요" : "예요";
+}
+
+function renderBoard(){
+  var box = document.getElementById("mb");
+  box.innerHTML = "";
+  (CHART.palaces || []).forEach(function(p){
+    if (!p) return;
+    var ip = interpOf(p.name) || {};
+    var pos = ZPOS[p.zhi];
+    var cell = document.createElement("button");
+    cell.type = "button";
+    cell.className = "cell";
+    cell.setAttribute("aria-pressed", "false");
+    cell.dataset.palace = p.name;
+    if (pos){ cell.style.gridRow = pos[0]; cell.style.gridColumn = pos[1]; }
+    var main = (ip.mainStars || []).map(starLabel).join(" ");
+    var aux  = (ip.auxStars || []).slice(0, 6).map(function(s){ return esc(s.name); }).join(" ");
+    cell.innerHTML =
+      '<span class="pn">' + esc(ip.kr || p.name) + (p.isShenGong ? " · 신궁" : "") +
+        '<span class="gz">' + esc(p.ganZhi) + '</span></span>' +
+      '<span class="ms">' + (main || '<span class="em">공궁</span>') + '</span>' +
+      (aux ? '<span class="as">' + aux + '</span>' : "");
+    cell.addEventListener("click", function(){ selectPalace(p.name); });
+    box.appendChild(cell);
+  });
+  var core = document.createElement("div");
+  core.className = "core";
+  core.innerHTML = "<b>" + esc(INTERP.wuXingJu.name) + " " + INTERP.wuXingJu.number + "국</b>" +
+    "<span>명궁 " + esc(CHART.mingGongZhi) + " · 신궁 " + esc(CHART.shenGongZhi) + "</span>" +
+    "<span>" + esc(CHART.yearGan) + esc(CHART.yearZhi) + "년생 · 칸을 누르면 궁 풀이가 열려요</span>";
+  box.appendChild(core);
+}
+
+function selectPalace(name){
+  SELECTED = name;
+  var cells = document.querySelectorAll(".mb .cell");
+  for (var i=0;i<cells.length;i++)
+    cells[i].setAttribute("aria-pressed", cells[i].dataset.palace === name ? "true" : "false");
+
+  var ip = interpOf(name);
+  var pd = document.getElementById("pd");
+  if (!ip){ pd.innerHTML = ""; return; }
+  var dict = INTERP.starDict || {};
+  var stars = (ip.mainStars || []).concat(ip.auxStars || []);
+  var starHtml = stars.map(function(s){
+    var m = dict[s.name];
+    if (!m) return "";
+    return '<div class="star"><b>' + esc(s.name) + '</b><span class="nick">' + esc(m.nickname) + '</span>' +
+      (s.siHua ? '<span class="nick">' + esc(HUA_KR[s.siHua] || s.siHua) + '</span>' : "") +
+      '<p>' + esc(m.body) + '</p>' +
+      (m.strengths && m.strengths.length ? '<p class="kw">강점 · ' + esc(m.strengths.join(" · ")) + '</p>' : "") +
+      (m.cautions && m.cautions.length ? '<p class="kw">주의 · ' + esc(m.cautions.join(" · ")) + '</p>' : "") +
+      '</div>';
+  }).join("");
+  var actions = (ip.actions || []).map(function(a){ return "<li>" + esc(a) + "</li>"; }).join("");
+  pd.innerHTML =
+    "<h3>" + esc(ip.kr) + (ip.theme ? " — " + esc(ip.theme) : "") + "</h3>" +
+    '<p class="role">' + esc(ip.role) + "</p>" +
+    (ip.hint ? '<p class="role">' + esc(ip.hint) + "</p>" : "") +
+    (ip.isEmpty ? '<p class="role">이 궁은 주성이 없는 공궁이에요. 마주 보는 궁의 별을 빌려 읽어요.</p>' : "") +
+    starHtml +
+    (actions ? "<ul>" + actions + "</ul>" : "");
+}
+
+function renderDaxian(){
+  var box = document.getElementById("dx");
+  box.innerHTML = "";
+  (CHART.daxian || []).forEach(function(x){
+    var ip = interpOf(x.palaceName);
+    var c = document.createElement("div");
+    c.className = "c";
+    c.innerHTML = '<div class="g">' + esc(x.ganZhi) + '</div>' +
+      '<div class="a">' + x.ageStart + "–" + x.ageEnd + '세</div>' +
+      '<div class="s">' + esc(ip ? ip.kr : x.palaceName) + '</div>';
+    box.appendChild(c);
+  });
+}
+
+function renderSanfang(thisYear){
+  var sf = CHART.sanfang || {};
+  var names = (sf.palaceNames || []).map(function(n){
+    var ip = interpOf(n); return ip ? ip.kr : n;
+  });
+  var parts = [];
+  if (names.length) parts.push("명궁이 함께 보는 자리는 " + names.join(" · ") + eyo(names[names.length-1]) + ".");
+  if (sf.luckyCount != null) parts.push("길성 " + sf.luckyCount + " · 살성 " + sf.shaCount + ".");
+  var ln = CHART.liunian;
+  if (ln){
+    var pmap = ln.siHuaPalaces || {};
+    var hua = Object.keys(ln.siHua || {}).map(function(star){
+      var h = ln.siHua[star], pal = interpOf(pmap[h]);
+      return star + " " + (HUA_KR[h] || h) + (pal ? " → " + pal.kr : "");
+    });
+    if (hua.length) parts.push(thisYear + "년 사화는 이렇게 흘러요 — " + hua.join(" · ") + ".");
+  }
+  document.getElementById("sfLine").textContent = parts.join(" ");
+  var tags = document.getElementById("tags");
+  tags.innerHTML = "";
+  ((CHART.structure && CHART.structure.tags) || []).forEach(function(t){
+    var s = document.createElement("span"); s.textContent = t; tags.appendChild(s);
+  });
+}
+
+function share(){
+  var msg = document.getElementById("shareMsg"), url = location.href;
+  if (window.__track) window.__track("cta", "share-jami");
+  if (navigator.share){ navigator.share({title:"내 자미두수 명반 — 무료 만세력", url:url}).catch(function(){}); return; }
+  var done = function(){ msg.textContent = "링크를 복사했어요"; setTimeout(function(){ msg.textContent=""; }, 2600); };
+  if (navigator.clipboard && navigator.clipboard.writeText)
+    navigator.clipboard.writeText(url).then(done, function(){ msg.textContent = url; });
+  else msg.textContent = url;
+}
+
+</script>
+</body>
+</html>
