@@ -120,10 +120,12 @@
   <div class="row">
     <div class="grow"><label for="hs">하우스 시스템</label><select id="hs">
       <option value="P">플라시두스</option><option value="W">홀사인</option></select></div>
+    <div class="grow"><label for="g">성별</label><select id="g">
+      <option value="M">남</option><option value="F">여</option></select></div>
   </div>
   <button class="calc-btn" id="go">내 출생 차트 보기</button>
   <p class="err" id="err"></p>
-  <p class="note" style="margin-top:14px">양력 생일 기준이에요. 시간을 모르면 태양·행성 별자리는 그대로 나오지만 <strong>상승궁(ASC)과 하우스는 나오지 않아요</strong> — 하루 사이에 열두 별자리가 다 지나가기 때문이에요.</p>
+  <p class="note" style="margin-top:14px">양력 생일 기준이에요. 시간을 모르면 태양·행성 별자리는 그대로 나오지만 <strong>상승궁(ASC)과 하우스는 나오지 않아요</strong> — 하루 사이에 열두 별자리가 다 지나가기 때문이에요. 별자리 계산에 성별은 쓰지 않지만, 앱에서 사주·자미두수까지 이어 보려면 필요해요.</p>
 </form>
 
 <section id="result">
@@ -268,19 +270,20 @@ function readForm(){
     h:unk?-1:+document.getElementById("h").value,
     mi:unk?0:+document.getElementById("mi").value,
     lat:+geo[0], lon:+geo[1],
-    hs:document.getElementById("hs").value
+    hs:document.getElementById("hs").value,
+    g:document.getElementById("g").value
   };
 }
 function syncUrl(v){
   var q = "?y="+v.y+"&mo="+v.mo+"&d="+v.d + (v.unk ? "&unk=1" : "&h="+v.h+"&mi="+v.mi)
-        + "&geo="+v.lat+","+v.lon + "&hs="+v.hs;
+        + "&geo="+v.lat+","+v.lon + "&hs="+v.hs + "&g="+v.g;
   try { history.replaceState(null, "", location.pathname + q); } catch(e) {}
 }
 function restoreFromUrl(){
   var q = new URLSearchParams(location.search);
   if (!q.get("y")) return;
   var set=function(id,val){ if(val!==null&&val!=="") document.getElementById(id).value=val; };
-  ["y","mo","d","hs"].forEach(function(k){ set(k, q.get(k)); });
+  ["y","mo","d","hs","g"].forEach(function(k){ set(k, q.get(k)); });
   if (q.get("unk") === "1"){
     document.getElementById("unk").checked = true;
     document.getElementById("h").disabled = true; document.getElementById("mi").disabled = true;
@@ -288,11 +291,13 @@ function restoreFromUrl(){
   set("city", q.get("geo"));
   run();
 }
-/* 별자리는 시(時) 없이도 태양·행성이 나오므로 시간 미상이면 na 로 넘긴다(앱이 같은 규약으로 복원). */
+/* 별자리는 시(時) 없이도 태양·행성이 나오므로 시간 미상이면 na 로 넘긴다(앱이 같은 규약으로 복원).
+   ⚠️ 성별을 M 으로 고정하면 앱이 만드는 첫 프로필의 대운 순역이 여성에게 반대로 잡힌다 —
+      네이탈 계산엔 안 쓰더라도 폼에서 반드시 받아 실어 보낸다. */
 function storeUrlWith(v){
   var date = v.y + pad(v.mo) + pad(v.d);
   var time = v.unk ? "na" : (pad(v.h) + pad(v.mi));
-  return STORE + encodeURIComponent("&b_" + date + "-" + time + "-M");
+  return STORE + encodeURIComponent("&b_" + date + "-" + time + "-" + (v.g === "F" ? "F" : "M"));
 }
 
 function run(){ withEngine("go", runNow); }
