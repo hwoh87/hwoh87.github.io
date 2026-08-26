@@ -25,14 +25,14 @@
   padding:10px 12px;border:1px solid #D8CFBC;border-radius:12px;font-size:16px;background:#FDFCF8;color:#33302B}
 .calc-form .grow{flex:1;min-width:88px}
 .chk{display:flex;align-items:center;gap:7px;font-size:14px;color:#5A4E33;padding:6px 0}
-.chk input{width:18px;height:18px;accent-color:#6E48F2}
-.calc-btn{width:100%;padding:15px;border:0;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;
-  color:#fff;background:linear-gradient(135deg,#8B6BFF,#6E48F2);box-shadow:0 6px 18px rgba(110,72,242,.3)}
+.chk input{width:18px;height:18px;accent-color:#7E6332}
+.calc-btn{width:100%;padding:15px;border:0;border-radius:16px;font-size:16px;font-weight:800;cursor:pointer;
+  color:#0C0A12;background:linear-gradient(180deg,#D6BA75,#C9A85B,#B7984E);box-shadow:0 6px 18px rgba(201,168,91,.3)}
 .calc-btn[disabled]{opacity:.62;cursor:progress}
 .err{color:#B4574B;font-size:14px;margin:8px 0 0;display:none}
 #result{display:none}
 .read-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 8px}
-.read-card{background:#fff;border:1px solid #E8E0D0;border-radius:14px;padding:13px 14px}
+.read-card{background:#fff;border:1px solid #E8E0D0;border-radius:20px;padding:13px 14px}
 .read-card .rk{display:block;font-size:11.5px;font-weight:800;color:#8A7C5F;letter-spacing:.04em}
 .read-card strong{display:block;font-size:19px;font-weight:800;color:#33302B;margin:3px 0 4px}
 .read-card p{margin:0;font-size:12.5px;color:#6B5C3A;line-height:1.55}
@@ -43,13 +43,13 @@
 .bars .bar i{display:block;height:100%;background:var(--el,#8A7C5F);border-radius:999px}
 .bars .pc{width:42px;text-align:right;font-size:12px;color:#8A7C5F;flex:none}
 .share-row{display:flex;align-items:center;gap:10px;margin:16px 0 0;flex-wrap:wrap}
-.share-btn{padding:11px 18px;border:1px solid #D8CFBC;background:#fff;color:#5B43C4;
+.share-btn{padding:11px 18px;border:1px solid #C9A85B;background:#fff;color:#7E6332;
   border-radius:999px;font-size:14px;font-weight:800;cursor:pointer}
 .share-msg{font-size:13px;color:#8A7C5F}
 .toolrail{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:26px 0 0}
-.toolrail a{display:block;background:#fff;border:1px solid #E8E0D0;border-radius:14px;padding:13px 15px;
-  text-decoration:none;color:#33302B}
-.toolrail a:hover{border-color:#C8B990}
+.toolrail a{display:block;background:#fff;border:1px solid #E8E0D0;border-radius:20px;padding:13px 15px;
+  text-decoration:none;color:#1C1B1F}
+.toolrail a:hover{border-color:#C9A85B}
 .toolrail .tk{display:block;font-size:11.5px;font-weight:800;color:#8A7C5F;letter-spacing:.04em}
 .toolrail strong{display:block;font-size:16px;margin:3px 0 3px}
 .toolrail span.sub{display:block;font-size:12.5px;color:#6B5C3A;line-height:1.5}
@@ -58,12 +58,12 @@
   gap:6px;margin:0 0 16px}
 .mb .cell{background:#fff;border:1px solid #E8E0D0;border-radius:12px;padding:8px 8px 7px;
   text-align:left;cursor:pointer;font:inherit;color:inherit;display:flex;flex-direction:column;gap:3px}
-.mb .cell:hover,.mb .cell[aria-pressed=true]{border-color:#6E48F2;box-shadow:0 0 0 2px rgba(110,72,242,.14)}
-.mb .cell .pn{font-size:12px;font-weight:800;color:#5B43C4}
+.mb .cell:hover,.mb .cell[aria-pressed=true]{border-color:#C9A85B;box-shadow:0 0 0 2px rgba(201,168,91,.18)}
+.mb .cell .pn{font-size:12px;font-weight:800;color:#7E6332}
 .mb .cell .gz{font-size:11px;color:#8A7C5F;margin-left:4px;font-weight:600}
 .mb .cell .ms{font-size:14px;font-weight:800;color:#33302B;line-height:1.35}
 .mb .cell .as{font-size:10.5px;color:#8A7C5F;line-height:1.4}
-.mb .cell .sh{font-size:10px;font-weight:800;color:#B4574B}
+.mb .cell .sh{font-size:10px;font-weight:800;color:#B03A2A}
 .mb .cell .em{font-size:11.5px;color:#A79A7C}
 .mb .core{grid-column:2/4;grid-row:2/4;background:#F6F1E4;border:1px solid #E0D6BE;border-radius:14px;
   padding:12px;display:flex;flex-direction:column;justify-content:center;gap:5px;text-align:center}
@@ -84,9 +84,9 @@
   padding:9px 10px;text-align:center}
 .dx .c .g{font-size:16px;font-weight:800}
 .dx .c .a{font-size:11.5px;color:#8A7C5F;margin-top:2px}
-.dx .c .s{font-size:11.5px;color:#5B43C4;margin-top:1px}
+.dx .c .s{font-size:11.5px;color:#46698F;margin-top:1px}
 .tagrow{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
-.tagrow span{font-size:12px;font-weight:700;background:#EFEAFB;color:#5B43C4;border-radius:999px;padding:5px 11px}
+.tagrow span{font-size:12px;font-weight:700;background:#F2E5CA;color:#5A4E33;border-radius:8px;padding:5px 11px}
 @media(max-width:430px){
   .mb{gap:4px;grid-template-rows:repeat(4,minmax(84px,auto))}
   .mb .cell{padding:6px 5px}
@@ -99,8 +99,8 @@
 <header class="topbar">
   <a class="wordmark" href="/">만세력</a>
   <nav>
-    <a href="/calc/">사주</a><a href="/calc/jami/">자미두수</a><a href="/calc/star/">별자리</a>
-    <a href="/ilju/">일주</a><a href="/term/">용어</a>
+    <a href="/calc/">사주</a><a href="/calc/gunghap/">궁합</a><a href="/calc/jami/">자미두수</a>
+    <a href="/calc/star/">별자리</a><a href="/ilju/">일주</a>
   </nav>
 </header>
 <section class="hero">
@@ -152,8 +152,13 @@
   </div>
 
   <aside class="cta-box">
-    <p class="cta-lead">여기까지 무료예요</p>
-    <p class="cta-sub">궁별 AI 해석·유년 흐름·사주와 겹쳐 보기까지 — 같은 엔진의 전체 분석은 만세력 앱에서.</p>
+    <p class="cta-lead">이 명반, 여기서 끝이 아니에요</p>
+    <p class="cta-sub">방금 계산한 생년월일 그대로 이어져요 — 다시 입력할 필요 없어요.</p>
+    <ul class="cta-feats">
+      <li>명반 전체를 AI가 긴 글로 풀어 읽어줘요</li>
+      <li>해마다 바뀌는 유년(流年) 사화 흐름을 이어서 볼 수 있어요</li>
+      <li>사주와 겹쳐 읽는 융합 리포트로 두 체계를 한 번에 봐요</li>
+    </ul>
     <a class="cta" id="storeCta" href="https://play.google.com/store/apps/details?id=com.samramanshang.manseryeok&referrer=utm_source%3Dseo%26utm_medium%3Dweb%26utm_campaign%3Djami" rel="nofollow" data-cta="store-jami">만세력 앱에서 전체 분석 보기</a>
   </aside>
 </section>
@@ -164,11 +169,11 @@
 <p><strong>사화(四化)</strong>는 화록(祿)·화권(權)·화과(科)·화기(忌) 네 가지 변화예요. 같은 별이라도 사화가 붙으면 그 별의 작동 방식이 달라져요. <strong>대한(大限)</strong>은 10년 단위로 명반을 옮겨 읽는 구간이고요.</p>
 <p class="note">이 계산기는 절입시각과 음력 변환을 반영한 정통 배성법으로 명반을 세워요. 앱과 같은 엔진이에요.</p>
 
-<div class="toolrail"><a href="/calc/" data-cta="tool-saju"><span class="tk">사주</span><strong>사주팔자 명식</strong><span class="sub">명식·십신·12운성·신살·대운과 격국·용신까지</span></a><a href="/calc/star/" data-cta="tool-star"><span class="tk">별자리</span><strong>출생 차트</strong><span class="sub">행성 배치·ASC/MC·주요 각과 기질 해석</span></a></div>
+<div class="toolrail"><a href="/calc/" data-cta="tool-saju"><span class="tk">사주</span><strong>사주팔자 명식</strong><span class="sub">명식·십신·12운성·신살·대운과 격국·용신까지</span></a><a href="/calc/gunghap/" data-cta="tool-gunghap"><span class="tk">궁합</span><strong>1:1 궁합</strong><span class="sub">여덟 글자 전체로 보는 두 사람의 결 — 17개 축</span></a><a href="/calc/star/" data-cta="tool-star"><span class="tk">별자리</span><strong>출생 차트</strong><span class="sub">행성 배치·ASC/MC·주요 각과 기질 해석</span></a></div>
 </div></main>
 <footer class="foot">
   <p><a href="/">만세력</a> — 사주 · 자미두수 · 별자리 · 궁합</p>
-  <p class="fine">명반은 만세력 앱과 같은 엔진(음력 변환·절입시각 반영)으로 세워요. 입력한 생년월일은 서버로 전송되지 않습니다.</p>
+  <p class="fine">명반은 만세력 앱과 같은 엔진(음력 변환·절입시각 반영)으로 세워요. 계산은 브라우저 안에서 수행되며 입력값을 저희 서버로 올리지 않습니다. 결과 공유 링크에는 입력한 생년월일이 담깁니다.</p>
 </footer>
 <script>
 
@@ -195,6 +200,7 @@ function jsRoot(){ return window["engine-core"].com.samramanshang.manseryeok.orr
 function SajuCalc(){ return jsRoot().SajuCalc; }
 function ZiweiCalc(){ return jsRoot().ZiweiCalc; }
 function NatalCalc(){ return jsRoot().NatalCalc; }
+function GunghapCalc(){ return jsRoot().GunghapCalc; }
 /* 계산 버튼 — 엔진이 아직이면 버튼을 잠그고 기다린다. */
 function withEngine(btnId, fn){
   var btn = document.getElementById(btnId);

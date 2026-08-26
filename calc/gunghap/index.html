@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>무료 궁합 계산기 — 사주로 보는 1:1 궁합 | 만세력</title>
+<meta name="description" content="두 사람 생년월일만 넣으면 사주 여덟 글자 전체로 궁합을 계산해요. 일간 합충·오행 보완·격국·신살·조후까지 17개 축 — 설치·회원가입 없이 무료." />
+<link rel="canonical" href="https://hwoh87.github.io/calc/gunghap/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="만세력" />
+<meta property="og:title" content="무료 궁합 계산기 — 사주로 보는 1:1 궁합 | 만세력" />
+<meta property="og:description" content="두 사람 생년월일만 넣으면 사주 여덟 글자 전체로 궁합을 계산해요. 일간 합충·오행 보완·격국·신살·조후까지 17개 축 — 설치·회원가입 없이 무료." />
+<meta property="og:url" content="https://hwoh87.github.io/calc/gunghap/" />
+<meta property="og:image" content="https://hwoh87.github.io/og-share.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="stylesheet" href="/assets/seo.css" />
+<script src="/assets/track.js" defer></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "만세력 궁합 계산기", "url": "https://hwoh87.github.io/calc/gunghap/", "applicationCategory": "LifestyleApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "KRW"}, "inLanguage": "ko", "publisher": {"@type": "Organization", "name": "만세력"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "홈", "item": "https://hwoh87.github.io/"}, {"@type": "ListItem", "position": 2, "name": "궁합 계산기"}]}</script>
+<style>
+.calc-form{background:#fff;border:1px solid #E8E0D0;border-radius:20px;padding:20px 18px;margin:0 0 26px}
+.calc-form .row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.calc-form label{font-size:13px;font-weight:700;color:#6B5C3A;display:block;margin-bottom:5px}
+.calc-form select,.calc-form input[type=number]{
+  padding:10px 12px;border:1px solid #D8CFBC;border-radius:12px;font-size:16px;background:#FDFCF8;color:#33302B}
+.calc-form .grow{flex:1;min-width:88px}
+.chk{display:flex;align-items:center;gap:7px;font-size:14px;color:#5A4E33;padding:6px 0}
+.chk input{width:18px;height:18px;accent-color:#7E6332}
+.calc-btn{width:100%;padding:15px;border:0;border-radius:16px;font-size:16px;font-weight:800;cursor:pointer;
+  color:#0C0A12;background:linear-gradient(180deg,#D6BA75,#C9A85B,#B7984E);box-shadow:0 6px 18px rgba(201,168,91,.3)}
+.calc-btn[disabled]{opacity:.62;cursor:progress}
+.err{color:#B4574B;font-size:14px;margin:8px 0 0;display:none}
+#result{display:none}
+.read-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 8px}
+.read-card{background:#fff;border:1px solid #E8E0D0;border-radius:20px;padding:13px 14px}
+.read-card .rk{display:block;font-size:11.5px;font-weight:800;color:#8A7C5F;letter-spacing:.04em}
+.read-card strong{display:block;font-size:19px;font-weight:800;color:#33302B;margin:3px 0 4px}
+.read-card p{margin:0;font-size:12.5px;color:#6B5C3A;line-height:1.55}
+.bars{display:flex;flex-direction:column;gap:6px;margin:0 0 8px}
+.bars .row2{display:flex;align-items:center;gap:9px}
+.bars .nm{width:64px;font-size:13px;font-weight:700;color:#5A4E33;flex:none}
+.bars .bar{flex:1;height:11px;background:#F0E9DB;border-radius:999px;overflow:hidden}
+.bars .bar i{display:block;height:100%;background:var(--el,#8A7C5F);border-radius:999px}
+.bars .pc{width:42px;text-align:right;font-size:12px;color:#8A7C5F;flex:none}
+.share-row{display:flex;align-items:center;gap:10px;margin:16px 0 0;flex-wrap:wrap}
+.share-btn{padding:11px 18px;border:1px solid #C9A85B;background:#fff;color:#7E6332;
+  border-radius:999px;font-size:14px;font-weight:800;cursor:pointer}
+.share-msg{font-size:13px;color:#8A7C5F}
+.toolrail{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:26px 0 0}
+.toolrail a{display:block;background:#fff;border:1px solid #E8E0D0;border-radius:20px;padding:13px 15px;
+  text-decoration:none;color:#1C1B1F}
+.toolrail a:hover{border-color:#C9A85B}
+.toolrail .tk{display:block;font-size:11.5px;font-weight:800;color:#8A7C5F;letter-spacing:.04em}
+.toolrail strong{display:block;font-size:16px;margin:3px 0 3px}
+.toolrail span.sub{display:block;font-size:12.5px;color:#6B5C3A;line-height:1.5}
+
+.pform{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.pform .pcol{background:#FDFCF8;border:1px solid #E8E0D0;border-radius:12px;padding:12px}
+.pform .pt{font-size:13px;font-weight:800;color:#7E6332;margin:0 0 8px}
+.pform .row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.pform label{font-size:12px;font-weight:700;color:#6B5C3A;display:block;margin-bottom:4px}
+.pform select,.pform input[type=number],.pform input[type=text]{
+  width:100%;padding:9px 10px;border:1px solid #D8CFBC;border-radius:12px;font-size:15px;background:#fff;color:#1C1B1F}
+.pform .grow{flex:1;min-width:64px}
+@media(max-width:560px){.pform{grid-template-columns:1fr}}
+.verdict-hero{background:linear-gradient(180deg,#221C3E 0%,#15131D 55%,#08070C 100%);
+  border-radius:20px;border:1px solid rgba(201,168,91,.35);padding:26px 20px;text-align:center;
+  color:#F4F1FF;margin:0 0 18px;position:relative;overflow:hidden}
+.verdict-hero .vk{font-size:11.5px;letter-spacing:.11em;font-weight:700;color:#C9A85B;margin:0 0 12px}
+.score-ring{width:112px;height:112px;border-radius:50%;margin:0 auto 14px;position:relative;
+  background:conic-gradient(#C9A85B calc(var(--sc,0)*1%),rgba(199,207,234,.15) 0)}
+.score-ring::before{content:"";position:absolute;inset:7px;border-radius:50%;background:#15131D}
+.score-ring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:30px;color:#F3D9A0;font-weight:800}
+.score-ring b small{font-size:12px;color:#9FA8CC;font-weight:600;margin-left:2px}
+.verdict-hero .vmain{font-family:"MaruBuri","Noto Serif KR",serif;font-size:21px;font-weight:600;line-height:1.5;margin:0 0 6px}
+.verdict-hero .vsub{font-size:14px;color:#C7CFEA;margin:0}
+.verdict-hero .vconf{font-size:11.5px;color:#9FA8CC;margin:12px 0 0}
+.subs{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:0 0 18px}
+.subs .sc{background:#fff;border:1px solid #E8E0D0;border-radius:20px;padding:12px 14px}
+.subs .sc .sk{display:block;font-size:11.5px;font-weight:800;color:#8A7C5F;letter-spacing:.04em}
+.subs .sc b{display:block;font-size:22px;color:#1C1B1F;margin:2px 0 6px}
+.subs .sc .bar{display:block;height:8px;background:#F0E9DB;border-radius:999px;overflow:hidden}
+.subs .sc .bar i{display:block;height:100%;border-radius:999px;background:var(--sb,#A58757)}
+.nlines{margin:0 0 18px;padding:0;list-style:none}
+.nlines li{background:#fff;border:1px solid #E8E0D0;border-radius:20px;padding:13px 15px;margin:0 0 8px;
+  font-size:14px;line-height:1.7;color:#33302B}
+.nlines li .nl{font-weight:800;color:#7E6332;margin-right:6px}
+.pairkw{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:0 0 18px}
+.pairkw .kw{background:#fff;border:1px solid #E8E0D0;border-radius:20px;padding:12px 14px}
+.pairkw .kw b{display:block;font-size:15px;margin:0 0 3px;color:#1C1B1F}
+.pairkw .kw span{font-size:12.5px;color:#6B5C3A;line-height:1.55}
+.pairkw .kw.caution{border-left:4px solid #9F7743}
+.axline{background:#fff;border:1px solid #E8E0D0;border-radius:20px;padding:13px 15px;margin:0 0 8px}
+.axline .axh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.axline .axname{font-size:12px;font-weight:800;color:#8A7C5F}
+.axline b{font-size:14.5px;color:#1C1B1F}
+.axline .tone{font-size:11px;font-weight:800;border-radius:8px;padding:2px 8px}
+.axline .tone.t길{background:#E7F1E6;color:#3F7154}
+.axline .tone.t중립{background:#F2E5CA;color:#5F5443}
+.axline .tone.t흉{background:#F3E4E1;color:#7E463F}
+.axline p{margin:7px 0 0;font-size:13px;color:#5A4E33;line-height:1.65}
+.flowrow{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;margin:0 0 6px}
+.flowcell{flex:0 0 auto;min-width:104px;background:#fff;border:1px solid #E8E0D0;border-radius:12px;
+  padding:10px 12px;text-align:center}
+.flowcell.locked{position:relative;filter:blur(0);background:#F7F0E1}
+.flowcell.locked .fv{filter:blur(4px);user-select:none}
+.flowcell .fy{font-size:12px;font-weight:800;color:#7E6332}
+.flowcell .fg{font-size:15px;font-weight:800;color:#1C1B1F;margin:2px 0}
+.flowcell .fv{font-size:12px;color:#5A4E33;line-height:1.5}
+.flowcell .lock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:800;color:#7E6332}
+.rulechips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px}
+.rulechips span{font-size:12px;font-weight:700;background:#F2E5CA;color:#5A4E33;border-radius:8px;padding:5px 11px}
+.minorgate{display:none;background:#F3E4E1;border:1px solid #DFC0B8;border-radius:12px;
+  padding:13px 15px;margin:0 0 14px;font-size:14px;color:#7A4B3C}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="wordmark" href="/">만세력</a>
+  <nav>
+    <a href="/calc/">사주</a><a href="/calc/gunghap/">궁합</a><a href="/calc/jami/">자미두수</a>
+    <a href="/calc/star/">별자리</a><a href="/ilju/">일주</a>
+  </nav>
+</header>
+<section class="hero">
+  <div class="hero-inner">
+    <nav class="crumbs" aria-label="위치"><a href="/">홈</a> › <span>궁합 계산기</span></nav>
+    <p class="kicker">무료 궁합</p>
+    <h1>사주 궁합 계산기<small>여덟 글자 전체로 보는 1:1 궁합 · 브라우저에서 바로</small></h1>
+  </div>
+</section>
+<div class="heroband"></div>
+<main class="paper"><div class="paper-inner">
+
+<form class="calc-form" id="f" onsubmit="return false">
+  <div class="pform">
+    <div class="pcol">
+      <p class="pt">나</p>
+      <div class="row">
+        <div class="grow"><label for="ay">년</label><input id="ay" type="number" min="1940" max="2026" value="1995" /></div>
+        <div class="grow"><label for="amo">월</label><select id="amo"></select></div>
+        <div class="grow"><label for="ad">일</label><select id="ad"></select></div>
+      </div>
+      <div class="row">
+        <div class="grow"><label for="ah">시</label><select id="ah"></select></div>
+        <div class="grow"><label for="ami">분</label><select id="ami"></select></div>
+        <div class="grow"><label for="ag">성별</label><select id="ag"><option value="M">남</option><option value="F">여</option></select></div>
+      </div>
+      <label class="chk"><input type="checkbox" id="aunk" /> 시간을 몰라요</label>
+    </div>
+    <div class="pcol">
+      <p class="pt">상대</p>
+      <div class="row">
+        <div class="grow"><label for="by">년</label><input id="by" type="number" min="1940" max="2026" value="1996" /></div>
+        <div class="grow"><label for="bmo">월</label><select id="bmo"></select></div>
+        <div class="grow"><label for="bd">일</label><select id="bd"></select></div>
+      </div>
+      <div class="row">
+        <div class="grow"><label for="bh">시</label><select id="bh"></select></div>
+        <div class="grow"><label for="bmi">분</label><select id="bmi"></select></div>
+        <div class="grow"><label for="bg">성별</label><select id="bg"><option value="M">남</option><option value="F">여</option></select></div>
+      </div>
+      <label class="chk"><input type="checkbox" id="bunk" /> 시간을 몰라요</label>
+    </div>
+  </div>
+  <div class="row" style="display:flex;gap:10px;margin-bottom:14px">
+    <div class="grow" style="flex:1"><label for="kind">관계</label><select id="kind">
+      <option value="COUPLE">연인·부부</option><option value="FRIEND">친구</option>
+      <option value="FAMILY">가족</option><option value="BUSINESS">동업·동료</option></select></div>
+  </div>
+  <p class="minorgate" id="minorGate">미성년자가 포함된 연인·부부 궁합은 제공하지 않아요. 관계를 친구·가족으로 바꾸면 볼 수 있어요.</p>
+  <button class="calc-btn" id="go">우리 궁합 계산하기</button>
+  <p class="err" id="err"></p>
+  <p class="note" style="margin-top:14px">양력 생일 기준이에요. 시간을 모르면 시주(時柱) 관련 풀이만 빼고 계산해요.
+  앱 궁합과 <strong>같은 엔진</strong>이고, 계산은 브라우저 안에서 끝나요 — 입력값을 저희 서버로 올리지 않아요.</p>
+</form>
+
+<section id="result">
+  <div class="verdict-hero">
+    <p class="vk" id="vkind">우리 궁합</p>
+    <div class="score-ring" id="ring"><b><span id="scoreN">—</span><small>점</small></b></div>
+    <p class="vmain" id="vmain"></p>
+    <p class="vsub" id="vsub"></p>
+    <p class="vconf" id="vconf"></p>
+  </div>
+
+  <div class="subs" id="subs"></div>
+
+  <h2>관통 메시지</h2>
+  <ul class="nlines" id="nlines"></ul>
+
+  <div id="pairCard"></div>
+
+  <h2>강점과 조율 포인트</h2>
+  <div class="pairkw" id="pairkw"></div>
+
+  <h2>이 관계를 만드는 결</h2>
+  <p class="note">앱과 같은 엔진이 17개 축으로 계산한 것 중 또렷한 축만 추렸어요.</p>
+  <div id="axes"></div>
+  <div class="rulechips" id="rules"></div>
+
+  <h2>올해, 두 사람의 흐름</h2>
+  <div class="flowrow" id="flow"></div>
+  <p class="note" id="flowNote">내년·내후년 흐름과 위기·전환 시기 예고는 앱에서 이어져요.</p>
+
+  <div class="share-row">
+    <button class="share-btn" id="share" type="button">결과 링크 공유</button>
+    <span class="share-msg" id="shareMsg"></span>
+  </div>
+  <p class="note" style="font-size:12.5px">공유 링크에는 두 사람의 생년월일이 담겨요 — 상대의 동의를 받고 공유해 주세요.</p>
+
+  <aside class="cta-box">
+    <p class="cta-lead">두 사람의 이야기, 여기서 끝이 아니에요</p>
+    <p class="cta-sub">방금 입력한 생년월일 그대로 이어져요 — 다시 입력할 필요 없어요.</p>
+    <ul class="cta-feats">
+      <li>두 사람의 궁합이 앞으로 3년간 해마다 어떻게 흐르는지 연도별로 보여줘요</li>
+      <li>AI가 두 사람의 관계를 긴 글로 깊이 풀어 읽어줘요</li>
+      <li id="ctaFeat3">결혼·전환 시기 추정과 조심할 시기 예고까지 대운으로 짚어줘요</li>
+    </ul>
+    <a class="cta" id="storeCta" href="https://play.google.com/store/apps/details?id=com.samramanshang.manseryeok&referrer=utm_source%3Dseo%26utm_medium%3Dweb%26utm_campaign%3Dgunghap_calc" rel="nofollow" data-cta="store-gunghap">만세력 앱에서 전체 궁합 보기</a>
+  </aside>
+</section>
+
+<h2>이 궁합은 무엇을 보나요</h2>
+<p>흔한 일주 궁합은 태어난 <strong>날의 두 글자</strong>만 봐요. 이 계산기는 만세력 앱과 같은 엔진으로
+<strong>여덟 글자 전체</strong>를 봅니다 — 일간의 합·충, 일지 관계, 오행 보완, 격국 호응, 신살 교차,
+조후(한열) 균형, 납음오행, 두 사람의 대운 동조까지 17개 축이에요.</p>
+<p>점수는 참고일 뿐, 명리에서 충(沖)과 형(刑)은 <strong>변화를 만드는 힘</strong>이기도 해요.
+낮은 점수가 나쁜 인연이라는 뜻이 아니라, 서로의 방식을 알고 시작하라는 뜻으로 읽어 주세요.</p>
+<p class="note">시간을 모르면 시주(자녀궁·시주 합충) 풀이만 빠지고 나머지는 그대로 계산돼요.
+분석 신뢰도에 함께 표시됩니다.</p>
+
+<div class="toolrail"><a href="/calc/" data-cta="tool-saju"><span class="tk">사주</span><strong>사주팔자 명식</strong><span class="sub">명식·십신·12운성·신살·대운과 격국·용신까지</span></a><a href="/calc/jami/" data-cta="tool-jami"><span class="tk">자미두수</span><strong>자미두수 명반</strong><span class="sub">12궁 주성·사화·대한 — 궁마다 풀이와 행동 처방</span></a><a href="/calc/star/" data-cta="tool-star"><span class="tk">별자리</span><strong>출생 차트</strong><span class="sub">행성 배치·ASC/MC·주요 각과 기질 해석</span></a></div>
+</div></main>
+<footer class="foot">
+  <p><a href="/">만세력</a> — 사주 · 자미두수 · 별자리 · 궁합</p>
+  <p class="fine">이 궁합은 만세력 앱 궁합과 같은 엔진으로 여덟 글자 전체를 계산해요. 계산은 브라우저 안에서 수행되며 입력값을 저희 서버로 올리지 않습니다. 결과 공유 링크에는 입력한 생년월일이 담깁니다.</p>
+</footer>
+<script>
+
+/* 엔진 지연 로드 — 1.7MB 번들이 첫 페인트를 막지 않게 한다.
+   세 도구가 같은 URL 을 쓰므로 두 번째 쪽부터는 브라우저 캐시에서 즉시 온다. */
+var __engP = null;
+function loadEngine(){
+  if (__engP) return __engP;
+  __engP = new Promise(function(res, rej){
+    var s = document.createElement("script");
+    s.src = "/calc/saju-engine.js";
+    s.onload = function(){ res(window["engine-core"]); };
+    s.onerror = function(){ __engP = null; rej(new Error("engine")); };
+    document.head.appendChild(s);
+  });
+  return __engP;
+}
+/* 유휴 시간에 미리 받아 둔다 — 사용자가 폼을 채우는 동안 대개 도착한다. */
+function warmEngine(){
+  if (window.requestIdleCallback) requestIdleCallback(function(){ loadEngine(); }, {timeout: 2500});
+  else setTimeout(loadEngine, 700);
+}
+function jsRoot(){ return window["engine-core"].com.samramanshang.manseryeok.orrery.js; }
+function SajuCalc(){ return jsRoot().SajuCalc; }
+function ZiweiCalc(){ return jsRoot().ZiweiCalc; }
+function NatalCalc(){ return jsRoot().NatalCalc; }
+function GunghapCalc(){ return jsRoot().GunghapCalc; }
+/* 계산 버튼 — 엔진이 아직이면 버튼을 잠그고 기다린다. */
+function withEngine(btnId, fn){
+  var btn = document.getElementById(btnId);
+  var label = btn ? btn.textContent : "";
+  if (btn){ btn.disabled = true; btn.textContent = "계산 준비 중…"; }
+  loadEngine().then(function(){
+    if (btn){ btn.disabled = false; btn.textContent = label; }
+    fn();
+  }, function(){
+    if (btn){ btn.disabled = false; btn.textContent = label; }
+    var err = document.getElementById("err");
+    if (err){ err.textContent = "계산 엔진을 불러오지 못했어요. 새로고침해 주세요."; err.style.display = "block"; }
+  });
+}
+function pad(n){ return (n<10?"0":"")+n; }
+function opt(sel, vals, labels){
+  vals.forEach(function(v,i){ var o=document.createElement("option"); o.value=v; o.textContent=labels?labels[i]:v; sel.appendChild(o); });
+}
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
+function fillCities(selId, useLat){
+  return loadEngine().then(function(){
+    var list = JSON.parse(useLat ? NatalCalc().cities() : SajuCalc().cities());
+    var sel = document.getElementById(selId);
+    if (!sel || sel.options.length) return;
+    list.forEach(function(c){
+      var o = document.createElement("option");
+      o.value = useLat ? (c.lat + "," + c.lon) : c.lon;
+      o.textContent = c.name;
+      sel.appendChild(o);
+    });
+  });
+}
+
+
+var STORE = "https://play.google.com/store/apps/details?id=com.samramanshang.manseryeok&referrer=utm_source%3Dseo%26utm_medium%3Dweb%26utm_campaign%3Dgunghap_calc";
+/* 공유 링크로 복원된 값인지 추적 — 수신자는 대개 '상대'나 제3자라서, 폼을 직접 손대지 않았다면
+   설치 인계(b_)에 공유자(A)의 생년월일을 실으면 안 된다(수신자 프로필이 남의 생일로 생성됨). */
+var RESTORED = false, USER_EDITED = false;
+var SUB_META = [
+  ["bond", "결속력", "#5E8966"], ["stability", "안정성", "#46698F"],
+  ["growth", "성장성", "#9F7743"], ["consumption", "소모도", "#9C5D58"]];
+var FLOW_KR = {BOTH_RISING:"함께 오르는 해", A_LEADS:"내가 끌어주는 해", B_LEADS:"상대가 끌어주는 해",
+  BOTH_RESTING:"함께 쉬어가는 해", CALM:"잔잔한 해", MIXED:"결이 갈리는 해"};
+
+/* A/B 역할 토큰 → 이름 치환 + 직후 조사 받침 보정 — 앱 personalizeRoleTokens 와 같은 규약.
+   (lookbehind 미지원 브라우저를 위해 앞 문자를 캡처해 보존한다) */
+function batchim(name){
+  var c = name.charCodeAt(name.length - 1);
+  if (c < 0xAC00 || c > 0xD7A3) return true;      // 한글 아님 — 받침형
+  return ((c - 0xAC00) % 28) !== 0;
+}
+function josa(name, a, b){ return name + (batchim(name) ? a : b); }
+function personalize(text, nameA, nameB){
+  return text.replace(/(^|[^A-Za-z])([AB])(은|는|이|가|을|를|와|과|으로|로)?(?![A-Za-z])/g,
+    function(_, pre, tok, j){
+      var nm = tok === "A" ? nameA : nameB;
+      var out;
+      switch (j) {
+        case "은": case "는": out = josa(nm, "은", "는"); break;
+        case "이": case "가":
+          /* 1인칭 보충형 — '나'+가 는 '나가'가 아니라 '내가'다(받침 규칙 밖의 예외) */
+          out = nm === "나" ? "내가" : josa(nm, "이", "가"); break;
+        case "을": case "를": out = josa(nm, "을", "를"); break;
+        case "와": case "과": out = josa(nm, "과", "와"); break;
+        case "으로": case "로": out = josa(nm, "으로", "로"); break;
+        default: out = nm + (j || "");
+      }
+      return pre + out;
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+  ["a","b"].forEach(function(p){
+    opt(document.getElementById(p+"mo"), Array.from({length:12},function(_,i){return i+1;}));
+    opt(document.getElementById(p+"d"), Array.from({length:31},function(_,i){return i+1;}));
+    opt(document.getElementById(p+"h"), Array.from({length:24},function(_,i){return i;}),
+        Array.from({length:24},function(_,i){return pad(i)+"시";}));
+    opt(document.getElementById(p+"mi"), Array.from({length:60},function(_,i){return i;}),
+        Array.from({length:60},function(_,i){return pad(i)+"분";}));
+    document.getElementById(p+"unk").addEventListener("change", function(){
+      document.getElementById(p+"h").disabled = this.checked;
+      document.getElementById(p+"mi").disabled = this.checked;
+    });
+  });
+  document.getElementById("go").addEventListener("click", run);
+  document.getElementById("share").addEventListener("click", share);
+  document.getElementById("f").addEventListener("input", function(){ USER_EDITED = true; });
+  document.getElementById("f").addEventListener("change", function(){ USER_EDITED = true; });
+  warmEngine();
+  restoreFromUrl();
+});
+
+function readPerson(p){
+  var unk = document.getElementById(p+"unk").checked;
+  return {
+    y:+document.getElementById(p+"y").value,
+    mo:+document.getElementById(p+"mo").value,
+    d:+document.getElementById(p+"d").value,
+    unk:unk,
+    h:unk?-1:+document.getElementById(p+"h").value,
+    mi:unk?0:+document.getElementById(p+"mi").value,
+    g:document.getElementById(p+"g").value
+  };
+}
+function readForm(){
+  return { a:readPerson("a"), b:readPerson("b"), kind:document.getElementById("kind").value };
+}
+function personQ(pfx, v){
+  return "&"+pfx+"y="+v.y+"&"+pfx+"mo="+v.mo+"&"+pfx+"d="+v.d+"&"+pfx+"g="+v.g
+       + (v.unk ? "&"+pfx+"unk=1" : "&"+pfx+"h="+v.h+"&"+pfx+"mi="+v.mi);
+}
+function syncUrl(f){
+  var q = "?kind="+f.kind + personQ("a", f.a) + personQ("b", f.b);
+  try { history.replaceState(null, "", location.pathname + q); } catch(e) {}
+}
+function restorePerson(q, pfx){
+  /* 외부에서 손으로 만든 링크가 "05" 처럼 패딩돼 와도 select 옵션("5")과 매칭되게 정규화 */
+  var set = function(id, val){
+    if (val === null || val === "") return;
+    if (/^\d+$/.test(val)) val = String(parseInt(val, 10));
+    document.getElementById(id).value = val;
+  };
+  if (!q.get(pfx+"y")) return false;
+  set(pfx+"y", q.get(pfx+"y")); set(pfx+"mo", q.get(pfx+"mo")); set(pfx+"d", q.get(pfx+"d"));
+  set(pfx+"g", q.get(pfx+"g"));
+  if (q.get(pfx+"unk") === "1"){
+    document.getElementById(pfx+"unk").checked = true;
+    document.getElementById(pfx+"h").disabled = true; document.getElementById(pfx+"mi").disabled = true;
+  } else { set(pfx+"h", q.get(pfx+"h")); set(pfx+"mi", q.get(pfx+"mi")); }
+  return true;
+}
+function restoreFromUrl(){
+  var q = new URLSearchParams(location.search);
+  if (q.get("kind")) document.getElementById("kind").value = q.get("kind");
+  var okA = restorePerson(q, "a"), okB = restorePerson(q, "b");
+  if (okA && okB){ RESTORED = true; run(); }
+}
+/* 설치 후 앱이 '나'의 프로필을 만들도록 A 의 생년월일을 싣는다.
+   단, 공유 링크로 복원만 된 상태(수신자)라면 A 는 남의 생일이므로 b_ 를 생략한다(utm 만 유지). */
+function storeUrlWith(f){
+  if (RESTORED && !USER_EDITED) return STORE;
+  var v = f.a;
+  var date = v.y + pad(v.mo) + pad(v.d);
+  var time = v.unk ? "na" : (pad(v.h) + pad(v.mi));
+  return STORE + encodeURIComponent("&b_" + date + "-" + time + "-" + (v.g === "F" ? "F" : "M"));
+}
+
+function run(){ withEngine("go", runNow); }
+function runNow(){
+  var err = document.getElementById("err"); err.style.display = "none";
+  var gate = document.getElementById("minorGate"); gate.style.display = "none";
+  /* 차단·오류 분기에서 직전 결과가 게이트 문구 아래 남으면 정책 문구와 화면이 모순된다 — 먼저 숨긴다. */
+  var hideResult = function(){ document.getElementById("result").style.display = "none"; };
+  var f = readForm();
+  if (!f.a.y || f.a.y < 1940 || f.a.y > 2026 || !f.b.y || f.b.y < 1940 || f.b.y > 2026){
+    hideResult(); err.textContent = "1940~2026년 사이로 입력해 주세요."; err.style.display = "block"; return;
+  }
+  var thisYear = new Date().getFullYear();
+  /* 앱과 같은 정책: 미성년 포함 연인·부부 궁합은 제공하지 않는다(연나이 기준). */
+  if (f.kind === "COUPLE" && (thisYear - f.a.y < 19 || thisYear - f.b.y < 19)){
+    hideResult(); gate.style.display = "block"; return;
+  }
+  var r;
+  try {
+    r = JSON.parse(GunghapCalc().analyze(
+      f.a.y, f.a.mo, f.a.d, f.a.h, f.a.mi, f.a.g,
+      f.b.y, f.b.mo, f.b.d, f.b.h, f.b.mi, f.b.g,
+      f.kind, thisYear));
+  } catch(e){
+    hideResult(); err.textContent = "계산 중 오류가 났어요. 날짜를 확인해 주세요."; err.style.display = "block"; return;
+  }
+  render(r, f);
+  syncUrl(f);
+  var cta = document.getElementById("storeCta");
+  if (cta) cta.href = storeUrlWith(f);
+  var res = document.getElementById("result");
+  res.style.display = "block";
+  res.scrollIntoView({behavior:"smooth"});
+  if (window.__track) window.__track("calc_done");
+}
+
+var KIND_KR = {COUPLE:"연인·부부", FRIEND:"친구", FAMILY:"가족", BUSINESS:"동업·동료"};
+function render(r, f){
+  var NA = "나", NB = "상대";
+  var P = function(t){ return personalize(t, NA, NB); };
+
+  document.getElementById("vkind").textContent =
+    r.iljuA.kr + "일주 × " + r.iljuB.kr + "일주 · " + (KIND_KR[f.kind] || "궁합");
+  /* 앱 ScoreDisplay 정책: score<10 은 숫자가 '고장'처럼 읽혀 라벨로 대체(게이지 컴팩트 표기) */
+  var ringB = document.querySelector("#ring b");
+  if (r.totalScore < 10) {
+    ringB.innerHTML = '<span style="font-size:15px;line-height:1.3">측정<br />어려움</span>';
+  } else {
+    ringB.innerHTML = '<span id="scoreN">' + r.totalScore + '</span><small>점</small>';
+  }
+  document.getElementById("ring").style.setProperty("--sc", Math.max(r.totalScore, 4));
+  /* verdict 는 가공 금지 계약 — 표시 분할만 " — " 로 한다(앱 CompatibilitySheet 동일) */
+  var vparts = r.verdict.split(" — ");
+  document.getElementById("vmain").textContent = vparts[0];
+  document.getElementById("vsub").textContent = P(vparts.slice(1).join(" — ") || "");
+  document.getElementById("vconf").textContent = "분석 신뢰도 " + r.confidence + "%" +
+    ((r.unknownTimeA || r.unknownTimeB) ? " · 시간 미상이 포함돼 시주 풀이는 뺐어요" : "");
+
+  var subs = document.getElementById("subs"); subs.innerHTML = "";
+  SUB_META.forEach(function(m){
+    var v = r.subScores[m[0]];
+    var el = document.createElement("div"); el.className = "sc";
+    el.style.setProperty("--sb", m[2]);
+    el.innerHTML = '<span class="sk">' + m[1] + '</span><b>' + v + '</b>' +
+      '<span class="bar"><i style="width:' + v + '%"></i></span>';
+    subs.appendChild(el);
+  });
+
+  var nl = document.getElementById("nlines"); nl.innerHTML = "";
+  (r.narrative || []).forEach(function(n){
+    var li = document.createElement("li");
+    li.innerHTML = '<span class="nl">' + esc(n.icon) + " " + esc(n.label) + '</span>' + esc(P(n.text));
+    nl.appendChild(li);
+  });
+
+  var pc = document.getElementById("pairCard");
+  pc.innerHTML = r.iljuPair
+    ? '<h2>일주 특수 관계</h2><div class="axline"><div class="axh">' +
+      '<span class="tone t' + esc(r.iljuPair.tone) + '">' + esc(r.iljuPair.tone) + '</span>' +
+      '<b>' + esc(P(r.iljuPair.headline)) + '</b></div>' +
+      '<p>' + esc(P(r.iljuPair.detail)) + '</p>' +
+      (r.iljuPair.advice ? '<p>' + esc(P(r.iljuPair.advice)) + '</p>' : "") + '</div>'
+    : "";
+
+  var kw = document.getElementById("pairkw"); kw.innerHTML = "";
+  (r.strengths || []).forEach(function(k){
+    var el = document.createElement("div"); el.className = "kw";
+    el.innerHTML = "<b>" + esc(k.emoji) + " " + esc(k.label) + "</b><span>" + esc(P(k.sub)) + "</span>";
+    kw.appendChild(el);
+  });
+  (r.cautions || []).forEach(function(k){
+    var el = document.createElement("div"); el.className = "kw caution";
+    el.innerHTML = "<b>" + esc(k.emoji) + " " + esc(k.label) + "</b><span>" + esc(P(k.sub)) + "</span>";
+    kw.appendChild(el);
+  });
+
+  /* 축: 길 상위 3 + 흉 전부(최대 2) — 또렷한 것만 */
+  var ax = document.getElementById("axes"); ax.innerHTML = "";
+  var good = (r.axes || []).filter(function(a){ return a.tone === "길"; })
+    .sort(function(x, y){ return y.score - x.score; }).slice(0, 3);
+  var bad = (r.axes || []).filter(function(a){ return a.tone === "흉"; })
+    .sort(function(x, y){ return x.score - y.score; }).slice(0, 2);
+  good.concat(bad).forEach(function(a){
+    var el = document.createElement("div"); el.className = "axline";
+    el.innerHTML = '<div class="axh"><span class="axname">' + esc(a.name) + '</span>' +
+      '<span class="tone t' + esc(a.tone) + '">' + esc(a.tone) + '</span>' +
+      '<b>' + esc(P(a.headline)) + '</b></div><p>' + esc(P(a.detail)) + '</p>';
+    ax.appendChild(el);
+  });
+
+  /* 결혼·전환 시기(timingForecast)는 엔진이 연인·부부 전용으로만 산출한다 — 다른 관계엔 실재 기능으로 교체 */
+  var feat3 = document.getElementById("ctaFeat3");
+  if (feat3) feat3.textContent = f.kind === "COUPLE"
+    ? "결혼·전환 시기 추정과 조심할 시기 예고까지 대운으로 짚어줘요"
+    : "셋 이상 모임·팀 전체의 궁합도 한 번에 분석할 수 있어요";
+  var fnote = document.getElementById("flowNote");
+  if (fnote) fnote.textContent = f.kind === "COUPLE"
+    ? "내년·내후년 흐름과 위기·전환 시기 예고는 앱에서 이어져요."
+    : "내년·내후년 흐름은 앱에서 이어져요.";
+
+  var rc = document.getElementById("rules"); rc.innerHTML = "";
+  (r.activatedRules || []).slice(0, 6).forEach(function(rule){
+    var sp = document.createElement("span"); sp.textContent = rule.name; rc.appendChild(sp);
+  });
+
+  /* 올해 흐름 1칸만 공개 — 내년부터는 앱 티저(블러 잠금) */
+  var fl = document.getElementById("flow"); fl.innerHTML = "";
+  (r.yearlyFlow || []).forEach(function(y, i){
+    var el = document.createElement("div");
+    el.className = "flowcell" + (i > 0 ? " locked" : "");
+    var body = '<div class="fy">' + esc(y.label) + " · " + y.year + '</div>' +
+      '<div class="fg">' + esc(y.ganzi) + '</div>' +
+      '<div class="fv">' + esc(FLOW_KR[y.pairFlow] || "") +
+      ((y.daewoonShiftA || y.daewoonShiftB) ? "<br />대운이 바뀌는 해" : "") + '</div>';
+    el.innerHTML = i > 0 ? body + '<span class="lock">앱에서 보기</span>' : body;
+    fl.appendChild(el);
+  });
+}
+
+function share(){
+  var msg = document.getElementById("shareMsg"), url = location.href;
+  if (window.__track) window.__track("cta", "share-gunghap");
+  if (navigator.share){ navigator.share({title:"우리 궁합 — 무료 만세력", url:url}).catch(function(){}); return; }
+  var done = function(){ msg.textContent = "링크를 복사했어요"; setTimeout(function(){ msg.textContent=""; }, 2600); };
+  if (navigator.clipboard && navigator.clipboard.writeText)
+    navigator.clipboard.writeText(url).then(done, function(){ msg.textContent = url; });
+  else msg.textContent = url;
+}
+
+</script>
+</body>
+</html>

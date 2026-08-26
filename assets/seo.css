@@ -1,54 +1,78 @@
-/* 만세력 pSEO — 앱의 2레이어 디자인 언어(딥네이비 코스믹 + 웜 페이퍼)를 웹으로 */
+/* 만세력 pSEO — 앱의 2레이어 디자인 언어(딥네이비 코스믹 + 웜 페이퍼)를 웹으로.
+   색은 앱 토큰 정본(AppTone/WuxingTokens)에서 그대로 가져온다 — 근사치 금지.
+   보라는 앱에서 AI 전용이라 웹 크롬에 쓰지 않는다(크롬=골드·네이비). */
+/* 한자 세리프 — 마루부리에 한자 글리프가 없어 h2·.hanja 의 한자는 이 폰트가 받는다.
+   구글 폰트는 KR 폰트를 유니코드 슬라이스로 쪼개 서빙해 실제로 쓰인 글자 조각만 내려온다. */
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600&display=swap");
+@font-face{font-family:"MaruBuri";font-weight:400;font-display:swap;
+  src:url(https://hangeul.pstatic.net/hangeul_static/webfont/MaruBuri/MaruBuri-Regular.woff2) format("woff2")}
+@font-face{font-family:"MaruBuri";font-weight:600;font-display:swap;
+  src:url(https://hangeul.pstatic.net/hangeul_static/webfont/MaruBuri/MaruBuri-SemiBold.woff2) format("woff2")}
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:#FAF7F0;color:#33302B;
+body{margin:0;background:#FAF5EB;color:#1C1B1F;
   font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;line-height:1.7}
-a{color:#5B43C4;text-decoration:none}
+a{color:#46698F;text-decoration:none}
 a:hover{text-decoration:underline}
 
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;
-  background:#0A0820;padding:10px 18px;position:sticky;top:0;z-index:5;flex-wrap:wrap}
-.wordmark{color:#EDEBF5;font-weight:800;letter-spacing:.02em;font-size:15px}
+  background:#0C0A12;padding:10px 18px;position:sticky;top:0;z-index:5;flex-wrap:wrap}
+.wordmark{color:#F4F1FF;font-weight:800;letter-spacing:.02em;font-size:15px}
 .topbar nav{display:flex;gap:14px}
-.topbar nav a{color:#B8B2D6;font-size:14px}
-.topbar nav a:hover{color:#EDEBF5;text-decoration:none}
+.topbar nav a{color:#9FA8CC;font-size:14px}
+.topbar nav a:hover{color:#F4F1FF;text-decoration:none}
 
-.hero{position:relative;overflow:hidden;text-align:center;color:#EDEBF5;
-  background:radial-gradient(ellipse 120% 70% at 50% -10%,#2A2158 0%,#171040 45%,#0A0820 100%);
+.hero{position:relative;overflow:hidden;text-align:center;color:#F4F1FF;
+  background:radial-gradient(ellipse 120% 70% at 50% -10%,#221C3E 0%,#15131D 45%,#08070C 100%);
   padding:34px 20px 40px}
 .hero::before{content:"";position:absolute;left:50%;top:-90px;transform:translateX(-50%);
   width:420px;height:260px;border-radius:50%;
-  background:radial-gradient(closest-side,rgba(124,92,255,.28),transparent 70%);pointer-events:none}
+  background:radial-gradient(closest-side,rgba(59,46,115,.38),transparent 70%);pointer-events:none}
+.stars{position:absolute;inset:0;pointer-events:none;opacity:.7;
+  background-image:
+    radial-gradient(1px 1px at 12% 28%,#DCE6FF 50%,transparent 51%),
+    radial-gradient(1px 1px at 78% 18%,#DCE6FF 50%,transparent 51%),
+    radial-gradient(1px 1px at 32% 72%,#DCE6FF 50%,transparent 51%),
+    radial-gradient(1px 1px at 64% 58%,#DCE6FF 50%,transparent 51%),
+    radial-gradient(1px 1px at 90% 66%,#DCE6FF 50%,transparent 51%),
+    radial-gradient(1px 1px at 45% 12%,#DCE6FF 50%,transparent 51%),
+    radial-gradient(1.5px 1.5px at 22% 52%,#F3D9A0 50%,transparent 51%),
+    radial-gradient(1.5px 1.5px at 84% 40%,#F3D9A0 50%,transparent 51%),
+    radial-gradient(1.5px 1.5px at 56% 84%,#F3D9A0 50%,transparent 51%);
+  animation:twinkle 7.2s ease-in-out infinite alternate}
+@keyframes twinkle{from{opacity:.5}to{opacity:.9}}
+@media (prefers-reduced-motion:reduce){.stars{animation:none}}
 .hero-inner{position:relative;max-width:760px;margin:0 auto}
-.crumbs{font-size:12px;color:#8F88B8;margin-bottom:14px}
-.crumbs a{color:#8F88B8}
-.kicker{font-size:12px;letter-spacing:.06em;color:#D9C58A;font-weight:700;margin:0 0 8px}
-.hero h1{font-size:27px;font-weight:800;margin:0;line-height:1.35;letter-spacing:-.01em}
-.hero h1 .hanja{color:#C9B2FF;font-weight:700}
-.hero h1 small{display:block;font-size:15px;font-weight:600;color:#C4BEE0;margin-top:10px;letter-spacing:0}
+.crumbs{font-size:12px;color:#9FA8CC;margin-bottom:14px}
+.crumbs a{color:#9FA8CC}
+.kicker{font-size:12px;letter-spacing:.11em;color:#C9A85B;font-weight:700;margin:0 0 8px}
+.hero h1{font-family:"MaruBuri","Noto Serif KR",serif;font-size:27px;font-weight:600;margin:0;line-height:1.45;letter-spacing:-.01em}
+.hero h1 .hanja{font-family:"Noto Serif KR",serif;color:#FFF6E8;font-weight:600}
+.hero h1 small{font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  display:block;font-size:15px;font-weight:600;color:#C7CFEA;margin-top:10px;letter-spacing:0}
 .badges{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:18px}
-.badge{font-size:12.5px;padding:5px 11px;border-radius:999px;
-  border:1px solid rgba(201,178,255,.34);color:#DAD3F5;background:rgba(124,92,255,.13)}
-.badge.gold{border-color:rgba(217,197,138,.5);color:#F0E2B8;background:rgba(217,197,138,.12)}
+.badge{font-size:12.5px;padding:5px 11px;border-radius:8px;
+  border:1px solid rgba(199,207,234,.30);color:#C7CFEA;background:rgba(199,207,234,.08)}
+.badge.gold{border-color:rgba(243,217,160,.45);color:#F3D9A0;background:rgba(201,168,91,.14)}
 .badge a{color:inherit}
-.heroband{height:18px;background:linear-gradient(#0A0820,rgba(250,247,240,0));margin-bottom:-18px;position:relative;z-index:1}
+.heroband{height:18px;background:linear-gradient(#08070C,rgba(250,245,235,0));margin-bottom:-18px;position:relative;z-index:1}
 
 .paper{padding:26px 20px 60px}
 .paper-inner{max-width:760px;margin:0 auto}
-h2{font-size:19px;margin:34px 0 12px;color:#7A5E1E;font-weight:800;
-  padding-bottom:8px;border-bottom:1px solid rgba(122,94,30,.22)}
+h2{font-family:"MaruBuri","Noto Serif KR",serif;font-size:19px;margin:34px 0 12px;color:#7E6332;font-weight:600;
+  padding-bottom:8px;border-bottom:1px solid rgba(126,99,50,.25)}
 h2:first-child{margin-top:6px}
 h3{font-size:16px;margin:22px 0 8px;color:#4A3E22;font-weight:700}
 p{margin:0 0 14px}
 .lead{font-size:17px}
 
 .chips{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 16px;padding:0;list-style:none}
-.chips li{font-size:13.5px;padding:5px 12px;border-radius:999px;background:#EFE9DC;color:#5A4E33}
-.chips.warn li{background:#F6E7E2;color:#7A4B3C}
+.chips li{font-size:13.5px;padding:5px 12px;border-radius:8px;background:#F2E5CA;color:#5A4E33}
+.chips.warn li{background:#F3E4E1;color:#7A4B3C}
 
 .factgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 18px;
   padding:0;list-style:none}
-.factgrid div{background:#fff;border:1px solid #E8E0D0;border-radius:14px;padding:12px 14px}
+.factgrid div{background:#fff;border:1px solid #E8E0D0;border-radius:20px;padding:12px 14px}
 .factgrid dt{font-size:12px;color:#8A7C5F;font-weight:700;margin-bottom:3px}
 .factgrid dd{margin:0;font-size:15.5px;font-weight:700;color:#33302B}
 .factgrid dd .sub{display:block;font-size:12.5px;font-weight:500;color:#7A6E56;margin-top:2px}
@@ -56,31 +80,31 @@ p{margin:0 0 14px}
 .bullets{margin:0 0 16px;padding-left:20px}
 .bullets li{margin-bottom:6px}
 .tbl{width:100%;border-collapse:collapse;margin:0 0 18px;background:#fff;
-  border:1px solid #E8E0D0;border-radius:12px;overflow:hidden;font-size:15px}
+  border:1px solid #E8E0D0;border-radius:20px;overflow:hidden;font-size:15px}
 .tbl th,.tbl td{padding:9px 12px;text-align:left;border-bottom:1px solid #EFE7D8}
 .tbl th{background:#F3EDE0;color:#6B5C3A;font-size:13px;font-weight:700}
 .tbl tr:last-child td{border-bottom:none}
 
-.note{background:#fff;border:1px solid #E8E0D0;border-left:3px solid #C9AE63;
+.note{background:#fff;border:1px solid #E8E0D0;border-left:3px solid #C9A85B;
   border-radius:12px;padding:13px 15px;margin:0 0 18px;font-size:14.5px;color:#5A5142}
 
 .linkgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px;
   margin:0 0 18px;padding:0;list-style:none}
 .linkgrid a{display:block;background:#fff;border:1px solid #E8E0D0;border-radius:12px;
   padding:11px 12px;font-size:14.5px;font-weight:600;color:#33302B;text-align:center}
-.linkgrid a:hover{border-color:#B9A3F0;text-decoration:none}
+.linkgrid a:hover{border-color:#C9A85B;text-decoration:none}
 .linkgrid a .sub{display:block;font-size:12px;font-weight:500;color:#8A7C5F;margin-top:2px}
 .linkgrid.tools{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
 .linkgrid.tools a{text-align:left;padding:14px 15px;font-size:16px}
 
 /* 연예인 명식표 · 오행 바 (build_celeb_site.py 가 쓴다) */
 .myeongsik{width:100%;min-width:340px;border-collapse:collapse;background:#fff;
-  border:1px solid #E8E0D0;border-radius:14px;overflow:hidden;text-align:center;font-size:14px}
+  border:1px solid #E8E0D0;border-radius:20px;overflow:hidden;text-align:center;font-size:14px}
 .myeongsik th{background:#F3EDE0;color:#6B5C3A;font-size:12.5px;padding:8px 4px;font-weight:700}
 .myeongsik td{padding:8px 4px;border-top:1px solid #F0E9DB}
 .myeongsik .hj{font-size:26px;font-weight:800;line-height:1.2;color:#33302B}
 .myeongsik .kr{font-size:11.5px;color:#8A7C5F}
-.myeongsik td.ss{font-size:13px;font-weight:700;color:#5B43C4}
+.myeongsik td.ss{font-size:13px;font-weight:700;color:#46698F}
 .myeongsik td.ss a{color:inherit}
 .bars{display:flex;flex-direction:column;gap:6px;margin:0 0 10px}
 .bars .row2{display:flex;align-items:center;gap:9px}
@@ -93,7 +117,7 @@ p{margin:0 0 14px}
 .gcards{list-style:none;margin:0 0 20px;padding:0;display:grid;
   grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
 .gcard{background:#fff;border:1px solid #E8E0D0;border-left:4px solid var(--gb,#C8BFA8);
-  border-radius:14px;padding:13px 15px}
+  border-radius:20px;padding:13px 15px}
 .gcard .gname{display:block;font-size:16px;font-weight:800;color:#33302B}
 .gcard .gname .hanja{font-size:13px;color:#8A7C5F;font-weight:600}
 .gcard .gband{display:inline-block;margin:4px 0 0;font-size:12.5px;font-weight:800;color:var(--gb,#8A7C5F)}
@@ -101,37 +125,42 @@ p{margin:0 0 14px}
 /* .badge 원본은 딥네이비 히어로용이라 웜 페이퍼 위에선 안 보인다 — 카드 안에서만 뒤집는다. */
 .gcard .badge{border-color:#E0D6BE;color:#6B5C3A;background:#F6F1E4}
 .gcard p{margin:8px 0 0;font-size:13px;color:#5A4E33;line-height:1.65}
-.b5{--gb:#3F7A45}.b4{--gb:#5B8C4F}.b3{--gb:#9A8B66}.b2{--gb:#C08A3E}.b1{--gb:#B4574B}
+.b5{--gb:#3F7154}.b4{--gb:#4A7052}.b3{--gb:#77602F}.b2{--gb:#7E5C33}.b1{--gb:#8A4F4A}
 .gpill{display:inline-block;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;
   color:#fff;background:var(--gb,#8A7C5F);white-space:nowrap}
 .tablewrap{overflow-x:auto;margin:0 0 20px;-webkit-overflow-scrolling:touch}
 .gtable{width:100%;min-width:520px;border-collapse:collapse;background:#fff;
-  border:1px solid #E8E0D0;border-radius:14px;overflow:hidden;font-size:13.5px}
+  border:1px solid #E8E0D0;border-radius:20px;overflow:hidden;font-size:13.5px}
 .gtable th{background:#F3EDE0;color:#6B5C3A;font-size:12.5px;padding:9px 8px;text-align:left;white-space:nowrap}
 .gtable td{padding:8px;border-top:1px solid #F0E9DB;vertical-align:top}
 .gtable td .sub{display:block;font-size:11.5px;color:#8A7C5F}
 
-.e-tree{--el:#4E8C5B}.e-fire{--el:#B4574B}.e-earth{--el:#9A7A3C}
-.e-metal{--el:#6E7A8C}.e-water{--el:#4A6390}
+/* --el = 앱 WuxingTokens(바·게이지용). --eld = 흰 글자 필 전용 딥 변형(WCAG 4.5:1). */
+.e-tree{--el:#5E8966;--eld:#44684C}.e-fire{--el:#B06A62;--eld:#8F4B44}.e-earth{--el:#A58757;--eld:#7C6038}
+.e-metal{--el:#7A8794;--eld:#576470}.e-water{--el:#4D6E97;--eld:#3C5878}
 .elpill{display:inline-block;font-size:12.5px;font-weight:700;padding:3px 10px;border-radius:999px;
-  color:#fff;background:var(--el,#7A6E56)}
+  color:#fff;background:var(--eld,var(--el,#7A6E56))}
 
-.topbar nav a.nav-calc{color:#0A0820;background:#EFE7C8;border-radius:999px;
+.topbar nav a.nav-calc{color:#0C0A12;background:#C9A85B;border-radius:999px;
   padding:3px 12px;font-weight:800}
-.topbar nav a.nav-calc:hover{background:#fff;color:#0A0820;text-decoration:none}
-.cta-alt{font-size:13px;color:#B8B2D6;margin:14px 0 0}
-.cta-alt a{color:#EFE7C8;font-weight:700;text-decoration:underline}
-.cta-box{margin:38px 0 0;background:#171040;color:#EDEBF5;border-radius:20px;padding:26px 22px;text-align:center}
-.cta-lead{font-size:18px;font-weight:800;margin:0 0 6px}
-.cta-sub{font-size:14px;color:#B8B2D6;margin:0 0 18px}
-a.cta{display:inline-block;padding:14px 26px;border-radius:999px;
-  background:linear-gradient(135deg,#8B6BFF,#6E48F2);color:#fff;font-weight:700;font-size:15px;
-  box-shadow:0 6px 18px rgba(110,72,242,.35)}
+.topbar nav a.nav-calc:hover{background:#F3D9A0;color:#0C0A12;text-decoration:none}
+.cta-alt{font-size:13px;color:#9FA8CC;margin:14px 0 0}
+.cta-alt a{color:#F3D9A0;font-weight:700;text-decoration:underline}
+.cta-box{margin:38px 0 0;background:#0C0A12;color:#F4F1FF;border-radius:20px;padding:26px 22px;text-align:center;
+  border:1px solid rgba(201,168,91,.30)}
+.cta-lead{font-family:"MaruBuri","Noto Serif KR",serif;font-size:18px;font-weight:600;margin:0 0 6px}
+.cta-sub{font-size:14px;color:#C7CFEA;margin:0 0 14px}
+.cta-feats{list-style:none;margin:0 auto 18px;padding:0;max-width:430px;text-align:left}
+.cta-feats li{font-size:13.5px;color:#C7CFEA;padding:5px 0 5px 24px;position:relative;line-height:1.6}
+.cta-feats li::before{content:"✦";position:absolute;left:4px;color:#C9A85B;font-size:12px}
+a.cta{display:inline-block;padding:14px 26px;border-radius:16px;
+  background:linear-gradient(180deg,#D6BA75,#C9A85B,#B7984E);color:#0C0A12;font-weight:800;font-size:15px;
+  box-shadow:0 6px 18px rgba(201,168,91,.35)}
 a.cta:hover{text-decoration:none}
 
-.foot{background:#0A0820;color:#8F88B8;padding:26px 20px 40px;text-align:center;font-size:13px}
-.foot a{color:#C4BEE0}
-.foot .fine{max-width:620px;margin:10px auto 0;font-size:12px;line-height:1.65;color:#6F6992}
+.foot{background:#0C0A12;color:#9FA8CC;padding:26px 20px 40px;text-align:center;font-size:13px}
+.foot a{color:#C7CFEA}
+.foot .fine{max-width:620px;margin:10px auto 0;font-size:12px;line-height:1.65;color:#7C82A0}
 
 @media (min-width:640px){
   .hero{padding:44px 24px 48px}

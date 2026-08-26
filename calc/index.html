@@ -25,14 +25,14 @@
   padding:10px 12px;border:1px solid #D8CFBC;border-radius:12px;font-size:16px;background:#FDFCF8;color:#33302B}
 .calc-form .grow{flex:1;min-width:88px}
 .chk{display:flex;align-items:center;gap:7px;font-size:14px;color:#5A4E33;padding:6px 0}
-.chk input{width:18px;height:18px;accent-color:#6E48F2}
-.calc-btn{width:100%;padding:15px;border:0;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;
-  color:#fff;background:linear-gradient(135deg,#8B6BFF,#6E48F2);box-shadow:0 6px 18px rgba(110,72,242,.3)}
+.chk input{width:18px;height:18px;accent-color:#7E6332}
+.calc-btn{width:100%;padding:15px;border:0;border-radius:16px;font-size:16px;font-weight:800;cursor:pointer;
+  color:#0C0A12;background:linear-gradient(180deg,#D6BA75,#C9A85B,#B7984E);box-shadow:0 6px 18px rgba(201,168,91,.3)}
 .calc-btn[disabled]{opacity:.62;cursor:progress}
 .err{color:#B4574B;font-size:14px;margin:8px 0 0;display:none}
 #result{display:none}
 .read-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 8px}
-.read-card{background:#fff;border:1px solid #E8E0D0;border-radius:14px;padding:13px 14px}
+.read-card{background:#fff;border:1px solid #E8E0D0;border-radius:20px;padding:13px 14px}
 .read-card .rk{display:block;font-size:11.5px;font-weight:800;color:#8A7C5F;letter-spacing:.04em}
 .read-card strong{display:block;font-size:19px;font-weight:800;color:#33302B;margin:3px 0 4px}
 .read-card p{margin:0;font-size:12.5px;color:#6B5C3A;line-height:1.55}
@@ -43,31 +43,31 @@
 .bars .bar i{display:block;height:100%;background:var(--el,#8A7C5F);border-radius:999px}
 .bars .pc{width:42px;text-align:right;font-size:12px;color:#8A7C5F;flex:none}
 .share-row{display:flex;align-items:center;gap:10px;margin:16px 0 0;flex-wrap:wrap}
-.share-btn{padding:11px 18px;border:1px solid #D8CFBC;background:#fff;color:#5B43C4;
+.share-btn{padding:11px 18px;border:1px solid #C9A85B;background:#fff;color:#7E6332;
   border-radius:999px;font-size:14px;font-weight:800;cursor:pointer}
 .share-msg{font-size:13px;color:#8A7C5F}
 .toolrail{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:26px 0 0}
-.toolrail a{display:block;background:#fff;border:1px solid #E8E0D0;border-radius:14px;padding:13px 15px;
-  text-decoration:none;color:#33302B}
-.toolrail a:hover{border-color:#C8B990}
+.toolrail a{display:block;background:#fff;border:1px solid #E8E0D0;border-radius:20px;padding:13px 15px;
+  text-decoration:none;color:#1C1B1F}
+.toolrail a:hover{border-color:#C9A85B}
 .toolrail .tk{display:block;font-size:11.5px;font-weight:800;color:#8A7C5F;letter-spacing:.04em}
 .toolrail strong{display:block;font-size:16px;margin:3px 0 3px}
 .toolrail span.sub{display:block;font-size:12.5px;color:#6B5C3A;line-height:1.5}
 
-.myeongsik{width:100%;border-collapse:collapse;background:#fff;border:1px solid #E8E0D0;border-radius:14px;
+.myeongsik{width:100%;min-width:0;border-collapse:collapse;background:#fff;border:1px solid #E8E0D0;border-radius:20px;
   overflow:hidden;text-align:center;margin:0 0 18px;font-size:14px}
 .myeongsik th{background:#F3EDE0;color:#6B5C3A;font-size:12.5px;padding:8px 4px}
 .myeongsik td{padding:7px 4px;border-top:1px solid #F0E9DB}
 .myeongsik .hj{font-size:26px;font-weight:800;line-height:1.2}
 .myeongsik .kr{font-size:11.5px;color:#8A7C5F}
-.myeongsik .ss{font-size:12.5px;font-weight:700;color:#5B43C4}
+.myeongsik .ss{font-size:12.5px;font-weight:700;color:#46698F}
 .myeongsik td a{color:inherit}
 .dw-strip{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;margin:0 0 8px}
 .dw-cell{flex:0 0 auto;min-width:74px;background:#fff;border:1px solid #E8E0D0;border-radius:12px;
   padding:9px 10px;text-align:center}
 .dw-cell .g{font-size:17px;font-weight:800}
 .dw-cell .a{font-size:11.5px;color:#8A7C5F;margin-top:2px}
-.dw-cell .s{font-size:11.5px;color:#5B43C4;margin-top:1px}
+.dw-cell .s{font-size:11.5px;color:#46698F;margin-top:1px}
 .ohang{display:flex;flex-direction:column;gap:6px;margin:0 0 8px}
 .ohang .row2{display:flex;align-items:center;gap:9px}
 .ohang .nm{width:44px;font-size:13px;font-weight:700;color:#5A4E33;flex:none}
@@ -80,8 +80,8 @@
 <header class="topbar">
   <a class="wordmark" href="/">만세력</a>
   <nav>
-    <a href="/calc/">사주</a><a href="/calc/jami/">자미두수</a><a href="/calc/star/">별자리</a>
-    <a href="/ilju/">일주</a><a href="/term/">용어</a>
+    <a href="/calc/">사주</a><a href="/calc/gunghap/">궁합</a><a href="/calc/jami/">자미두수</a>
+    <a href="/calc/star/">별자리</a><a href="/ilju/">일주</a>
   </nav>
 </header>
 <section class="hero">
@@ -152,17 +152,22 @@
   </div>
 
   <aside class="cta-box">
-    <p class="cta-lead">여기까지 무료예요</p>
-    <p class="cta-sub">AI 해석·궁합·오늘의 운세·자미두수·별자리까지 — 같은 엔진의 전체 분석은 만세력 앱에서.</p>
+    <p class="cta-lead">이 명식, 여기서 끝이 아니에요</p>
+    <p class="cta-sub">방금 계산한 생년월일 그대로 이어져요 — 다시 입력할 필요 없어요.</p>
+    <ul class="cta-feats">
+      <li>10년 대운·해마다의 세운을 전용 상세 화면에서 깊이 들여다봐요</li>
+      <li>성격이 다른 12명의 AI 술사 중 골라 1:1 사주 상담을 나눠요</li>
+      <li>매일 바뀌는 오늘의 하늘 기운을 역학 달력·홈 위젯으로 받아요</li>
+    </ul>
     <a class="cta" id="storeCta" href="https://play.google.com/store/apps/details?id=com.samramanshang.manseryeok&referrer=utm_source%3Dseo%26utm_medium%3Dweb%26utm_campaign%3Dcalc" rel="nofollow" data-cta="store-calc">만세력 앱에서 전체 분석 보기</a>
   </aside>
 </section>
 
-<div class="toolrail"><a href="/calc/jami/" data-cta="tool-jami"><span class="tk">자미두수</span><strong>자미두수 명반</strong><span class="sub">12궁 주성·사화·대한 — 궁마다 풀이와 행동 처방</span></a><a href="/calc/star/" data-cta="tool-star"><span class="tk">별자리</span><strong>출생 차트</strong><span class="sub">행성 배치·ASC/MC·주요 각과 기질 해석</span></a></div>
+<div class="toolrail"><a href="/calc/gunghap/" data-cta="tool-gunghap"><span class="tk">궁합</span><strong>1:1 궁합</strong><span class="sub">여덟 글자 전체로 보는 두 사람의 결 — 17개 축</span></a><a href="/calc/jami/" data-cta="tool-jami"><span class="tk">자미두수</span><strong>자미두수 명반</strong><span class="sub">12궁 주성·사화·대한 — 궁마다 풀이와 행동 처방</span></a><a href="/calc/star/" data-cta="tool-star"><span class="tk">별자리</span><strong>출생 차트</strong><span class="sub">행성 배치·ASC/MC·주요 각과 기질 해석</span></a></div>
 </div></main>
 <footer class="foot">
   <p><a href="/">만세력</a> — 사주 · 자미두수 · 별자리 · 궁합</p>
-  <p class="fine">이 계산기는 만세력 앱과 같은 엔진(절입시각·진태양시 반영)을 브라우저에서 실행해요. 입력한 생년월일은 서버로 전송되지 않습니다.</p>
+  <p class="fine">이 계산기는 만세력 앱과 같은 엔진(절입시각·진태양시 반영)을 브라우저에서 실행해요. 계산은 브라우저 안에서 수행되며 입력값을 저희 서버로 올리지 않습니다. 결과 공유 링크에는 입력한 생년월일이 담깁니다.</p>
 </footer>
 <script>
 
@@ -189,6 +194,7 @@ function jsRoot(){ return window["engine-core"].com.samramanshang.manseryeok.orr
 function SajuCalc(){ return jsRoot().SajuCalc; }
 function ZiweiCalc(){ return jsRoot().ZiweiCalc; }
 function NatalCalc(){ return jsRoot().NatalCalc; }
+function GunghapCalc(){ return jsRoot().GunghapCalc; }
 /* 계산 버튼 — 엔진이 아직이면 버튼을 잠그고 기다린다. */
 function withEngine(btnId, fn){
   var btn = document.getElementById(btnId);
