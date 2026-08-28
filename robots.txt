@@ -1,9 +1,11 @@
 User-agent: Yeti
 Allow: /
 Disallow: /pair/
+Disallow: /saju/
 
 User-agent: *
 Allow: /
 Disallow: /pair/
+Disallow: /saju/
 
 Sitemap: https://hwoh87.github.io/sitemap.xml

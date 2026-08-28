@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>인생 4구간 리포트 — 네 기둥이 잇는 한 생애 | 만세력</title>
+<meta name="robots" content="noindex,follow" />
+<meta name="description" content="생년월일시를 넣으면 사주 명식과 대운을 계산하고, 네 기둥이 잇는 일생을 시기별로 읽어드려요. 설치도 가입도 없이 웹에서 바로." />
+<link rel="canonical" href="https://hwoh87.github.io/saju/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="만세력" />
+<meta property="og:title" content="인생 4구간 리포트 — 네 기둥이 잇는 한 생애 | 만세력" />
+<meta property="og:description" content="생년월일시를 넣으면 사주 명식과 대운을 계산하고, 네 기둥이 잇는 일생을 시기별로 읽어드려요." />
+<meta property="og:url" content="https://hwoh87.github.io/saju/" />
+<meta property="og:image" content="https://hwoh87.github.io/og-saju.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="stylesheet" href="/assets/seo.css" />
+<script src="/assets/track.js" defer></script>
+<style>
+.calc-form{background:#fff;border:1px solid #E8E0D0;border-radius:20px;padding:20px 18px;margin:0 0 26px}
+.calc-form .row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.calc-form label{font-size:13px;font-weight:700;color:#6B5C3A;display:block;margin-bottom:5px}
+.calc-form select,.calc-form input[type=number]{
+  padding:10px 12px;border:1px solid #D8CFBC;border-radius:12px;font-size:16px;background:#FDFCF8;color:#33302B}
+.calc-form .grow{flex:1;min-width:88px}
+.chk{display:flex;align-items:center;gap:7px;font-size:14px;color:#5A4E33;padding:6px 0}
+.chk input{width:18px;height:18px;accent-color:#7E6332}
+.calc-btn{width:100%;padding:15px;border:0;border-radius:16px;font-size:16px;font-weight:800;cursor:pointer;
+  color:#0C0A12;background:linear-gradient(180deg,#D6BA75,#C9A85B,#B7984E);box-shadow:0 6px 18px rgba(201,168,91,.3)}
+.calc-btn[disabled]{opacity:.62;cursor:progress}
+.err{color:#B4574B;font-size:14px;margin:8px 0 0;display:none}
+#result{display:none}
+.read-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 8px}
+.read-card{background:#fff;border:1px solid #E8E0D0;border-radius:20px;padding:13px 14px}
+.read-card .rk{display:block;font-size:11.5px;font-weight:800;color:#8A7C5F;letter-spacing:.04em}
+.read-card strong{display:block;font-size:19px;font-weight:800;color:#33302B;margin:3px 0 4px}
+.read-card p{margin:0;font-size:12.5px;color:#6B5C3A;line-height:1.55}
+.bars{display:flex;flex-direction:column;gap:6px;margin:0 0 8px}
+.bars .row2{display:flex;align-items:center;gap:9px}
+.bars .nm{width:64px;font-size:13px;font-weight:700;color:#5A4E33;flex:none}
+.bars .bar{flex:1;height:11px;background:#F0E9DB;border-radius:999px;overflow:hidden}
+.bars .bar i{display:block;height:100%;background:var(--el,#8A7C5F);border-radius:999px}
+.bars .pc{width:42px;text-align:right;font-size:12px;color:#8A7C5F;flex:none}
+.hero-cta{margin:18px auto 0;display:block;padding:13px 30px;border:0;border-radius:999px;
+  font-size:15px;font-weight:800;cursor:pointer;color:#0C0A12;
+  background:linear-gradient(180deg,#D6BA75,#C9A85B,#B7984E);box-shadow:0 6px 18px rgba(201,168,91,.3)}
+.pay-box{margin:26px 0 0}
+.pay-lead{font-size:19px;font-weight:800;color:#33302B;margin:0 0 4px}
+.pay-sub{font-size:14.5px;color:#6B5C3A;line-height:1.6;margin:0 0 16px}
+.pay-card{background:#fff;border:1px solid #C9A85B;border-radius:20px;padding:20px 18px;
+  box-shadow:0 6px 22px rgba(201,168,91,.18)}
+.pay-title{font-size:17px;font-weight:800;color:#33302B;margin:0 0 12px}
+.pay-feats{margin:0 0 16px;padding:0;list-style:none}
+.pay-feats li{font-size:14px;color:#5A4E33;line-height:1.7;padding:0 0 0 22px;position:relative}
+.pay-feats li::before{content:"\2713";position:absolute;left:2px;color:#C9A85B;font-weight:800}
+.pay-price{text-align:center;margin:0 0 12px;font-size:15px;color:#6B5C3A}
+.pay-price b{font-size:30px;font-weight:800;color:#33302B;letter-spacing:-.01em}
+.pay-btn{width:100%;padding:15px;border:0;border-radius:16px;font-size:16px;font-weight:800;cursor:pointer;
+  color:#0C0A12;background:linear-gradient(180deg,#D6BA75,#C9A85B,#B7984E);box-shadow:0 6px 18px rgba(201,168,91,.3)}
+.pay-btn[disabled]{opacity:.62;cursor:progress}
+.pay-methods{text-align:center;font-size:12.5px;color:#8A7C5F;margin:10px 0 0}
+.pay-legal{font-size:12px;color:#8A7C5F;line-height:1.6;margin:12px 0 0}
+.pay-err{color:#B4574B;font-size:14px;margin:10px 0 0;display:none}
+.pay-calm{font-size:13px;color:#8A7C5F;margin:12px 0 0;text-align:center}
+.legal-links{font-size:12.5px;margin:0 0 8px}
+.legal-links a{color:#9FA8CC}
+.share-row{display:flex;align-items:center;gap:10px;margin:16px 0 0;flex-wrap:wrap}
+.share-btn{padding:11px 18px;border:1px solid #C9A85B;background:#fff;color:#7E6332;
+  border-radius:999px;font-size:14px;font-weight:800;cursor:pointer}
+.share-msg{font-size:13px;color:#8A7C5F}
+.toolrail{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:26px 0 0}
+.toolrail a{display:block;background:#fff;border:1px solid #E8E0D0;border-radius:20px;padding:13px 15px;
+  text-decoration:none;color:#1C1B1F}
+.toolrail a:hover{border-color:#C9A85B}
+.toolrail .tk{display:block;font-size:11.5px;font-weight:800;color:#8A7C5F;letter-spacing:.04em}
+.toolrail strong{display:block;font-size:16px;margin:3px 0 3px}
+.toolrail span.sub{display:block;font-size:12.5px;color:#6B5C3A;line-height:1.5}
+
+.myeongsik{width:100%;min-width:0;border-collapse:collapse;background:#fff;border:1px solid #E8E0D0;border-radius:20px;
+  overflow:hidden;text-align:center;margin:0 0 18px;font-size:14px}
+.myeongsik th{background:#F3EDE0;color:#6B5C3A;font-size:12.5px;padding:8px 4px}
+.myeongsik td{padding:7px 4px;border-top:1px solid #F0E9DB}
+.myeongsik .hj{font-size:26px;font-weight:800;line-height:1.2}
+.myeongsik .kr{font-size:11.5px;color:#8A7C5F}
+.myeongsik .ss{font-size:12.5px;font-weight:700;color:#46698F}
+.myeongsik td a{color:inherit}
+.dw-strip{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;margin:0 0 8px}
+.dw-cell{flex:0 0 auto;min-width:74px;background:#fff;border:1px solid #E8E0D0;border-radius:12px;
+  padding:9px 10px;text-align:center}
+.dw-cell .g{font-size:17px;font-weight:800}
+.dw-cell .a{font-size:11.5px;color:#8A7C5F;margin-top:2px}
+.dw-cell .s{font-size:11.5px;color:#46698F;margin-top:1px}
+.ohang{display:flex;flex-direction:column;gap:6px;margin:0 0 8px}
+.ohang .row2{display:flex;align-items:center;gap:9px}
+.ohang .nm{width:44px;font-size:13px;font-weight:700;color:#5A4E33;flex:none}
+.ohang .bar{flex:1;height:11px;background:#F0E9DB;border-radius:999px;overflow:hidden}
+.ohang .bar i{display:block;height:100%;background:var(--el,#8A7C5F);border-radius:999px}
+.ohang .pc{width:38px;text-align:right;font-size:12px;color:#8A7C5F;flex:none}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="wordmark" href="/">만세력</a>
+</header>
+<section class="hero">
+  <div class="hero-inner">
+    <p class="kicker">인생 4구간 리포트</p>
+    <h1>네 기둥이 잇는 한 생애<small>생년월일시 하나면 됩니다.<br />설치도 가입도 없이, 여기서 바로.</small></h1>
+    <button class="hero-cta" id="toForm" type="button">내 사주 넣기</button>
+  </div>
+</section>
+<div class="heroband"></div>
+<main class="paper"><div class="paper-inner">
+
+<form class="calc-form" id="f" onsubmit="return false">
+  <div class="row">
+    <div class="grow"><label for="y">년</label><input id="y" type="number" min="1940" max="2026" value="1995" /></div>
+    <div class="grow"><label for="mo">월</label><select id="mo"></select></div>
+    <div class="grow"><label for="d">일</label><select id="d"></select></div>
+  </div>
+  <div class="row">
+    <div class="grow"><label for="h">시</label><select id="h"></select></div>
+    <div class="grow"><label for="mi">분</label><select id="mi"></select></div>
+    <div class="grow"><label for="g">성별</label><select id="g"><option value="M">남</option><option value="F">여</option></select></div>
+  </div>
+  <div class="row">
+    <label class="chk"><input type="checkbox" id="unk" /> 태어난 시간을 몰라요</label>
+    <label class="chk"><input type="checkbox" id="tst" /> 진태양시 보정</label>
+    <span class="grow" id="cityWrap" style="display:none"><select id="city" aria-label="출생 도시"></select></span>
+  </div>
+  <button class="calc-btn" id="go">내 사주 계산하기</button>
+  <p class="err" id="err"></p>
+  <p class="note" style="margin-top:14px">양력 생일 기준이에요. 음력 변환·야자시 설정·AI 해석은 만세력 앱에서 지원해요.</p>
+</form>
+
+<section id="result">
+  <h2>내 명식</h2>
+  <table class="myeongsik" aria-label="사주 명식">
+    <thead><tr><th>구분</th><th>시주</th><th>일주</th><th>월주</th><th>년주</th></tr></thead>
+    <tbody>
+      <tr><th>십신</th><td id="ss-t"></td><td>본원</td><td id="ss-m"></td><td id="ss-y"></td></tr>
+      <tr><th>천간</th><td id="tg-t"></td><td id="tg-d"></td><td id="tg-m"></td><td id="tg-y"></td></tr>
+      <tr><th>지지</th><td id="jj-t"></td><td id="jj-d"></td><td id="jj-m"></td><td id="jj-y"></td></tr>
+      <tr><th>십신(지지)</th><td id="bs-t"></td><td id="bs-d"></td><td id="bs-m"></td><td id="bs-y"></td></tr>
+      <tr><th>12운성</th><td id="us-t"></td><td id="us-d"></td><td id="us-m"></td><td id="us-y"></td></tr>
+      <tr><th>12신살</th><td id="sl-t"></td><td id="sl-d"></td><td id="sl-m"></td><td id="sl-y"></td></tr>
+    </tbody>
+  </table>
+  <p id="iljuLine" class="note"></p>
+
+  <h2>대운 흐름</h2>
+  <div class="dw-strip" id="dw"></div>
+  <p class="note" id="gmLine"></p>
+
+  <h2>내 사주 읽기</h2>
+  <div class="read-grid">
+    <div class="read-card"><span class="rk">격국</span><strong id="ggLabel">—</strong><p id="ggWhy"></p></div>
+    <div class="read-card"><span class="rk">일간 강약</span><strong id="stLabel">—</strong><p id="stWhy"></p></div>
+    <div class="read-card"><span class="rk">용신 · 억부</span><strong id="ysYong">—</strong><p id="ysGi"></p></div>
+    <div class="read-card" id="johuCard" style="display:none"><span class="rk">조후</span><strong id="johuEl">—</strong><p id="johuWhy"></p></div>
+  </div>
+  <p class="note" id="stHint"></p>
+  <h3>오행 분포</h3>
+  <div class="ohang" id="ohang"></div>
+  <p class="note" id="ohangNote"></p>
+
+  <aside class="pay-box" id="payBox">
+    <p class="pay-lead">여기까지가 <strong>지도</strong>예요.</p>
+    <p class="pay-sub">이 네 기둥이 한 생애로 어떻게 이어지는지는, 읽어드려야 보입니다.</p>
+
+    <div class="pay-card">
+      <p class="pay-title">인생 4구간 리포트</p>
+      <ul class="pay-feats">
+        <li>큰 그림 — 네 기둥이 그리는 일생의 결</li>
+        <li>초년 · 청년 · 중년 · 말년 — 시기마다 무엇이 주제가 되는지</li>
+        <li>전환점 — 대운이 방향을 트는 자리</li>
+        <li>위 명식·격국·용신을 근거로, 사실 나열이 아니라 이야기로</li>
+        <li>링크로 언제든 다시 열람</li>
+      </ul>
+      <p class="pay-price"><b>3,900</b>원</p>
+      <button class="pay-btn" id="payBtn" type="button">결제하고 리포트 열기</button>
+      <p class="pay-methods">카카오페이 · 네이버페이 · 신용카드 · 토스</p>
+      <p class="pay-legal">디지털 콘텐츠 특성상 <strong>열람을 시작하면 청약철회가 제한</strong>됩니다.
+      열람 전에는 전액 환불돼요. <a href="/legal/refund/">환불 안내 자세히</a></p>
+      <p class="pay-err" id="payErr"></p>
+    </div>
+
+    <p class="pay-calm">결과 링크는 저장해두시면 나중에 다시 열어볼 수 있어요.</p>
+  </aside>
+
+  <h2>어떤 근거로 읽나요</h2>
+  <p>절입시각과 진태양시까지 반영한 정통 만세력으로 명식을 세우고, 격국·일간 강약·용신과
+  10년 대운의 흐름을 겹쳐 읽습니다. 안드로이드 앱 「만세력」에서 쓰는 것과 같은 엔진이에요 —
+  웹과 앱이 다른 답을 내지 않도록 회귀 테스트로 고정해두었습니다.</p>
+
+  <h2>무엇을 하지 않나요</h2>
+  <p>맞다 틀리다를 단정하지 않아요. 앞으로의 시기는 가능성의 어투로만 씁니다.
+  사주는 한 사람이 놓인 자리를 설명하는 언어지, 결론을 내려주는 도구가 아니에요.</p>
+</section>
+
+<div class="toolrail"><a href="/calc/gunghap/" data-cta="tool-gunghap"><span class="tk">궁합</span><strong>1:1 궁합</strong><span class="sub">여덟 글자 전체로 보는 두 사람의 결 — 17개 축</span></a><a href="/calc/jami/" data-cta="tool-jami"><span class="tk">자미두수</span><strong>자미두수 명반</strong><span class="sub">12궁 주성·사화·대한 — 궁마다 풀이와 행동 처방</span></a><a href="/calc/star/" data-cta="tool-star"><span class="tk">별자리</span><strong>출생 차트</strong><span class="sub">행성 배치·ASC/MC·주요 각과 기질 해석</span></a></div>
+</div></main>
+<footer class="foot">
+  <p><a href="/">만세력</a> — 사주 · 자미두수 · 별자리 · 궁합</p>
+  <p class="legal-links"><a href="/legal/terms/">이용약관</a> · <a href="/legal/privacy/">개인정보처리방침</a>
+  · <a href="/legal/refund/">환불·청약철회</a> · <a href="/legal/business/">사업자정보</a></p>
+  <p class="fine">무료 계산은 브라우저 안에서 끝나며 입력값을 저희 서버로 올리지 않습니다.
+  결제하실 때만 리포트 생성을 위해 전송됩니다. 해석은 전통 명리학에 근거한 참고 자료이며,
+  의학적·법률적·재무적 조언이 아닙니다.</p>
+</footer>
+<script>
+
+/* 엔진 지연 로드 — 1.7MB 번들이 첫 페인트를 막지 않게 한다.
+   세 도구가 같은 URL 을 쓰므로 두 번째 쪽부터는 브라우저 캐시에서 즉시 온다. */
+var __engP = null;
+function loadEngine(){
+  if (__engP) return __engP;
+  __engP = new Promise(function(res, rej){
+    var s = document.createElement("script");
+    s.src = "/calc/saju-engine.js";
+    s.onload = function(){ res(window["engine-core"]); };
+    s.onerror = function(){ __engP = null; rej(new Error("engine")); };
+    document.head.appendChild(s);
+  });
+  return __engP;
+}
+/* 유휴 시간에 미리 받아 둔다 — 사용자가 폼을 채우는 동안 대개 도착한다. */
+function warmEngine(){
+  if (window.requestIdleCallback) requestIdleCallback(function(){ loadEngine(); }, {timeout: 2500});
+  else setTimeout(loadEngine, 700);
+}
+function jsRoot(){ return window["engine-core"].com.samramanshang.manseryeok.orrery.js; }
+function SajuCalc(){ return jsRoot().SajuCalc; }
+function ZiweiCalc(){ return jsRoot().ZiweiCalc; }
+function NatalCalc(){ return jsRoot().NatalCalc; }
+function GunghapCalc(){ return jsRoot().GunghapCalc; }
+/* 계산 버튼 — 엔진이 아직이면 버튼을 잠그고 기다린다. */
+function withEngine(btnId, fn){
+  var btn = document.getElementById(btnId);
+  var label = btn ? btn.textContent : "";
+  if (btn){ btn.disabled = true; btn.textContent = "계산 준비 중…"; }
+  loadEngine().then(function(){
+    if (btn){ btn.disabled = false; btn.textContent = label; }
+    fn();
+  }, function(){
+    if (btn){ btn.disabled = false; btn.textContent = label; }
+    var err = document.getElementById("err");
+    if (err){ err.textContent = "계산 엔진을 불러오지 못했어요. 새로고침해 주세요."; err.style.display = "block"; }
+  });
+}
+function pad(n){ return (n<10?"0":"")+n; }
+function opt(sel, vals, labels){
+  vals.forEach(function(v,i){ var o=document.createElement("option"); o.value=v; o.textContent=labels?labels[i]:v; sel.appendChild(o); });
+}
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
+function fillCities(selId, useLat){
+  return loadEngine().then(function(){
+    var list = JSON.parse(useLat ? NatalCalc().cities() : SajuCalc().cities());
+    var sel = document.getElementById(selId);
+    if (!sel || sel.options.length) return;
+    list.forEach(function(c){
+      var o = document.createElement("option");
+      o.value = useLat ? (c.lat + "," + c.lon) : c.lon;
+      o.textContent = c.name;
+      sel.appendChild(o);
+    });
+  });
+}
+
+
+var LINKS = {"ilju": {"갑자": "/ilju/gapja/", "갑인": "/ilju/gapin/", "갑진": "/ilju/gapjin/", "갑오": "/ilju/gapo/", "갑신": "/ilju/gapsin/", "갑술": "/ilju/gapsul/", "을축": "/ilju/eulchuk/", "을묘": "/ilju/eulmyo/", "을사": "/ilju/eulsa/", "을미": "/ilju/eulmi/", "을유": "/ilju/eulyu/", "을해": "/ilju/eulhae/", "병자": "/ilju/byeongja/", "병인": "/ilju/byeongin/", "병진": "/ilju/byeongjin/", "병오": "/ilju/byeongo/", "병신": "/ilju/byeongsin/", "병술": "/ilju/byeongsul/", "정축": "/ilju/jeongchuk/", "정묘": "/ilju/jeongmyo/", "정사": "/ilju/jeongsa/", "정미": "/ilju/jeongmi/", "정유": "/ilju/jeongyu/", "정해": "/ilju/jeonghae/", "무자": "/ilju/muja/", "무인": "/ilju/muin/", "무진": "/ilju/mujin/", "무오": "/ilju/muo/", "무신": "/ilju/musin/", "무술": "/ilju/musul/", "기축": "/ilju/gichuk/", "기묘": "/ilju/gimyo/", "기사": "/ilju/gisa/", "기미": "/ilju/gimi/", "기유": "/ilju/giyu/", "기해": "/ilju/gihae/", "경자": "/ilju/gyeongja/", "경인": "/ilju/gyeongin/", "경진": "/ilju/gyeongjin/", "경오": "/ilju/gyeongo/", "경신": "/ilju/gyeongsin/", "경술": "/ilju/gyeongsul/", "신축": "/ilju/sinchuk/", "신묘": "/ilju/sinmyo/", "신사": "/ilju/sinsa/", "신미": "/ilju/sinmi/", "신유": "/ilju/sinyu/", "신해": "/ilju/sinhae/", "임자": "/ilju/imja/", "임인": "/ilju/imin/", "임진": "/ilju/imjin/", "임오": "/ilju/imo/", "임신": "/ilju/imsin/", "임술": "/ilju/imsul/", "계축": "/ilju/gyechuk/", "계묘": "/ilju/gyemyo/", "계사": "/ilju/gyesa/", "계미": "/ilju/gyemi/", "계유": "/ilju/gyeyu/", "계해": "/ilju/gyehae/"}, "sipsin": {"본원": "/term/bonwon/", "비견": "/term/bigyeon/", "겁재": "/term/geopjae/", "식신": "/term/siksin/", "상관": "/term/sanggwan/", "편재": "/term/pyeonjae/", "정재": "/term/jeongjae/", "편관": "/term/pyeongwan/", "정관": "/term/jeonggwan/", "편인": "/term/pyeonin/", "정인": "/term/jeongin/"}, "meteor": {"絶": {"kr": "절", "url": "/term/jeol/"}, "胎": {"kr": "태", "url": "/term/tae/"}, "養": {"kr": "양", "url": "/term/yang/"}, "長生": {"kr": "장생", "url": "/term/jangsaeng/"}, "沐浴": {"kr": "목욕", "url": "/term/mokyok/"}, "冠帶": {"kr": "관대", "url": "/term/gwandae/"}, "乾祿": {"kr": "건록", "url": "/term/geonrok/"}, "帝旺": {"kr": "제왕", "url": "/term/jewang/"}, "衰": {"kr": "쇠", "url": "/term/soe/"}, "病": {"kr": "병", "url": "/term/byeong/"}, "死": {"kr": "사", "url": "/term/sa/"}, "墓": {"kr": "묘", "url": "/term/myo/"}}, "spirit": {"劫殺": {"kr": "겁살", "url": "/term/geopsal/"}, "災殺": {"kr": "재살", "url": "/term/jaesal/"}, "天殺": {"kr": "천살", "url": "/term/cheonsal/"}, "地殺": {"kr": "지살", "url": "/term/jisal/"}, "年殺": {"kr": "연살", "url": "/term/yeonsal/"}, "月殺": {"kr": "월살", "url": "/term/wolsal/"}, "亡身": {"kr": "망신살", "url": "/term/mangsinsal/"}, "將星": {"kr": "장성살", "url": "/term/jangseongsal/"}, "攀鞍": {"kr": "반안살", "url": "/term/banansal/"}, "驛馬": {"kr": "역마살", "url": "/term/yeokmasal/"}, "六害": {"kr": "육해살", "url": "/term/yukhaesal/"}, "華蓋": {"kr": "화개살", "url": "/term/hwagaesal/"}}};
+// 엔진은 지연 로드다(loadEngine) — 폼 조립은 엔진 없이 먼저 하고, 계산 시점에만 기다린다.
+document.addEventListener("DOMContentLoaded", function init(){
+  var mo=document.getElementById("mo"), d=document.getElementById("d"), h=document.getElementById("h"), mi=document.getElementById("mi");
+  opt(mo, Array.from({length:12},function(_,i){return i+1;}));
+  opt(d, Array.from({length:31},function(_,i){return i+1;}));
+  opt(h, Array.from({length:24},function(_,i){return i;}), Array.from({length:24},function(_,i){return pad(i)+"시";}));
+  opt(mi, Array.from({length:60},function(_,i){return i;}), Array.from({length:60},function(_,i){return pad(i)+"분";}));
+  loadEngine().then(function(){
+    var cities = JSON.parse(SajuCalc().cities());
+    var citySel = document.getElementById("city");
+    cities.forEach(function(c){ var o=document.createElement("option"); o.value=c.lon; o.textContent=c.name; citySel.appendChild(o); });
+  }, function(){});
+  document.getElementById("tst").addEventListener("change", function(){
+    document.getElementById("cityWrap").style.display = this.checked ? "block" : "none";
+  });
+  document.getElementById("unk").addEventListener("change", function(){
+    document.getElementById("h").disabled = this.checked;
+    document.getElementById("mi").disabled = this.checked;
+  });
+  warmEngine();
+  document.getElementById("go").addEventListener("click", run);
+  document.getElementById("payBtn").addEventListener("click", startPay);
+  document.getElementById("toForm").addEventListener("click", function(){
+    document.getElementById("f").scrollIntoView({behavior:"smooth", block:"start"});
+  });
+  restoreFromUrl();
+});
+function link(url, text){ return url ? '<a href="'+url+'">'+text+'</a>' : text; }
+var EL_KR = {"木":"목","火":"화","土":"토","金":"금","水":"수"};
+var EL_CLS = {"木":"e-tree","火":"e-fire","土":"e-earth","金":"e-metal","水":"e-water"};
+function elName(h){ return h ? h+"("+(EL_KR[h]||"")+")" : "—"; }
+
+/** 폼의 현재 입력 — 계산·URL·공유가 같은 소스를 쓴다. */
+function readForm(){
+  var unk = document.getElementById("unk").checked;
+  return {
+    y:+document.getElementById("y").value,
+    mo:+document.getElementById("mo").value,
+    d:+document.getElementById("d").value,
+    unk:unk,
+    h:unk?-1:+document.getElementById("h").value,
+    mi:unk?0:+document.getElementById("mi").value,
+    g:document.getElementById("g").value,
+    tst:document.getElementById("tst").checked,
+    lon:document.getElementById("tst").checked ? +(document.getElementById("city").value||126.978) : 126.978
+  };
+}
+
+/** 계산 결과를 주소창에 반영 — 뒤로가기 복원·링크 공유가 가능해진다.
+ *  canonical 은 /calc/ 로 고정돼 있어 파라미터 URL 이 중복 색인되지 않는다. */
+function syncUrl(v){
+  var q = "?y="+v.y+"&mo="+v.mo+"&d="+v.d+"&g="+v.g
+        + (v.unk ? "&unk=1" : "&h="+v.h+"&mi="+v.mi)
+        + (v.tst ? "&tst=1&lon="+v.lon : "");
+  try { history.replaceState(null, "", location.pathname + q); } catch(e) {}
+}
+
+/** ?y=..&mo=.. 로 들어오면 폼을 채우고 바로 계산한다(공유 링크 수신). */
+function restoreFromUrl(){
+  var q = new URLSearchParams(location.search);
+  if (!q.get("y")) return;
+  var set = function(id, val){ if (val !== null && val !== "") document.getElementById(id).value = val; };
+  set("y", q.get("y")); set("mo", q.get("mo")); set("d", q.get("d")); set("g", q.get("g"));
+  if (q.get("unk") === "1"){
+    document.getElementById("unk").checked = true;
+    document.getElementById("h").disabled = true; document.getElementById("mi").disabled = true;
+  } else { set("h", q.get("h")); set("mi", q.get("mi")); }
+  if (q.get("tst") === "1"){
+    document.getElementById("tst").checked = true;
+    document.getElementById("cityWrap").style.display = "block";
+    set("city", q.get("lon"));
+  }
+  run();
+}
+
+function renderInterpret(v){
+  var t;
+  try { t = JSON.parse(SajuCalc().interpret(v.y,v.mo,v.d,v.h,v.mi,v.g,v.tst,v.lon)); }
+  catch(e){ return; }
+
+  var gg = t.geokguk || {};
+  document.getElementById("ggLabel").textContent = gg.hangul || "—";
+  var why = [];
+  if (gg.resolvedBy) why.push(gg.resolvedBy + " 기준");
+  if (gg.transparentStem) why.push(gg.transparentStem + (gg.transparentPosition ? " " + gg.transparentPosition : "") + " 투출");
+  if (gg.category) why.push(gg.category);
+  document.getElementById("ggWhy").textContent = why.join(" · ");
+
+  var st = t.strength || {};
+  document.getElementById("stLabel").textContent = st.label || "—";
+  var tot = (st.help||0) + (st.weaken||0);
+  document.getElementById("stWhy").textContent = tot
+    ? "돕는 힘 " + Math.round(st.help*100/tot) + "% · 빼는 힘 " + Math.round(st.weaken*100/tot) + "%"
+    : "";
+  document.getElementById("stHint").textContent = t.hint || "";
+
+  // 중화 사주는 억부를 단정하지 않는다 — 용신을 보조 참고로 낮춰 적는다(엔진·앱과 같은 태도).
+  var ys = t.yongsin;
+  document.getElementById("ysYong").textContent = ys && ys.yong.length
+    ? ys.yong.map(elName).join(" · ") : "—";
+  var giText = ys && ys.gi.length ? "피할 오행 " + ys.gi.map(elName).join(" · ") : "";
+  document.getElementById("ysGi").textContent =
+    st.neutral ? (giText ? giText + " · 중화라 보조 참고예요" : "중화라 보조 참고예요") : giText;
+
+  var johu = t.johu, jc = document.getElementById("johuCard");
+  if (johu){
+    jc.style.display = "";
+    document.getElementById("johuEl").textContent = elName(johu.element);
+    document.getElementById("johuWhy").textContent = johu.reason || "";
+  } else { jc.style.display = "none"; }
+
+  var els = t.elements || {}, sum = 0;
+  ["木","火","土","金","水"].forEach(function(k){ sum += (els[k]||0); });
+  var box = document.getElementById("ohang"); box.innerHTML = "";
+  ["木","火","土","金","水"].forEach(function(k){
+    var n = els[k]||0, pc = sum ? Math.round(n*100/sum) : 0;
+    var row = document.createElement("div");
+    row.className = "row2 " + (EL_CLS[k]||"");
+    row.innerHTML = '<span class="nm">'+elName(k)+'</span>'
+      + '<span class="bar"><i style="width:'+pc+'%"></i></span>'
+      + '<span class="pc">'+pc+'%</span>';
+    box.appendChild(row);
+  });
+  document.getElementById("ohangNote").textContent =
+    t.unknownTime ? "시주를 뺀 세 기둥 기준이에요. 태어난 시간을 알면 결과가 달라질 수 있어요."
+                  : "천간과 지지 속 지장간까지 가중해 센 분포예요.";
+}
+function fillPillar(sfx, p){
+  var q = function(id){ return document.getElementById(id+"-"+sfx); };
+  if (!p){ ["ss","tg","jj","bs","us","sl"].forEach(function(k){ var el=q(k); if(el) el.innerHTML='<span class="kr">시간 미상</span>'; }); return; }
+  var m = LINKS.meteor[p.unseong] || {kr:p.unseong, url:""};
+  var s = LINKS.spirit[p.sinsal] || {kr:p.sinsal, url:""};
+  if (q("ss")) q("ss").innerHTML = '<span class="ss">'+link(LINKS.sipsin[p.stemSipsin], p.stemSipsin)+'</span>';
+  q("tg").innerHTML = '<div class="hj">'+p.ganzi[0]+'</div><div class="kr">'+p.stemKr+'</div>';
+  q("jj").innerHTML = '<div class="hj">'+p.ganzi[1]+'</div><div class="kr">'+p.branchKr+'</div>';
+  q("bs").innerHTML = '<span class="ss">'+link(LINKS.sipsin[p.branchSipsin], p.branchSipsin)+'</span>';
+  q("us").innerHTML = link(m.url, m.kr);
+  q("sl").innerHTML = link(s.url, s.kr);
+}
+function run(){ withEngine("go", runNow); }
+function runNow(){
+  var err = document.getElementById("err"); err.style.display="none";
+  var v = readForm();
+  var y=v.y, mo=v.mo, d=v.d, h=v.h, mi=v.mi, g=v.g, tst=v.tst, lon=v.lon;
+  if (!y || y<1940 || y>2026){ err.textContent="1940~2026년 사이로 입력해 주세요."; err.style.display="block"; return; }
+  var r;
+  try { r = JSON.parse(SajuCalc().calculate(y,mo,d,h,mi,g,tst,lon)); }
+  catch(e){ err.textContent="계산 중 오류가 났어요. 날짜를 확인해 주세요."; err.style.display="block"; return; }
+  fillPillar("y", r.pillars.year); fillPillar("m", r.pillars.month);
+  fillPillar("d", r.pillars.day);  fillPillar("t", r.pillars.time);
+  document.getElementById("ss-t").innerHTML = r.pillars.time ? '<span class="ss">'+link(LINKS.sipsin[r.pillars.time.stemSipsin], r.pillars.time.stemSipsin)+'</span>' : '<span class="kr">시간 미상</span>';
+  var iljuUrl = LINKS.ilju[r.iljuKr];
+  document.getElementById("iljuLine").innerHTML =
+    "내 일주는 <strong>"+r.iljuKr+"일주("+r.pillars.day.ganzi+")</strong> — " +
+    (iljuUrl ? '<a href="'+iljuUrl+'">일주 도감에서 성격·직업·인연 풀이 보기</a>' : "");
+  var dw = document.getElementById("dw"); dw.innerHTML="";
+  r.daewoon.forEach(function(x){
+    var c=document.createElement("div"); c.className="dw-cell";
+    c.innerHTML='<div class="g">'+x.ganzi+'</div><div class="a">'+x.age+"세 · "+x.startYear+'</div><div class="s">'+link(LINKS.sipsin[x.stemSipsin], x.stemSipsin)+'</div>';
+    dw.appendChild(c);
+  });
+  document.getElementById("gmLine").textContent = "공망: "+r.gongmang+" · 보정 적용 시각 "+r.adjusted.year+"."+pad(r.adjusted.month)+"."+pad(r.adjusted.day)+" "+pad(r.adjusted.hour)+":"+pad(r.adjusted.minute);
+  renderInterpret(v);
+  syncUrl(v);
+  LAST_INPUT = v;
+  document.getElementById("result").style.display="block";
+  document.getElementById("result").scrollIntoView({behavior:"smooth"});
+  if (window.__track){ window.__track("calc_done"); window.__track("paywall_view"); }
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   결제 — Phase 1. PG(포트원) 심사 전이라 결제창 호출은 스텁이고,
+   주문 생성(pair-order)까지는 실제로 동작한다. 순서가 중요하다:
+   **주문을 먼저 만들고 결제한다.** 결제 성공 뒤에 입력을 보내면, 결제만
+   하고 창을 닫은 사용자의 리포트를 만들 근거가 서버에 없다.
+   ───────────────────────────────────────────────────────────────── */
+var FN = "https://sidxbzpbesbaiokxrqsf.supabase.co/functions/v1";
+var LAST_INPUT = null;
+
+function uuid(){
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c){
+    var r = Math.random() * 16 | 0;
+    return (c === "x" ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+
+function payError(msg){
+  var el = document.getElementById("payErr");
+  el.textContent = msg; el.style.display = "block";
+}
+
+/* 인생 4구간 페이로드 — 엔진이 앱과 같은 모양으로 만들어 준다.
+   ⚠️ 여기서 손으로 조립하지 않는다. life_phase_cache 키가 갈리면 같은 사주가
+      매번 새로 생성되고(원가 누수), 웹과 앱이 다른 리포트를 준다.
+      LifePhaseCalcCore 가 정본이고 WebLifePhaseParityTest 가 앱과 대조해 잠근다.
+   ⚠️ SajuCalc().lifePhase 는 번들 재빌드 후에만 존재한다(PR #68). 없으면 안내만 낸다. */
+function lifePhaseFor(v){
+  var api = SajuCalc();
+  if (typeof api.lifePhase !== "function") return null;
+  var out = JSON.parse(api.lifePhase(v.y, v.mo, v.d, v.h, v.mi, v.g, v.tst, v.lon));
+  return out && out.error ? null : out;
+}
+
+function startPay(){
+  var btn = document.getElementById("payBtn");
+  document.getElementById("payErr").style.display = "none";
+  if (!LAST_INPUT){ payError("먼저 생년월일시를 넣고 계산해 주세요."); return; }
+
+  var payload;
+  try { payload = lifePhaseFor(LAST_INPUT); }
+  catch (e) { payload = null; }
+  if (!payload){
+    payError("리포트 준비 중이에요. 조금 뒤에 다시 시도해 주세요.");
+    return;
+  }
+
+  if (window.__track) window.__track("pay_start");
+  btn.disabled = true; btn.textContent = "주문 생성 중…";
+
+  var orderId = uuid();
+  fetch(FN + "/pair-order", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      orderId: orderId,
+      product: "saju_life_phase",
+      input: {
+        y: LAST_INPUT.y, mo: LAST_INPUT.mo, d: LAST_INPUT.d,
+        h: LAST_INPUT.h, mi: LAST_INPUT.mi, g: LAST_INPUT.g, unk: !!LAST_INPUT.unk,
+        life_phase: payload
+      }
+    })
+  }).then(function(res){
+    if (!res.ok) throw new Error("order " + res.status);
+    return res.json();
+  }).then(function(){
+    /* TODO(PG): 포트원 채널 발급 후 실제 결제창 호출로 교체하고,
+       성공 시 location.href = "/pair/r/?p=" + orderId 로 넘긴다. */
+    btn.disabled = false; btn.textContent = "결제하고 리포트 열기";
+    payError("결제 준비 중이에요. 곧 열립니다 — 주문은 저장됐어요.");
+  }).catch(function(){
+    btn.disabled = false; btn.textContent = "결제하고 리포트 열기";
+    payError("주문을 만들지 못했어요. 잠시 후 다시 시도해 주세요.");
+  });
+}
+
+</script>
+</body>
+</html>

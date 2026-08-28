@@ -48,8 +48,8 @@
 </div>
 
 <section id="report" style="display:none">
-  <h1 style="font-size:22px;margin:0 0 4px">두 사람 리포트</h1>
-  <p class="note" style="margin:0 0 18px">사주 명식을 겹쳐 읽은 관계 해석이에요.</p>
+  <h1 style="font-size:22px;margin:0 0 4px" id="rTitle">리포트</h1>
+  <p class="note" style="margin:0 0 18px" id="rSub"></p>
 
   <div class="rkeep">
     <p>이 링크는 저장해두시면 <strong>언제든 다시 열려요.</strong></p>
@@ -62,9 +62,8 @@
   <div class="rbody" id="body"></div>
 
   <aside class="appbox">
-    <p class="al">매일 두 사람의 흐름이 궁금하다면</p>
-    <p class="as">이 리포트는 오늘 기준 한 장이에요.
-    앱에서는 두 분의 하루하루 흐름과 달력, 좋은 날을 이어서 볼 수 있어요.</p>
+    <p class="al" id="aTitle">더 이어서 보고 싶다면</p>
+    <p class="as" id="aSub"></p>
     <a class="ab" id="appCta" rel="nofollow"
        href="https://play.google.com/store/apps/details?id=com.samramanshang.manseryeok&referrer=utm_source%3Dweb%26utm_medium%3Dpair%26utm_campaign%3Dpair_report">앱에서 이어보기</a>
   </aside>
@@ -98,7 +97,29 @@ function setState(title, sub, spinning){
   document.getElementById("spin").style.display = spinning ? "" : "none";
 }
 
+/* 상품별 제목·설명. 서버가 product 를 준다(pair-report). 모르는 값이면 궁합으로 둔다. */
+var PRODUCTS = {
+  pair_report: {
+    title: "두 사람 리포트",
+    sub: "사주 명식을 겹쳐 읽은 관계 해석이에요.",
+    appTitle: "매일 두 사람의 흐름이 궁금하다면",
+    appSub: "이 리포트는 오늘 기준 한 장이에요. 앱에서는 두 분의 하루하루 흐름과 달력, 좋은 날을 이어서 볼 수 있어요."
+  },
+  saju_life_phase: {
+    title: "인생 4구간 리포트",
+    sub: "네 기둥이 한 흐름으로 이어지는 일생을 시기별로 읽었어요.",
+    appTitle: "지금 이 시기가 더 궁금하다면",
+    appSub: "이 리포트는 일생의 큰 흐름이에요. 앱에서는 올해·이번 달·오늘의 운을 이어서 볼 수 있어요."
+  }
+};
+
 function showReport(data){
+  var meta = PRODUCTS[data.product] || PRODUCTS.pair_report;
+  document.getElementById("rTitle").textContent = meta.title;
+  document.getElementById("rSub").textContent = meta.sub;
+  document.getElementById("aTitle").textContent = meta.appTitle;
+  document.getElementById("aSub").textContent = meta.appSub;
+  document.title = meta.title + " | 만세력";
   document.getElementById("state").style.display = "none";
   document.getElementById("report").style.display = "block";
   document.getElementById("body").textContent = data.body_md || "";
