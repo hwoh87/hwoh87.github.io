@@ -14,11 +14,14 @@
   var URL_ = "https://sidxbzpbesbaiokxrqsf.supabase.co/functions/v1/web-beacon";
   var mobile = window.matchMedia && window.matchMedia("(max-width: 767px)").matches;
 
+  var FUNNEL = {calc_done: 1, paywall_view: 1, pay_start: 1, pay_done: 1};
+
   function send(kind, label) {
     var body = JSON.stringify({
       kind: kind,
-      // calc_done 은 호출부가 라벨을 안 준다 — 채널을 물려서 "어느 채널이 완주까지 갔나"를 남긴다.
-      label: label || (kind === "calc_done" ? CHAN : null),
+      // 완주형 이벤트는 호출부가 라벨을 안 준다 — 채널을 물려서 "어느 채널이 어디까지 갔나"를 남긴다.
+      // /pair/ 퍼널의 판정 기준이 광고 앵글별 전환율이라, 이 물림이 없으면 앵글을 구분할 수 없다.
+      label: label || (FUNNEL[kind] ? CHAN : null),
       path: location.pathname,
       ref: document.referrer || "",
       mobile: !!mobile

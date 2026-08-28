@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>두 사람 리포트 | 만세력</title>
+<meta name="robots" content="noindex,nofollow" />
+<meta name="description" content="결제한 두 사람 리포트를 여는 페이지예요." />
+<link rel="stylesheet" href="/assets/seo.css" />
+<script src="/assets/track.js" defer></script>
+<style>
+.rwrap{max-width:720px;margin:0 auto}
+.legal-links{font-size:12.5px;margin:0 0 8px}
+.legal-links a{color:#9FA8CC}
+.rstate{background:#fff;border:1px solid #E8E0D0;border-radius:20px;padding:28px 20px;text-align:center}
+.rstate .rt{font-size:17px;font-weight:800;color:#33302B;margin:0 0 6px}
+.rstate .rs{font-size:14px;color:#6B5C3A;line-height:1.7;margin:0}
+.spin{width:26px;height:26px;border-radius:50%;margin:0 auto 14px;
+  border:3px solid #F0E9DB;border-top-color:#C9A85B;animation:sp 900ms linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.spin{animation-duration:2.4s}}
+.rbody{background:#fff;border:1px solid #E8E0D0;border-radius:20px;padding:24px 20px;margin:0 0 18px;
+  font-size:15px;line-height:1.85;color:#33302B;white-space:pre-wrap;word-break:keep-all}
+.rkeep{background:#FDFCF8;border:1px solid #E8E0D0;border-radius:20px;padding:16px 18px;margin:0 0 18px}
+.rkeep p{margin:0 0 10px;font-size:14px;color:#5A4E33;line-height:1.6}
+.rkeep .row{display:flex;gap:8px;flex-wrap:wrap}
+.rkeep button{padding:11px 16px;border:1px solid #C9A85B;background:#fff;color:#7E6332;
+  border-radius:999px;font-size:14px;font-weight:800;cursor:pointer}
+.rkeep .msg{font-size:13px;color:#8A7C5F;margin:8px 0 0;min-height:18px}
+.appbox{background:linear-gradient(180deg,#221C3E 0%,#15131D 100%);border-radius:20px;
+  border:1px solid rgba(201,168,91,.35);padding:22px 20px;color:#F4F1FF;margin:26px 0 0}
+.appbox .al{font-size:16px;font-weight:800;margin:0 0 8px}
+.appbox .as{font-size:13.5px;color:#C7CFEA;line-height:1.7;margin:0 0 16px}
+.appbox .ab{display:block;text-align:center;padding:14px;border-radius:16px;text-decoration:none;
+  font-size:15px;font-weight:800;color:#0C0A12;background:linear-gradient(180deg,#D6BA75,#C9A85B,#B7984E)}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="wordmark" href="/">만세력</a>
+</header>
+<main><div class="wrap rwrap">
+
+<div class="rstate" id="state">
+  <div class="spin" id="spin"></div>
+  <p class="rt" id="stateTitle">리포트를 여는 중이에요</p>
+  <p class="rs" id="stateSub">결제 확인에 몇 초 걸릴 수 있어요.</p>
+</div>
+
+<section id="report" style="display:none">
+  <h1 style="font-size:22px;margin:0 0 4px">두 사람 리포트</h1>
+  <p class="note" style="margin:0 0 18px">사주 명식을 겹쳐 읽은 관계 해석이에요.</p>
+
+  <div class="rkeep">
+    <p>이 링크는 저장해두시면 <strong>언제든 다시 열려요.</strong></p>
+    <div class="row">
+      <button type="button" id="copy">링크 복사</button>
+    </div>
+    <p class="msg" id="keepMsg"></p>
+  </div>
+
+  <div class="rbody" id="body"></div>
+
+  <aside class="appbox">
+    <p class="al">매일 두 사람의 흐름이 궁금하다면</p>
+    <p class="as">이 리포트는 오늘 기준 한 장이에요.
+    앱에서는 두 분의 하루하루 흐름과 달력, 좋은 날을 이어서 볼 수 있어요.</p>
+    <a class="ab" id="appCta" rel="nofollow"
+       href="https://play.google.com/store/apps/details?id=com.samramanshang.manseryeok&referrer=utm_source%3Dweb%26utm_medium%3Dpair%26utm_campaign%3Dpair_report">앱에서 이어보기</a>
+  </aside>
+</section>
+
+</div></main>
+<footer class="foot">
+  <p><a href="/">만세력</a> — 사주 · 자미두수 · 별자리 · 궁합</p>
+  <p class="legal-links"><a href="/legal/terms/">이용약관</a> · <a href="/legal/privacy/">개인정보처리방침</a>
+  · <a href="/legal/refund/">환불·청약철회</a> · <a href="/legal/business/">사업자정보</a></p>
+  <p class="fine">이 해석은 전통 명리학에 근거한 참고 자료이며, 의학적·법률적·재무적 조언이 아닙니다.</p>
+</footer>
+<script>
+/* 결제 후 리포트 뷰어.
+   ?p=<orderId> 로 들어와 pair-report 를 폴링한다 — PG 웹훅이 도착해야 status 가 paid 가 되고,
+   보통 1~3초 걸린다. 확정되면 URL 을 ?t=<claim_token> 으로 바꿔 영구 링크로 만든다.
+   ?t=<token> 으로 들어오면 폴링 없이 바로 조회한다(재열람 경로).
+
+   ⚠️ 본문은 서버가 준 것만 그린다. 여기서 마크다운을 HTML 로 만들지 않는다 —
+      textContent 로만 넣어 주입 경로를 아예 만들지 않는다(white-space:pre-wrap 로 줄바꿈 유지). */
+var FN = "https://sidxbzpbesbaiokxrqsf.supabase.co/functions/v1";
+var POLL_MS = 1500;
+var GIVE_UP_MS = 25000;
+var started = Date.now();
+
+function q(name){ try { return new URLSearchParams(location.search).get(name) || ""; } catch(e){ return ""; } }
+
+function setState(title, sub, spinning){
+  document.getElementById("stateTitle").textContent = title;
+  document.getElementById("stateSub").textContent = sub;
+  document.getElementById("spin").style.display = spinning ? "" : "none";
+}
+
+function showReport(data){
+  document.getElementById("state").style.display = "none";
+  document.getElementById("report").style.display = "block";
+  document.getElementById("body").textContent = data.body_md || "";
+  if (data.token){
+    try { history.replaceState(null, "", location.pathname + "?t=" + encodeURIComponent(data.token)); }
+    catch(e) {}
+  }
+  if (window.__track) window.__track("pay_done");
+}
+
+function fail(title, sub){ setState(title, sub, false); }
+
+function poll(){
+  var p = q("p"), t = q("t");
+  var url = t ? (FN + "/pair-report?t=" + encodeURIComponent(t))
+              : (FN + "/pair-report?p=" + encodeURIComponent(p));
+
+  fetch(url).then(function(res){
+    if (res.status === 404) throw new Error("not_found");
+    if (!res.ok) throw new Error("http_" + res.status);
+    return res.json();
+  }).then(function(data){
+    if (data.status === "paid" && data.body_md){ showReport(data); return; }
+
+    if (data.status === "paid" && data.pending_body){
+      setState("리포트를 쓰는 중이에요", "곧 열려요. 이 창을 닫지 말아 주세요.", true);
+    } else if (data.status === "failed") {
+      fail("결제가 완료되지 않았어요", "결제가 취소되었거나 실패했어요. 다시 시도해 주세요.");
+      return;
+    } else if (data.status === "refunded") {
+      fail("환불된 주문이에요", "이 리포트는 환불 처리되어 열 수 없어요.");
+      return;
+    }
+
+    if (Date.now() - started > GIVE_UP_MS){
+      fail("결제 확인이 늦어지고 있어요",
+           "결제가 됐다면 잠시 후 이 링크를 다시 열어 주세요. 링크는 그대로 유효해요.");
+      return;
+    }
+    setTimeout(poll, POLL_MS);
+  }).catch(function(e){
+    if (String(e && e.message) === "not_found"){
+      fail("주문을 찾을 수 없어요", "링크가 올바른지 확인해 주세요.");
+      return;
+    }
+    if (Date.now() - started > GIVE_UP_MS){
+      fail("잠시 연결이 불안정해요", "잠시 후 이 링크를 다시 열어 주세요.");
+      return;
+    }
+    setTimeout(poll, POLL_MS);
+  });
+}
+
+document.getElementById("copy").addEventListener("click", function(){
+  var msg = document.getElementById("keepMsg"), url = location.href;
+  var done = function(){ msg.textContent = "링크를 복사했어요"; setTimeout(function(){ msg.textContent = ""; }, 2600); };
+  if (navigator.clipboard && navigator.clipboard.writeText)
+    navigator.clipboard.writeText(url).then(done, function(){ msg.textContent = url; });
+  else msg.textContent = url;
+});
+
+if (!q("p") && !q("t")) fail("주소가 올바르지 않아요", "결제 후 받은 링크로 다시 들어와 주세요.");
+else poll();
+</script>
+</body>
+</html>
