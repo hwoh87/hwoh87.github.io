@@ -6,7 +6,7 @@
   <title>공유 결과 | 만세력</title>
 
   <!-- 카톡/인스타/메신저 리치 미리보기 (Open Graph) — 정적 공통.
-       종류별 미리보기는 /s/<kind>/ OG 셸(fusion·compat·group·pair)이 담당(정적 호스팅 한계 내 최대치). -->
+       종류별 미리보기는 /s/<kind>/ OG 셸(fusion·compat·group·pair·gwansang)이 담당(정적 호스팅 한계 내 최대치). -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="만세력" />
   <meta property="og:title" content="사주 분석 결과를 공유받았어요 | 만세력" />
@@ -17,155 +17,245 @@
   <meta property="og:url" content="https://hwoh87.github.io/s/" />
   <meta name="twitter:card" content="summary_large_image" />
 
+  <!-- 앱 세리프 정본(마루부리) — 한자 글리프가 없어 한자는 Noto Serif KR(600)이 받는다(앱 SealHanja 와 같은 역할). -->
   <style>
-    /* 앱 리뉴얼 디자인 언어의 2-레이어를 웹으로 옮김:
-       딥네이비 코스믹 모먼트(히어로) + 웜 페이퍼 에디토리얼(본문). */
+    @import url("https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600&display=swap");
+    @font-face{font-family:"MaruBuri";font-weight:400;font-display:swap;
+      src:url(https://hangeul.pstatic.net/hangeul_static/webfont/MaruBuri/MaruBuri-Regular.woff2) format("woff2")}
+    @font-face{font-family:"MaruBuri";font-weight:600;font-display:swap;
+      src:url(https://hangeul.pstatic.net/hangeul_static/webfont/MaruBuri/MaruBuri-SemiBold.woff2) format("woff2")}
+
+    /* ── 앱 디자인 토큰 사본(단일 출처는 앱 AppDesignTokens — 근사치 금지) ──
+       cosmicSpaceTop #08070C · cosmicSpaceDeep #120F19 · heroTitle #F4F1FF · heroBody #C7CFEA
+       heroMeta #9FA8CC · cosmicGold #C9A85B · goldBright #F3D9A0 · goldDeep #7E6332
+       CTA 골드 = 앱 tabAccent 채움의 웹 정합(180deg #D6BA75→#C9A85B→#B7984E, onGold #0C0A12)
+       종류별 본문 액센트(--acc)는 앱 SharedResultActivity 와 동일: 융합=aiAccent #6B4EFF ·
+       궁합/그룹=red #9C5D58 · 관상=orangeDeep #7E6034 (JS 가 kind 에 맞춰 갱신) */
+    :root { --acc: #6B4EFF; }
     * { box-sizing: border-box; }
     html { -webkit-text-size-adjust: 100%; }
     body {
-      margin: 0; min-height: 100vh; background: #0A0820; color: #EDEBF5;
+      margin: 0; min-height: 100vh; background: #08070C; color: #C7CFEA;
       font-family: -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
     }
 
-    /* ── 씬/로딩/폴백 센터 카드(다크) ── */
+    /* ── 씬/로딩/폴백 센터 카드(딥스페이스) ── */
     .center {
       min-height: 100vh; display: flex; flex-direction: column;
       align-items: center; justify-content: center; gap: 18px; text-align: center; padding: 32px;
     }
-    .logo { font-size: 44px; }
-    .center h1 { font-size: 20px; font-weight: 700; margin: 0; }
-    .center p { font-size: 14px; line-height: 1.6; color: #B8B2D6; margin: 0; max-width: 320px; }
+    .logo { font-size: 42px; }
+    .center h1 { font-size: 20px; font-weight: 700; margin: 0; color: #F4F1FF; }
+    .center p { font-size: 14px; line-height: 1.6; color: #9FA8CC; margin: 0; max-width: 320px; }
     a.cta {
-      display: inline-block; margin-top: 6px; padding: 14px 28px; border-radius: 999px;
-      background: linear-gradient(135deg, #8B6BFF, #6E48F2); color: #fff; font-weight: 700;
-      text-decoration: none; font-size: 15px;
-      box-shadow: 0 6px 18px rgba(110, 72, 242, 0.35);
+      display: inline-block; margin-top: 6px; padding: 13px 24px; border-radius: 14px;
+      background: linear-gradient(180deg, #D6BA75, #C9A85B, #B7984E);
+      color: #0C0A12; font-weight: 800; text-decoration: none; font-size: 14.5px;
+      box-shadow: 0 6px 18px rgba(201, 168, 91, 0.30);
     }
 
     /* ── sid 스냅샷 뷰 ── */
     .wrap { display: none; }
 
-    /* 코스믹 히어로 — 딥네이비 그라데이션 + 별가루 + 글로우 오브 */
+    /* 코스믹 히어로 — 앱 딥스페이스 모먼트(테마 무관 고정) + 별가루(얼음빛+금빛) + 액센트 성운 */
     .hero {
       position: relative; overflow: hidden; text-align: center;
-      background:
-        radial-gradient(ellipse 120% 70% at 50% -10%, #2A2158 0%, #171040 45%, #0A0820 100%);
-      padding: 52px 22px 44px;
+      background: radial-gradient(ellipse 120% 70% at 50% -10%, #221C3E 0%, #15131D 45%, #08070C 100%);
+      padding: 30px 22px 42px;
     }
-    .hero::before {
-      /* 은은한 성운 글로우 */
-      content: ""; position: absolute; left: 50%; top: -80px; transform: translateX(-50%);
-      width: 420px; height: 260px; border-radius: 50%;
-      background: radial-gradient(closest-side, rgba(124, 92, 255, 0.28), transparent 70%);
-      pointer-events: none;
+    .glow {
+      /* 종류 액센트로 물드는 성운 — JS 가 kind 확정 후 색을 갱신(앱 히어로의 accent 글로우) */
+      position: absolute; left: 50%; top: -80px; transform: translateX(-50%);
+      width: 440px; height: 280px; border-radius: 50%; pointer-events: none;
+      background: radial-gradient(closest-side, rgba(107, 78, 255, 0.20), transparent 70%);
     }
-    .stars, .stars2 { position: absolute; inset: 0; pointer-events: none; }
-    .star { position: absolute; border-radius: 50%; background: #EDEBF5; opacity: 0.8; }
+    .stars { position: absolute; inset: 0; pointer-events: none; }
+    .star { position: absolute; border-radius: 50%; }
+    .star.ice { background: #DCE6FF; }
+    .star.gold { background: #F3D9A0; }
     .star.tw { animation: tw 3.2s ease-in-out infinite; }
     @keyframes tw { 0%,100% { opacity: 0.25; } 50% { opacity: 0.9; } }
     @media (prefers-reduced-motion: reduce) { .star.tw { animation: none; } }
     .hero-inner { position: relative; max-width: 720px; margin: 0 auto; }
+
+    /* 상단 배지 행 — 골드 오버라인 + 읽기 전용 글래스 필(앱 SharedWelcomeHero 1행) */
+    .hero-top {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      margin-bottom: 22px; flex-wrap: wrap;
+    }
+    .ovl {
+      font-size: 10.5px; letter-spacing: 0.14em; font-weight: 700; color: #F3D9A0;
+      background: rgba(201, 168, 91, 0.16); border: 1px solid rgba(201, 168, 91, 0.50);
+      border-radius: 8px; padding: 4px 10px;
+    }
+    .ro {
+      font-size: 10.5px; font-weight: 700; color: #C7CFEA;
+      background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 999px; padding: 4px 10px;
+    }
+
     .orb {
-      width: 64px; height: 64px; margin: 0 auto 16px; border-radius: 50%;
+      width: 64px; height: 64px; margin: 0 auto 14px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center; font-size: 30px;
-      background: radial-gradient(circle at 32% 28%, #3B2F73, #1B1443 68%);
-      border: 1px solid rgba(201, 178, 255, 0.35);
-      box-shadow: 0 0 28px rgba(124, 92, 255, 0.45), inset 0 0 18px rgba(124, 92, 255, 0.25);
+      color: #F3D9A0;
+      background: radial-gradient(circle at 32% 28%, #1C1830, #0C0A12 70%);
+      border: 1px solid rgba(243, 217, 160, 0.38);
+      box-shadow: 0 0 26px rgba(201, 168, 91, 0.35), inset 0 0 16px rgba(201, 168, 91, 0.16);
     }
     .brand {
-      font-size: 12px; letter-spacing: 0.22em; color: #D9C58A; font-weight: 700;
+      font-size: 12px; letter-spacing: 0.18em; color: #C9A85B; font-weight: 700;
       text-transform: uppercase;
     }
-    .subject { font-size: 24px; font-weight: 800; margin: 12px 0 0; line-height: 1.35; }
-    .subject .accent { color: #C9B2FF; }
-    .sig {
-      margin: 20px auto 0; max-width: 560px;
-      font-family: Georgia, "Noto Serif KR", serif; font-size: 17.5px; line-height: 1.75;
-      color: #EFE9FF;
+    .subject {
+      font-family: "MaruBuri", "Noto Serif KR", serif;
+      font-size: 24px; font-weight: 600; margin: 12px 0 0; line-height: 1.45;
+      letter-spacing: -0.01em; color: #F4F1FF;
     }
-    .sig::before, .sig::after { color: #D9C58A; font-size: 20px; }
+    .subject .accent { color: #F3D9A0; }
+    .sig {
+      margin: 18px auto 0; max-width: 560px;
+      font-family: "MaruBuri", "Noto Serif KR", serif; font-weight: 400;
+      font-size: 17.5px; line-height: 1.8; color: #F4F1FF;
+    }
+    .sig::before, .sig::after { color: #F3D9A0; font-size: 19px; }
     .sig::before { content: "“ "; }
     .sig::after { content: " ”"; }
-    /* 궁합 점수(스냅샷 뷰) — 히어로 안 골드 링 */
+
+    /* 종류/프라이버시 글래스 칩(앱 SharedHeroGlassChip) */
+    .chiprow { display: flex; justify-content: center; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+    .gchip {
+      font-size: 11.5px; font-weight: 600; color: #C7CFEA;
+      background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 12px; padding: 6px 11px;
+    }
+
+    /* 궁합 점수(스냅샷 뷰) — 히어로 안 골드 링 + 밴드 스케일(앱 ScoreBandScaleRow) */
     .scorering {
-      width: 118px; height: 118px; margin: 24px auto 0; border-radius: 50%;
+      width: 118px; height: 118px; margin: 22px auto 0; border-radius: 50%;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       position: relative;
     }
     .scorering::before {
       content: ""; position: absolute; inset: 0; border-radius: 50%;
-      background: conic-gradient(#E8C36B calc(var(--pct) * 1%), rgba(237, 235, 245, 0.14) 0);
+      background: conic-gradient(#C9A85B calc(var(--pct) * 1%), rgba(199, 207, 234, 0.14) 0);
       -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
       mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
     }
-    .scorering .num { font-size: 38px; font-weight: 800; color: #F3E6C2; line-height: 1; }
-    .scorering .unit { font-size: 12px; color: #B8B2D6; margin-top: 6px; }
+    .scorering .num { font-size: 38px; font-weight: 800; color: #F3D9A0; line-height: 1; }
+    .scorering .unit { font-size: 12px; color: #9FA8CC; margin-top: 6px; }
+    .bandrow { display: flex; justify-content: center; gap: 6px; margin-top: 14px; flex-wrap: wrap; }
+    .band {
+      font-size: 10.5px; font-weight: 700; color: #9FA8CC;
+      background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.10);
+      border-radius: 999px; padding: 3px 9px;
+    }
+    .band.on { color: #FDFBF6; border-color: transparent; }
+
     .heroband {
       /* 히어로 → 페이퍼 이음새 */
-      height: 18px; background: linear-gradient(#0A0820, rgba(10, 8, 32, 0));
+      height: 18px; background: linear-gradient(#08070C, rgba(8, 7, 12, 0));
       position: relative; z-index: 1; margin-bottom: -18px;
     }
 
-    /* 웜 페이퍼 본문 */
-    .paper { background: #FAF7F0; color: #33302B; padding: 30px 22px 150px; }
+    /* ── 웜 페이퍼 본문(앱 여명 배경 #FAF5EB) — AI 리포트 본문은 앱 AiMarkdownText 와 같은 결 ── */
+    .paper { background: #FAF5EB; color: #33302B; padding: 30px 22px 150px; }
     .paper-inner { max-width: 720px; margin: 0 auto; }
     .cardimg {
       width: 100%; border-radius: 18px; display: block; margin: 2px 0 18px;
-      box-shadow: 0 10px 26px rgba(23, 16, 64, 0.18);
+      box-shadow: 0 10px 26px rgba(12, 10, 18, 0.18);
     }
+    /* 섹션 헤딩 = 앱 SectionTitle(산세리프 굵게 + 종류 액센트, 장식 없음) */
     .report h2 {
-      font-size: 18.5px; margin: 36px 0 12px; color: #7A5E1E; font-weight: 800;
-      padding-bottom: 8px; border-bottom: 1px solid rgba(122, 94, 30, 0.22);
+      font-size: 17px; margin: 34px 0 10px; color: var(--acc); font-weight: 800; line-height: 1.5;
     }
     .report h2:first-child { margin-top: 4px; }
-    .report h2::before { content: "✦ "; color: #C7A94F; font-size: 14px; }
-    .report h3 { font-size: 16px; margin: 26px 0 8px; color: #5D43C9; font-weight: 700; }
-    .report p { font-size: 15.5px; line-height: 1.9; color: #45403A; margin: 0 0 15px; }
-    .report ul { margin: 0 0 15px; padding-left: 20px; }
-    .report li { font-size: 15.5px; line-height: 1.85; color: #45403A; margin-bottom: 6px; }
-    .report strong { color: #201C17; }
-    .term { color: #5D43C9; border-bottom: 1px dashed rgba(93, 67, 201, 0.45); font-weight: 600; }
+    .report h3 { font-size: 15.5px; margin: 24px 0 8px; color: var(--acc); font-weight: 700; }
+    .report p { font-size: 15.5px; line-height: 1.78; color: #33302B; margin: 0 0 16px; }
+    /* 불릿 = 앱 액센트 도트(텍스트 "•" 가 아니라 6px 원) */
+    .report ul { list-style: none; margin: 0 0 16px; padding-left: 10px; }
+    .report li {
+      position: relative; padding-left: 18px; font-size: 15.5px; line-height: 1.78;
+      color: #33302B; margin-bottom: 8px;
+    }
+    .report li::before {
+      content: ""; position: absolute; left: 0; top: 11px; width: 6px; height: 6px;
+      border-radius: 50%; background: var(--acc); opacity: 0.78;
+    }
+    .report strong { color: #1C1B1F; }
+    /* [[용어]] = 앱 용어 링크 표기(액센트 + 밑줄) */
+    .term {
+      color: var(--acc); font-weight: 600; text-decoration: underline;
+      text-underline-offset: 3px; text-decoration-thickness: 1px;
+    }
+
+    /* 신뢰 카드(앱 SharedTrustCard — 딥네이비 메달리온 + 브랜드 한 줄) */
+    .trust {
+      display: flex; gap: 12px; align-items: center; background: #fff;
+      border: 1px solid #E8E0D0; border-radius: 16px; padding: 14px 15px; margin: 30px 0 0;
+    }
+    .trust .medal {
+      width: 36px; height: 36px; border-radius: 12px; flex: none;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #08070C, #120F19); color: #F3D9A0; font-size: 15px;
+    }
+    .trust b { display: block; font-size: 13.5px; color: #1C1B1F; }
+    .trust span { display: block; font-size: 12.5px; color: #6B5C3A; line-height: 1.55; margin-top: 2px; }
+
+    /* 재공유(링크 복사) — 앱 하단 보조 버튼의 웹 대응 */
+    .sharerow { display: flex; align-items: center; gap: 10px; margin: 14px 0 0; }
+    .copybtn {
+      padding: 10px 16px; border: 1px solid #C9A85B; background: #fff; color: #7E6332;
+      border-radius: 999px; font-size: 13.5px; font-weight: 800; cursor: pointer;
+    }
+    .copymsg { font-size: 12.5px; color: #8A7C5F; opacity: 0; transition: opacity 0.3s; }
+    .copymsg.on { opacity: 1; }
+
     .meta {
-      margin-top: 34px; padding-top: 14px; border-top: 1px solid rgba(51, 48, 43, 0.12);
+      margin-top: 26px; padding-top: 14px; border-top: 1px solid rgba(51, 48, 43, 0.12);
       font-size: 12px; color: #8D8578; line-height: 1.7;
     }
 
-    /* 하단 고정 CTA 독(다크 글래스 — 페이퍼 위에서 대비) */
+    /* 하단 고정 CTA 독 — 앱 스티키 독(여명 배경 페이드 + 골드 프라이머리) */
     .ctabar {
       position: fixed; left: 0; right: 0; bottom: 0; display: none;
-      background: rgba(10, 8, 32, 0.94); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
-      border-top: 1px solid rgba(124, 92, 255, 0.30);
-      padding: 12px 18px calc(12px + env(safe-area-inset-bottom));
+      background: rgba(250, 245, 235, 0.96);
+      -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(126, 99, 50, 0.18);
+      padding: 10px 18px calc(10px + env(safe-area-inset-bottom));
     }
-    .ctabar .inner { max-width: 720px; margin: 0 auto; display: flex; gap: 10px; align-items: center; }
-    .ctabar .hint { flex: 1; font-size: 12.5px; line-height: 1.5; color: #B8B2D6; min-width: 0; }
+    .ctabar .inner { max-width: 720px; margin: 0 auto; display: flex; gap: 12px; align-items: center; }
+    .ctabar .hint { flex: 1; font-size: 12.5px; line-height: 1.5; color: #6B5C3A; min-width: 0; }
     .ctabar a.cta { margin-top: 0; padding: 13px 22px; font-size: 14px; white-space: nowrap; flex-shrink: 0; }
 
-    /* ── 선물 포장 오버레이(?gift=1) — 리포트 위에 먼저 덮이는 포장지. 로딩도 함께 가려준다. ── */
+    /* ── 선물 포장 오버레이(?gift=1) — 딥스페이스 포장지. 로딩도 함께 가려준다. ── */
     .gift {
       position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column;
       align-items: center; justify-content: center; text-align: center; padding: 32px 24px;
-      background: radial-gradient(120% 80% at 50% 0%, #1E2E4A 0%, #141F33 55%, #0A1220 100%);
+      background: radial-gradient(120% 80% at 50% 0%, #221C3E 0%, #15131D 55%, #08070C 100%);
       transition: opacity .45s ease, visibility .45s;
     }
     .gift.off { opacity: 0; visibility: hidden; }
     .gift .g-orb {
-      width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center;
-      font-size: 44px; background: rgba(232, 199, 112, 0.10);
-      border: 1.5px solid rgba(232, 199, 112, 0.45); margin-bottom: 22px;
+      width: 96px; height: 96px; border-radius: 50%; display: flex;
+      align-items: center; justify-content: center;
+      font-size: 44px; background: rgba(201, 168, 91, 0.10);
+      border: 1.5px solid rgba(243, 217, 160, 0.45); margin-bottom: 22px;
       animation: giftFloat 2.6s ease-in-out infinite;
     }
     @keyframes giftFloat { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-7px) } }
     .gift .g-kicker { font-size: 12px; letter-spacing: .22em; color: #C9A85B; font-weight: 700; margin-bottom: 12px; }
-    .gift h2 { font-size: 24px; font-weight: 800; color: #F4F1FF; margin: 0 0 8px; line-height: 1.35; }
-    .gift .g-sub { font-size: 14px; color: #B8B2D6; line-height: 1.6; margin-bottom: 28px; }
+    .gift h2 {
+      font-family: "MaruBuri", "Noto Serif KR", serif;
+      font-size: 24px; font-weight: 600; color: #F4F1FF; margin: 0 0 8px; line-height: 1.4;
+    }
+    .gift .g-sub { font-size: 14px; color: #9FA8CC; line-height: 1.6; margin-bottom: 28px; }
     .gift .g-open {
       display: inline-block; padding: 14px 34px; border-radius: 14px; font-size: 15px; font-weight: 800;
-      color: #14130F; text-decoration: none; cursor: pointer; border: 0;
-      background: linear-gradient(150deg, #E8C770, #B8860B);
-      box-shadow: 0 8px 26px rgba(184, 134, 11, 0.35);
+      color: #0C0A12; text-decoration: none; cursor: pointer; border: 0;
+      background: linear-gradient(180deg, #D6BA75, #C9A85B, #B7984E);
+      box-shadow: 0 8px 26px rgba(201, 168, 91, 0.35);
     }
-    .gift .g-note { margin-top: 16px; font-size: 11.5px; color: #8F89AE; }
+    .gift .g-note { margin-top: 16px; font-size: 11.5px; color: #9FA8CC; }
   </style>
 <script src="/assets/track.js" defer></script>
 </head>
@@ -173,6 +263,7 @@
   <!-- sid 스냅샷 뷰(JS가 채움): 코스믹 히어로 + 웜 페이퍼 본문 -->
   <div class="wrap" id="snap">
     <div class="hero">
+      <div class="glow" id="glow"></div>
       <div class="stars" id="stars"></div>
       <div class="hero-inner" id="heroInner"></div>
     </div>
@@ -182,7 +273,7 @@
   <div class="ctabar" id="ctabar">
     <div class="inner">
       <div class="hint" id="ctahint">내 사주도 이렇게 깊이 분석받고 싶다면</div>
-      <a id="ctabtn" class="cta" href="#">앱에서 분석하기</a>
+      <a id="ctabtn" class="cta" href="#" data-cta="store-s-viewer">앱에서 분석하기</a>
     </div>
   </div>
 
@@ -201,7 +292,7 @@
     <div class="logo">🔮</div>
     <h1 id="centerTitle">만세력</h1>
     <p id="centerDesc">결과를 불러오는 중이에요…</p>
-    <a id="centerCta" class="cta" href="#" style="display:none">앱에서 보기</a>
+    <a id="centerCta" class="cta" href="#" style="display:none" data-cta="store-s-center">앱에서 보기</a>
   </div>
 
   <script>
@@ -272,7 +363,12 @@
         a.setAttribute('href', ctaHref);
         a.style.display = 'inline-block';
       }
+      function hexRgba(hex, a) {
+        var n = parseInt(hex.slice(1), 16);
+        return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
+      }
       // 별가루 — sid 시드 기반 결정적 배치(리로드마다 흔들리지 않게).
+      //   앱 코스믹 캔버스와 같은 두 색: 얼음빛 #DCE6FF(잔별) + 금빛 #F3D9A0(굵은 별).
       function sprinkleStars(seedStr) {
         var host = document.getElementById('stars');
         var seed = 0;
@@ -280,15 +376,54 @@
         function rnd() { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }
         for (var n = 0; n < 46; n++) {
           var s = document.createElement('span');
-          var size = rnd() < 0.82 ? 1.5 : 2.5;
-          s.className = 'star' + (rnd() < 0.4 ? ' tw' : '');
+          var isGold = rnd() < 0.28;
+          var size = isGold ? 2.5 : 1.5;
+          s.className = 'star ' + (isGold ? 'gold' : 'ice') + (rnd() < 0.4 ? ' tw' : '');
           s.style.width = size + 'px'; s.style.height = size + 'px';
           s.style.left = (rnd() * 100).toFixed(2) + '%';
           s.style.top = (rnd() * 100).toFixed(2) + '%';
           s.style.opacity = (0.25 + rnd() * 0.6).toFixed(2);
-          if (s.classList.contains('tw')) s.style.animationDelay = (rnd() * 3).toFixed(2) + 's';
+          if (s.className.indexOf('tw') >= 0) s.style.animationDelay = (rnd() * 3).toFixed(2) + 's';
           host.appendChild(s);
         }
+      }
+      // 상단 배지 행 + 글래스 칩(앱 SharedWelcomeHero 요소)
+      function heroTop() {
+        return '<div class="hero-top"><span class="ovl">공유받은 리포트</span>' +
+          '<span class="ro">👁️ 읽기 전용</span></div>';
+      }
+      function glassChips(kindChip) {
+        return '<div class="chiprow"><span class="gchip">' + kindChip + '</span>' +
+          '<span class="gchip">🔒 생년월일은 담기지 않아요</span></div>';
+      }
+      function trustCard(sub) {
+        return '<div class="trust"><div class="medal">✦</div><div>' +
+          '<b>만세력 — 사주 · 자미두수 · 별자리 융합</b>' +
+          '<span>' + sub + '</span></div></div>';
+      }
+      function shareRow() {
+        return '<div class="sharerow"><button class="copybtn" id="copybtn" type="button">🔗 이 리포트 링크 복사</button>' +
+          '<span class="copymsg" id="copymsg">링크를 복사했어요</span></div>';
+      }
+      function bindCopy() {
+        var btn = document.getElementById('copybtn');
+        if (!btn) return;
+        btn.addEventListener('click', function () {
+          var url = location.href;
+          var done = function () {
+            var msg = document.getElementById('copymsg');
+            msg.classList.add('on');
+            setTimeout(function () { msg.classList.remove('on'); }, 2200);
+          };
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(url).then(done, done);
+          } else {
+            var ta = document.createElement('textarea');
+            ta.value = url; document.body.appendChild(ta); ta.select();
+            try { document.execCommand('copy'); } catch (e) {}
+            document.body.removeChild(ta); done();
+          }
+        });
       }
 
       // ── sid 스냅샷: 서버 JSON 을 받아 웹에서 결과를 그대로 보여준다(자동 리다이렉트 없음) ──
@@ -308,67 +443,100 @@
               document.getElementById('giftSub').textContent =
                 d.name_a + '님을 위해 만든 AI 사주 리포트예요.';
             }
-            var hero = '', paper = '';
+            var hero = '', paper = '', acc = '#6B4EFF';
             // AI 리포트(ai-report + report_kind). 'saju-fusion' 은 일반화 이전 구행 하위호환.
             var isAiReport = (d.scene_type === 'ai-report' || d.scene_type === 'saju-fusion') && d.body_md;
             if (isAiReport) {
+              // 종류별 브랜딩 + 본문 액센트 — 앱 SharedResultActivity 의 kind 분기와 동일 값.
               var KIND = {
                 'fusion': {
                   glyph: '☯', label: 'AI 융합 해석', subjectSuffix: '님의 사주 리포트',
-                  titleSuffix: '님의 사주 AI 융합 해석',
+                  titleSuffix: '님의 사주 AI 융합 해석', acc: '#6B4EFF',
+                  chip: '🔮 AI 융합 해석',
                   meta: '이 리포트는 만세력 앱의 AI 융합 해석(사주 · 자미두수 · 별자리)으로 생성됐어요.',
-                  hint: '내 사주도 이렇게 깊이 분석받고 싶다면'
+                  hint: '내 사주도 이렇게 깊이 분석받고 싶다면',
+                  trust: '내 사주로 분석하면 나의 명식 · 용신 · 흐름까지 이어져요.'
                 },
                 'compat': {
                   glyph: '💞', label: '1:1 궁합 AI 해석', subjectSuffix: ' 궁합 AI 리포트',
-                  titleSuffix: ' 궁합 AI 해석',
+                  titleSuffix: ' 궁합 AI 해석', acc: '#9C5D58',
+                  chip: '💞 궁합 AI 해석',
                   meta: '이 리포트는 만세력 앱의 1:1 궁합 AI 해석(사주 기반)으로 생성됐어요.',
-                  hint: '우리 궁합도 이렇게 깊이 보고 싶다면'
+                  hint: '우리 궁합도 이렇게 깊이 보고 싶다면',
+                  trust: '사주 · 자미두수 · 별자리를 한 앱에서. 내 사주로 보면 관계의 흐름·시기까지 이어져요.'
                 },
                 'group': {
                   glyph: '👥', label: '그룹 궁합 AI 해석', subjectSuffix: ' 그룹 궁합 리포트',
-                  titleSuffix: ' 그룹 궁합 AI 해석',
+                  titleSuffix: ' 그룹 궁합 AI 해석', acc: '#9C5D58',
+                  chip: '👥 그룹 궁합 AI 해석',
                   meta: '이 리포트는 만세력 앱의 그룹 궁합 AI 해석(사주 기반)으로 생성됐어요.',
-                  hint: '우리 모임 궁합도 이렇게 보고 싶다면'
+                  hint: '우리 모임 궁합도 이렇게 보고 싶다면',
+                  trust: '사주 · 자미두수 · 별자리를 한 앱에서. 우리 모임을 직접 분석하면 케미 지도까지 이어져요.'
                 },
                 'gwansang': {
                   // 관상은 name_a 자체가 완결 라벨("관상 보고서") — 타인 사진 케이스가 많아 소유격 없음.
                   glyph: '相', label: 'AI 관상 보고서', subjectSuffix: '',
-                  titleSuffix: '',
+                  titleSuffix: '', acc: '#7E6034',
+                  chip: '🧿 AI 관상 보고서',
                   meta: '이 보고서는 만세력 앱의 관상 분석(온디바이스 관상 + AI 심층)으로 생성됐어요. 얼굴 사진은 포함되지 않아요.',
-                  hint: '내 얼굴의 기운도 읽어 보고 싶다면'
+                  hint: '내 얼굴의 기운도 읽어 보고 싶다면',
+                  trust: '사주 · 자미두수 · 별자리에 관상까지 한 앱에서. 셀피 한 장이면 기기 안에서 분석돼요.'
                 }
               };
               var b = KIND[d.report_kind] || KIND['fusion'];
+              acc = b.acc;
               document.title = d.name_a + b.titleSuffix + ' | 만세력';
+              hero += heroTop();
               hero += '<div class="orb">' + b.glyph + '</div>';
               hero += '<div class="brand">만세력 · ' + b.label + '</div>';
               hero += '<div class="subject"><span class="accent">' + esc(d.name_a) + '</span>' + b.subjectSuffix + '</div>';
               hero += '<div class="sig">' + esc(d.one_liner) + '</div>';
+              hero += glassChips(b.chip);
               paper += '<div class="report">' + mdToHtml(d.body_md) + '</div>';
+              paper += trustCard(b.trust);
+              paper += shareRow();
               paper += '<p class="meta">' + b.meta + '<br />공유한 사람이 직접 공개한 결과이며, 링크는 일정 기간 후 만료됩니다.</p>';
               document.getElementById('ctahint').textContent = b.hint;
             } else {
+              // 1:1 궁합 스냅샷(비 AI) — 골드 링 점수 + 밴드 스케일(앱 수신 화면과 동일 구간).
+              acc = '#9C5D58';
               document.title = d.name_a + ' × ' + d.name_b + ' 궁합 | 만세력';
               var pct = Math.max(0, Math.min(100, Number(d.score) || 0));
+              var bandIdx = pct >= 80 ? 4 : pct >= 65 ? 3 : pct >= 50 ? 2 : pct >= 35 ? 1 : 0;
+              var bandColor = pct >= 65 ? '#3F7154' : pct >= 50 ? '#5E7189' : pct >= 35 ? '#9F7743' : '#9C5D58';
+              var bands = ['어긋남', '주의', '보통', '좋음', '강한 인연'].map(function (lb, i) {
+                return i === bandIdx
+                  ? '<span class="band on" style="background:' + bandColor + '">' + lb + '</span>'
+                  : '<span class="band">' + lb + '</span>';
+              }).join('');
+              hero += heroTop();
               hero += '<div class="orb">💞</div>';
               hero += '<div class="brand">만세력 · 사주 궁합</div>';
               hero += '<div class="subject"><span class="accent">' + esc(d.name_a) + ' × ' + esc(d.name_b) + '</span>' +
                 (d.relation_label ? ' · ' + esc(d.relation_label) : '') + '</div>';
               hero += '<div class="scorering" style="--pct:' + pct + '"><span class="num">' + esc(d.score) + '</span><span class="unit">사주로 본 궁합 점수</span></div>';
+              hero += '<div class="bandrow">' + bands + '</div>';
               hero += '<div class="sig">' + esc(d.one_liner) + '</div>';
+              hero += glassChips('💞 1:1 궁합' + (d.relation_label ? ' · ' + esc(d.relation_label) : ''));
               if (d.card_url) paper += '<img class="cardimg" alt="궁합 카드" src="' + esc(d.card_url) + '" />';
+              paper += trustCard('사주 · 자미두수 · 별자리를 한 앱에서. 내 사주로 보면 관계의 흐름·시기까지 이어져요.');
+              paper += shareRow();
               paper += '<p class="meta">공유한 사람이 공개한 결과예요. 만세력 앱에서 내 사주로 직접 궁합을 확인할 수 있어요.</p>';
               document.getElementById('ctahint').textContent = '내 사주로 우리 궁합을 확인하고 싶다면';
             }
+            // 종류 액센트 반영 — 본문 헤딩·도트·용어(앱 headingColor)와 히어로 성운 글로우.
+            document.documentElement.style.setProperty('--acc', acc);
+            document.getElementById('glow').style.background =
+              'radial-gradient(closest-side, ' + hexRgba(acc, 0.20) + ', transparent 70%)';
             document.getElementById('heroInner').innerHTML = hero;
             document.getElementById('paperInner').innerHTML = paper;
             sprinkleStars(sid);
+            bindCopy();
             document.getElementById('snap').style.display = 'block';
             document.getElementById('ctabtn').setAttribute('href', ctaHref(store, sid));
             document.getElementById('ctabar').style.display = 'block';
             document.getElementById('center').style.display = 'none';
-            document.body.style.background = '#FAF7F0';
+            document.body.style.background = '#FAF5EB';
           })
           .catch(function () {
             giftEl.classList.add('off');
