@@ -14,103 +14,295 @@
 <meta property="og:url" content="https://hwoh87.github.io/saju/" />
 <meta property="og:image" content="https://hwoh87.github.io/og-saju.png" />
 <meta name="twitter:card" content="summary_large_image" />
-<link rel="stylesheet" href="/assets/seo.css" />
 <script src="/assets/track.js" defer></script>
 <style>
-.calc-form{background:#fff;border:1px solid #E8E0D0;border-radius:20px;padding:20px 18px;margin:0 0 26px}
+/* ─── 광고 랜딩 스킨 — 풀 다크 코스믹 ─────────────────────────────────────
+   /calc/ 계열의 "웜 페이퍼" 톤과 달리 이 페이지는 Meta 광고에서 넘어오는
+   세일즈 랜딩이라, 광고 이미지(밤하늘·금박)의 인상이 끊기지 않도록
+   전체를 앱의 딥네이비 레이어(AppTone 크롬 토큰)로 통일한다.
+   seo.css 를 링크하지 않는 독립 스킨 — 페이퍼 배경이 섞이면 안 된다. */
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600&display=swap");
+@font-face{font-family:"MaruBuri";font-weight:400;font-display:swap;
+  src:url(https://hangeul.pstatic.net/hangeul_static/webfont/MaruBuri/MaruBuri-Regular.woff2) format("woff2")}
+@font-face{font-family:"MaruBuri";font-weight:600;font-display:swap;
+  src:url(https://hangeul.pstatic.net/hangeul_static/webfont/MaruBuri/MaruBuri-SemiBold.woff2) format("woff2")}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:#0C0A12;color:#E9E4F4;
+  font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;line-height:1.75}
+a{color:#C7CFEA;text-decoration:none}
+.serif{font-family:"MaruBuri","Noto Serif KR",serif}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:rgba(12,10,18,.86);backdrop-filter:blur(8px);padding:10px 18px;
+  position:sticky;top:0;z-index:5}
+.wordmark{color:#F4F1FF;font-weight:800;letter-spacing:.02em;font-size:15px}
+
+/* ── 히어로: 광고 클릭 직후 첫 화면. 가격은 여기서 말하지 않는다(카피 문서 B-1). */
+.hero{position:relative;overflow:hidden;text-align:center;color:#F4F1FF;
+  min-height:86svh;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse 130% 80% at 50% -12%,#221C3E 0%,#15131D 52%,#0C0A12 100%);
+  padding:48px 22px 64px}
+.hero::before{content:"";position:absolute;left:50%;top:-110px;transform:translateX(-50%);
+  width:520px;height:320px;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(59,46,115,.42),transparent 70%);pointer-events:none}
+.stars{position:absolute;inset:0;pointer-events:none;opacity:.7;
+  background-image:
+    radial-gradient(1px 1px at 12% 28%,#DCE6FF 50%,transparent 51%),
+    radial-gradient(1px 1px at 78% 18%,#DCE6FF 50%,transparent 51%),
+    radial-gradient(1px 1px at 32% 72%,#DCE6FF 50%,transparent 51%),
+    radial-gradient(1px 1px at 64% 58%,#DCE6FF 50%,transparent 51%),
+    radial-gradient(1px 1px at 90% 66%,#DCE6FF 50%,transparent 51%),
+    radial-gradient(1px 1px at 45% 12%,#DCE6FF 50%,transparent 51%),
+    radial-gradient(1.5px 1.5px at 22% 52%,#F3D9A0 50%,transparent 51%),
+    radial-gradient(1.5px 1.5px at 84% 40%,#F3D9A0 50%,transparent 51%),
+    radial-gradient(1.5px 1.5px at 56% 84%,#F3D9A0 50%,transparent 51%);
+  animation:twinkle 7.2s ease-in-out infinite alternate}
+@keyframes twinkle{from{opacity:.5}to{opacity:.9}}
+@media (prefers-reduced-motion:reduce){.stars{animation:none}}
+.hero-inner{position:relative;max-width:680px;margin:0 auto}
+.kicker{font-size:12px;letter-spacing:.14em;color:#C9A85B;font-weight:700;margin:0 0 16px}
+.hero h1{font-family:"MaruBuri","Noto Serif KR",serif;font-size:29px;font-weight:600;
+  margin:0 0 18px;line-height:1.52;letter-spacing:-.01em}
+.hero .hsub{font-size:15.5px;color:#C7CFEA;line-height:1.8;margin:0 0 30px}
+.hero .hsub strong{color:#F3D9A0;font-weight:700}
+.hero-cta{display:inline-block;padding:16px 40px;border:0;border-radius:999px;
+  font-size:16.5px;font-weight:800;cursor:pointer;color:#0C0A12;
+  background:linear-gradient(180deg,#D6BA75,#C9A85B,#B7984E);box-shadow:0 8px 26px rgba(201,168,91,.38)}
+.hero .free{font-size:12.5px;color:#9FA8CC;margin:12px 0 0}
+.scrolldn{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);
+  color:#9FA8CC;font-size:20px;animation:dn 1.8s ease-in-out infinite;pointer-events:none}
+@keyframes dn{0%,100%{transform:translate(-50%,0);opacity:.5}50%{transform:translate(-50%,7px);opacity:1}}
+@media (prefers-reduced-motion:reduce){.scrolldn{animation:none}}
+
+.wrap{max-width:680px;margin:0 auto;padding:0 22px}
+section.blk{padding:58px 0 6px}
+.sk-label{font-size:12px;letter-spacing:.14em;color:#C9A85B;font-weight:700;text-align:center;margin:0 0 14px}
+.blk h2{font-family:"MaruBuri","Noto Serif KR",serif;font-size:22px;font-weight:600;color:#F4F1FF;
+  text-align:center;line-height:1.55;margin:0 0 26px;border:0;padding:0}
+
+/* ── 공감 스토리: 광고 훅의 감정을 받아서 문제를 이름 붙인다. 관찰형 문장만. */
+.story p{font-family:"MaruBuri","Noto Serif KR",serif;font-size:17px;line-height:2.05;
+  color:#D9D2EC;text-align:center;margin:0 0 26px}
+.story p b{color:#F3D9A0;font-weight:600}
+.story .turn{color:#F4F1FF;font-size:18px}
+
+/* ── 리포트가 답하는 것: 질문형 카드 */
+.qs{display:grid;gap:10px;margin:0}
+.qcard{background:#171226;border:1px solid #2A2344;border-radius:18px;padding:17px 19px}
+.qcard .qq{font-size:15.5px;font-weight:800;color:#F4F1FF;margin:0 0 5px}
+.qcard .qq em{font-style:normal;color:#F3D9A0}
+.qcard p{font-size:13.5px;color:#A99FC4;line-height:1.7;margin:0}
+
+/* ── 리포트 미리보기: 실물 지면처럼. 예시임을 명시(가짜 후기·가짜 사례 금지). */
+.preview{position:relative;background:#171226;border:1px solid rgba(201,168,91,.4);
+  border-radius:20px;padding:24px 22px 0;overflow:hidden;max-height:330px}
+.preview .ptag{display:inline-block;font-size:11.5px;font-weight:800;letter-spacing:.08em;
+  color:#C9A85B;border:1px solid rgba(201,168,91,.5);border-radius:8px;padding:3px 9px;margin:0 0 14px}
+.preview h3{font-family:"MaruBuri","Noto Serif KR",serif;font-size:16.5px;color:#F3D9A0;
+  font-weight:600;margin:0 0 10px}
+.preview p{font-size:14.5px;line-height:1.95;color:#D9D2EC;margin:0 0 16px}
+.preview .fade{position:absolute;left:0;right:0;bottom:0;height:150px;
+  background:linear-gradient(rgba(23,18,38,0),#171226 78%);display:flex;align-items:flex-end;
+  justify-content:center;padding-bottom:18px}
+.preview .fade span{font-size:13px;color:#9FA8CC}
+.pv-note{font-size:12.5px;color:#7C82A0;text-align:center;margin:10px 0 0}
+
+/* ── 신뢰 블록 */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.fact{background:#171226;border:1px solid #2A2344;border-radius:18px;padding:16px 17px;text-align:center}
+.fact b{display:block;font-size:15px;color:#F4F1FF;margin:0 0 4px}
+.fact span{font-size:12.5px;color:#A99FC4;line-height:1.6;display:block}
+.how-p{font-size:14.5px;color:#B9B0D6;line-height:1.85;text-align:center;margin:18px 0 0}
+
+/* ── 가격 카드(입력 전 노출용). 단일가 — 취소선 가짜 할인 금지(표시광고법·신뢰). */
+.pay-card{background:#171226;border:1px solid #C9A85B;border-radius:20px;padding:22px 20px;
+  box-shadow:0 10px 34px rgba(201,168,91,.16)}
+.pay-title{font-size:17px;font-weight:800;color:#F3D9A0;margin:0 0 12px}
+.pay-feats{margin:0 0 16px;padding:0;list-style:none}
+.pay-feats li{font-size:14px;color:#C7CFEA;line-height:1.75;padding:0 0 0 24px;position:relative}
+.pay-feats li::before{content:"✦";position:absolute;left:3px;color:#C9A85B;font-weight:800;font-size:12px}
+.pay-price{text-align:center;margin:0 0 12px;font-size:15px;color:#A99FC4}
+.pay-price b{font-size:31px;font-weight:800;color:#F4F1FF;letter-spacing:-.01em}
+.pay-btn,a.pay-btn{display:block;width:100%;padding:15px;border:0;border-radius:16px;text-align:center;
+  font-size:16px;font-weight:800;cursor:pointer;color:#0C0A12;
+  background:linear-gradient(180deg,#D6BA75,#C9A85B,#B7984E);box-shadow:0 6px 18px rgba(201,168,91,.3)}
+.pay-btn[disabled]{opacity:.62;cursor:progress}
+.pay-methods{text-align:center;font-size:12.5px;color:#8F86AC;margin:10px 0 0}
+.pay-legal{font-size:12px;color:#8F86AC;line-height:1.6;margin:12px 0 0}
+.pay-legal a{color:#C7CFEA;text-decoration:underline}
+.pay-err{color:#E39A8E;font-size:14px;margin:10px 0 0;display:none}
+.pay-calm{font-size:13px;color:#8F86AC;margin:12px 0 0;text-align:center}
+.pay-box{margin:26px 0 0}
+.pay-lead{font-size:19px;font-weight:800;color:#F4F1FF;margin:0 0 4px}
+.pay-lead strong{color:#F3D9A0}
+.pay-sub{font-size:14.5px;color:#A99FC4;line-height:1.6;margin:0 0 16px}
+.pay-sub strong{color:#D9D2EC}
+
+/* ── 입력 폼 (다크 리스킨 — id·구조는 계산 JS와 계약) */
+.calc-form{background:#171226;border:1px solid #2A2344;border-radius:20px;padding:20px 18px;margin:0 0 26px}
 .calc-form .row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
-.calc-form label{font-size:13px;font-weight:700;color:#6B5C3A;display:block;margin-bottom:5px}
+.calc-form label{font-size:13px;font-weight:700;color:#A99FC4;display:block;margin-bottom:5px}
 .calc-form select,.calc-form input[type=number]{
-  padding:10px 12px;border:1px solid #D8CFBC;border-radius:12px;font-size:16px;background:#FDFCF8;color:#33302B}
+  padding:10px 12px;border:1px solid #3A3355;border-radius:12px;font-size:16px;background:#0F0C1D;color:#EDE8F5}
 .calc-form .grow{flex:1;min-width:88px}
-.chk{display:flex;align-items:center;gap:7px;font-size:14px;color:#5A4E33;padding:6px 0}
-.chk input{width:18px;height:18px;accent-color:#7E6332}
+.chk{display:flex;align-items:center;gap:7px;font-size:14px;color:#C7CFEA;padding:6px 0}
+.chk input{width:18px;height:18px;accent-color:#C9A85B}
 .calc-btn{width:100%;padding:15px;border:0;border-radius:16px;font-size:16px;font-weight:800;cursor:pointer;
   color:#0C0A12;background:linear-gradient(180deg,#D6BA75,#C9A85B,#B7984E);box-shadow:0 6px 18px rgba(201,168,91,.3)}
 .calc-btn[disabled]{opacity:.62;cursor:progress}
-.err{color:#B4574B;font-size:14px;margin:8px 0 0;display:none}
+.err{color:#E39A8E;font-size:14px;margin:8px 0 0;display:none}
 #result{display:none}
-.read-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 8px}
-.read-card{background:#fff;border:1px solid #E8E0D0;border-radius:20px;padding:13px 14px}
-.read-card .rk{display:block;font-size:11.5px;font-weight:800;color:#8A7C5F;letter-spacing:.04em}
-.read-card strong{display:block;font-size:19px;font-weight:800;color:#33302B;margin:3px 0 4px}
-.read-card p{margin:0;font-size:12.5px;color:#6B5C3A;line-height:1.55}
-.bars{display:flex;flex-direction:column;gap:6px;margin:0 0 8px}
-.bars .row2{display:flex;align-items:center;gap:9px}
-.bars .nm{width:64px;font-size:13px;font-weight:700;color:#5A4E33;flex:none}
-.bars .bar{flex:1;height:11px;background:#F0E9DB;border-radius:999px;overflow:hidden}
-.bars .bar i{display:block;height:100%;background:var(--el,#8A7C5F);border-radius:999px}
-.bars .pc{width:42px;text-align:right;font-size:12px;color:#8A7C5F;flex:none}
-.hero-cta{margin:18px auto 0;display:block;padding:13px 30px;border:0;border-radius:999px;
-  font-size:15px;font-weight:800;cursor:pointer;color:#0C0A12;
-  background:linear-gradient(180deg,#D6BA75,#C9A85B,#B7984E);box-shadow:0 6px 18px rgba(201,168,91,.3)}
-.pay-box{margin:26px 0 0}
-.pay-lead{font-size:19px;font-weight:800;color:#33302B;margin:0 0 4px}
-.pay-sub{font-size:14.5px;color:#6B5C3A;line-height:1.6;margin:0 0 16px}
-.pay-card{background:#fff;border:1px solid #C9A85B;border-radius:20px;padding:20px 18px;
-  box-shadow:0 6px 22px rgba(201,168,91,.18)}
-.pay-title{font-size:17px;font-weight:800;color:#33302B;margin:0 0 12px}
-.pay-feats{margin:0 0 16px;padding:0;list-style:none}
-.pay-feats li{font-size:14px;color:#5A4E33;line-height:1.7;padding:0 0 0 22px;position:relative}
-.pay-feats li::before{content:"\2713";position:absolute;left:2px;color:#C9A85B;font-weight:800}
-.pay-price{text-align:center;margin:0 0 12px;font-size:15px;color:#6B5C3A}
-.pay-price b{font-size:30px;font-weight:800;color:#33302B;letter-spacing:-.01em}
-.pay-btn{width:100%;padding:15px;border:0;border-radius:16px;font-size:16px;font-weight:800;cursor:pointer;
-  color:#0C0A12;background:linear-gradient(180deg,#D6BA75,#C9A85B,#B7984E);box-shadow:0 6px 18px rgba(201,168,91,.3)}
-.pay-btn[disabled]{opacity:.62;cursor:progress}
-.pay-methods{text-align:center;font-size:12.5px;color:#8A7C5F;margin:10px 0 0}
-.pay-legal{font-size:12px;color:#8A7C5F;line-height:1.6;margin:12px 0 0}
-.pay-err{color:#B4574B;font-size:14px;margin:10px 0 0;display:none}
-.pay-calm{font-size:13px;color:#8A7C5F;margin:12px 0 0;text-align:center}
+@media(max-width:560px){.pform{grid-template-columns:1fr}}
+.note{background:#100D1F;border:1px solid #2A2344;border-left:3px solid #C9A85B;
+  border-radius:12px;padding:13px 15px;margin:0 0 18px;font-size:13.5px;color:#A99FC4;line-height:1.7}
+.note strong{color:#D9D2EC}
+
+/* ── 결과(무료 티저) */
 .legal-links{font-size:12.5px;margin:0 0 8px}
 .legal-links a{color:#9FA8CC}
-.share-row{display:flex;align-items:center;gap:10px;margin:16px 0 0;flex-wrap:wrap}
-.share-btn{padding:11px 18px;border:1px solid #C9A85B;background:#fff;color:#7E6332;
-  border-radius:999px;font-size:14px;font-weight:800;cursor:pointer}
-.share-msg{font-size:13px;color:#8A7C5F}
-.toolrail{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:26px 0 0}
-.toolrail a{display:block;background:#fff;border:1px solid #E8E0D0;border-radius:20px;padding:13px 15px;
-  text-decoration:none;color:#1C1B1F}
-.toolrail a:hover{border-color:#C9A85B}
-.toolrail .tk{display:block;font-size:11.5px;font-weight:800;color:#8A7C5F;letter-spacing:.04em}
-.toolrail strong{display:block;font-size:16px;margin:3px 0 3px}
-.toolrail span.sub{display:block;font-size:12.5px;color:#6B5C3A;line-height:1.5}
 
-.myeongsik{width:100%;min-width:0;border-collapse:collapse;background:#fff;border:1px solid #E8E0D0;border-radius:20px;
-  overflow:hidden;text-align:center;margin:0 0 18px;font-size:14px}
-.myeongsik th{background:#F3EDE0;color:#6B5C3A;font-size:12.5px;padding:8px 4px}
-.myeongsik td{padding:7px 4px;border-top:1px solid #F0E9DB}
+/* ── FAQ */
+.faq{display:grid;gap:8px}
+.faq details{background:#171226;border:1px solid #2A2344;border-radius:14px;padding:0}
+.faq summary{cursor:pointer;list-style:none;padding:15px 17px;font-size:14.5px;font-weight:700;color:#E9E4F4}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";float:right;color:#C9A85B;font-weight:800}
+.faq details[open] summary::after{content:"−"}
+.faq .fa{padding:0 17px 15px;font-size:13.5px;color:#A99FC4;line-height:1.75}
+
+.foot{background:#08070C;color:#9FA8CC;padding:30px 20px 44px;text-align:center;font-size:13px;margin-top:64px}
+.foot a{color:#C7CFEA}
+.foot .fine{max-width:620px;margin:10px auto 0;font-size:12px;line-height:1.65;color:#7C82A0}
+
+@media (min-width:640px){
+  .hero h1{font-size:36px}
+  .blk h2{font-size:25px}
+}
+
+/* ── saju 전용 다크: 명식표·대운 스트립·읽기 카드·오행 바 */
+#result h2{font-family:"MaruBuri","Noto Serif KR",serif;font-size:19px;color:#F3D9A0;font-weight:600;
+  margin:34px 0 12px;text-align:left}
+#result h3{font-size:16px;margin:22px 0 8px;color:#D9D2EC;font-weight:700}
+.myeongsik{width:100%;min-width:0;border-collapse:collapse;background:#171226;border:1px solid #2A2344;
+  border-radius:20px;overflow:hidden;text-align:center;margin:0 0 18px;font-size:14px;color:#E9E4F4}
+.myeongsik th{background:#1D1734;color:#A99FC4;font-size:12.5px;padding:8px 4px}
+.myeongsik td{padding:7px 4px;border-top:1px solid #241D3D}
 .myeongsik .hj{font-size:26px;font-weight:800;line-height:1.2}
-.myeongsik .kr{font-size:11.5px;color:#8A7C5F}
-.myeongsik .ss{font-size:12.5px;font-weight:700;color:#46698F}
+.myeongsik .kr{font-size:11.5px;color:#8F86AC}
+.myeongsik .ss{font-size:12.5px;font-weight:700;color:#9DB5DC}
 .myeongsik td a{color:inherit}
 .dw-strip{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;margin:0 0 8px}
-.dw-cell{flex:0 0 auto;min-width:74px;background:#fff;border:1px solid #E8E0D0;border-radius:12px;
-  padding:9px 10px;text-align:center}
+.dw-cell{flex:0 0 auto;min-width:74px;background:#171226;border:1px solid #2A2344;border-radius:12px;
+  padding:9px 10px;text-align:center;color:#E9E4F4}
 .dw-cell .g{font-size:17px;font-weight:800}
-.dw-cell .a{font-size:11.5px;color:#8A7C5F;margin-top:2px}
-.dw-cell .s{font-size:11.5px;color:#46698F;margin-top:1px}
+.dw-cell .a{font-size:11.5px;color:#8F86AC;margin-top:2px}
+.dw-cell .s{font-size:11.5px;color:#9DB5DC;margin-top:1px}
+.read-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 8px}
+.read-card{background:#171226;border:1px solid #2A2344;border-radius:20px;padding:13px 14px}
+.read-card .rk{display:block;font-size:11.5px;font-weight:800;color:#9FA8CC;letter-spacing:.04em}
+.read-card strong{display:block;font-size:19px;font-weight:800;color:#F4F1FF;margin:3px 0 4px}
+.read-card p{margin:0;font-size:12.5px;color:#A99FC4;line-height:1.55}
 .ohang{display:flex;flex-direction:column;gap:6px;margin:0 0 8px}
 .ohang .row2{display:flex;align-items:center;gap:9px}
-.ohang .nm{width:44px;font-size:13px;font-weight:700;color:#5A4E33;flex:none}
-.ohang .bar{flex:1;height:11px;background:#F0E9DB;border-radius:999px;overflow:hidden}
+.ohang .nm{width:44px;font-size:13px;font-weight:700;color:#C7CFEA;flex:none}
+.ohang .bar{flex:1;height:11px;background:#2A2344;border-radius:999px;overflow:hidden}
 .ohang .bar i{display:block;height:100%;background:var(--el,#8A7C5F);border-radius:999px}
-.ohang .pc{width:38px;text-align:right;font-size:12px;color:#8A7C5F;flex:none}
+.ohang .pc{width:38px;text-align:right;font-size:12px;color:#8F86AC;flex:none}
+/* 앱 WuxingTokens — seo.css 를 안 쓰므로 여기 정의(다크 배경 대비 밝은 변형) */
+.e-tree{--el:#6FA277}.e-fire{--el:#C77E75}.e-earth{--el:#BF9C64}.e-metal{--el:#8E9BA8}.e-water{--el:#5F84B0}
 </style>
 </head>
 <body>
 <header class="topbar">
   <a class="wordmark" href="/">만세력</a>
 </header>
+
 <section class="hero">
+  <div class="stars"></div>
   <div class="hero-inner">
     <p class="kicker">인생 4구간 리포트</p>
-    <h1>네 기둥이 잇는 한 생애<small>생년월일시 하나면 됩니다.<br />설치도 가입도 없이, 여기서 바로.</small></h1>
+    <h1>지금 이 시기는,<br />내 인생의 어디쯤일까</h1>
+    <p class="hsub">태어난 날의 네 기둥이 잇는 한 생애를 읽습니다.<br />
+    생년월일시 하나면 됩니다 — <strong>설치도 가입도 없이, 여기서 바로.</strong></p>
     <button class="hero-cta" id="toForm" type="button">내 사주 넣기</button>
+    <p class="free">명식·격국·용신까지는 무료예요</p>
+  </div>
+  <span class="scrolldn">↓</span>
+</section>
+
+<div class="wrap">
+
+<section class="blk story">
+  <p>열심히 살고 있는데,<br />지금 가는 방향이 맞는지는 <b>확신이 없을 때</b>가 있습니다.</p>
+  <p>남들의 시간표와 비교하게 되고,<br />늦은 건지 빠른 건지도 모른 채 계속 걷게 됩니다.</p>
+  <p class="turn">사주에서 일생은 하나의 흐름이 아니라<br /><b>주제가 다른 네 구간</b>으로 읽힙니다.</p>
+</section>
+
+<section class="blk">
+  <p class="sk-label">WHAT&#39;S INSIDE</p>
+  <h2>리포트는 이 질문들에<br />문장으로 답합니다</h2>
+  <div class="qs">
+    <div class="qcard"><p class="qq">내 일생의 <em>큰 그림</em>은 어떤 결인가</p>
+      <p>네 기둥이 그리는 생애의 패턴을, 명식·격국·용신을 근거로.</p></div>
+    <div class="qcard"><p class="qq">초년 · 청년 · 중년 · 말년 — <em>시기마다</em> 무엇이 주제인가</p>
+      <p>구간마다 힘이 실리는 자리와 비워지는 자리를 따로.</p></div>
+    <div class="qcard"><p class="qq">흐름이 방향을 트는 <em>전환점</em>은 어디인가</p>
+      <p>10년 대운이 갈아타는 자리 — 무엇이 끝나고 무엇이 시작되는지.</p></div>
+    <div class="qcard"><p class="qq">그래서 <em>지금</em>은 어떤 자리인가</p>
+      <p>사실 나열이 아니라, 네 구간이 이어지는 하나의 이야기로.</p></div>
   </div>
 </section>
-<div class="heroband"></div>
-<main class="paper"><div class="paper-inner">
+
+<section class="blk">
+  <p class="sk-label">PREVIEW</p>
+  <h2>이런 문장으로 씁니다</h2>
+  <div class="preview">
+    <span class="ptag">리포트 예시 문단</span>
+    <h3>3장 · 중년 — 쌓은 것이 구조가 되는 시기</h3>
+    <p>이 구간에서 눈에 들어오는 건, 앞선 청년 구간에서 흩어져 있던 힘이 한 방향으로
+    모이기 시작한다는 점이에요. 그동안은 여러 갈래를 벌려 놓고 어느 것도 확신하기 어려운
+    배치였다면, 이 시기부터는 그중 하나가 무게중심이 되는 구조입니다. 다만 힘이 모이는
+    시기는 늘 같은 청구서를 들고 옵니다 — 나머지를 정리해야 한다는 것.</p>
+    <p>그 정리를 미루면 이 구간의 장점이 부담으로 바뀌기 쉬워요. 대운의 흐름을 보면…</p>
+    <div class="fade"><span>— 결제하면 당신의 이야기로 이어집니다 —</span></div>
+  </div>
+  <p class="pv-note">위 문단은 형식을 보여드리기 위한 예시예요. 실제 리포트는 당신의 명식으로 새로 씁니다.</p>
+</section>
+
+<section class="blk">
+  <p class="sk-label">HOW IT&#39;S MADE</p>
+  <h2>운세가 아니라,<br />명식을 세워서 읽습니다</h2>
+  <div class="facts">
+    <div class="fact"><b>정통 만세력</b><span>절입시각·진태양시까지 반영해 명식을 세워요</span></div>
+    <div class="fact"><b>격국 · 용신 · 대운</b><span>일간 강약과 10년 대운의 흐름을 겹쳐서</span></div>
+    <div class="fact"><b>앱과 같은 엔진</b><span>안드로이드 앱 「만세력」과 동일한 계산이에요</span></div>
+  </div>
+  <p class="how-p">맞다 틀리다를 단정하지 않아요. 앞으로의 시기는 가능성의 어투로만 씁니다.<br />
+  사주는 한 사람이 놓인 자리를 설명하는 언어지, 결론을 내려주는 도구가 아니에요.</p>
+</section>
+
+<section class="blk">
+  <p class="sk-label">REPORT</p>
+  <h2>인생 4구간 리포트</h2>
+  <div class="pay-card">
+    <ul class="pay-feats">
+      <li>큰 그림 — 네 기둥이 그리는 일생의 결</li>
+      <li>초년 · 청년 · 중년 · 말년 — 시기마다 무엇이 주제가 되는지</li>
+      <li>전환점 — 대운이 방향을 트는 자리</li>
+      <li>명식·격국·용신을 근거로, 사실 나열이 아니라 이야기로</li>
+      <li>링크로 언제든 다시 열람</li>
+    </ul>
+    <p class="pay-price"><b>3,900</b>원</p>
+    <a class="pay-btn" href="#f">내 사주 넣고 시작하기</a>
+    <p class="pay-methods">카카오페이 · 네이버페이 · 신용카드 · 토스</p>
+  </div>
+  <p class="pay-calm">먼저 명식과 풀이를 무료로 보고, 결제는 그다음에 정해도 돼요.</p>
+</section>
+
+<section class="blk" id="input">
+  <p class="sk-label">START</p>
+  <h2>내 사주를 넣어보세요</h2>
 
 <form class="calc-form" id="f" onsubmit="return false">
   <div class="row">
@@ -188,18 +380,28 @@
     <p class="pay-calm">결과 링크는 저장해두시면 나중에 다시 열어볼 수 있어요.</p>
   </aside>
 
-  <h2>어떤 근거로 읽나요</h2>
-  <p>절입시각과 진태양시까지 반영한 정통 만세력으로 명식을 세우고, 격국·일간 강약·용신과
-  10년 대운의 흐름을 겹쳐 읽습니다. 안드로이드 앱 「만세력」에서 쓰는 것과 같은 엔진이에요 —
-  웹과 앱이 다른 답을 내지 않도록 회귀 테스트로 고정해두었습니다.</p>
-
-  <h2>무엇을 하지 않나요</h2>
-  <p>맞다 틀리다를 단정하지 않아요. 앞으로의 시기는 가능성의 어투로만 씁니다.
-  사주는 한 사람이 놓인 자리를 설명하는 언어지, 결론을 내려주는 도구가 아니에요.</p>
+</section>
 </section>
 
-<div class="toolrail"><a href="/calc/gunghap/" data-cta="tool-gunghap"><span class="tk">궁합</span><strong>1:1 궁합</strong><span class="sub">여덟 글자 전체로 보는 두 사람의 결 — 17개 축</span></a><a href="/calc/jami/" data-cta="tool-jami"><span class="tk">자미두수</span><strong>자미두수 명반</strong><span class="sub">12궁 주성·사화·대한 — 궁마다 풀이와 행동 처방</span></a><a href="/calc/star/" data-cta="tool-star"><span class="tk">별자리</span><strong>출생 차트</strong><span class="sub">행성 배치·ASC/MC·주요 각과 기질 해석</span></a></div>
-</div></main>
+<section class="blk">
+  <p class="sk-label">FAQ</p>
+  <h2>자주 묻는 것</h2>
+  <div class="faq">
+    <details><summary>태어난 시간을 몰라요</summary>
+      <p class="fa">시주(時柱)를 빼고 읽어드려요. 정확도는 조금 내려가지만 결과는 나오고,
+      리포트도 시간 미상을 전제로 씁니다. 폼에서 "태어난 시간을 몰라요"에 체크하면 돼요.</p></details>
+    <details><summary>환불이 되나요?</summary>
+      <p class="fa">열람 전에는 전액 환불돼요. 디지털 콘텐츠 특성상 리포트 열람을 시작하면
+      청약철회가 제한됩니다. <a href="/legal/refund/">환불 안내 자세히 보기</a></p></details>
+    <details><summary>리포트를 나중에 다시 볼 수 있나요?</summary>
+      <p class="fa">네. 결제하면 전용 링크가 생기고, 그 링크로 언제든 다시 열 수 있어요.</p></details>
+    <details><summary>입력한 생년월일은 어떻게 쓰이나요?</summary>
+      <p class="fa">무료 계산은 브라우저 안에서 끝나요 — 입력값이 저희 서버로 올라가지 않습니다.
+      결제하실 때만 리포트 생성을 위해 전송되고, 광고·마케팅에 쓰지 않아요.</p></details>
+  </div>
+</section>
+
+</div>
 <footer class="foot">
   <p><a href="/">만세력</a> — 사주 · 자미두수 · 별자리 · 궁합</p>
   <p class="legal-links"><a href="/legal/terms/">이용약관</a> · <a href="/legal/privacy/">개인정보처리방침</a>
@@ -208,6 +410,7 @@
   결제하실 때만 리포트 생성을 위해 전송됩니다. 해석은 전통 명리학에 근거한 참고 자료이며,
   의학적·법률적·재무적 조언이 아닙니다.</p>
 </footer>
+
 <script>
 
 /* 엔진 지연 로드 — 1.7MB 번들이 첫 페인트를 막지 않게 한다.
