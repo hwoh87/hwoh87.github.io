@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>내 사주 리포트 · 삼라만상</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css">
+<style>
+  /* 리포트 표제 세리프 — 앱 정본 마루부리(한자는 Noto Serif KR 이 받는다) */
+  @import url("https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600&display=swap");
+  @font-face{font-family:"MaruBuri";font-weight:400;font-display:swap;
+    src:url(https://hangeul.pstatic.net/hangeul_static/webfont/MaruBuri/MaruBuri-Regular.woff2) format("woff2")}
+  @font-face{font-family:"MaruBuri";font-weight:600;font-display:swap;
+    src:url(https://hangeul.pstatic.net/hangeul_static/webfont/MaruBuri/MaruBuri-SemiBold.woff2) format("woff2")}
+</style>
+<link rel="stylesheet" href="style.css">
+<script src="/assets/track.js" defer></script>
+</head>
+<body class="report-page">
+
+<!-- 생성/로딩 스테이지 (딥스페이스) -->
+<div class="rp-gen" id="gen">
+  <div class="rp-hero stars" id="genStars" style="position:absolute;inset:0;background:none"></div>
+  <div class="who" id="genWho" style="display:none"><img id="genWhoImg" alt=""></div>
+  <h1 id="genTitle">리포트를 불러오는 중…</h1>
+  <p class="line" id="genLine">잠깐이면 돼요.</p>
+  <div class="bar" id="genBar" style="display:none"><i id="genBarFill"></i></div>
+  <p class="pct" id="genPct"></p>
+  <div class="err-box" id="genErr">
+    <button class="retry" id="genRetry" type="button">이어서 다시 쓰기</button>
+  </div>
+</div>
+
+<!-- 완성된 리포트 -->
+<div id="view" style="display:none">
+  <div class="rp-hero">
+    <div class="stars" id="stars"></div>
+    <div class="rp-hero-in" id="heroIn"></div>
+  </div>
+  <div class="rp-paper">
+    <div class="rp-paper-in" id="paperIn"></div>
+  </div>
+  <div class="rp-dock">
+    <div class="in">
+      <p class="hint" id="dockHint">이 리포트는 1년간 보관돼요.<br>PDF로 내려받으면 평생 소장!</p>
+      <a href="library.html" style="font-size:12px;font-weight:700;color:#6b5c3a;flex-shrink:0">내 리포트</a>
+      <button class="pdf" id="pdfBtn" type="button" data-cta="store-report-pdf">📕 PDF로 소장하기</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" role="status"></div>
+
+<script src="catalog.js"></script>
+<script src="store-api.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+function toast(msg) {
+  const t = $("#toast");
+  t.textContent = msg; t.classList.add("on");
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("on"), 2600);
+}
+
+const rid = new URLSearchParams(location.search).get("rid");
+let DATA = null;   // 서버 get 응답 — PDF 생성기도 이걸 쓴다
+let PROD = null, READER = null, CAT = null;
+
+function sprinkle(host, seedStr, n) {
+  let seed = 0;
+  for (let i = 0; i < seedStr.length; i++) seed = (seed * 31 + seedStr.charCodeAt(i)) >>> 0;
+  const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+  for (let k = 0; k < n; k++) {
+    const s = document.createElement("span");
+    const gold = rnd() < 0.3;
+    s.className = "star " + (gold ? "gold" : "ice") + (rnd() < 0.4 ? " tw" : "");
+    const size = gold ? 2.5 : 1.5;
+    s.style.cssText = `width:${size}px;height:${size}px;left:${(rnd() * 100).toFixed(2)}%;top:${(rnd() * 100).toFixed(2)}%;opacity:${(0.25 + rnd() * 0.6).toFixed(2)};`;
+    if (s.className.includes("tw")) s.style.animationDelay = (rnd() * 3).toFixed(2) + "s";
+    host.appendChild(s);
+  }
+}
+
+// ── 생성 진행 ────────────────────────────────────────────────
+const GEN_LINES = [
+  "만세력 위에 여덟 글자를 펼치고 있어요",
+  "십신의 결을 하나씩 짚는 중이에요",
+  "대운의 굽이를 걸어 보는 중…",
+  "글자 사이 숨은 이야기를 꺼내는 중",
+  "장마다 따로, 정성껏 쓰는 중이에요",
+  "먹을 갈아 마지막 문장을 고르는 중…",
+];
+let lineTimer = null;
+function startLines(readerName) {
+  let i = 0;
+  $("#genLine").textContent = readerName + " 술사가 " + GEN_LINES[0];
+  lineTimer = setInterval(() => {
+    i = (i + 1) % GEN_LINES.length;
+    $("#genLine").textContent = readerName + " 술사가 " + GEN_LINES[i];
+  }, 3400);
+}
+
+// 청크당 챕터 수는 서버가 준 chunkSize 를 쓴다 — 상수로 박으면 서버가 분할을 바꾼 순간
+//   (v2 에서 4→3) '빠진 청크' 판정이 조용히 어긋난다. 구 응답이면 total/chunks 로 역산.
+function chunkSizeOf(data) {
+  if (data.chunkSize > 0) return data.chunkSize;
+  return Math.max(1, Math.ceil(data.total / Math.max(1, data.chunks)));
+}
+
+function chunkRanges(total, chunks, size) {
+  const out = [];
+  for (let i = 0; i < chunks; i++) out.push([i * size, Math.min(total, i * size + size)]);
+  return out;
+}
+
+async function ensureGenerated(data) {
+  const have = new Set(data.chapters.map(ch => ch.idx));
+  const size = chunkSizeOf(data);
+  const ranges = chunkRanges(data.total, data.chunks, size);
+  const missing = [];
+  ranges.forEach(([from, to], i) => {
+    for (let k = from; k < to; k++) if (!have.has(k)) { missing.push(i); break; }
+  });
+  if (!missing.length) return data;
+
+  // 생성 스테이지 전환
+  $("#genWho").style.display = "";
+  $("#genWhoImg").src = "art/readers/" + PROD.reader + ".webp";
+  $("#genTitle").textContent = READER.emoji + " " + READER.name + " 술사가 리포트를 쓰고 있어요";
+  $("#genBar").style.display = "";
+  startLines(READER.name);
+  const doneBase = data.chunks - missing.length;
+  let doneCnt = 0;
+  const paint = () => {
+    const pct = Math.round(((doneBase + doneCnt) / data.chunks) * 100);
+    $("#genBarFill").style.width = pct + "%";
+    $("#genPct").textContent = `${data.total}장 중 ${Math.min(data.total, (doneBase + doneCnt) * size)}장 완성`;
+  };
+  paint();
+
+  const results = await Promise.allSettled(missing.map(i =>
+    storeApi({ action: "generate", rid, chunk: i }).then(r => { doneCnt++; paint(); return r; })
+  ));
+  const failed = results.filter(x => x.status === "rejected");
+  if (failed.length) {
+    clearInterval(lineTimer);
+    const e = failed[0].reason || {};
+    $("#genTitle").textContent = "붓이 잠깐 멈췄어요";
+    $("#genLine").textContent = storeErrMsg(e) + (failed.length < missing.length ? " (일부 장은 이미 완성됐어요)" : "");
+    $("#genErr").style.display = "block";
+    throw new Error("gen_failed");
+  }
+  clearInterval(lineTimer);
+  return await storeApi({ action: "get", rid });
+}
+
+// ── 렌더 ────────────────────────────────────────────────────
+function renderView(data) {
+  const inputs = data.inputs || {};
+  const name = inputs.name || "당신";
+
+  // 히어로
+  let hero = `<span class="rp-ovl">${CAT.emoji} ${escHtml(CAT.label)} · 나만의 사주 리포트</span>`;
+  hero += `<div class="rp-orb"><img src="art/readers/${PROD.reader}.webp" alt="${READER.name}"></div>`;
+  hero += `<div class="rp-brand">삼라만상 · ${READER.emoji} ${escHtml(READER.name)} 술사</div>`;
+  hero += `<div class="rp-title"><span class="nm">${escHtml(name)}</span>님의<br>${escHtml(PROD.title)}</div>`;
+  if (data.one_liner) hero += `<div class="rp-sig">${escHtml(data.one_liner)}</div>`;
+  hero += `<div class="rp-chips">`;
+  hero += `<span class="rp-chip">${escHtml(fmtBirth(inputs.birth))}</span>`;
+  if (inputs.partner) hero += `<span class="rp-chip">💞 ${escHtml(inputs.partner.name || "그 사람")} · ${escHtml(fmtBirth(inputs.partner.birth))}</span>`;
+  if (inputs.pet) hero += `<span class="rp-chip">🐾 ${escHtml(inputs.pet.name || "아이")} · ${inputs.pet.birthYear}년생</span>`;
+  hero += `<span class="rp-chip">${data.total}장 · ${new Date(data.created_at).toLocaleDateString("ko-KR")}</span>`;
+  hero += `</div>`;
+  $("#heroIn").innerHTML = hero;
+  sprinkle($("#stars"), rid, 46);
+
+  // 지면 — 앱 결과 화면과 같은 구성: 명식 오프닝 → 챕터 사이에 분석지 시각 카드가 스민다.
+  const chAccent = darkenHex(CAT.color, 0.30); // 카테고리색을 지면 대비로 눌러 챕터 액센트로
+  let paper = sheetOpeningHtml(data);
+  const anchors = anchorSheetVisuals(data.chapters);
+  data.chapters.forEach(ch => {
+    if (ch.idx > 0) paper += `<div class="rp-divider"><span>✦</span></div>`;
+    const no = String(ch.idx + 1).padStart(2, "0");
+    paper += `<section class="rp-ch" style="--chacc:${chAccent}">
+      <div class="rp-ch-head">
+        <span class="rp-ch-med">${no}</span>
+        <div class="rp-ch-tt">
+          <p class="rp-ch-ovl">CHAPTER ${no}</p>
+          <h2 class="rp-ch-title">${escHtml(ch.title)}</h2>
+        </div>
+      </div>
+      ${anchors[ch.idx] ? `<div class="rp-ch-visual">${sheetVisualHtml(anchors[ch.idx], data)}</div>` : ""}
+      <div class="rp-md">${mdToHtml(ch.body)}</div>
+    </section>`;
+  });
+
+  // 앵커를 못 찾은 분석지 카드는 말미에 모은다(약속한 분석지 누락 방지 — 앱과 동일).
+  const leftover = ["elements", "sinsal", "months", "daewoon"]
+    .filter(k => !Object.values(anchors).includes(k));
+  if (leftover.length) {
+    paper += `<div class="rp-divider"><span>✦</span></div>
+      <div class="rp-sechead"><small>SHEET</small><b>명리 분석지</b></div>`;
+    leftover.forEach(k => { paper += `<div class="rp-ch-visual">${sheetVisualHtml(k, data)}</div>`; });
+  }
+
+  // 관통 문구 에코 — 리딩을 닫는 서명(앱과 동일).
+  if (data.one_liner) {
+    paper += `<p class="rp-sig-echo">“ ${escHtml(data.one_liner)} ”</p>`;
+  }
+
+  // 추가질문 (플러스 티어)
+  if (data.tier === "plus") {
+    if (data.extra_q) {
+      paper += `<div class="rp-ask"><p class="t">💬 추가질문</p>
+        <p class="qa-q">Q. ${escHtml(data.extra_q.question)}</p>
+        <div class="rp-md qa-a">${mdToHtml(data.extra_q.answer)}</div></div>`;
+    } else {
+      paper += `<div class="rp-ask"><p class="t">💬 추가질문 1회</p>
+        <p class="d">리포트를 다 읽고 나서 남은 궁금증 하나 — ${escHtml(READER.name)} 술사가 본편에서 안 다룬 각도로 새로 답해줘. 기회는 한 번뿐이니 아껴 써!</p>
+        <textarea id="askInput" maxlength="500" placeholder="예) 올해 안에 승부를 봐야 할까, 내년을 기다릴까?"></textarea>
+        <button id="askBtn" type="button" data-cta="store-report-ask">술사에게 묻기</button></div>`;
+    }
+  }
+
+  paper += `<div class="rp-reader">
+    <img src="art/readers/${PROD.reader}.webp" alt="">
+    <div><p class="nm">${READER.emoji} ${escHtml(READER.name)}</p>
+    <p class="role">${escHtml(READER.title)}</p>
+    <p>${escHtml(READER.tag)}</p></div></div>`;
+  paper += `<p class="rp-meta">이 리포트는 만세력 엔진의 실제 계산(원국·신살·대운·세운·월운) 위에서 ${escHtml(READER.name)} 술사(AI)가 ${escHtml(name)}님만을 위해 집필했어요.
+    해석은 참고용 · 엔터테인먼트 목적이며 의료·법률·투자 판단의 근거가 될 수 없어요.
+    링크는 1년간 유효하고, PDF로 저장하면 계속 소장할 수 있어요.</p>`;
+  $("#paperIn").innerHTML = paper;
+
+  const askBtn = $("#askBtn");
+  if (askBtn) askBtn.addEventListener("click", onAsk);
+
+  $("#gen").style.display = "none";
+  $("#view").style.display = "block";
+  document.body.style.background = "#faf5ee";
+
+  // 보관함 갱신(관통문구 포함)
+  libAdd({ rid, slug: data.slug, title: PROD.title, name: inputs.name || "", at: Date.parse(data.created_at) || Date.now(), sig: data.one_liner || "" });
+}
+
+async function onAsk() {
+  const q = $("#askInput").value.trim();
+  if (q.length < 5) { toast("질문을 조금만 더 구체적으로 적어줘"); return; }
+  const btn = $("#askBtn");
+  btn.disabled = true; btn.textContent = READER.name + " 술사가 답을 쓰는 중…";
+  try {
+    const r = await storeApi({ action: "ask", rid, question: q });
+    DATA.extra_q = r.extra_q;
+    renderView(DATA);
+    toast("답이 도착했어요 — 아래에서 확인해줘");
+  } catch (e) {
+    btn.disabled = false; btn.textContent = "술사에게 묻기";
+    toast(storeErrMsg(e));
+  }
+}
+
+// ── PDF ─────────────────────────────────────────────────────
+let pdfLoading = false;
+function loadScript(src) {
+  return new Promise((res, rej) => {
+    const s = document.createElement("script");
+    s.src = src; s.onload = res; s.onerror = () => rej(new Error("load " + src));
+    document.head.appendChild(s);
+  });
+}
+$("#pdfBtn").addEventListener("click", async () => {
+  if (pdfLoading || !DATA) return;
+  pdfLoading = true;
+  const btn = $("#pdfBtn");
+  const orig = btn.textContent;
+  btn.disabled = true; btn.textContent = "책자를 만드는 중… 0%";
+  try {
+    if (!window.html2canvas) await loadScript("vendor/html2canvas.min.js");
+    if (!(window.jspdf && window.jspdf.jsPDF)) await loadScript("vendor/jspdf.umd.min.js");
+    if (!window.buildStoreReportPdf) await loadScript("report-pdf.js");
+    await window.buildStoreReportPdf(DATA, PROD, READER, CAT, pct => {
+      btn.textContent = "책자를 만드는 중… " + pct + "%";
+    });
+    toast("PDF가 저장됐어요 📕");
+  } catch (e) {
+    console.error(e);
+    toast("PDF 생성에 실패했어요 — 잠시 후 다시 시도해줘");
+  }
+  btn.disabled = false; btn.textContent = orig;
+  pdfLoading = false;
+});
+
+// ── 시작 ────────────────────────────────────────────────────
+async function boot() {
+  if (!rid) { $("#genTitle").textContent = "리포트 주소가 올바르지 않아요"; $("#genLine").textContent = "링크를 다시 확인해줘."; return; }
+  try {
+    let data = await storeApi({ action: "get", rid });
+    PROD = PRODUCT_BY_SLUG[data.slug];
+    READER = READERS[PROD.reader];
+    CAT = CATS[PROD.cat];
+    document.title = `${PROD.title} · 내 사주 리포트 · 삼라만상`;
+    if (!data.done) data = await ensureGenerated(data);
+    if (!data.done) throw new Error("incomplete");
+    DATA = data;
+    renderView(data);
+  } catch (e) {
+    if (e.message === "gen_failed") return; // 재시도 버튼이 떠 있음
+    $("#genTitle").textContent = "리포트를 열 수 없어요";
+    $("#genLine").textContent = storeErrMsg(e);
+  }
+}
+$("#genRetry").addEventListener("click", () => {
+  $("#genErr").style.display = "none";
+  $("#genTitle").textContent = "다시 먹을 가는 중…";
+  boot();
+});
+boot();
+</script>
+</body>
+</html>

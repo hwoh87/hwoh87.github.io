@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>내 리포트 · 삼라만상</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css">
+<link rel="stylesheet" href="style.css">
+<script src="/assets/track.js" defer></script>
+</head>
+<body>
+
+<header class="site-head">
+  <nav>
+    <a class="brand" href="./">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="11" r="7.2" fill="#fbbf24" opacity="0.92"/>
+        <circle cx="14.6" cy="9" r="6.2" fill="#0c0c14" opacity="0.55"/>
+        <path d="M3 18.5 h8 M6 21 h12" stroke="#a78bfa" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      삼라만상
+    </a>
+    <div class="head-links">
+      <a href="./#tests">사주 분석</a>
+      <a href="./#readers" class="hide-m">술사 소개</a>
+    </div>
+  </nav>
+</header>
+
+<main class="lib">
+  <div class="section-head" style="margin-top:36px">
+    <p class="eyebrow">MY REPORTS</p>
+    <h2>내 리포트</h2>
+  </div>
+  <div id="list"></div>
+</main>
+
+<footer class="site-foot">
+  <div class="inner">
+    <p class="tag">여기 목록은 <b>예전에 웹에서 만든 리포트</b>예요 · 이 브라우저에만 저장돼요</p>
+    <p class="fine">브라우저를 바꾸거나 기록을 지우면 목록이 사라져요 — PDF로 내려받아 소장해줘.
+    새로 만드는 리포트는 앱의 '내 리포트'에 남아요.</p>
+  </div>
+</footer>
+
+<script src="catalog.js"></script>
+<script src="store-api.js"></script>
+<script>
+const list = libAll();
+const host = document.getElementById("list");
+if (!list.length) {
+  host.innerHTML = `<div class="lib-empty">이 브라우저에 저장된 리포트가 없어요.<br>
+    리포트는 <b>만세력 앱</b>에서 만들고 앱의 '내 리포트'에 보관돼요.<br>
+    <a href="./#tests" style="color:#a78bfa;text-decoration:underline">사주 분석 둘러보기 →</a></div>`;
+} else {
+  host.innerHTML = list.map(x => {
+    const p = PRODUCT_BY_SLUG[x.slug];
+    const d = x.at ? new Date(x.at).toLocaleDateString("ko-KR") : "";
+    return `<a class="lib-card" href="report.html?rid=${encodeURIComponent(x.rid)}">
+      ${p ? `<img src="art/covers/${p.slug}.webp" alt="">` : ""}
+      <div style="min-width:0">
+        <p class="tt">${x.title ? escHtml(x.title) : "사주 리포트"}</p>
+        <p class="mt">${x.name ? escHtml(x.name) + "님 · " : ""}${d}${x.sig ? ` · “${escHtml(x.sig)}”` : ""}</p>
+      </div>
+      <span class="go">열기 →</span>
+    </a>`;
+  }).join("");
+}
+</script>
+</body>
+</html>

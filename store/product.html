@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>사주 분석 · 삼라만상</title>
+<meta name="description" content="명리 술사가 만세력 엔진의 진짜 계산 위에서 사주를 깊이 있게 풀어주는 AI 사주 분석.">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css">
+<link rel="stylesheet" href="style.css">
+<script src="/assets/track.js" defer></script>
+</head>
+<body>
+
+<header class="site-head">
+  <nav>
+    <a class="brand" href="./">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="11" r="7.2" fill="#fbbf24" opacity="0.92"/>
+        <circle cx="14.6" cy="9" r="6.2" fill="#0c0c14" opacity="0.55"/>
+        <path d="M3 18.5 h8 M6 21 h12" stroke="#a78bfa" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      삼라만상
+    </a>
+    <div class="head-links">
+      <a href="./#tests">사주 분석</a>
+      <a href="library.html" class="hide-m">내 리포트</a>
+      <a class="btn-login" href="https://play.google.com/store/apps/details?id=com.samramanshang.manseryeok&referrer=utm_source%3Dseo%26utm_medium%3Dweb%26utm_campaign%3Dstore_nav" rel="nofollow" data-cta="store-nav-app">앱 받기</a>
+    </div>
+  </nav>
+</header>
+
+<main class="pd" id="pd"></main>
+
+<div class="sticky-bar" id="stickyBar" style="display:none">
+  <div class="inner">
+    <div class="info">
+      <p class="l1" id="sbLine"></p>
+      <p class="l2" id="sbPrice"></p>
+    </div>
+    <button type="button" class="go" onclick="buy()">시작하기</button>
+  </div>
+</div>
+
+<footer class="site-foot" style="padding-bottom:64px">
+  <div class="inner">
+    <div class="links">
+      <a href="../legal/privacy/">개인정보처리방침</a>
+      <a href="../legal/terms/">이용약관</a>
+      <a href="../legal/refund/">환불정책</a>
+      <a href="../legal/business/">사업자정보</a>
+    </div>
+    <p class="tag">삼라만상 · 하늘의 흐름으로 사주를 풀다 · 엔터테인먼트 목적</p>
+    <p class="fine">© 2026 삼라만상. 본 서비스의 해석은 참고용이며 의사결정의 근거로 사용될 수 없습니다.</p>
+  </div>
+</footer>
+
+<div id="toast" role="status"></div>
+
+<script src="catalog.js"></script>
+<script>
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("on");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove("on"), 2600);
+}
+function buy() {
+  if (window.__track) window.__track("cta", "store-buy-" + (slug || "unknown"));
+  location.href = "checkout.html?id=" + encodeURIComponent(slug);
+}
+
+const slug = new URLSearchParams(location.search).get("id");
+const p = PRODUCT_BY_SLUG[slug] || PRODUCTS[0];
+const c = CATS[p.cat];
+const r = READERS[p.reader];
+document.title = `${p.title} - ${c.label} 사주 분석 · 삼라만상`;
+
+// 상세 공통 블록 — ENGINE/분석지 문구는 landing/calc 실 엔진이 실제로 계산하는 것만 적는다.
+const SHEET_CHIPS = ["오행 분포 차트", "십신 집계", "신강약 게이지", "격국 배지", "신살·귀인 목록", "대운 타임라인", "공망·간여지동"];
+const METHODS = [
+  ["사주 원국", "태어난 연·월·일·시를 여덟 글자로 세운 기본 뼈대. 모든 해석이 여기서 출발해."],
+  ["오행 분포", "나무·불·흙·쇠·물 다섯 기운 중 뭐가 넘치고 뭐가 비었는지. 성격도 약점도 여기서 갈려."],
+  ["십신", "내 기운이 사람·돈·일과 어떤 식으로 엮이는지 보는 열 가지 관계."],
+  ["신강·신약", "타고난 기운이 센 편인지 여린 편인지. 밀어붙여도 되는 사람인지 한 박자 쉬어야 하는 사람인지가 갈려."],
+  ["신살과 귀인", "유난히 세게 도는 기운과 나를 도와주는 자리. 소문 말고 계산으로 있는지 없는지를 가려."],
+  ["대운", "10년 단위로 갈아타는 큰 흐름. 태어난 시각을 몰라도 이건 그대로 뽑혀."],
+];
+const CALC = [
+  "십신과 지장간",
+  "오행 분포와 과부족",
+  "신강약 — 득령·득지·득세, 돕는 힘·빼는 힘 비율까지",
+  "격국(어느 기운 기준으로 잡혔는지, 투출 근거까지)",
+  "용신 — 중화 사주는 단정하지 않고 보류하는 태도 그대로",
+  "신살·귀인 목록",
+  "대운(10년 단위 흐름 · 태어난 시각 없어도 나옴)",
+  "공망 · 간여지동",
+  "진태양시 보정(정확한 시각을 넣었을 때 · 출생 도시 경도 기준)",
+];
+const FAQ = [
+  ["태어난 시간을 몰라도 돼?", "돼. 시주만 비워 두고 여섯 글자로 계산해 — 일주·오행·대운은 그대로 나와서 해석의 뼈대는 충분해. 시간을 알면 더 정밀해지는 것뿐이야."],
+  ["음력 생일인데?", "여기 입력은 양력 기준이야. 양력으로 바꿔서 넣어줘 — 헷갈리면 만세력 앱이 음력 변환을 지원해."],
+  ["얼마나 걸려?", `생일을 넣으면 만세력 계산이 바로 돌고, ${r.name}의 리포트까지 1분 안팎이면 완성돼. 읽는 시간은 약 ${p.readMin}분이야.`],
+  ["나중에 다시 볼 수 있어?", "응. '내 리포트'에 1년간 남아서 몇 번이고 다시 볼 수 있고, PDF로 내려받으면 평생 소장이야."],
+  ["사주 처음인데 어려워?", "전혀. 용어를 몰라도 되게 전부 풀어서 써주고, 계산표는 표와 게이지로 먼저 보여줘."],
+  ["환불돼?", "리포트 생성 전에는 전액 환불돼. 생성 후에는 디지털 콘텐츠 특성상 어려운데, 자세한 건 환불정책에서 확인해줘."],
+];
+
+const badge = p.badge ? `<span class="badge" style="--bc:${p.badge === "NEW" ? "#34d399" : "#ec4899"}; position:static">${p.badge}</span>` : "";
+const chapters = p.chapters.map((t, i) => {
+  const note = p.notes && p.notes[i + 1]
+    ? `<p class="note">${esc(p.notes[i + 1])}</p>` : "";
+  return `<div class="ch"><span class="no">${String(i + 1).padStart(2, "0")}</span><span>${esc(t)}</span></div>${note}`;
+}).join("");
+const related = (p.related || []).map(s => {
+  const q = PRODUCT_BY_SLUG[s];
+  return q ? `<a class="rel-card" href="product.html?id=${q.slug}"><b>${esc(q.title)}</b><span>${esc(q.bullets)}</span></a>` : "";
+}).join("");
+
+document.getElementById("pd").innerHTML = `
+  <a class="pd-back" href="./#tests">← 사주 분석 모음</a>
+  <div class="pd-meta" style="--c:${c.color}"><span class="cat">${c.label}</span>${badge}</div>
+  <h1>${esc(p.title)}</h1>
+  <p class="kicker">${esc(p.kicker)}</p>
+
+  <div class="pd-hero">
+    <img src="art/covers/${p.slug}.webp" alt="">
+    <div class="shade"></div>
+    <div class="txt"><h2>${esc(p.headline)}</h2></div>
+  </div>
+
+  <p class="pd-pitch">${esc(p.pitch)}</p>
+  <p class="pd-bullets">${esc(p.bullets)}</p>
+  <div class="pd-greet"><b>${r.emoji} ${r.name}</b> — ${esc(p.greeting)}</div>
+  <button type="button" class="pd-cta" onclick="buy()">${esc(p.title)} 열어보기</button>
+
+  <section>
+    <h2 class="sec-t"><small>CHECK</small>이런 마음으로 왔다면</h2>
+    <ul class="pd-came">${p.came.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+    <p class="pd-came-tail">하나라도 걸렸으면, 이 사주분석이 제대로 된 답을 짚어줄 거야.</p>
+  </section>
+
+  <section>
+    <h2 class="sec-t"><small>REPORT</small>뭘 받게 되는 거야</h2>
+    <div class="pd-stats">
+      <div class="pd-stat"><p class="v">${p.chaptersN}장</p><p class="k">리포트 챕터</p></div>
+      <div class="pd-stat"><p class="v">${p.basisN}종</p><p class="k">명리 계산 근거</p></div>
+      <div class="pd-stat"><p class="v">약 ${p.readMin}분</p><p class="k">읽는 시간</p></div>
+    </div>
+    <p class="pd-deliver">${esc(p.deliver)}</p>
+    <p class="pd-bullets" style="margin-top:12px">핵심 축 — ${esc(p.axes)}</p>
+  </section>
+
+  <section style="--c:${c.color}">
+    <h2 class="sec-t"><small>CONTENTS</small>받아보게 될 목차 <span style="font-size:12px;color:rgba(255,255,255,.35);font-weight:600">전체 ${p.chaptersN}장</span></h2>
+    <div class="pd-toc">${chapters}</div>
+    <p class="pd-toc-tail">장마다 따로 계산하고 따로 써서 보내줘. 목차는 고정이고, 안에 들어갈 내용은 네 여덟 글자에 따라 전부 달라져.</p>
+  </section>
+
+  <section>
+    <h2 class="sec-t"><small>SHEET</small>리포트 앞에 붙는 명리 분석지</h2>
+    <div class="pd-chips">${SHEET_CHIPS.map(x => `<span>${x}</span>`).join("")}</div>
+    <p class="pd-chips-tail">네 사주를 계산한 표와 게이지가 리포트 앞에 같이 붙어. 글은 한 번 읽고 덮어도, 이 분석지는 두고두고 다시 펼쳐보게 돼.</p>
+  </section>
+
+  <section>
+    <h2 class="sec-t"><small>READER</small>이 분석을 써주는 술사</h2>
+    <div class="pd-reader">
+      <img src="art/readers/${p.reader}.webp" alt="${r.name}">
+      <div>
+        <p class="nm">${r.emoji} ${r.name}</p>
+        <p class="role">${esc(r.title)}</p>
+        <p>${esc(r.tag)}</p>
+        <p class="spec">전문 분야 · ${esc(r.spec)}</p>
+      </div>
+    </div>
+    <p class="pd-reader-tail">${p.chaptersN}장 전부 ${subj(r.name)} 직접 읽고 꼼꼼히 풀어줘.</p>
+  </section>
+
+  <section>
+    <h2 class="sec-t"><small>METHOD</small>뭘 근거로 보는 거야?</h2>
+    <p class="pd-deliver" style="margin-bottom:14px">네 생년월일시로 만세력 계산을 먼저 돌려. 거기서 나온 숫자를 근거로, ${subj(r.name)} 장마다 하나씩 풀어줘.</p>
+    <div class="pd-method">${METHODS.map(([t, d]) => `<div class="m"><b>${t}</b><p>${d}</p></div>`).join("")}</div>
+  </section>
+
+  <section>
+    <h2 class="sec-t"><small>ENGINE</small>이 리포트가 실제로 돌리는 계산</h2>
+    <ul class="pd-calc">${CALC.map(x => `<li>${x}</li>`).join("")}</ul>
+  </section>
+
+  <section class="pd-faq">
+    <h2 class="sec-t"><small>FAQ</small>결제 전에 자주 묻는 것</h2>
+    ${FAQ.map(([q, a]) => `<details><summary>${q}</summary><p class="a">${a}</p></details>`).join("")}
+  </section>
+
+  <section id="pricing">
+    <h2 class="sec-t"><small>PRICE</small>딱 두 가지 중에 고르면 돼</h2>
+    <div class="pd-price">
+      <div class="price-card best">
+        <span class="flag">단건</span>
+        <p class="tier">${esc(p.title)} · 사주 분석 리포트</p>
+        <p class="amount">${won(priceOf(p.slug))}</p>
+        <ul><li>${p.chaptersN}장 전체 리포트 + 명리 분석지</li><li>PDF 소장 · 내 리포트에 보관</li><li>구독 아님 — 이 리포트 하나만 결제해</li></ul>
+        <button type="button" onclick="buy()">앱에서 열기</button>
+      </div>
+    </div>
+    <p class="pd-price-tail">결제와 생성은 만세력 앱에서 이뤄져. 아래에서 생년월일을 넣으면 앱이 그대로 이어받아.</p>
+  </section>
+
+  <div class="pd-close">
+    <p>네 팔자 여덟 글자로 너에게 맞춰 쓰는,<br>이 세상에 하나밖에 없는 사주 분석이야.</p>
+    <p class="em">${esc(p.closeLine || "답을 미루는 동안에도 흐름은 가고 있어. 오늘 확인하고 정하자!")}</p>
+    <button type="button" class="pd-cta" onclick="buy()">${esc(p.title)} 열어보기</button>
+  </div>
+
+  <section>
+    <h2 class="sec-t"><small>MORE</small>같이 보면 좋은 것들</h2>
+    <div class="pd-related">${related}</div>
+  </section>
+`;
+
+document.getElementById("stickyBar").style.display = "";
+document.getElementById("sbLine").textContent = `${p.chaptersN}장 리포트 · 계산 근거 ${p.basisN}종`;
+document.getElementById("sbPrice").textContent = won(priceOf(p.slug));
+</script>
+</body>
+</html>

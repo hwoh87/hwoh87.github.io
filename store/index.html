@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>삼라만상 · 하늘의 흐름으로 내 사주를 풀다</title>
+<meta name="description" content="생년월일만 넣으면 명리 술사가 사주팔자를 깊이 있게 풀어주는 AI 사주 분석. 연애·재회·재물·시기까지, 만세력 엔진의 진짜 계산 위에서.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="삼라만상 · 하늘의 흐름으로 내 사주를 풀다">
+<meta property="og:description" content="생년월일만 넣으면 명리 술사가 사주팔자를 깊이 있게 풀어주는 AI 사주 분석. 연애·재회·재물·시기까지.">
+<meta property="og:image" content="art/covers/love-sal.webp">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css">
+<link rel="stylesheet" href="style.css">
+<script src="/assets/track.js" defer></script>
+</head>
+<body>
+
+<header class="site-head">
+  <nav>
+    <a class="brand" href="./">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="11" r="7.2" fill="#fbbf24" opacity="0.92"/>
+        <circle cx="14.6" cy="9" r="6.2" fill="#0c0c14" opacity="0.55"/>
+        <path d="M3 18.5 h8 M6 21 h12" stroke="#a78bfa" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      삼라만상
+    </a>
+    <div class="head-links">
+      <a href="#tests">사주 분석</a>
+      <a href="library.html">내 리포트</a>
+      <a href="../calc/" class="hide-m">무료 계산기</a>
+      <a class="btn-login" href="https://play.google.com/store/apps/details?id=com.samramanshang.manseryeok&referrer=utm_source%3Dseo%26utm_medium%3Dweb%26utm_campaign%3Dstore_nav" rel="nofollow" data-cta="store-nav-app">앱 받기</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <!-- 프로모 배너 -->
+  <div class="promo wrap">
+    <div class="promo-card">
+      <div class="promo-inner">
+        <div>
+          <p class="promo-badge" id="promoBadge"></p>
+          <p class="promo-price">
+            <span class="all">건당</span>
+            <span class="now" id="priceNow"></span>
+          </p>
+          <p class="promo-sub" id="promoLine"></p>
+        </div>
+        <a class="promo-cta" href="#tests">분석 보러가기</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 카테고리 칩 -->
+  <div class="chips" id="chips"></div>
+
+  <!-- 피처드 캐러셀 -->
+  <div class="rail" id="featured"></div>
+
+  <!-- 상품 목록 -->
+  <section id="tests" class="wrap" style="scroll-margin-top:80px">
+    <div class="section-head fade-up">
+      <p class="eyebrow">사주 분석 <span id="productCount"></span>종</p>
+      <h2>네 고민, 골라봐</h2>
+    </div>
+    <div id="groups"></div>
+  </section>
+
+  <!-- 술사 소개 -->
+  <section id="readers" style="scroll-margin-top:80px; margin-top:64px">
+    <div class="section-head fade-up" style="margin-top:0">
+      <p class="eyebrow">삼라만상의 술사</p>
+      <h2>네 팔자, 누가 읽어줄까</h2>
+    </div>
+    <div class="readers-rail" id="readersRail"></div>
+  </section>
+
+  <!-- 무료 맛보기 — 실제 만세력 엔진 계산 -->
+  <section id="free" class="teaser wrap">
+    <div class="teaser-head fade-up">
+      <div class="pill">🌙 생일만 넣으면 끝</div>
+      <h2>고르기 전에,<br><span class="hl">한번 봐볼래?</span></h2>
+      <p>이름이랑 생일 넣어봐. 네 여덟 글자를 진짜로 계산해서, 지금 너한테 가장 크게 흐르는 기운이 뭔지 바로 짚어줄게.</p>
+    </div>
+    <div class="teaser-box">
+      <form class="sj-form" id="sjForm" onsubmit="return false">
+        <div class="sj-row">
+          <input class="sj-input" id="sjName" type="text" maxlength="20" placeholder="이름 (불릴 이름)" style="flex:1">
+          <div class="sj-gender">
+            <button type="button" id="gF" class="on">여</button>
+            <button type="button" id="gM">남</button>
+          </div>
+        </div>
+        <div class="sj-row">
+          <div class="sj-unit"><input class="sj-input" id="sjY" type="number" inputmode="numeric" placeholder="1995"><span>연도</span></div>
+          <div class="sj-unit"><input class="sj-input" id="sjMo" type="number" inputmode="numeric" placeholder="1~12"><span>월</span></div>
+          <div class="sj-unit"><input class="sj-input" id="sjD" type="number" inputmode="numeric" placeholder="1~31"><span>일</span></div>
+        </div>
+        <select class="sj-select" id="sjH">
+          <option value="-1">태어난 시 모름</option>
+          <option value="0">자시 (23:30~01:30)</option>
+          <option value="2">축시 (01:30~03:30)</option>
+          <option value="4">인시 (03:30~05:30)</option>
+          <option value="6">묘시 (05:30~07:30)</option>
+          <option value="8">진시 (07:30~09:30)</option>
+          <option value="10">사시 (09:30~11:30)</option>
+          <option value="12">오시 (11:30~13:30)</option>
+          <option value="14">미시 (13:30~15:30)</option>
+          <option value="16">신시 (15:30~17:30)</option>
+          <option value="18">유시 (17:30~19:30)</option>
+          <option value="20">술시 (19:30~21:30)</option>
+          <option value="22">해시 (21:30~23:30)</option>
+        </select>
+        <button class="draw-btn" id="sjGo" type="button">생일 넣고 바로 보기</button>
+        <p class="draw-hint" id="sjErr" style="display:none;color:#f9a8d4"></p>
+      </form>
+
+      <div class="sj-result" id="sjResult">
+        <div class="sj-pillars" id="sjPillars"></div>
+        <p class="sj-line" id="sjIlju"></p>
+        <div class="sj-cards">
+          <div class="dr-item">
+            <div class="t"><span class="nm">지금 가장 크게 흐르는 기운</span><span class="ori" id="sjGgWhy"></span></div>
+            <p class="tx" id="sjGg" style="font-size:16px;font-weight:800;color:#fff"></p>
+          </div>
+          <div class="dr-item">
+            <div class="t"><span class="nm">타고난 기운의 세기</span><span class="ori" id="sjStLabel"></span></div>
+            <div class="sj-gauge"><div class="help" id="sjGaugeHelp"></div><div class="weaken" id="sjGaugeWeaken"></div></div>
+            <div class="sj-gauge-lb"><span id="sjHelpLb"></span><span id="sjWeakenLb"></span></div>
+          </div>
+          <div class="dr-item" id="sjHintBox" style="display:none">
+            <div class="t"><span class="nm">지금 들어야 할 조언</span></div>
+            <p class="tx" id="sjHint"></p>
+          </div>
+        </div>
+        <a class="dr-cta" href="#tests">이 사주, 열두 장으로 제대로 풀어보기 →</a>
+        <p class="draw-hint" style="margin-top:10px">명식 전체·대운·자미두수는 <a href="../calc/" style="color:#a78bfa;text-decoration:underline">무료 만세력 계산기</a>에서 더 볼 수 있어</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div class="inner">
+    <div class="links">
+      <a href="../legal/privacy/">개인정보처리방침</a>
+      <a href="../legal/terms/">이용약관</a>
+      <a href="../legal/refund/">환불정책</a>
+      <a href="../legal/business/">사업자정보</a>
+    </div>
+    <p class="tag">삼라만상 · 하늘의 흐름으로 사주를 풀다 · 엔터테인먼트 목적</p>
+    <p class="fine">© 2026 삼라만상. 본 서비스의 해석은 참고용이며 의사결정의 근거로 사용될 수 없습니다.</p>
+  </div>
+</footer>
+
+<div id="toast" role="status"></div>
+
+<script src="catalog.js"></script>
+<script>
+// ── 렌더 ─────────────────────────────────────────
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+document.getElementById("promoBadge").textContent = PRICING.promoBadge;
+// 상품마다 값이 달라(혼자 9,900 / 둘 12,900 / 반려 7,900) 최저가를 "…부터"로 적는다.
+document.getElementById("priceNow").textContent = won(Math.min(PRICING.solo, PRICING.pair, PRICING.pet)) + "부터";
+document.getElementById("promoLine").innerHTML = PRICING.promoLine;
+document.getElementById("productCount").textContent = PRODUCTS.length;
+
+$("#chips").innerHTML = Object.entries(CATS).map(([id, c]) =>
+  `<a class="chip" style="--c:${c.color}" href="#cat-${id}">${c.emoji} ${c.label}</a>`
+).join("") + `<a class="chip" style="--c:#8b5cf6" href="#free">🌙 사주 맛보기</a>`;
+
+const badgeHtml = p => p.badge
+  ? `<span class="badge" style="--bc:${p.badge === "NEW" ? "#34d399" : "#ec4899"}">${p.badge}</span>` : "";
+
+$("#featured").innerHTML = FEATURED.map(p => {
+  const c = CATS[p.cat];
+  return `<a class="hero-card fade-up" href="product.html?id=${p.slug}" style="--c:${c.color}">
+    <div class="ph"><img src="art/covers/${p.slug}.webp" alt="" loading="lazy">
+      <div class="shade"></div>${badgeHtml(p)}
+      <div class="txt"><span class="cat">${c.label}</span><h3>${esc(p.title)}</h3><p>${esc(p.bullets)}</p></div>
+    </div></a>`;
+}).join("");
+
+$("#groups").innerHTML = Object.entries(CATS).map(([id, c]) => {
+  const items = PRODUCTS.filter(p => p.cat === id);
+  if (!items.length) return "";
+  return `<div class="group fade-up" id="cat-${id}" style="--c:${c.color}; scroll-margin-top:80px">
+    <div class="group-head">
+      <span class="icon">${c.emoji}</span>
+      <div><h3>${esc(c.group)}</h3><p class="desc">${esc(c.desc)}</p></div>
+      <span class="count">${items.length}개</span>
+    </div>
+    <div class="cards-row">${items.map(p => {
+      const r = READERS[p.reader];
+      return `<a class="p-card" href="product.html?id=${p.slug}" style="--c:${c.color}">
+        <div class="ph"><img src="art/covers/${p.slug}.webp" alt="" loading="lazy">
+          <div class="shade"></div>${badgeHtml(p)}
+          <div class="txt"><span class="cat">${c.label}</span>
+            <p class="bullets">${esc(p.bullets)}</p><h4>${esc(p.title)}</h4>
+            <span class="reader">${r.emoji} ${r.name}</span>
+          </div>
+        </div></a>`;
+    }).join("")}</div>
+  </div>`;
+}).join("") + `<a class="see-all fade-up" href="#tests">전체 ${PRODUCTS.length}종 둘러보기 →</a>`;
+
+$("#readersRail").innerHTML = Object.entries(READERS).map(([id, r]) =>
+  `<div class="reader-card fade-up">
+    <div class="ph"><img src="art/readers/${id}.webp" alt="${r.name}" loading="lazy"></div>
+    <div class="txt"><div class="role">${r.emoji} ${esc(r.title)}</div><h4>${r.name}</h4>
+      <p style="margin-top:6px">${esc(r.tag)}</p></div>
+  </div>`
+).join("");
+
+// ── 무료 맛보기: 실제 만세력 엔진 ─────────────────
+// landing/calc 의 KMP 엔진 번들을 그대로 쓴다 — 계산 로직 사본 금지.
+let __engP = null;
+function loadEngine() {
+  if (__engP) return __engP;
+  __engP = new Promise((res, rej) => {
+    const s = document.createElement("script");
+    s.src = "../calc/saju-engine.js";
+    s.onload = () => res(window["engine-core"]);
+    s.onerror = () => { __engP = null; rej(new Error("engine")); };
+    document.head.appendChild(s);
+  });
+  return __engP;
+}
+const SajuCalc = () => window["engine-core"].com.samramanshang.manseryeok.orrery.js.SajuCalc;
+
+let gender = "F";
+["gF", "gM"].forEach(id => document.getElementById(id).addEventListener("click", e => {
+  gender = id === "gF" ? "F" : "M";
+  document.getElementById("gF").classList.toggle("on", gender === "F");
+  document.getElementById("gM").classList.toggle("on", gender === "M");
+}));
+
+const PILLAR_LABELS = [["time", "시주"], ["day", "일주"], ["month", "월주"], ["year", "연주"]];
+function sjErr(msg) {
+  const el = $("#sjErr");
+  el.textContent = msg; el.style.display = msg ? "" : "none";
+}
+
+document.getElementById("sjGo").addEventListener("click", () => {
+  const y = +$("#sjY").value, mo = +$("#sjMo").value, d = +$("#sjD").value;
+  const hv = +$("#sjH").value;
+  if (!y || !mo || !d) { sjErr("생년월일을 채워줘 🌙"); return; }
+  if (y < 1940 || y > 2026) { sjErr("연도는 1940~2026년 사이로 넣어줘"); return; }
+  sjErr("");
+  const btn = document.getElementById("sjGo");
+  const label = btn.textContent;
+  btn.disabled = true; btn.textContent = "하늘의 흐름 계산 중…";
+  loadEngine().then(() => {
+    btn.disabled = false; btn.textContent = label;
+    let r, t;
+    const h = hv < 0 ? -1 : hv, mi = hv < 0 ? 0 : 30;
+    try {
+      r = JSON.parse(SajuCalc().calculate(y, mo, d, h, mi, gender, false, 126.978));
+      try { t = JSON.parse(SajuCalc().interpret(y, mo, d, h, mi, gender, false, 126.978)); } catch (e) { t = {}; }
+    } catch (e) { sjErr("계산 중 오류가 났어요. 날짜를 확인해줘"); return; }
+
+    $("#sjPillars").innerHTML = PILLAR_LABELS.map(([key, lb]) => {
+      const p = r.pillars[key];
+      if (!p) return `<div class="sj-pillar empty"><p class="lb">${lb}</p><p class="gz">—</p><p class="ss">미상</p></div>`;
+      const hi = key === "day" ? "border-color:rgba(251,191,36,.55);background:rgba(251,191,36,.07)" : "";
+      return `<div class="sj-pillar" style="${hi}"><p class="lb">${lb}</p><p class="gz">${esc(p.ganzi)}</p><p class="ss">${esc(p.stemSipsin || (key === "day" ? "나" : ""))}</p></div>`;
+    }).join("");
+
+    const name = $("#sjName").value.trim();
+    $("#sjIlju").innerHTML = `${name ? esc(name) + ", " : ""}네 일주는 <b>${esc(r.iljuKr)}일주(${esc(r.pillars.day.ganzi)})</b> — 이 여덟 글자가 모든 해석의 뼈대야.`;
+
+    const gg = t.geokguk || {};
+    $("#sjGg").textContent = gg.hangul || "격국 판별 보류";
+    const why = [];
+    if (gg.resolvedBy) why.push(gg.resolvedBy + " 기준");
+    if (gg.transparentStem) why.push(gg.transparentStem + " 투출");
+    $("#sjGgWhy").textContent = why.join(" · ");
+
+    const st = t.strength || {};
+    const tot = (st.help || 0) + (st.weaken || 0);
+    const hp = tot ? Math.round(st.help * 100 / tot) : 50;
+    $("#sjStLabel").textContent = st.label || "";
+    $("#sjGaugeHelp").style.width = hp + "%";
+    $("#sjGaugeWeaken").style.width = (100 - hp) + "%";
+    $("#sjHelpLb").textContent = "돕는 힘 " + hp + "%";
+    $("#sjWeakenLb").textContent = "빼는 힘 " + (100 - hp) + "%";
+
+    if (t.hint) { $("#sjHint").textContent = t.hint; $("#sjHintBox").style.display = ""; }
+    else $("#sjHintBox").style.display = "none";
+
+    const box = $("#sjResult");
+    box.classList.add("on");
+    box.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, () => {
+    btn.disabled = false; btn.textContent = label;
+    sjErr("계산 엔진을 불러오지 못했어요. 새로고침해줘");
+  });
+});
+
+// 티저가 보이면 엔진을 미리 받아 둔다 — 폼 채우는 동안 대개 도착한다.
+new IntersectionObserver((es, o) => es.forEach(e => {
+  if (e.isIntersecting) { loadEngine().catch(() => {}); o.disconnect(); }
+}), { rootMargin: "600px" }).observe(document.getElementById("free"));
+
+// ── 공통 ─────────────────────────────────────────
+function toast(msg) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("on");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove("on"), 2400);
+}
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+}), { threshold: 0.08 });
+document.querySelectorAll(".fade-up").forEach(el => io.observe(el));
+</script>
+</body>
+</html>
