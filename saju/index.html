@@ -293,9 +293,8 @@ section.blk{padding:58px 0 6px}
       <li>명식·격국·용신을 근거로, 사실 나열이 아니라 이야기로</li>
       <li>링크로 언제든 다시 열람</li>
     </ul>
-    <p class="pay-price"><b>3,900</b>원</p>
     <a class="pay-btn" href="#f">내 사주 넣고 시작하기</a>
-    <p class="pay-methods">카카오페이 · 네이버페이 · 신용카드 · 토스</p>
+    <p class="pay-methods">명식·격국·용신은 여기서 무료 · 4구간 해석은 앱에서</p>
   </div>
   <p class="pay-calm">먼저 명식과 풀이를 무료로 보고, 결제는 그다음에 정해도 돼요.</p>
 </section>
@@ -369,9 +368,8 @@ section.blk{padding:58px 0 6px}
         <li>위 명식·격국·용신을 근거로, 사실 나열이 아니라 이야기로</li>
         <li>링크로 언제든 다시 열람</li>
       </ul>
-      <p class="pay-price"><b>3,900</b>원</p>
-      <button class="pay-btn" id="payBtn" type="button">결제하고 리포트 열기</button>
-      <p class="pay-methods">카카오페이 · 네이버페이 · 신용카드 · 토스</p>
+      <button class="pay-btn" id="payBtn" type="button">앱에서 이어보기</button>
+      <p class="pay-methods">인생 4구간 해석은 만세력 앱에서 볼 수 있어요 · 여기 넣은 생년월일은 앱이 이어받아요</p>
       <p class="pay-legal">디지털 콘텐츠 특성상 <strong>열람을 시작하면 청약철회가 제한</strong>됩니다.
       열람 전에는 전액 환불돼요. <a href="/legal/refund/">환불 안내 자세히</a></p>
       <p class="pay-err" id="payErr"></p>
@@ -644,11 +642,16 @@ function runNow(){
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   결제 — Phase 1. PG(포트원) 심사 전이라 결제창 호출은 스텁이고,
-   주문 생성(pair-order)까지는 실제로 동작한다. 순서가 중요하다:
-   **주문을 먼저 만들고 결제한다.** 결제 성공 뒤에 입력을 보내면, 결제만
-   하고 창을 닫은 사용자의 리포트를 만들 근거가 서버에 없다.
+   결제 — **웹에서 받지 않는다**(2026-08-31). 웹에 PG 가 없어서 여기서 주문을
+   만들면 pending 에 갇힐 뿐이라, 결제는 앱(Play 빌링) 한 곳으로 모았다.
+   그래서 pair-order 를 부르지 않고 설치 레퍼러로 앱에 넘긴다(handoffUrl).
+   PG 를 실제로 붙이는 날: verify-payment 웹훅(구현돼 있음)에 시크릿을 넣고,
+   startPay 를 PortOne.requestPayment 호출로 되돌리면 된다.
+   그때도 순서는 그대로 — **주문을 먼저 만들고 결제한다.** 결제 성공 뒤에 입력을
+   보내면, 결제만 하고 창을 닫은 사용자의 리포트를 만들 근거가 서버에 없다.
    ───────────────────────────────────────────────────────────────── */
+/* ⚠️ FN·uuid() 는 지금 호출자가 없다 — 결제를 앱으로 넘기면서 pair-order 호출을 뺐기 때문이다.
+   PG 를 붙이는 날 startPay 를 되돌리면 다시 쓰이므로 지우지 말 것(서버 함수도 그대로 살아 있다). */
 var FN = "https://sidxbzpbesbaiokxrqsf.supabase.co/functions/v1";
 var LAST_INPUT = null;
 
@@ -677,47 +680,28 @@ function lifePhaseFor(v){
   return out && out.error ? null : out;
 }
 
+/* 웹에는 PG 가 없다 — 결제는 앱(Play 빌링)에서만 일어난다. 주문을 만들지 않고
+   설치 레퍼러에 생년월일을 실어 앱으로 넘긴다(규약은 store/checkout.html handoffUrl 과 동일).
+   ⚠️ payload 에 '=' 금지 — extractPayload 가 b_ 접두사를 잃는다(BirthReferrerPayloadTest).
+   인생 4구간 해석은 앱 안의 기능이라 상품 slug 없이 생년월일만 넘긴다. */
+var PLAY_URL = "https://play.google.com/store/apps/details?id=com.samramanshang.manseryeok"
+  + "&referrer=utm_source%3Dseo%26utm_medium%3Dweb%26utm_campaign%3Dsaju";
+
+function handoffUrl(v){
+  var p2 = function(n){ return (n < 10 ? "0" : "") + n; };
+  var date = v.y + p2(v.mo) + p2(v.d);
+  var time = v.unk ? "na" : (p2(v.h) + p2(v.mi));
+  return PLAY_URL + encodeURIComponent("&b_" + date + "-" + time + "-" + v.g);
+}
+
 function startPay(){
   var btn = document.getElementById("payBtn");
   document.getElementById("payErr").style.display = "none";
   if (!LAST_INPUT){ payError("먼저 생년월일시를 넣고 계산해 주세요."); return; }
 
-  var payload;
-  try { payload = lifePhaseFor(LAST_INPUT); }
-  catch (e) { payload = null; }
-  if (!payload){
-    payError("리포트 준비 중이에요. 조금 뒤에 다시 시도해 주세요.");
-    return;
-  }
-
-  if (window.__track) window.__track("pay_start");
-  btn.disabled = true; btn.textContent = "주문 생성 중…";
-
-  var orderId = uuid();
-  fetch(FN + "/pair-order", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      orderId: orderId,
-      product: "saju_life_phase",
-      input: {
-        y: LAST_INPUT.y, mo: LAST_INPUT.mo, d: LAST_INPUT.d,
-        h: LAST_INPUT.h, mi: LAST_INPUT.mi, g: LAST_INPUT.g, unk: !!LAST_INPUT.unk,
-        life_phase: payload
-      }
-    })
-  }).then(function(res){
-    if (!res.ok) throw new Error("order " + res.status);
-    return res.json();
-  }).then(function(){
-    /* TODO(PG): 포트원 채널 발급 후 실제 결제창 호출로 교체하고,
-       성공 시 location.href = "/pair/r/?p=" + orderId 로 넘긴다. */
-    btn.disabled = false; btn.textContent = "결제하고 리포트 열기";
-    payError("결제 준비 중이에요. 곧 열립니다 — 주문은 저장됐어요.");
-  }).catch(function(){
-    btn.disabled = false; btn.textContent = "결제하고 리포트 열기";
-    payError("주문을 만들지 못했어요. 잠시 후 다시 시도해 주세요.");
-  });
+  if (window.__track) window.__track("cta", "saju-handoff");
+  btn.disabled = true; btn.textContent = "앱으로 넘기는 중…";
+  location.href = handoffUrl(LAST_INPUT);
 }
 
 </script>
