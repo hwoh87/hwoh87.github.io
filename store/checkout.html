@@ -52,8 +52,30 @@ const r = READERS[p.reader];
 const inputType = STORE_INPUT[p.slug] || "solo";
 document.title = `주문서 · ${p.title} · 삼라만상`;
 
-// 웹에는 PG 가 없다 — 결제는 앱(Play 빌링)에서만 일어난다. 그래서 주문을 만들지 않고,
-// 설치 레퍼러에 인계 payload 를 실어 앱이 생년월일·상품을 이어받게 한다(/calc/ 와 같은 규약).
+const extraFields = STORE_EXTRA_FIELDS[p.slug] || [];
+
+/* 결제 — 포트원(PortOne v2) / PG 는 토스페이먼츠. 순서는 **주문 먼저, 결제 나중**이다:
+   결제 성공 뒤에 입력을 받으면, 결제만 하고 창을 닫은 사용자의 리포트를 만들 근거가 서버에 없다.
+   서버(store-report create)가 pending 주문과 결제창 파라미터를 함께 내려준다.
+
+   SDK 는 결제를 누른 뒤에만 받는다 — 주문서를 구경만 하는 사람에게 결제 스크립트를 물리지 않는다.
+   (엔진 번들 loadEngine 과 같은 지연 로딩 관례.) */
+let __poP = null;
+function loadPortOne() {
+  if (__poP) return __poP;
+  __poP = new Promise((res, rej) => {
+    const sc = document.createElement("script");
+    sc.src = "https://cdn.portone.io/v2/browser-sdk.js";
+    sc.onload = () => res(window.PortOne);
+    sc.onerror = () => { __poP = null; rej(new Error("portone")); };
+    document.head.appendChild(sc);
+  });
+  return __poP;
+}
+
+/* 앱 인계 — 이제는 **폴백**이다. 정적 페이지(GitHub Pages)와 서버 플래그(STORE_WEB_ORDERS)는
+   따로 배포되므로, 서버가 아직 웹 판매를 안 열었거나 PG 설정이 빠진 순간에도 주문서가 죽지 않게
+   앱 결제로 넘긴다. 규약은 그대로다. */
 const PLAY_URL = "https://play.google.com/store/apps/details?id=com.samramanshang.manseryeok" +
   "&referrer=utm_source%3Dseo%26utm_medium%3Dweb%26utm_campaign%3Dstore";
 
@@ -100,8 +122,26 @@ function personForm(prefix, title, sub, nameLabel) {
   </form>`;
 }
 
-// 상대·반려동물·부가 입력 폼은 웹에서 받지 않는다 — 앱 주문서에서 한 번만 받게 해
-// 같은 정보를 두 번 입력하는 일을 없앴다(웹은 내 생년월일만 받아 앱으로 인계).
+function petForm() {
+  return `
+  <h2 class="sec"><span class="no">2</span>우리 아이 <small>반려동물 정보</small></h2>
+  <form class="sj-form" onsubmit="return false">
+    <div class="sj-row">
+      <input class="sj-input" id="petName" type="text" maxlength="12" placeholder="아이 이름" style="flex:1.2">
+      <input class="sj-input" id="petSpecies" type="text" maxlength="12" placeholder="강아지 / 고양이 …" style="flex:1">
+    </div>
+    <div class="sj-unit"><input class="sj-input" id="petYear" type="number" inputmode="numeric" placeholder="2019"><span>태어난 해</span></div>
+    <p class="ck-hint">정확한 해를 모르면 추정 나이로 계산한 연도를 넣어줘 — 띠(년주) 기준으로 읽는 리딩이야.</p>
+  </form>`;
+}
+
+function extraForm() {
+  if (!extraFields.length) return "";
+  const rows = extraFields.map(f => `
+    <div class="sj-unit" style="margin-top:10px"><input class="sj-input" id="ex_${f.key}" type="number" inputmode="numeric" placeholder="${f.ph}"><span></span></div>
+    <p class="ck-hint" style="margin-top:4px">${escHtml(f.label)}</p>`).join("");
+  return `<h2 class="sec"><span class="no">＋</span>알면 더 깊어지는 것 <small>선택 입력</small></h2>${rows}`;
+}
 
 document.getElementById("ck").innerHTML = `
   <a class="pd-back" href="product.html?id=${p.slug}">← ${escHtml(p.title)}</a>
@@ -115,11 +155,11 @@ document.getElementById("ck").innerHTML = `
   </div>
 
   ${personForm("me", "나의 정보", "리포트의 주인공", "이름 (리포트에 불릴 이름)")}
-  ${inputType === "solo" ? "" : `<p class="ck-hint" style="margin-top:10px">${
-    inputType === "pair" ? "그 사람의 생년월일은 앱 주문서에서 이어서 받아요." : "아이 이름·종·태어난 해는 앱 주문서에서 이어서 받아요."
-  }</p>`}
+  ${inputType === "pair" ? personForm("pt", "그 사람의 정보", "생년월일이 꼭 필요해", "그 사람 이름·별칭 (선택)") : ""}
+  ${inputType === "pet" ? petForm() : ""}
+  ${extraForm()}
 
-  <h2 class="sec"><span class="no">2</span>구성 확인하기</h2>
+  <h2 class="sec"><span class="no">${inputType === "solo" ? 2 : 3}</span>구성 확인하기</h2>
   <div class="ck-tiers" id="tiers">
     <label class="ck-tier on" data-tier="basic">
       <p class="t1">${escHtml(p.title)} · 사주 분석 리포트</p>
@@ -133,9 +173,9 @@ document.getElementById("ck").innerHTML = `
     <span>이 분석은 명리 계산과 AI 술사 해석에 기반한 <b>참고용·엔터테인먼트 콘텐츠</b>임을 이해했어요. 입력한 생년월일은 리포트 생성에만 쓰여요.${inputType === "pair" || p.slug === "love-sal" ? " (연애·궁합 분석은 만 19세 이상만 신청할 수 있어요)" : ""}</span>
   </label>
 
-  <button class="ck-cta" id="go" data-cta="store-checkout-${p.slug}">앱에서 결제하고 받기 →</button>
-  <p class="ck-fine">결제와 리포트 생성은 <b>만세력 앱</b>에서 이뤄져요 · 여기 넣은 생년월일은 앱이 그대로 이어받아요<br>완성된 리포트는 앱의 '내 리포트'에 보관되고, PDF로 저장할 수 있어요<br>
-  <a href="../legal/terms/" style="text-decoration:underline">이용약관</a> · <a href="../legal/refund/" style="text-decoration:underline">환불정책</a> · <a href="../legal/privacy/" style="text-decoration:underline">개인정보처리방침</a></p>
+  <button class="ck-cta" id="go" data-cta="store-checkout-${p.slug}">${won(priceOf(p.slug))} 결제하고 받기 →</button>
+  <p class="ck-fine">카드 결제는 <b>토스페이먼츠</b>(결제대행 포트원)를 통해 안전하게 처리돼요 · 카드 정보는 저희 서버에 남지 않아요<br>완성된 리포트는 이 브라우저의 '내 리포트'에 남고, PDF로 저장할 수 있어요 · 1년간 보관돼요<br>
+  <a href="../legal/terms/" style="text-decoration:underline">이용약관</a> · <a href="../legal/refund/" style="text-decoration:underline">환불정책</a> · <a href="../legal/privacy/" style="text-decoration:underline">개인정보처리방침</a> · <a href="../legal/business/" style="text-decoration:underline">사업자정보</a></p>
   <p class="ck-err" id="err"></p>
 `;
 
@@ -169,30 +209,141 @@ function readPerson(prefix, label, nameRequired) {
   return { name, gender: genders[prefix], birth: { y, mo, d, h: hv < 0 ? -1 : hv, mi: hv < 0 ? 0 : 30 } };
 }
 
-// 여기서 명식을 세우지 않는다 — 계산·결제·생성은 전부 앱에서 한다(엔진 번들도 받지 않는다).
+const LON = 126.978; // 서울 기준 — 진태양시 보정은 무료 계산기(/calc/)에서 도시 선택으로 제공
+
+/** 폼 → 서버에 보낼 {inputs, context}. 명식은 브라우저(KMP 엔진)가 세운다 — 서버엔 엔진이 없다.
+ *  점수·해석은 보내지 않는다. 명식은 조작해도 남의 사주로 제 돈 내는 짓이라 실익이 없다. */
+async function buildOrder(me, partner, pet, extra) {
+  await loadEngine();
+  const root = engineRoot();
+  const now = new Date();
+  const nowArgs = [now.getFullYear(), now.getMonth() + 1, now.getDate()];
+
+  const context = {
+    me: JSON.parse(root.StoreCalc.context(me.birth.y, me.birth.mo, me.birth.d, me.birth.h, me.birth.mi, me.gender, false, LON, ...nowArgs)),
+  };
+  if (partner) {
+    context.partner = JSON.parse(root.StoreCalc.context(partner.birth.y, partner.birth.mo, partner.birth.d, partner.birth.h, partner.birth.mi, partner.gender, false, LON, ...nowArgs));
+    context.gunghap = JSON.parse(root.GunghapCalc.analyze(
+      me.birth.y, me.birth.mo, me.birth.d, me.birth.h, me.birth.mi, me.gender,
+      partner.birth.y, partner.birth.mo, partner.birth.d, partner.birth.h, partner.birth.mi, partner.gender,
+      "COUPLE", now.getFullYear()
+    ));
+  }
+  if (pet) {
+    context.pet = { name: pet.name, species: pet.species, birthYear: pet.birthYear, yearGanzi: root.StoreCalc.yearGanzi(pet.birthYear) };
+  }
+
+  const inputs = { name: me.name, gender: me.gender, birth: me.birth };
+  if (partner) inputs.partner = partner;
+  if (pet) inputs.pet = pet;
+  if (extra) inputs.extra = extra;
+  return { inputs, context };
+}
+
+/** 결제창 호출. 돌아갈 곳은 **뷰어**다 — 팝업(데스크톱)과 리다이렉트(모바일)가 같은 화면에서 만나고,
+ *  결제 확정(confirm_web)도 거기 한 곳에만 두면 된다. */
+async function pay(order) {
+  const PortOne = await loadPortOne();
+  const pm = order.payment;
+  const back = new URL("report.html", location.href);
+  back.searchParams.set("rid", order.rid);
+
+  const resp = await PortOne.requestPayment({
+    storeId: pm.storeId,
+    channelKey: pm.channelKey,
+    paymentId: pm.paymentId,
+    orderName: pm.orderName,
+    totalAmount: pm.amount,
+    currency: "CURRENCY_KRW",
+    payMethod: "CARD",
+    // ⚠️ 모바일은 리다이렉트 방식으로만 동작한다 — 빼면 결제창이 아예 안 뜬다(포트원 문서).
+    redirectUrl: back.toString(),
+  });
+  // 리다이렉트 방식이면 여기까지 오지 않는다(포트원이 redirectUrl 로 이동시킨다).
+  if (resp && resp.code != null) throw new Error(resp.message || "결제가 완료되지 않았어요");
+  location.href = back.toString();
+}
+
 $("#go").addEventListener("click", async () => {
   err("");
   const btn = $("#go");
-  let me;
+  const label = btn.textContent;
+  let me, partner = null, pet = null, extra = null;
   try {
     if (!$("#agree").checked) throw new Error("안내 사항에 동의해줘 — 체크박스를 눌러줘");
     me = readPerson("me", "나의", true);
+    if (inputType === "pair") partner = readPerson("pt", "그 사람의", false);
+    if (inputType === "pet") {
+      const py = +$("#petYear").value;
+      if (!py || py < 1985 || py > 2026) throw new Error("아이가 태어난 해를 넣어줘 (예: 2019)");
+      pet = { name: $("#petName").value.trim(), species: $("#petSpecies").value.trim(), birthYear: py };
+    }
+    if (extraFields.length) {
+      extra = {};
+      extraFields.forEach(f => {
+        const v = +document.getElementById("ex_" + f.key).value;
+        if (v >= 1950 && v <= 2035) extra[f.key] = v;
+      });
+      if (!Object.keys(extra).length) extra = null;
+    }
   } catch (e) { err(e.message); return; }
 
-  // 미성년 가드 — 연애·궁합 상품은 앱과 같은 기준(만 19세 미만 차단)으로 여기서 먼저 막는다.
+  // 미성년 가드 — 연애·궁합 상품은 앱과 같은 기준(만 19세 미만 차단). 서버도 같은 판정을 한다.
   if ((inputType === "pair" || p.slug === "love-sal") &&
       new Date().getFullYear() - me.birth.y < 19) {
     err("연애·궁합 분석은 만 19세 이상만 신청할 수 있어요");
     return;
   }
 
-  // 결제는 앱에서 — 생년월일을 레퍼러에 실어 보내고 Play 로 넘긴다.
-  // (상대·반려동물 정보는 레퍼러에 담기엔 커서 앱 주문서에서 한 번 더 받는다.)
   btn.disabled = true;
-  btn.textContent = "앱으로 넘기는 중…";
-  if (window.__track) window.__track("cta", "store-handoff-" + p.slug);
-  location.href = handoffUrl(me, p.slug);
+  btn.textContent = "여덟 글자를 세우는 중…";
+  try {
+    const { inputs, context } = await buildOrder(me, partner, pet, extra);
+
+    btn.textContent = "주문을 접수하는 중…";
+    let order;
+    try {
+      order = await storeApi({ action: "create", slug: p.slug, tier: "basic", inputs, context });
+    } catch (e) {
+      // 서버가 웹 판매를 안 열었거나 PG 설정이 빠졌다 — 앱 결제로 넘긴다(이 페이지와 서버 플래그는
+      // 따로 배포되므로, 어느 쪽이 먼저 바뀌어도 주문서가 막다른 길이 되지 않게).
+      if (e.code === "web_orders_closed" || e.code === "payment_not_configured") {
+        btn.textContent = "앱으로 넘기는 중…";
+        if (window.__track) window.__track("cta", "store-handoff-" + p.slug);
+        location.href = handoffUrl(me, p.slug);
+        return;
+      }
+      throw e;
+    }
+
+    // 보관함 기록은 **결제 전에** 남긴다 — 결제하고 창을 닫아도 이 브라우저에 rid 가 남아야
+    // '내 리포트'로 되찾을 수 있다(웹 주문의 재열람 키는 rid 하나뿐이다).
+    libAdd({ rid: order.rid, slug: p.slug, title: p.title, name: me.name, at: Date.now() });
+
+    // 사전 오픈(무료 모드)이면 결제 단계가 없다 — 바로 뷰어로.
+    if (order.status === "paid" || !order.payment) {
+      if (window.__track) window.__track("cta", "store-order-" + p.slug);
+      location.href = "report.html?rid=" + encodeURIComponent(order.rid);
+      return;
+    }
+
+    btn.textContent = "결제창을 여는 중…";
+    // 라벨을 비운다 — 완주형 이벤트는 track.js 가 유입 채널을 물려 준다(앵글별 전환율 판정용).
+    if (window.__track) window.__track("pay_start");
+    await pay(order);
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = label;
+    err(e.code ? storeErrMsg(e)
+      : e.message === "engine" ? "계산 엔진을 불러오지 못했어요. 새로고침해줘"
+      : e.message === "portone" ? "결제창을 불러오지 못했어요. 네트워크를 확인하고 다시 시도해줘"
+      : (e.message || "잠시 후 다시 시도해줘"));
+  }
 });
+
+// 폼이 보이는 동안 엔진을 미리 받아 둔다.
+setTimeout(() => loadEngine().catch(() => {}), 600);
 </script>
 </body>
 </html>

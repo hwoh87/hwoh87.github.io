@@ -63,7 +63,10 @@ function toast(msg) {
   clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("on"), 2600);
 }
 
-const rid = new URLSearchParams(location.search).get("rid");
+const QS = new URLSearchParams(location.search);
+const rid = QS.get("rid");
+// 포트원 리다이렉트(모바일)는 결과를 쿼리로 싣고 이 페이지로 돌아온다 — 실패 시에만 code/message 가 온다.
+const PAY_CODE = QS.get("code"), PAY_MSG = QS.get("message");
 let DATA = null;   // 서버 get 응답 — PDF 생성기도 이걸 쓴다
 let PROD = null, READER = null, CAT = null;
 
@@ -112,6 +115,51 @@ function chunkRanges(total, chunks, size) {
   const out = [];
   for (let i = 0; i < chunks; i++) out.push([i * size, Math.min(total, i * size + size)]);
   return out;
+}
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/**
+ * 결제 확정 — 뷰어는 결제창에서 **돌아오는 자리**이기도 하다(checkout 이 redirectUrl 을 여기로 잡는다).
+ * 그래서 pending 주문을 만나면 여기서 확정을 시도한다.
+ *
+ * 왜 폴링인가: 확정 경로가 둘이다. 웹훅(verify-payment)은 정본이지만 몇 초 늦고, confirm_web 은
+ * 즉시지만 PG 승인 반영에 한 박자 걸릴 수 있다. 둘 중 먼저 도착하는 쪽을 받으면 되므로 몇 번만 두드린다
+ * (서버는 어느 쪽이 이겨도 한 번만 확정한다 — pg_tx_id 유니크).
+ *
+ * ⚠️ 여기서 402 를 받았다고 사용자를 탓하면 안 된다. 결제창을 닫은 경우와 승인 반영이 늦은 경우가
+ *    같은 코드로 오기 때문에, 다 두드려 본 뒤에야 "확인되지 않았다"고 말한다.
+ */
+async function ensurePaid(data) {
+  if (data.status === "paid") return data;
+
+  // 포트원이 실패를 명시했다 — 두드릴 이유가 없다.
+  if (PAY_CODE) {
+    $("#genTitle").textContent = "결제가 완료되지 않았어요";
+    $("#genLine").innerHTML = escHtml(PAY_MSG || "결제창에서 취소되었거나 승인이 거절됐어요.") +
+      `<br><a href="checkout.html?id=${encodeURIComponent(data.slug)}" style="text-decoration:underline">다시 주문하기</a>`;
+    throw new Error("pay_stopped");
+  }
+
+  $("#genTitle").textContent = "결제를 확인하는 중…";
+  $("#genLine").textContent = "승인 결과가 도착하면 바로 이어서 써줄게.";
+  for (let attempt = 0; attempt < 4; attempt++) {
+    if (attempt) await sleep(1500);
+    try {
+      await storeApi({ action: "confirm_web", rid });
+      if (window.__track) window.__track("pay_done");
+      return await storeApi({ action: "get", rid });
+    } catch (e) {
+      // 아직 승인이 안 잡혔거나 포트원 조회가 흔들렸다 — 다시 두드린다. 그 밖의 오류는 즉시 알린다.
+      if (e.code !== "payment_required" && e.code !== "portone_lookup_failed") throw e;
+    }
+  }
+  $("#genTitle").textContent = "결제가 확인되지 않았어요";
+  $("#genLine").innerHTML = "결제를 마쳤는데도 이 화면이 보이면 잠시 뒤 새로고침해줘 — 승인이 늦게 잡히는 경우가 있어.<br>" +
+    `계속 그러면 <a href="../legal/business/" style="text-decoration:underline">문의처</a>로 주문번호 <b>${escHtml(rid)}</b> 를 알려줘.`;
+  $("#genRetry").textContent = "결제 다시 확인하기";
+  $("#genErr").style.display = "block";
+  throw new Error("pay_pending");
 }
 
 async function ensureGenerated(data) {
@@ -300,12 +348,15 @@ async function boot() {
     READER = READERS[PROD.reader];
     CAT = CATS[PROD.cat];
     document.title = `${PROD.title} · 내 사주 리포트 · 삼라만상`;
+    // 결제 → 생성 순서다. 확정 전에 generate 를 부르면 402 만 돌아온다.
+    if (data.status !== "paid") data = await ensurePaid(data);
     if (!data.done) data = await ensureGenerated(data);
     if (!data.done) throw new Error("incomplete");
     DATA = data;
     renderView(data);
   } catch (e) {
-    if (e.message === "gen_failed") return; // 재시도 버튼이 떠 있음
+    // 아래 셋은 이미 제 화면(재시도 버튼·안내문)을 그려 뒀다 — 덮어쓰지 않는다.
+    if (e.message === "gen_failed" || e.message === "pay_pending" || e.message === "pay_stopped") return;
     $("#genTitle").textContent = "리포트를 열 수 없어요";
     $("#genLine").textContent = storeErrMsg(e);
   }

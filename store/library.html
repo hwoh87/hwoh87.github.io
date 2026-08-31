@@ -39,9 +39,9 @@
 
 <footer class="site-foot">
   <div class="inner">
-    <p class="tag">여기 목록은 <b>예전에 웹에서 만든 리포트</b>예요 · 이 브라우저에만 저장돼요</p>
+    <p class="tag">여기 목록은 <b>이 브라우저에서 만든 리포트</b>예요 · 이 브라우저에만 저장돼요</p>
     <p class="fine">브라우저를 바꾸거나 기록을 지우면 목록이 사라져요 — PDF로 내려받아 소장해줘.
-    새로 만드는 리포트는 앱의 '내 리포트'에 남아요.</p>
+    목록을 잃었는데 결제한 리포트가 있으면 문의처로 알려줘.</p>
   </div>
 </footer>
 
@@ -52,7 +52,7 @@ const list = libAll();
 const host = document.getElementById("list");
 if (!list.length) {
   host.innerHTML = `<div class="lib-empty">이 브라우저에 저장된 리포트가 없어요.<br>
-    리포트는 <b>만세력 앱</b>에서 만들고 앱의 '내 리포트'에 보관돼요.<br>
+    리포트는 만든 <b>브라우저에 남아요</b> — 다른 기기에서 만든 건 여기 보이지 않아요.<br>
     <a href="./#tests" style="color:#a78bfa;text-decoration:underline">사주 분석 둘러보기 →</a></div>`;
 } else {
   host.innerHTML = list.map(x => {

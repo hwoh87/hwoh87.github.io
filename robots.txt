@@ -4,4 +4,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://hwoh87.github.io/sitemap.xml
+Sitemap: https://samra.cc/sitemap.xml
