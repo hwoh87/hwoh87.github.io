@@ -902,3 +902,24 @@ body.report-page { background: #08070c; }
   font-family: "MaruBuri", "Noto Serif KR", serif;
   font-size: 18px; line-height: 1.8; color: #7e6332;
 }
+
+/* ── 무료 도구 · 자료실(홈 하단 pSEO 허브) ─────────────
+   옛 홈의 허브를 스토어 톤으로 옮긴 블록. 라이트 테마인 /assets/seo.css 를 끌어오면
+   다크 위에서 깨지므로 여기서 최소한만 정의한다.
+   ⚠️ .lib-* 는 보관함(library.html)이 이미 쓰는 이름이라 hub- 를 쓴다. */
+.hub { margin-top: 64px; }
+.hub-lead { margin: 10px 0 0; font-size: 14px; line-height: 1.75; color: rgba(255, 255, 255, 0.55); }
+.hub-lead b { color: rgba(255, 255, 255, 0.8); font-weight: 700; }
+.hub-grid {
+  display: grid; gap: 10px; margin-top: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+.hub-card {
+  display: block; padding: 16px 18px; border-radius: 16px;
+  background: rgba(255, 255, 255, 0.035); border: 1px solid rgba(255, 255, 255, 0.07);
+  transition: background 0.16s, border-color 0.16s, transform 0.16s;
+}
+.hub-card:hover { background: rgba(255, 255, 255, 0.06); border-color: rgba(167, 139, 250, 0.4); transform: translateY(-2px); }
+.hub-card b { display: block; font-size: 15px; font-weight: 700; color: #EDE9FF; }
+.hub-card span { display: block; margin-top: 5px; font-size: 12.5px; line-height: 1.65; color: rgba(255, 255, 255, 0.45); }
+.hub-fine { margin: 22px 0 0; font-size: 12px; line-height: 1.7; color: rgba(255, 255, 255, 0.32); }

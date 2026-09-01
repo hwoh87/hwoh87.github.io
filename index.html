@@ -1,86 +1,365 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>무료 만세력 · 자미두수 · 별자리 계산기 | 만세력 사주 자료실</title>
-<meta name="description" content="생년월일만 넣으면 사주 명식·자미두수 명반·출생 차트를 설치 없이 바로 계산해요. 60갑자 일주 도감과 일주 궁합, 사주 용어사전까지 — 정통 명리 기준 무료 자료실이에요." />
-<link rel="canonical" href="https://samra.cc/" />
-<meta property="og:type" content="article" />
-<meta property="og:site_name" content="만세력" />
-<meta property="og:title" content="무료 만세력 · 자미두수 · 별자리 계산기 | 만세력 사주 자료실" />
-<meta property="og:description" content="생년월일만 넣으면 사주 명식·자미두수 명반·출생 차트를 설치 없이 바로 계산해요. 60갑자 일주 도감과 일주 궁합, 사주 용어사전까지 — 정통 명리 기준 무료 자료실이에요." />
-<meta property="og:url" content="https://samra.cc/" />
-<meta property="og:image" content="https://samra.cc/og-share.png" />
-<meta name="twitter:card" content="summary_large_image" />
-<link rel="stylesheet" href="/assets/seo.css" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>사주 분석 15종 · 무료 만세력 계산기 | 삼라만상</title>
+<meta name="description" content="생년월일만 넣으면 명리 술사가 사주팔자를 깊이 있게 풀어주는 AI 사주 분석 15종. 연애·재회·재물·시기까지, 만세력 엔진의 진짜 계산 위에서. 사주 명식·자미두수 명반·궁합·출생 차트는 설치 없이 무료로 계산해요.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="사주 분석 15종 · 무료 만세력 계산기 | 삼라만상">
+<meta property="og:description" content="생년월일만 넣으면 명리 술사가 사주팔자를 깊이 있게 풀어주는 AI 사주 분석 15종. 연애·재회·재물·시기까지, 만세력 엔진의 진짜 계산 위에서. 사주 명식·자미두수 명반·궁합·출생 차트는 설치 없이 무료로 계산해요.">
+<meta property="og:image" content="https://samra.cc/og-share.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css">
+<link rel="stylesheet" href="/store/style.css">
+<link rel="canonical" href="https://samra.cc/">
+<meta property="og:site_name" content="삼라만상">
+<meta property="og:url" content="https://samra.cc/">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "삼라만상", "url": "https://samra.cc/", "inLanguage": "ko"}</script>
 <script src="/assets/track.js" defer></script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "홈"}]}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "만세력", "url": "https://samra.cc/", "inLanguage": "ko"}</script>
 </head>
 <body>
-<header class="topbar">
-  <a class="wordmark" href="/">만세력</a>
+
+<header class="site-head">
   <nav>
-    <a href="/ilju/">일주</a><a href="/celeb/">연예인</a><a href="/term/">용어</a>
-    <a class="nav-calc" href="/calc/" data-cta="calc-nav">무료 계산기</a>
+    <a class="brand" href="/">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="11" r="7.2" fill="#fbbf24" opacity="0.92"/>
+        <circle cx="14.6" cy="9" r="6.2" fill="#0c0c14" opacity="0.55"/>
+        <path d="M3 18.5 h8 M6 21 h12" stroke="#a78bfa" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      삼라만상
+    </a>
+    <div class="head-links">
+      <a href="#tests">사주 분석</a>
+      <a href="/store/library.html">내 리포트</a>
+      <a href="/calc/" class="hide-m">무료 계산기</a>
+      <a class="btn-login" href="https://play.google.com/store/apps/details?id=com.samramanshang.manseryeok&referrer=utm_source%3Dseo%26utm_medium%3Dweb%26utm_campaign%3Dstore_nav" rel="nofollow" data-cta="store-nav-app">앱 받기</a>
+    </div>
   </nav>
 </header>
 
-<section class="hero">
-  <div class="stars" aria-hidden="true"></div>
-  <div class="hero-inner">
-    <nav class="crumbs" aria-label="위치"><span>홈</span></nav>
-    <p class="kicker">사주 · 자미두수 · 별자리 · 궁합</p>
-    <h1>만세력 사주 자료실</h1>
-    
+<main>
+  <!-- 프로모 배너 -->
+  <div class="promo wrap">
+    <div class="promo-card">
+      <div class="promo-inner">
+        <div>
+          <p class="promo-badge" id="promoBadge"></p>
+          <p class="promo-price">
+            <span class="all">건당</span>
+            <span class="now" id="priceNow"></span>
+          </p>
+          <p class="promo-sub" id="promoLine"></p>
+        </div>
+        <a class="promo-cta" href="#tests">분석 보러가기</a>
+      </div>
+    </div>
   </div>
-</section>
-<div class="heroband"></div>
 
-<main class="paper"><div class="paper-inner">
-<p class="lead">만세력은 정통 명리 만세력을 기준으로 사주·자미두수·별자리·궁합을 계산하는 앱이에요.
-이 자료실에는 앱이 쓰는 <strong>풀이 데이터를 그대로</strong> 공개해 두었어요 — 설치하지 않아도 읽을 수 있어요.</p>
+  <!-- 카테고리 칩 -->
+  <div class="chips" id="chips"></div>
 
-<h2>설치 없이 바로 쓰는 무료 계산기</h2>
-<p>생년월일만 넣으면 브라우저에서 바로 계산해요. 앱과 <strong>같은 엔진</strong>이고, 입력한 생년월일은 서버로 보내지 않아요.</p>
-<ul class="linkgrid tools"><li><a href="/calc/" data-cta="tool-calc">사주팔자 명식<span class="sub">명식·십신·12운성·신살·대운에 격국·용신까지</span></a></li><li><a href="/calc/gunghap/" data-cta="tool-gunghap">1:1 궁합<span class="sub">여덟 글자 전체로 보는 두 사람의 결 — 17개 축</span></a></li><li><a href="/calc/jami/" data-cta="tool-jami">자미두수 명반<span class="sub">12궁 주성·사화·대한과 궁마다의 풀이</span></a></li><li><a href="/calc/star/" data-cta="tool-star">출생 차트<span class="sub">태양·달·상승궁과 행성 배치·주요 각</span></a></li></ul>
+  <!-- 피처드 캐러셀 -->
+  <div class="rail" id="featured"></div>
 
-<h2>60갑자 일주 도감</h2>
-<p>태어난 날의 천간·지지가 이루는 60가지 조합. 성격의 결과 인연의 방식이 가장 진하게 드러나는 자리예요.</p>
-<ul class="linkgrid"><li><a href="/ilju/gapja/">갑자일주<span class="sub">물 위의 큰 나무</span></a></li><li><a href="/ilju/byeongin/">병인일주<span class="sub">큰 나무를 태우는 불</span></a></li><li><a href="/ilju/muo/">무오일주<span class="sub">한낮의 큰 산</span></a></li><li><a href="/ilju/gyeongjin/">경진일주<span class="sub">옥토 속의 쇠</span></a></li><li><a href="/ilju/imja/">임자일주<span class="sub">큰 바다</span></a></li><li><a href="/ilju/gyehae/">계해일주<span class="sub">큰 바다의 깊은 물</span></a></li></ul>
-<p><a href="/ilju/">→ 일주 60종 전체 보기</a></p>
+  <!-- 상품 목록 -->
+  <section id="tests" class="wrap" style="scroll-margin-top:80px">
+    <div class="section-head fade-up">
+      <p class="eyebrow">사주 분석 <span id="productCount"></span>종</p>
+      <h2>네 고민, 골라봐</h2>
+    </div>
+    <div id="groups"></div>
+  </section>
 
-<h2>천간 · 지지 해설</h2>
-<p>하늘의 열 글자와 땅의 열두 글자. 각 글자가 강할 때와 약할 때, 직업 적성, 합·충 관계까지.</p>
-<ul class="linkgrid"><li><a href="/cheongan/">천간 10자<span class="sub">갑 을 병 정 무…</span></a></li>
-<li><a href="/jiji/">지지 12자<span class="sub">자 축 인 묘 진…</span></a></li></ul>
+  <!-- 술사 소개 -->
+  <section id="readers" style="scroll-margin-top:80px; margin-top:64px">
+    <div class="section-head fade-up" style="margin-top:0">
+      <p class="eyebrow">삼라만상의 술사</p>
+      <h2>네 팔자, 누가 읽어줄까</h2>
+    </div>
+    <div class="readers-rail" id="readersRail"></div>
+  </section>
 
-<h2>일주 궁합</h2>
-<p>일간·일지의 합·충과 납음, 일간끼리의 십신으로 두 일주가 어떤 결로 만나는지 60갑자 전부를 대조했어요.
-일주마다 잘 맞는 자리와 자극이 큰 자리를 함께 정리해 두었습니다.</p>
-<ul class="linkgrid"><li><a href="/ilju/gapja/gunghap/">갑자일주 궁합<span class="sub">甲子</span></a></li><li><a href="/ilju/byeongin/gunghap/">병인일주 궁합<span class="sub">丙寅</span></a></li><li><a href="/ilju/muo/gunghap/">무오일주 궁합<span class="sub">戊午</span></a></li><li><a href="/ilju/gyeongjin/gunghap/">경진일주 궁합<span class="sub">庚辰</span></a></li><li><a href="/ilju/imja/gunghap/">임자일주 궁합<span class="sub">壬子</span></a></li><li><a href="/ilju/gyehae/gunghap/">계해일주 궁합<span class="sub">癸亥</span></a></li></ul>
+  <!-- 무료 맛보기 — 실제 만세력 엔진 계산 -->
+  <section id="free" class="teaser wrap">
+    <div class="teaser-head fade-up">
+      <div class="pill">🌙 생일만 넣으면 끝</div>
+      <h2>고르기 전에,<br><span class="hl">한번 봐볼래?</span></h2>
+      <p>이름이랑 생일 넣어봐. 네 여덟 글자를 진짜로 계산해서, 지금 너한테 가장 크게 흐르는 기운이 뭔지 바로 짚어줄게.</p>
+    </div>
+    <div class="teaser-box">
+      <form class="sj-form" id="sjForm" onsubmit="return false">
+        <div class="sj-row">
+          <input class="sj-input" id="sjName" type="text" maxlength="20" placeholder="이름 (불릴 이름)" style="flex:1">
+          <div class="sj-gender">
+            <button type="button" id="gF" class="on">여</button>
+            <button type="button" id="gM">남</button>
+          </div>
+        </div>
+        <div class="sj-row">
+          <div class="sj-unit"><input class="sj-input" id="sjY" type="number" inputmode="numeric" placeholder="1995"><span>연도</span></div>
+          <div class="sj-unit"><input class="sj-input" id="sjMo" type="number" inputmode="numeric" placeholder="1~12"><span>월</span></div>
+          <div class="sj-unit"><input class="sj-input" id="sjD" type="number" inputmode="numeric" placeholder="1~31"><span>일</span></div>
+        </div>
+        <select class="sj-select" id="sjH">
+          <option value="-1">태어난 시 모름</option>
+          <option value="0">자시 (23:30~01:30)</option>
+          <option value="2">축시 (01:30~03:30)</option>
+          <option value="4">인시 (03:30~05:30)</option>
+          <option value="6">묘시 (05:30~07:30)</option>
+          <option value="8">진시 (07:30~09:30)</option>
+          <option value="10">사시 (09:30~11:30)</option>
+          <option value="12">오시 (11:30~13:30)</option>
+          <option value="14">미시 (13:30~15:30)</option>
+          <option value="16">신시 (15:30~17:30)</option>
+          <option value="18">유시 (17:30~19:30)</option>
+          <option value="20">술시 (19:30~21:30)</option>
+          <option value="22">해시 (21:30~23:30)</option>
+        </select>
+        <button class="draw-btn" id="sjGo" type="button">생일 넣고 바로 보기</button>
+        <p class="draw-hint" id="sjErr" style="display:none;color:#f9a8d4"></p>
+      </form>
 
-<h2>사주 용어사전</h2>
-<p>십신·12운성·12신살·형충회합 등 46개 용어를 뜻과 강점·주의 키워드로 정리했어요.</p>
-<p><a href="/term/">→ 용어사전 전체 보기</a></p>
+      <div class="sj-result" id="sjResult">
+        <div class="sj-pillars" id="sjPillars"></div>
+        <p class="sj-line" id="sjIlju"></p>
+        <div class="sj-cards">
+          <div class="dr-item">
+            <div class="t"><span class="nm">지금 가장 크게 흐르는 기운</span><span class="ori" id="sjGgWhy"></span></div>
+            <p class="tx" id="sjGg" style="font-size:16px;font-weight:800;color:#fff"></p>
+          </div>
+          <div class="dr-item">
+            <div class="t"><span class="nm">타고난 기운의 세기</span><span class="ori" id="sjStLabel"></span></div>
+            <div class="sj-gauge"><div class="help" id="sjGaugeHelp"></div><div class="weaken" id="sjGaugeWeaken"></div></div>
+            <div class="sj-gauge-lb"><span id="sjHelpLb"></span><span id="sjWeakenLb"></span></div>
+          </div>
+          <div class="dr-item" id="sjHintBox" style="display:none">
+            <div class="t"><span class="nm">지금 들어야 할 조언</span></div>
+            <p class="tx" id="sjHint"></p>
+          </div>
+        </div>
+        <a class="dr-cta" href="#tests">이 사주, 열두 장으로 제대로 풀어보기 →</a>
+        <p class="draw-hint" style="margin-top:10px">명식 전체·대운·자미두수는 <a href="/calc/" style="color:#a78bfa;text-decoration:underline">무료 만세력 계산기</a>에서 더 볼 수 있어</p>
+      </div>
+    </div>
+  </section>
 
-<aside class="cta-box">
-  <p class="cta-lead">내 사주에서는 어떻게 나올까요?</p>
-  <p class="cta-sub">생년월일만 넣으면 명식·십신·12운성·신살·대운까지 바로 계산해요. 설치도 회원가입도 없어요.</p>
-  <a class="cta" href="/calc/" data-cta="calc-box">무료 만세력으로 내 명식 보기</a>
-  <p class="cta-alt"><a href="/calc/gunghap/" data-cta="calc-box-gunghap-alt">1:1 궁합</a> ·
-    <a href="/calc/jami/" data-cta="calc-box-jami">자미두수 명반</a> ·
-    <a href="/calc/star/" data-cta="calc-box-star">별자리 출생 차트</a>도 무료예요</p>
-  <p class="cta-alt" style="margin-top:20px">여기서 더 나아가면 — 만세력 앱에서는</p>
-  <ul class="cta-feats"><li>매일 바뀌는 오늘의 하늘 기운과 나의 운세를 역학 달력에서 확인해요</li><li>성격이 다른 12명의 AI 술사 중 골라 1:1 사주 상담을 나눌 수 있어요</li><li>홈 화면 위젯으로 앱을 열지 않고도 오늘 운세를 바로 봐요</li></ul>
-  <p class="cta-alt"><a href="https://play.google.com/store/apps/details?id=com.samramanshang.manseryeok&amp;referrer=utm_source%3Dseo%26utm_medium%3Dweb%26utm_campaign%3Dhome" rel="nofollow" data-cta="store-box">Google Play 에서 만세력 받기</a></p>
-</aside>
-</div></main>
+  <!-- 무료 도구 · 자료실 — 옛 홈(pSEO 허브)의 내부 링크를 그대로 옮긴 블록.
+       이 링크가 사라지면 색인된 term/ilju/cheongan/jiji 로 가는 상위 크롤 경로가 끊긴다.
+       클래스는 hub- 접두사 — .lib-* 는 보관함(library.html)이 이미 쓰고 있다. -->
+  <section id="free-lib" class="wrap hub" style="scroll-margin-top:80px">
+    <div class="section-head fade-up">
+      <p class="eyebrow">무료</p>
+      <h2>사기 전에, 먼저 봐도 돼</h2>
+      <p class="hub-lead">앱과 <b>같은 엔진</b>으로 브라우저에서 바로 계산해요. 생년월일은 서버로 보내지 않아요.</p>
+    </div>
 
-<footer class="foot">
-  <p><a href="/">만세력</a> — 사주 · 자미두수 · 별자리 · 궁합</p>
-  <p class="fine">이 페이지의 풀이는 정통 명리 문헌(자평진전·삼명통회·궁통보감)을 현대 어법으로 옮긴 참고 자료예요. 사주는 한 글자가 아니라 여덟 글자의 관계로 읽습니다.</p>
+    <div class="hub-grid fade-up">
+      <a class="hub-card" href="/calc/" data-cta="tool-calc"><b>사주팔자 명식</b><span>명식 · 십신 · 12운성 · 신살 · 대운에 격국 · 용신까지</span></a>
+      <a class="hub-card" href="/calc/gunghap/" data-cta="tool-gunghap"><b>1:1 궁합</b><span>여덟 글자 전체로 보는 두 사람의 결 — 17개 축</span></a>
+      <a class="hub-card" href="/calc/jami/" data-cta="tool-jami"><b>자미두수 명반</b><span>12궁 주성 · 사화 · 대한과 궁마다의 풀이</span></a>
+      <a class="hub-card" href="/calc/star/" data-cta="tool-star"><b>출생 차트</b><span>태양 · 달 · 상승궁과 행성 배치 · 주요 각</span></a>
+    </div>
+
+    <div class="section-head fade-up" style="margin-top:44px">
+      <p class="eyebrow">자료실</p>
+      <h2>읽을거리도 전부 무료야</h2>
+      <p class="hub-lead">앱이 쓰는 풀이 데이터를 그대로 공개해 뒀어요 — 설치하지 않아도 읽을 수 있어요.</p>
+    </div>
+
+    <div class="hub-grid fade-up">
+      <a class="hub-card" href="/ilju/"><b>60갑자 일주 도감</b><span>태어난 날의 천간 · 지지가 이루는 60가지 조합</span></a>
+      <a class="hub-card" href="/ilju/gapja/gunghap/"><b>일주 궁합</b><span>60갑자 전부를 대조한 일주끼리의 결</span></a>
+      <a class="hub-card" href="/cheongan/"><b>천간 10자</b><span>갑 을 병 정 무 … 강할 때와 약할 때</span></a>
+      <a class="hub-card" href="/jiji/"><b>지지 12자</b><span>자 축 인 묘 진 … 합 · 충 관계까지</span></a>
+      <a class="hub-card" href="/term/"><b>사주 용어사전</b><span>십신 · 12운성 · 12신살 · 형충회합 46개</span></a>
+      <a class="hub-card" href="/celeb/"><b>연예인 사주</b><span>공개된 생년월일로 본 명식과 궁합</span></a>
+    </div>
+
+    <p class="hub-fine">이 자료의 풀이는 정통 명리 문헌(자평진전 · 삼명통회 · 궁통보감)을 현대 어법으로 옮긴 참고 자료예요.
+    사주는 한 글자가 아니라 여덟 글자의 관계로 읽습니다.</p>
+  </section>
+
+</main>
+
+<footer class="site-foot">
+  <div class="inner">
+    <div class="links">
+      <a href="/legal/privacy/">개인정보처리방침</a>
+      <a href="/legal/terms/">이용약관</a>
+      <a href="/legal/refund/">환불정책</a>
+      <a href="/legal/business/">사업자정보</a>
+    </div>
+    <p class="tag">삼라만상 · 하늘의 흐름으로 사주를 풀다 · 엔터테인먼트 목적</p>
+    <p class="fine">© 2026 삼라만상. 본 서비스의 해석은 참고용이며 의사결정의 근거로 사용될 수 없습니다.</p>
+  </div>
 </footer>
+
+<div id="toast" role="status"></div>
+
+<script src="/store/catalog.js"></script>
+<script>
+// ── 렌더 ─────────────────────────────────────────
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+document.getElementById("promoBadge").textContent = PRICING.promoBadge;
+// 상품마다 값이 달라(혼자 9,900 / 둘 12,900 / 반려 7,900) 최저가를 "…부터"로 적는다.
+document.getElementById("priceNow").textContent = won(Math.min(PRICING.solo, PRICING.pair, PRICING.pet)) + "부터";
+document.getElementById("promoLine").innerHTML = PRICING.promoLine;
+document.getElementById("productCount").textContent = PRODUCTS.length;
+
+$("#chips").innerHTML = Object.entries(CATS).map(([id, c]) =>
+  `<a class="chip" style="--c:${c.color}" href="#cat-${id}">${c.emoji} ${c.label}</a>`
+).join("") + `<a class="chip" style="--c:#8b5cf6" href="#free">🌙 사주 맛보기</a>`;
+
+const badgeHtml = p => p.badge
+  ? `<span class="badge" style="--bc:${p.badge === "NEW" ? "#34d399" : "#ec4899"}">${p.badge}</span>` : "";
+
+$("#featured").innerHTML = FEATURED.map(p => {
+  const c = CATS[p.cat];
+  return `<a class="hero-card fade-up" href="/store//store/product.html?id=${p.slug}" style="--c:${c.color}">
+    <div class="ph"><img src="/store/art/covers/${p.slug}.webp" alt="" loading="lazy">
+      <div class="shade"></div>${badgeHtml(p)}
+      <div class="txt"><span class="cat">${c.label}</span><h3>${esc(p.title)}</h3><p>${esc(p.bullets)}</p></div>
+    </div></a>`;
+}).join("");
+
+$("#groups").innerHTML = Object.entries(CATS).map(([id, c]) => {
+  const items = PRODUCTS.filter(p => p.cat === id);
+  if (!items.length) return "";
+  return `<div class="group fade-up" id="cat-${id}" style="--c:${c.color}; scroll-margin-top:80px">
+    <div class="group-head">
+      <span class="icon">${c.emoji}</span>
+      <div><h3>${esc(c.group)}</h3><p class="desc">${esc(c.desc)}</p></div>
+      <span class="count">${items.length}개</span>
+    </div>
+    <div class="cards-row">${items.map(p => {
+      const r = READERS[p.reader];
+      return `<a class="p-card" href="/store//store/product.html?id=${p.slug}" style="--c:${c.color}">
+        <div class="ph"><img src="/store/art/covers/${p.slug}.webp" alt="" loading="lazy">
+          <div class="shade"></div>${badgeHtml(p)}
+          <div class="txt"><span class="cat">${c.label}</span>
+            <p class="bullets">${esc(p.bullets)}</p><h4>${esc(p.title)}</h4>
+            <span class="reader">${r.emoji} ${r.name}</span>
+          </div>
+        </div></a>`;
+    }).join("")}</div>
+  </div>`;
+}).join("") + `<a class="see-all fade-up" href="#tests">전체 ${PRODUCTS.length}종 둘러보기 →</a>`;
+
+$("#readersRail").innerHTML = Object.entries(READERS).map(([id, r]) =>
+  `<div class="reader-card fade-up">
+    <div class="ph"><img src="/store/art/readers/${id}.webp" alt="${r.name}" loading="lazy"></div>
+    <div class="txt"><div class="role">${r.emoji} ${esc(r.title)}</div><h4>${r.name}</h4>
+      <p style="margin-top:6px">${esc(r.tag)}</p></div>
+  </div>`
+).join("");
+
+// ── 무료 맛보기: 실제 만세력 엔진 ─────────────────
+// landing/calc 의 KMP 엔진 번들을 그대로 쓴다 — 계산 로직 사본 금지.
+let __engP = null;
+function loadEngine() {
+  if (__engP) return __engP;
+  __engP = new Promise((res, rej) => {
+    const s = document.createElement("script");
+    s.src = "/calc/saju-engine.js";
+    s.onload = () => res(window["engine-core"]);
+    s.onerror = () => { __engP = null; rej(new Error("engine")); };
+    document.head.appendChild(s);
+  });
+  return __engP;
+}
+const SajuCalc = () => window["engine-core"].com.samramanshang.manseryeok.orrery.js.SajuCalc;
+
+let gender = "F";
+["gF", "gM"].forEach(id => document.getElementById(id).addEventListener("click", e => {
+  gender = id === "gF" ? "F" : "M";
+  document.getElementById("gF").classList.toggle("on", gender === "F");
+  document.getElementById("gM").classList.toggle("on", gender === "M");
+}));
+
+const PILLAR_LABELS = [["time", "시주"], ["day", "일주"], ["month", "월주"], ["year", "연주"]];
+function sjErr(msg) {
+  const el = $("#sjErr");
+  el.textContent = msg; el.style.display = msg ? "" : "none";
+}
+
+document.getElementById("sjGo").addEventListener("click", () => {
+  const y = +$("#sjY").value, mo = +$("#sjMo").value, d = +$("#sjD").value;
+  const hv = +$("#sjH").value;
+  if (!y || !mo || !d) { sjErr("생년월일을 채워줘 🌙"); return; }
+  if (y < 1940 || y > 2026) { sjErr("연도는 1940~2026년 사이로 넣어줘"); return; }
+  sjErr("");
+  const btn = document.getElementById("sjGo");
+  const label = btn.textContent;
+  btn.disabled = true; btn.textContent = "하늘의 흐름 계산 중…";
+  loadEngine().then(() => {
+    btn.disabled = false; btn.textContent = label;
+    let r, t;
+    const h = hv < 0 ? -1 : hv, mi = hv < 0 ? 0 : 30;
+    try {
+      r = JSON.parse(SajuCalc().calculate(y, mo, d, h, mi, gender, false, 126.978));
+      try { t = JSON.parse(SajuCalc().interpret(y, mo, d, h, mi, gender, false, 126.978)); } catch (e) { t = {}; }
+    } catch (e) { sjErr("계산 중 오류가 났어요. 날짜를 확인해줘"); return; }
+
+    $("#sjPillars").innerHTML = PILLAR_LABELS.map(([key, lb]) => {
+      const p = r.pillars[key];
+      if (!p) return `<div class="sj-pillar empty"><p class="lb">${lb}</p><p class="gz">—</p><p class="ss">미상</p></div>`;
+      const hi = key === "day" ? "border-color:rgba(251,191,36,.55);background:rgba(251,191,36,.07)" : "";
+      return `<div class="sj-pillar" style="${hi}"><p class="lb">${lb}</p><p class="gz">${esc(p.ganzi)}</p><p class="ss">${esc(p.stemSipsin || (key === "day" ? "나" : ""))}</p></div>`;
+    }).join("");
+
+    const name = $("#sjName").value.trim();
+    $("#sjIlju").innerHTML = `${name ? esc(name) + ", " : ""}네 일주는 <b>${esc(r.iljuKr)}일주(${esc(r.pillars.day.ganzi)})</b> — 이 여덟 글자가 모든 해석의 뼈대야.`;
+
+    const gg = t.geokguk || {};
+    $("#sjGg").textContent = gg.hangul || "격국 판별 보류";
+    const why = [];
+    if (gg.resolvedBy) why.push(gg.resolvedBy + " 기준");
+    if (gg.transparentStem) why.push(gg.transparentStem + " 투출");
+    $("#sjGgWhy").textContent = why.join(" · ");
+
+    const st = t.strength || {};
+    const tot = (st.help || 0) + (st.weaken || 0);
+    const hp = tot ? Math.round(st.help * 100 / tot) : 50;
+    $("#sjStLabel").textContent = st.label || "";
+    $("#sjGaugeHelp").style.width = hp + "%";
+    $("#sjGaugeWeaken").style.width = (100 - hp) + "%";
+    $("#sjHelpLb").textContent = "돕는 힘 " + hp + "%";
+    $("#sjWeakenLb").textContent = "빼는 힘 " + (100 - hp) + "%";
+
+    if (t.hint) { $("#sjHint").textContent = t.hint; $("#sjHintBox").style.display = ""; }
+    else $("#sjHintBox").style.display = "none";
+
+    const box = $("#sjResult");
+    box.classList.add("on");
+    box.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, () => {
+    btn.disabled = false; btn.textContent = label;
+    sjErr("계산 엔진을 불러오지 못했어요. 새로고침해줘");
+  });
+});
+
+// 티저가 보이면 엔진을 미리 받아 둔다 — 폼 채우는 동안 대개 도착한다.
+new IntersectionObserver((es, o) => es.forEach(e => {
+  if (e.isIntersecting) { loadEngine().catch(() => {}); o.disconnect(); }
+}), { rootMargin: "600px" }).observe(document.getElementById("free"));
+
+// ── 공통 ─────────────────────────────────────────
+function toast(msg) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("on");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove("on"), 2400);
+}
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+}), { threshold: 0.08 });
+document.querySelectorAll(".fade-up").forEach(el => io.observe(el));
+</script>
 </body>
 </html>
