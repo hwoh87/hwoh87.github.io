@@ -41,48 +41,22 @@
 </header>
 
 <main>
-  <!-- 프로모 배너 -->
-  <div class="promo wrap">
-    <div class="promo-card">
-      <div class="promo-inner">
-        <div>
-          <p class="promo-badge" id="promoBadge"></p>
-          <p class="promo-price">
-            <span class="all">건당</span>
-            <span class="now" id="priceNow"></span>
-          </p>
-          <p class="promo-sub" id="promoLine"></p>
-        </div>
-        <a class="promo-cta" href="#tests">분석 보러가기</a>
+  <!-- 첫인상 = 가격이 아니라 가치. 가격은 상품 고르기 CTA 에 부제로만 얹는다.
+       바로 아래에 무료 맛보기를 둔다 — 처음 온 사람에게 가장 강한 후킹은
+       "일단 공짜로 내 명식을 본다" 이고, 그걸 보고 나서 유료를 고르는 순서가 자연스럽다. -->
+  <section class="lead-hero wrap">
+    <div class="lead-inner">
+      <p class="lead-eyebrow">구독 아닌 단건 · 고민 하나에 하나씩</p>
+      <h1 class="lead-title">고민 하나를,<br><span class="hl">여덟 글자로 끝까지</span></h1>
+      <p class="lead-sub">연애 · 재회 · 재물 · 시기 — 고민마다 다른 술사가 네 사주만 보고 길게 써.
+        지어낸 말이 아니라 만세력 엔진이 실제로 계산한 명식 위에서.</p>
+      <div class="lead-cta">
+        <a class="lead-primary" href="#free">먼저 무료로 내 명식 보기</a>
+        <a class="lead-secondary" href="#tests">고민 고르기 · <span id="priceNow"></span></a>
       </div>
     </div>
-  </div>
-
-  <!-- 카테고리 칩 -->
-  <div class="chips" id="chips"></div>
-
-  <!-- 피처드 캐러셀 -->
-  <div class="rail" id="featured"></div>
-
-  <!-- 상품 목록 -->
-  <section id="tests" class="wrap" style="scroll-margin-top:80px">
-    <div class="section-head fade-up">
-      <p class="eyebrow">사주 분석 <span id="productCount"></span>종</p>
-      <h2>네 고민, 골라봐</h2>
-    </div>
-    <div id="groups"></div>
   </section>
 
-  <!-- 술사 소개 -->
-  <section id="readers" style="scroll-margin-top:80px; margin-top:64px">
-    <div class="section-head fade-up" style="margin-top:0">
-      <p class="eyebrow">삼라만상의 술사</p>
-      <h2>네 팔자, 누가 읽어줄까</h2>
-    </div>
-    <div class="readers-rail" id="readersRail"></div>
-  </section>
-
-  <!-- 무료 맛보기 — 실제 만세력 엔진 계산 -->
   <section id="free" class="teaser wrap">
     <div class="teaser-head fade-up">
       <div class="pill">🌙 생일만 넣으면 끝</div>
@@ -146,6 +120,31 @@
     </div>
   </section>
 
+
+  <!-- 카테고리 칩 -->
+  <div class="chips" id="chips"></div>
+
+  <!-- 피처드 캐러셀 -->
+  <div class="rail" id="featured"></div>
+
+  <!-- 상품 목록 -->
+  <section id="tests" class="wrap" style="scroll-margin-top:80px">
+    <div class="section-head fade-up">
+      <p class="eyebrow">사주 분석 <span id="productCount"></span>종</p>
+      <h2>네 고민, 골라봐</h2>
+    </div>
+    <div id="groups"></div>
+  </section>
+
+  <!-- 술사 소개 -->
+  <section id="readers" style="scroll-margin-top:80px; margin-top:64px">
+    <div class="section-head fade-up" style="margin-top:0">
+      <p class="eyebrow">삼라만상의 술사</p>
+      <h2>네 팔자, 누가 읽어줄까</h2>
+    </div>
+    <div class="readers-rail" id="readersRail"></div>
+  </section>
+
   <!-- 무료 도구 · 자료실 — 옛 홈(pSEO 허브)의 내부 링크를 그대로 옮긴 블록.
        이 링크가 사라지면 색인된 term/ilju/cheongan/jiji 로 가는 상위 크롤 경로가 끊긴다.
        클래스는 hub- 접두사 — .lib-* 는 보관함(library.html)이 이미 쓰고 있다. -->
@@ -205,10 +204,9 @@
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
-document.getElementById("promoBadge").textContent = PRICING.promoBadge;
 // 상품마다 값이 달라(혼자 9,900 / 둘 12,900 / 반려 7,900) 최저가를 "…부터"로 적는다.
+// 가격은 히어로의 부제(고민 고르기 · N원부터)로만 나온다 — 첫인상을 가격이 잡지 않게.
 document.getElementById("priceNow").textContent = won(Math.min(PRICING.solo, PRICING.pair, PRICING.pet)) + "부터";
-document.getElementById("promoLine").innerHTML = PRICING.promoLine;
 document.getElementById("productCount").textContent = PRODUCTS.length;
 
 $("#chips").innerHTML = Object.entries(CATS).map(([id, c]) =>

@@ -923,3 +923,43 @@ body.report-page { background: #08070c; }
 .hub-card b { display: block; font-size: 15px; font-weight: 700; color: #EDE9FF; }
 .hub-card span { display: block; margin-top: 5px; font-size: 12.5px; line-height: 1.65; color: rgba(255, 255, 255, 0.45); }
 .hub-fine { margin: 22px 0 0; font-size: 12px; line-height: 1.7; color: rgba(255, 255, 255, 0.32); }
+
+/* ── 홈 첫 화면: 가치 히어로 ─────────────────────────
+   가격 배너를 대신한다. 첫인상을 금액이 잡지 않게 하고, 가격은 보조 CTA 부제로만 둔다.
+   바로 아래가 무료 맛보기라 여기 1차 CTA 는 "무료로 보기"를 가리킨다. */
+.lead-hero { padding: 56px 0 40px; }
+.lead-inner { max-width: 720px; }
+.lead-eyebrow {
+  font-size: 12px; font-weight: 800; letter-spacing: 0.1em;
+  color: var(--violet-soft, #a78bfa); text-transform: none;
+}
+.lead-title {
+  margin: 14px 0 0; font-size: clamp(30px, 5.4vw, 50px); line-height: 1.22;
+  font-weight: 800; letter-spacing: -0.02em; color: #F4F1FF;
+}
+.lead-title .hl {
+  background: linear-gradient(100deg, #c4b5fd 0%, #fbbf24 92%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.lead-sub {
+  margin: 18px 0 0; font-size: 15px; line-height: 1.85;
+  color: rgba(255, 255, 255, 0.6); max-width: 620px;
+}
+.lead-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
+.lead-primary, .lead-secondary {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 14px 24px; border-radius: 14px; font-size: 14.5px; font-weight: 800;
+  transition: transform 0.16s, background 0.16s, border-color 0.16s;
+}
+.lead-primary { background: var(--violet, #8b5cf6); color: #fff; }
+.lead-primary:hover { background: var(--violet-hi, #7c4ddb); transform: translateY(-2px); }
+.lead-secondary {
+  background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.lead-secondary:hover { border-color: rgba(167, 139, 250, 0.55); transform: translateY(-2px); }
+@media (max-width: 560px) {
+  .lead-hero { padding: 36px 0 28px; }
+  .lead-cta { flex-direction: column; }
+  .lead-primary, .lead-secondary { width: 100%; }
+}
