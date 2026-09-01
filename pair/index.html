@@ -706,7 +706,7 @@ function render(r, f){
    만들면 pending 에 갇힐 뿐이라, 결제는 앱(Play 빌링) 한 곳으로 모았다.
    그래서 pair-order 를 부르지 않고 설치 레퍼러로 앱에 넘긴다(handoffUrl).
    PG 를 실제로 붙이는 날: verify-payment 웹훅(구현돼 있음)에 시크릿을 넣고,
-   startPay 를 PortOne.requestPayment 호출로 되돌리면 된다.
+   startPay 를 토스 결제창(payment.requestPayment) 호출로 되돌리면 된다.
    그때도 순서는 그대로 — **주문을 먼저 만들고 결제한다.** 결제 성공 뒤에 입력을
    보내면, 결제만 하고 창을 닫은 사용자의 리포트를 만들 근거가 서버에 없다.
    ───────────────────────────────────────────────────────────────── */

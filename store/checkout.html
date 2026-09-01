@@ -54,23 +54,27 @@ document.title = `주문서 · ${p.title} · 삼라만상`;
 
 const extraFields = STORE_EXTRA_FIELDS[p.slug] || [];
 
-/* 결제 — 포트원(PortOne v2) / PG 는 토스페이먼츠. 순서는 **주문 먼저, 결제 나중**이다:
+/* 결제 — 토스페이먼츠 직접 연동. 순서는 **주문 먼저, 결제 나중**이다:
    결제 성공 뒤에 입력을 받으면, 결제만 하고 창을 닫은 사용자의 리포트를 만들 근거가 서버에 없다.
    서버(store-report create)가 pending 주문과 결제창 파라미터를 함께 내려준다.
 
+   ⚠️ 토스 결제창은 **인증까지만** 한다 — 승인은 successUrl 로 돌아간 뒤 서버(confirm_web)가
+      `/v1/payments/confirm` 을 쳐야 난다. 그래서 여기서 결제가 "끝났다"고 말할 수 없고,
+      돌아갈 곳(뷰어)이 승인을 마무리한다. 뒤집으면 좋은 성질이다 — 여기서 이탈하면 돈이 안 빠진다.
+
    SDK 는 결제를 누른 뒤에만 받는다 — 주문서를 구경만 하는 사람에게 결제 스크립트를 물리지 않는다.
    (엔진 번들 loadEngine 과 같은 지연 로딩 관례.) */
-let __poP = null;
-function loadPortOne() {
-  if (__poP) return __poP;
-  __poP = new Promise((res, rej) => {
+let __tpP = null;
+function loadToss() {
+  if (__tpP) return __tpP;
+  __tpP = new Promise((res, rej) => {
     const sc = document.createElement("script");
-    sc.src = "https://cdn.portone.io/v2/browser-sdk.js";
-    sc.onload = () => res(window.PortOne);
-    sc.onerror = () => { __poP = null; rej(new Error("portone")); };
+    sc.src = "https://js.tosspayments.com/v2/standard";
+    sc.onload = () => res(window.TossPayments);
+    sc.onerror = () => { __tpP = null; rej(new Error("pgsdk")); };
     document.head.appendChild(sc);
   });
-  return __poP;
+  return __tpP;
 }
 
 /* 앱 인계 — 이제는 **폴백**이다. 정적 페이지(GitHub Pages)와 서버 플래그(STORE_WEB_ORDERS)는
@@ -174,7 +178,7 @@ document.getElementById("ck").innerHTML = `
   </label>
 
   <button class="ck-cta" id="go" data-cta="store-checkout-${p.slug}">${won(priceOf(p.slug))} 결제하고 받기 →</button>
-  <p class="ck-fine">카드 결제는 <b>토스페이먼츠</b>(결제대행 포트원)를 통해 안전하게 처리돼요 · 카드 정보는 저희 서버에 남지 않아요<br>완성된 리포트는 이 브라우저의 '내 리포트'에 남고, PDF로 저장할 수 있어요 · 1년간 보관돼요<br>
+  <p class="ck-fine">카드 결제는 <b>토스페이먼츠</b>를 통해 안전하게 처리돼요 · 카드 정보는 저희 서버에 남지 않아요<br>완성된 리포트는 이 브라우저의 '내 리포트'에 남고, PDF로 저장할 수 있어요 · 1년간 보관돼요<br>
   <a href="../legal/terms/" style="text-decoration:underline">이용약관</a> · <a href="../legal/refund/" style="text-decoration:underline">환불정책</a> · <a href="../legal/privacy/" style="text-decoration:underline">개인정보처리방침</a> · <a href="../legal/business/" style="text-decoration:underline">사업자정보</a></p>
   <p class="ck-err" id="err"></p>
 `;
@@ -241,27 +245,29 @@ async function buildOrder(me, partner, pet, extra) {
   return { inputs, context };
 }
 
-/** 결제창 호출. 돌아갈 곳은 **뷰어**다 — 팝업(데스크톱)과 리다이렉트(모바일)가 같은 화면에서 만나고,
- *  결제 확정(confirm_web)도 거기 한 곳에만 두면 된다. */
+/** 결제창 호출. 돌아갈 곳은 **뷰어**다 — 성공도 실패도 같은 화면에서 만나고, 승인(confirm_web)도
+ *  거기 한 곳에만 두면 된다.
+ *
+ *  성공하면 토스가 successUrl 에 `paymentKey`·`orderId`·`amount` 를 붙여 돌려보내고,
+ *  실패하면 failUrl 에 `code`·`message` 를 붙인다. rid 는 우리가 이미 달아 두므로 뷰어는
+ *  둘 다 같은 자리에서 읽는다. */
 async function pay(order) {
-  const PortOne = await loadPortOne();
+  const TossPayments = await loadToss();
   const pm = order.payment;
   const back = new URL("report.html", location.href);
   back.searchParams.set("rid", order.rid);
 
-  const resp = await PortOne.requestPayment({
-    storeId: pm.storeId,
-    channelKey: pm.channelKey,
-    paymentId: pm.paymentId,
+  const payment = TossPayments(pm.clientKey).payment({ customerKey: TossPayments.ANONYMOUS });
+  await payment.requestPayment({
+    method: "CARD",
+    amount: { currency: "KRW", value: pm.amount },
+    orderId: pm.orderId,
     orderName: pm.orderName,
-    totalAmount: pm.amount,
-    currency: "CURRENCY_KRW",
-    payMethod: "CARD",
-    // ⚠️ 모바일은 리다이렉트 방식으로만 동작한다 — 빼면 결제창이 아예 안 뜬다(포트원 문서).
-    redirectUrl: back.toString(),
+    successUrl: back.toString(),
+    failUrl: back.toString(),
+    card: { useEscrow: false, flowMode: "DEFAULT", useCardPoint: false, useAppCardOnly: false },
   });
-  // 리다이렉트 방식이면 여기까지 오지 않는다(포트원이 redirectUrl 로 이동시킨다).
-  if (resp && resp.code != null) throw new Error(resp.message || "결제가 완료되지 않았어요");
+  // 여기까지 오지 않는다 — 토스가 successUrl/failUrl 로 이동시킨다. 혹시 남으면 뷰어로 보낸다.
   location.href = back.toString();
 }
 
@@ -337,7 +343,7 @@ $("#go").addEventListener("click", async () => {
     btn.textContent = label;
     err(e.code ? storeErrMsg(e)
       : e.message === "engine" ? "계산 엔진을 불러오지 못했어요. 새로고침해줘"
-      : e.message === "portone" ? "결제창을 불러오지 못했어요. 네트워크를 확인하고 다시 시도해줘"
+      : e.message === "pgsdk" ? "결제창을 불러오지 못했어요. 네트워크를 확인하고 다시 시도해줘"
       : (e.message || "잠시 후 다시 시도해줘"));
   }
 });
