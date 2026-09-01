@@ -218,7 +218,7 @@ const badgeHtml = p => p.badge
 
 $("#featured").innerHTML = FEATURED.map(p => {
   const c = CATS[p.cat];
-  return `<a class="hero-card fade-up" href="/store//store/product.html?id=${p.slug}" style="--c:${c.color}">
+  return `<a class="hero-card fade-up" href="/store/product.html?id=${p.slug}" style="--c:${c.color}">
     <div class="ph"><img src="/store/art/covers/${p.slug}.webp" alt="" loading="lazy">
       <div class="shade"></div>${badgeHtml(p)}
       <div class="txt"><span class="cat">${c.label}</span><h3>${esc(p.title)}</h3><p>${esc(p.bullets)}</p></div>
@@ -236,7 +236,7 @@ $("#groups").innerHTML = Object.entries(CATS).map(([id, c]) => {
     </div>
     <div class="cards-row">${items.map(p => {
       const r = READERS[p.reader];
-      return `<a class="p-card" href="/store//store/product.html?id=${p.slug}" style="--c:${c.color}">
+      return `<a class="p-card" href="/store/product.html?id=${p.slug}" style="--c:${c.color}">
         <div class="ph"><img src="/store/art/covers/${p.slug}.webp" alt="" loading="lazy">
           <div class="shade"></div>${badgeHtml(p)}
           <div class="txt"><span class="cat">${c.label}</span>
