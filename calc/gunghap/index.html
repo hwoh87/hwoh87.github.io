@@ -103,13 +103,15 @@
 .flowrow{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;margin:0 0 6px}
 .flowcell{flex:0 0 auto;min-width:104px;background:#fff;border:1px solid #E8E0D0;border-radius:12px;
   padding:10px 12px;text-align:center}
-.flowcell.locked{position:relative;filter:blur(0);background:#F7F0E1}
+.flowcell.locked{position:relative;filter:blur(0);background:#F7F0E1;padding-bottom:30px}
 .flowcell.locked .fv{filter:blur(4px);user-select:none}
 .flowcell .fy{font-size:12px;font-weight:800;color:#7E6332}
 .flowcell .fg{font-size:15px;font-weight:800;color:#1C1B1F;margin:2px 0}
 .flowcell .fv{font-size:12px;color:#5A4E33;line-height:1.5}
-.flowcell .lock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  font-size:12px;font-weight:800;color:#7E6332}
+/* 잠금 라벨은 카드 아래 확보해 둔 자리(.locked 의 padding-bottom)에 앉힌다.
+   inset:0 + 세로 중앙이면 흐림 처리하지 않은 간지 글자 위에 그대로 겹쳐 둘 다 못 읽는다. */
+.flowcell .lock{position:absolute;left:0;right:0;bottom:9px;display:flex;justify-content:center;
+  font-size:11px;font-weight:800;color:#7E6332}
 .rulechips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px}
 .rulechips span{font-size:12px;font-weight:700;background:#F2E5CA;color:#5A4E33;border-radius:8px;padding:5px 11px}
 .minorgate{display:none;background:#F3E4E1;border:1px solid #DFC0B8;border-radius:12px;
