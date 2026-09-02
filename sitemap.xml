@@ -4,6 +4,21 @@
   <url><loc>https://samra.cc/calc/gunghap/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://samra.cc/calc/jami/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://samra.cc/calc/star/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://samra.cc/store/product.html?id=love-sal</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://samra.cc/store/product.html?id=love-mind</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://samra.cc/store/product.html?id=contact-timing</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://samra.cc/store/product.html?id=sok-hap</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://samra.cc/store/product.html?id=midnight-self</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://samra.cc/store/product.html?id=past-life</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://samra.cc/store/product.html?id=pet-past-life</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://samra.cc/store/product.html?id=gunghap</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://samra.cc/store/product.html?id=marriage</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://samra.cc/store/product.html?id=three-months</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://samra.cc/store/product.html?id=job-change</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://samra.cc/store/product.html?id=why-breakup</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://samra.cc/store/product.html?id=reunion</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://samra.cc/store/product.html?id=money-bowl</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://samra.cc/store/product.html?id=money-months</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://samra.cc/</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>
   <url><loc>https://samra.cc/ilju/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://samra.cc/cheongan/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
@@ -1014,19 +1029,4 @@
   <url><loc>https://samra.cc/m/856/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://samra.cc/m/857/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://samra.cc/m/858/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://samra.cc/store/product.html?id=love-sal</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://samra.cc/store/product.html?id=love-mind</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://samra.cc/store/product.html?id=contact-timing</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://samra.cc/store/product.html?id=sok-hap</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://samra.cc/store/product.html?id=midnight-self</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://samra.cc/store/product.html?id=past-life</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://samra.cc/store/product.html?id=pet-past-life</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://samra.cc/store/product.html?id=gunghap</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://samra.cc/store/product.html?id=marriage</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://samra.cc/store/product.html?id=three-months</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://samra.cc/store/product.html?id=job-change</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://samra.cc/store/product.html?id=why-breakup</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://samra.cc/store/product.html?id=reunion</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://samra.cc/store/product.html?id=money-bowl</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://samra.cc/store/product.html?id=money-months</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>
