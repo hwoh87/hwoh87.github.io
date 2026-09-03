@@ -39,6 +39,37 @@ const STORE_ERR_KR = {
 const storeErrMsg = e =>
   STORE_ERR_KR[e && e.code] || "잠시 연결이 매끄럽지 않았어요. 다시 시도해줘.";
 
+// ── 웹 결제가 지금 열려 있는가 ────────────────────────────────
+/** 서버(STORE_WEB_ORDERS 플래그 + 토스 키)가 웹 카드 결제를 실제로 받는 상태인지 물어본다.
+ *
+ *  정적 페이지(GitHub Pages)와 서버는 따로 배포돼서 "카드로 결제돼요"라고 적힌 화면이
+ *  닫혀 있는 서버를 보고 있는 순간이 늘 있다. 그 어긋남을 **결제 버튼을 누른 뒤에** 알리면,
+ *  폼을 다 채우고 명식까지 세운 사람이 아무 설명 없이 Play 스토어로 튕긴다. 그래서 화면이
+ *  먼저 물어보고, 닫혀 있으면 처음부터 '앱에서 이어받기'로 갈아입는다.
+ *
+ *  ⚠️ 전용 엔드포인트가 아니라 create 의 웹 게이트를 이용한다 — store-report 는 웹 채널 차단을
+ *     **입력 검증·레이트리밋보다 먼저** 판정하므로, inputs 없이 부르면 주문도 만들지 않고
+ *     레이트리밋도 쓰지 않은 채 게이트 상태만 돌아온다(서버 쪽에도 이 순서를 지키라는 주석이 있다).
+ *  결제 키만 빠진 경우(payment_not_configured)는 입력을 봐야 나오므로 여기서는 못 잡는다 —
+ *  그건 클릭 시점 폴백이 받는다.
+ *
+ *  @returns Promise<"open"|"closed"|"unknown">  unknown = 못 물어봤다(화면을 그대로 둔다).
+ */
+const WEBPAY_KEY = "samra_store_webpay";
+function webPayState(slug) {
+  try {
+    const cached = sessionStorage.getItem(WEBPAY_KEY);
+    if (cached) return Promise.resolve(cached);
+  } catch (e) { /* 프라이빗 모드 — 캐시 없이 매번 물어본다 */ }
+  return storeApi({ action: "create", slug })
+    .then(() => "open")
+    .catch(e => e.code === "web_orders_closed" ? "closed" : e.code ? "open" : "unknown")
+    .then(state => {
+      if (state !== "unknown") { try { sessionStorage.setItem(WEBPAY_KEY, state); } catch (e) {} }
+      return state;
+    });
+}
+
 // ── KMP 엔진(landing/calc 공유 번들) ─────────────────────────
 let __engP = null;
 function loadEngine() {

@@ -553,6 +553,20 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .ck-prod .cat { font-size: 11px; font-weight: 700; color: var(--c, #a78bfa); letter-spacing: 0.05em; }
 .ck-prod h1 { font-size: 17px; font-weight: 800; line-height: 1.35; margin-top: 3px; }
 .ck-prod .meta { margin-top: 5px; font-size: 12px; color: rgba(255, 255, 255, 0.45); }
+/* 웹 결제가 닫혀 있을 때의 안내 — 상품 카드 바로 아래, 폼을 채우기 전에 읽히는 자리.
+   경고가 아니라 안내라서 붉은색을 쓰지 않는다(브랜드 골드). */
+.ck-handoff {
+  margin: -8px 0 22px; padding: 15px 17px; border-radius: 16px;
+  background: rgba(251, 191, 36, 0.07); border: 1px solid rgba(251, 191, 36, 0.24);
+}
+.ck-handoff .hd-t { font-size: 14px; font-weight: 800; color: #fcd34d; }
+.ck-handoff .hd-b { margin-top: 7px; font-size: 12.5px; line-height: 1.7; color: rgba(255, 255, 255, 0.72); }
+.ck-handoff .hd-b b { color: #fff; font-weight: 700; }
+.ck-handoff .hd-late {
+  margin-top: 11px; padding-top: 10px; border-top: 1px solid rgba(251, 191, 36, 0.18);
+  font-size: 12.5px; line-height: 1.6; font-weight: 700; color: #fcd34d;
+}
+
 .ck h2.sec { font-size: 15px; font-weight: 700; margin: 26px 0 12px; display: flex; align-items: center; gap: 8px; }
 .ck h2.sec .no {
   display: inline-flex; align-items: center; justify-content: center;
