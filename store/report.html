@@ -122,6 +122,20 @@ function chunkRanges(total, chunks, size) {
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 /**
+ * 미결제 주문 화면의 CTA — **재주문**으로 바꿔 단다.
+ *
+ * ⚠️ 기본 버튼은 "이어서 다시 쓰기"(boot 재실행)인데, 결제가 안 된 주문에서는 다시 돌려도 같은
+ *    화면이 그대로 다시 그려진다. 사용자 눈에는 "버튼이 안 눌린다"로 보인다(2026-09-08 실사용 제보).
+ *    결제 전 주문에서 할 수 있는 유일한 다음 행동은 재주문뿐이라, 여기서는 링크를 지우고 버튼을 쓴다.
+ */
+function reorderCta(slug) {
+  const btn = $("#genRetry");
+  btn.textContent = "다시 주문하기";
+  btn.dataset.href = "checkout.html?id=" + encodeURIComponent(slug);
+  $("#genErr").style.display = "block";
+}
+
+/**
  * 결제 승인 — 뷰어는 결제창에서 **돌아오는 자리**다(checkout 이 successUrl·failUrl 을 여기로 잡는다).
  *
  * ⚠️ 토스에서는 이게 "확정"이 아니라 **승인 그 자체**다. 결제창은 인증까지만 했고, 서버가
@@ -137,8 +151,8 @@ async function ensurePaid(data) {
   // 토스가 실패를 명시했다(failUrl) — 두드릴 이유가 없다.
   if (PAY_CODE) {
     $("#genTitle").textContent = "결제가 완료되지 않았어요";
-    $("#genLine").innerHTML = escHtml(PAY_MSG || "결제창에서 취소되었거나 승인이 거절됐어요.") +
-      `<br><a href="checkout.html?id=${encodeURIComponent(data.slug)}" style="text-decoration:underline">다시 주문하기</a>`;
+    $("#genLine").innerHTML = escHtml(PAY_MSG || "결제창에서 취소되었거나 승인이 거절됐어요.");
+    reorderCta(data.slug);
     throw new Error("pay_stopped");
   }
 
@@ -149,9 +163,8 @@ async function ensurePaid(data) {
     const again = await storeApi({ action: "get", rid });
     if (again.status === "paid") return again;
     $("#genTitle").textContent = "결제가 완료되지 않았어요";
-    $("#genLine").innerHTML = "결제창을 끝까지 통과하지 않아 결제가 이뤄지지 않았어 — <b>결제된 금액은 없어</b>.<br>" +
-      `<a href="checkout.html?id=${encodeURIComponent(data.slug)}" style="text-decoration:underline">다시 주문하기</a>`;
-    $("#genErr").style.display = "block";
+    $("#genLine").innerHTML = "결제창을 끝까지 통과하지 않아 결제가 이뤄지지 않았어 — <b>결제된 금액은 없어</b>.";
+    reorderCta(data.slug);
     throw new Error("pay_pending");
   }
 
@@ -375,6 +388,9 @@ async function boot() {
   }
 }
 $("#genRetry").addEventListener("click", () => {
+  // reorderCta 가 실어 둔 목적지가 있으면 재실행이 아니라 이동이다(미결제 주문).
+  const go = $("#genRetry").dataset.href;
+  if (go) { location.href = go; return; }
   $("#genErr").style.display = "none";
   $("#genTitle").textContent = "다시 먹을 가는 중…";
   boot();
