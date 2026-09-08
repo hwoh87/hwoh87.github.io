@@ -9,6 +9,11 @@
   --violet-hi: #8b5cf6;
   --violet-soft: #a78bfa;
   --line: rgba(255, 255, 255, 0.06);
+  /* 글자 알파 하한 = 0.5. #0c0c14 위 5.33:1 · 카드(#1a1a2e) 위 5.16:1 로 WCAG AA(4.5:1)를
+     양쪽 서피스에서 넘긴다. 예전엔 0.15~0.45 가 뒤섞여 푸터 법정 고지가 1.5:1(사실상 안 보임)
+     이었다. 더 흐리게 하고 싶으면 알파가 아니라 크기·간격으로 눌러야 한다.
+     검사: scripts/web_contrast_audit.js 를 브라우저에서 실행. */
+  --ink-min: rgba(255, 255, 255, 0.5);
   --line-strong: rgba(255, 255, 255, 0.08);
   --card-r: 24px;
 }
@@ -46,7 +51,9 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   max-width: 1024px; margin: 0 auto; padding: 0 16px;
   height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 8px;
 }
-.brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 16px; flex-shrink: 0; }
+/* 탭 타깃 — 로고도 손가락으로 눌리는 크기여야 한다(예전 83×24). */
+.brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 16px; flex-shrink: 0;
+  padding: 8px 6px 8px 0; margin-left: -2px; }
 .brand svg { display: block; }
 .head-links { display: flex; align-items: center; gap: 4px; }
 .head-links a, .head-links button {
@@ -85,8 +92,8 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 }
 .promo-price { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; line-height: 1.375; }
 .promo-price .all { font-size: 15px; font-weight: 700; color: rgba(255, 255, 255, 0.8); }
-.promo-price .was { font-size: 17px; color: rgba(255, 255, 255, 0.35); text-decoration: line-through; }
-.promo-price .arrow { font-size: 17px; color: rgba(255, 255, 255, 0.4); }
+.promo-price .was { font-size: 17px; color: rgba(255, 255, 255, 0.5); text-decoration: line-through; }
+.promo-price .arrow { font-size: 17px; color: rgba(255, 255, 255, 0.5); }
 .promo-price .now {
   font-size: 24px; font-weight: 800; color: #fff;
   background: linear-gradient(transparent 45%, rgba(139, 92, 246, 0.6) 45%);
@@ -139,7 +146,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   border-radius: var(--card-r); overflow: hidden;
   border: 1px solid var(--line-strong); transition: border-color 0.2s;
 }
-.hero-card:hover { border-color: rgba(255, 255, 255, 0.25); }
+.hero-card:hover { border-color: rgba(255, 255, 255, 0.5); }
 @media (min-width: 640px) { .hero-card { width: 420px; } }
 .hero-card .ph { position: relative; aspect-ratio: 4 / 5; overflow: hidden; }
 .hero-card .ph img {
@@ -182,8 +189,8 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   border: 1px solid color-mix(in srgb, var(--c) 25%, transparent);
 }
 .group-head h3 { font-size: 18px; font-weight: 700; color: #fff; line-height: 1.25; }
-.group-head .desc { font-size: 12px; color: rgba(255, 255, 255, 0.4); margin-top: 2px; }
-.group-head .count { margin-left: auto; font-size: 11px; color: rgba(255, 255, 255, 0.25); flex-shrink: 0; }
+.group-head .desc { font-size: 12px; color: rgba(255, 255, 255, 0.5); margin-top: 2px; }
+.group-head .count { margin-left: auto; font-size: 11px; color: rgba(255, 255, 255, 0.5); flex-shrink: 0; }
 @media (min-width: 640px) { .group-head h3 { font-size: 20px; } }
 
 .cards-row {
@@ -198,7 +205,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   border: 1px solid var(--line-strong);
   transition: border-color 0.2s, transform 0.2s;
 }
-.p-card:hover { border-color: rgba(255, 255, 255, 0.25); transform: translateY(-2px); }
+.p-card:hover { border-color: rgba(255, 255, 255, 0.5); transform: translateY(-2px); }
 @media (min-width: 640px) { .p-card { width: 180px; max-width: none; } }
 .p-card .ph { position: relative; aspect-ratio: 2 / 3; overflow: hidden; }
 .p-card .ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
@@ -215,8 +222,8 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
 .p-card h4 { font-size: 15px; font-weight: 700; color: #fff; line-height: 1.25; text-shadow: 0 1px 10px rgba(0, 0, 0, 0.9); }
-.p-card .reader { display: block; margin-top: 6px; font-size: 10px; color: rgba(255, 255, 255, 0.35); text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85); }
-.see-all { display: block; text-align: center; margin: 8px 0 0; font-size: 13.5px; font-weight: 600; color: rgba(255, 255, 255, 0.5); }
+.p-card .reader { display: block; margin-top: 6px; font-size: 10px; color: rgba(255, 255, 255, 0.5); text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85); }
+.see-all { display: block; text-align: center; margin: 4px 0 0; padding: 10px 0; font-size: 13.5px; font-weight: 600; color: rgba(255, 255, 255, 0.5); }
 .see-all:hover { color: #fff; }
 
 /* ── 점술사 소개 ───────────────────────────────── */
@@ -227,14 +234,14 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   border: 1px solid var(--line-strong); background: #12121f;
   transition: border-color 0.2s, transform 0.2s;
 }
-.reader-card:hover { border-color: rgba(255, 255, 255, 0.22); transform: translateY(-2px); }
+.reader-card:hover { border-color: rgba(255, 255, 255, 0.5); transform: translateY(-2px); }
 .reader-card .ph { position: relative; aspect-ratio: 1 / 1; overflow: hidden; }
 .reader-card .ph img { width: 100%; height: 100%; object-fit: cover; }
 .reader-card .ph::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, #12121f, transparent 40%); }
 .reader-card .txt { padding: 0 14px 14px; margin-top: -6px; position: relative; }
 .reader-card h4 { font-size: 15px; font-weight: 700; }
 .reader-card .role { font-size: 11px; color: var(--violet-soft); margin-bottom: 6px; }
-.reader-card p { font-size: 11px; color: rgba(255, 255, 255, 0.45); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.reader-card p { font-size: 11px; color: rgba(255, 255, 255, 0.5); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
 /* ── 무료 맛보기 ───────────────────────────────── */
 .teaser { padding-top: 24px; padding-bottom: 40px; scroll-margin-top: 80px; }
@@ -247,7 +254,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 }
 .teaser-head h2 { font-size: 24px; font-weight: 700; line-height: 1.25; letter-spacing: -0.01em; margin-bottom: 16px; }
 .teaser-head h2 .hl { color: var(--violet-soft); }
-.teaser-head p { color: rgba(255, 255, 255, 0.45); font-size: 15px; }
+.teaser-head p { color: rgba(255, 255, 255, 0.5); font-size: 15px; }
 @media (min-width: 640px) { .teaser-head h2 { font-size: 30px; } }
 
 .teaser-box { max-width: 448px; margin: 0 auto; }
@@ -257,7 +264,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.55); transition: all 0.15s;
 }
-.q-chip:hover { border-color: rgba(255, 255, 255, 0.25); }
+.q-chip:hover { border-color: rgba(255, 255, 255, 0.5); }
 .q-chip.on { background: var(--violet); border-color: var(--violet-hi); color: #fff; }
 .draw-btn {
   display: block; width: 100%; padding: 14px; border-radius: 14px;
@@ -279,8 +286,8 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .t-card .face img { width: 100%; height: 100%; object-fit: cover; }
 .t-card .front { transform: rotateY(180deg); }
 .t-card .front img.rv { transform: rotate(180deg); }
-.t-card .pos { text-align: center; margin-top: 8px; font-size: 11px; color: rgba(255, 255, 255, 0.4); }
-.draw-hint { text-align: center; margin-top: 14px; font-size: 12.5px; color: rgba(255, 255, 255, 0.35); }
+.t-card .pos { text-align: center; margin-top: 8px; font-size: 11px; color: rgba(255, 255, 255, 0.5); }
+.draw-hint { text-align: center; margin-top: 14px; font-size: 12.5px; color: rgba(255, 255, 255, 0.5); }
 .draw-result { margin-top: 20px; display: grid; gap: 10px; }
 .dr-item {
   border: 1px solid var(--line-strong); border-radius: 14px; padding: 14px 16px;
@@ -289,7 +296,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .dr-item .t { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
 .dr-item .nm { font-size: 14px; font-weight: 700; }
 .dr-item .ori { font-size: 11px; color: var(--violet-soft); }
-.dr-item .kw { font-size: 12px; color: rgba(255, 255, 255, 0.45); margin-bottom: 6px; }
+.dr-item .kw { font-size: 12px; color: rgba(255, 255, 255, 0.5); margin-bottom: 6px; }
 .dr-item .tx { font-size: 13px; color: rgba(255, 255, 255, 0.7); line-height: 1.6; }
 .dr-cta {
   display: block; text-align: center; margin-top: 16px; padding: 13px; border-radius: 14px;
@@ -301,10 +308,12 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 /* ── 푸터 ─────────────────────────────────────── */
 .site-foot { margin-top: auto; border-top: 1px solid var(--line); }
 .site-foot .inner { max-width: 1024px; margin: 0 auto; padding: 32px 16px; text-align: center; }
-.site-foot .links { display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 12px; color: rgba(255, 255, 255, 0.35); margin-bottom: 12px; }
+/* 법정 링크 4종 — 눌러야 하는 링크라 세로 여백으로 탭 타깃을 만든다(예전 41×18). */
+.site-foot .links { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 4px 10px; font-size: 12px; color: rgba(255, 255, 255, 0.5); margin-bottom: 8px; }
+.site-foot .links a { padding: 9px 6px; border-radius: 8px; }
 .site-foot .links a:hover { color: rgba(255, 255, 255, 0.6); }
-.site-foot .tag { color: rgba(255, 255, 255, 0.2); font-size: 12px; margin-bottom: 12px; }
-.site-foot .fine { color: rgba(255, 255, 255, 0.15); font-size: 11px; margin-top: 12px; }
+.site-foot .tag { color: rgba(255, 255, 255, 0.55); font-size: 12px; margin-bottom: 12px; }
+.site-foot .fine { color: rgba(255, 255, 255, 0.58); font-size: 11px; margin-top: 12px; }
 
 /* ── 등장 애니메이션 ───────────────────────────── */
 .fade-up { opacity: 0; transform: translateY(14px); transition: opacity 0.6s, transform 0.6s; }
@@ -324,13 +333,13 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 
 /* ══ 상품 상세 페이지 ══════════════════════════ */
 .pd { max-width: 720px; margin: 0 auto; padding: 0 16px 120px; }
-.pd-back { display: inline-flex; align-items: center; gap: 6px; margin: 20px 0 12px; font-size: 13px; color: rgba(255, 255, 255, 0.45); }
+.pd-back { display: inline-flex; align-items: center; gap: 6px; margin: 20px 0 12px; font-size: 13px; color: rgba(255, 255, 255, 0.5); }
 .pd-back:hover { color: #fff; }
 .pd-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
 .pd-meta .cat { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; color: var(--c); }
 .pd-meta .badge { position: static; }
 .pd h1 { font-size: 28px; font-weight: 800; line-height: 1.25; letter-spacing: -0.01em; }
-.pd .kicker { margin-top: 8px; font-size: 13px; color: rgba(255, 255, 255, 0.4); }
+.pd .kicker { margin-top: 8px; font-size: 13px; color: rgba(255, 255, 255, 0.5); }
 @media (min-width: 640px) { .pd h1 { font-size: 34px; } }
 
 .pd-hero { position: relative; margin: 24px 0; border-radius: var(--card-r); overflow: hidden; border: 1px solid var(--line-strong); }
@@ -374,7 +383,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line-strong);
 }
 .pd-stat .v { font-size: 20px; font-weight: 800; color: #fff; }
-.pd-stat .k { margin-top: 4px; font-size: 11.5px; color: rgba(255, 255, 255, 0.4); }
+.pd-stat .k { margin-top: 4px; font-size: 11.5px; color: rgba(255, 255, 255, 0.5); }
 .pd-deliver { font-size: 14px; line-height: 1.75; color: rgba(255, 255, 255, 0.65); }
 
 .pd-toc { display: grid; gap: 6px; }
@@ -387,7 +396,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .pd-toc .note {
   padding: 8px 16px 8px 46px; font-size: 12.5px; color: color-mix(in srgb, var(--c) 80%, #fff); line-height: 1.5;
 }
-.pd-toc-tail { margin-top: 14px; font-size: 12.5px; color: rgba(255, 255, 255, 0.4); line-height: 1.6; }
+.pd-toc-tail { margin-top: 14px; font-size: 12.5px; color: rgba(255, 255, 255, 0.5); line-height: 1.6; }
 
 .pd-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .pd-chips span {
@@ -404,7 +413,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .pd-reader .nm { font-size: 17px; font-weight: 800; }
 .pd-reader .role { font-size: 12px; color: var(--violet-soft); margin: 2px 0 8px; }
 .pd-reader p { font-size: 13px; color: rgba(255, 255, 255, 0.6); line-height: 1.6; }
-.pd-reader .spec { margin-top: 8px; font-size: 11.5px; color: rgba(255, 255, 255, 0.4); }
+.pd-reader .spec { margin-top: 8px; font-size: 11.5px; color: rgba(255, 255, 255, 0.5); }
 .pd-reader-tail { margin-top: 12px; font-size: 13px; color: rgba(255, 255, 255, 0.5); }
 
 .pd-method { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -433,7 +442,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   display: flex; justify-content: space-between; align-items: center;
 }
 .pd-faq summary::-webkit-details-marker { display: none; }
-.pd-faq summary::after { content: "▾"; font-size: 11px; color: rgba(255, 255, 255, 0.35); transition: transform 0.2s; }
+.pd-faq summary::after { content: "▾"; font-size: 11px; color: rgba(255, 255, 255, 0.5); transition: transform 0.2s; }
 .pd-faq details[open] summary::after { transform: rotate(180deg); }
 .pd-faq .a { padding: 0 16px 14px; font-size: 13.5px; color: rgba(255, 255, 255, 0.55); line-height: 1.7; }
 
@@ -449,14 +458,14 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line-strong);
 }
 .price-card.best { border-color: rgba(139, 92, 246, 0.55); background: rgba(124, 58, 237, 0.08); }
-.price-card .tier { font-size: 12px; font-weight: 700; color: rgba(255, 255, 255, 0.45); margin-bottom: 8px; }
+.price-card .tier { font-size: 12px; font-weight: 700; color: rgba(255, 255, 255, 0.5); margin-bottom: 8px; }
 .price-card.best .tier { color: var(--violet-soft); }
 .price-card .flag {
   position: absolute; top: -10px; right: 16px; padding: 3px 10px; border-radius: 999px;
   background: var(--violet); color: #fff; font-size: 11px; font-weight: 700;
 }
 .price-card .amount { font-size: 26px; font-weight: 800; }
-.price-card .was2 { font-size: 13px; color: rgba(255, 255, 255, 0.3); text-decoration: line-through; margin-left: 6px; }
+.price-card .was2 { font-size: 13px; color: rgba(255, 255, 255, 0.5); text-decoration: line-through; margin-left: 6px; }
 .price-card ul { margin: 12px 0 16px; display: grid; gap: 6px; }
 .price-card li { list-style: none; font-size: 13px; color: rgba(255, 255, 255, 0.6); display: flex; gap: 8px; }
 .price-card li::before { content: "·"; color: var(--violet-soft); font-weight: 800; }
@@ -479,9 +488,9 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   padding: 15px 16px; border-radius: 14px;
   background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line-strong); transition: border-color 0.15s;
 }
-.rel-card:hover { border-color: rgba(255, 255, 255, 0.25); }
+.rel-card:hover { border-color: rgba(255, 255, 255, 0.5); }
 .rel-card b { display: block; font-size: 13.5px; margin-bottom: 4px; }
-.rel-card span { font-size: 11.5px; color: rgba(255, 255, 255, 0.45); line-height: 1.5; }
+.rel-card span { font-size: 11.5px; color: rgba(255, 255, 255, 0.5); line-height: 1.5; }
 
 .sticky-bar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
@@ -493,7 +502,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   display: flex; align-items: center; gap: 12px;
 }
 .sticky-bar .info { flex: 1; min-width: 0; }
-.sticky-bar .l1 { font-size: 11px; color: rgba(255, 255, 255, 0.45); }
+.sticky-bar .l1 { font-size: 11px; color: rgba(255, 255, 255, 0.5); }
 .sticky-bar .l2 { font-size: 16px; font-weight: 800; }
 .sticky-bar .go {
   flex-shrink: 0; padding: 11px 22px; border-radius: 12px;
@@ -511,18 +520,18 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 }
 .sj-input::-webkit-outer-spin-button, .sj-input::-webkit-inner-spin-button { -webkit-appearance: none; }
 .sj-input:focus, .sj-select:focus { outline: none; border-color: rgba(139, 92, 246, 0.7); }
-.sj-input::placeholder { color: rgba(255, 255, 255, 0.3); }
+.sj-input::placeholder { color: rgba(255, 255, 255, 0.5); }
 .sj-select { appearance: none; -webkit-appearance: none; }
 .sj-unit { position: relative; flex: 1; }
 .sj-unit span {
   position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-  font-size: 10px; color: rgba(255, 255, 255, 0.25); pointer-events: none;
+  font-size: 10px; color: rgba(255, 255, 255, 0.5); pointer-events: none;
 }
 .sj-gender { display: flex; gap: 8px; }
 .sj-gender button {
   padding: 12px 16px; border-radius: 12px; font-size: 14px; font-weight: 700;
   border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.4); transition: all 0.15s;
+  color: rgba(255, 255, 255, 0.5); transition: all 0.15s;
 }
 .sj-gender button.on { background: var(--violet); border-color: var(--violet-hi); color: #fff; }
 
@@ -533,7 +542,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   text-align: center; padding: 14px 6px 12px; border-radius: 14px;
   background: rgba(124, 58, 237, 0.08); border: 1px solid rgba(139, 92, 246, 0.28);
 }
-.sj-pillar .lb { font-size: 10px; color: rgba(255, 255, 255, 0.35); margin-bottom: 6px; }
+.sj-pillar .lb { font-size: 10px; color: rgba(255, 255, 255, 0.5); margin-bottom: 6px; }
 .sj-pillar .gz { font-size: 20px; font-weight: 800; letter-spacing: 0.04em; }
 /* 오행색 — 앱 WuxingTokens 의 바 색과 같은 값. 다크 위에서 읽히는 밝은 변형이다. */
 .sj-pillar .gz span { color: var(--el, #F4F1FF); }
@@ -562,7 +571,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .sj-gauge { margin-top: 8px; height: 8px; border-radius: 999px; overflow: hidden; background: rgba(255, 255, 255, 0.08); display: flex; }
 .sj-gauge .help { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
 .sj-gauge .weaken { background: rgba(255, 255, 255, 0.16); }
-.sj-gauge-lb { display: flex; justify-content: space-between; margin-top: 6px; font-size: 11px; color: rgba(255, 255, 255, 0.4); }
+.sj-gauge-lb { display: flex; justify-content: space-between; margin-top: 6px; font-size: 11px; color: rgba(255, 255, 255, 0.5); }
 
 /* ══ 체크아웃(주문서) ══════════════════════════ */
 .ck { max-width: 640px; margin: 0 auto; padding: 0 16px 120px; }
@@ -574,7 +583,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .ck-prod img { width: 64px; height: 84px; border-radius: 12px; object-fit: cover; flex-shrink: 0; }
 .ck-prod .cat { font-size: 11px; font-weight: 700; color: var(--c, #a78bfa); letter-spacing: 0.05em; }
 .ck-prod h1 { font-size: 17px; font-weight: 800; line-height: 1.35; margin-top: 3px; }
-.ck-prod .meta { margin-top: 5px; font-size: 12px; color: rgba(255, 255, 255, 0.45); }
+.ck-prod .meta { margin-top: 5px; font-size: 12px; color: rgba(255, 255, 255, 0.5); }
 /* 웹 결제가 닫혀 있을 때의 안내 — 상품 카드 바로 아래, 폼을 채우기 전에 읽히는 자리.
    경고가 아니라 안내라서 붉은색을 쓰지 않는다(브랜드 골드). */
 .ck-handoff {
@@ -595,8 +604,8 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   width: 20px; height: 20px; border-radius: 7px; font-size: 11px; font-weight: 800;
   background: rgba(124, 58, 237, 0.25); color: #ddd6fe;
 }
-.ck h2.sec small { font-size: 11.5px; font-weight: 500; color: rgba(255, 255, 255, 0.35); }
-.ck-hint { margin-top: 8px; font-size: 12px; color: rgba(255, 255, 255, 0.35); line-height: 1.6; }
+.ck h2.sec small { font-size: 11.5px; font-weight: 500; color: rgba(255, 255, 255, 0.5); }
+.ck-hint { margin-top: 8px; font-size: 12px; color: rgba(255, 255, 255, 0.5); line-height: 1.6; }
 .ck-tiers { display: grid; gap: 10px; }
 @media (min-width: 560px) { .ck-tiers { grid-template-columns: 1fr 1fr; } }
 .ck-tier {
@@ -607,9 +616,9 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .ck-tier input { position: absolute; opacity: 0; }
 .ck-tier.on { border-color: rgba(139, 92, 246, 0.75); background: rgba(124, 58, 237, 0.1); }
 .ck-tier .t1 { font-size: 13px; font-weight: 700; }
-.ck-tier .t2 { margin-top: 3px; font-size: 11.5px; color: rgba(255, 255, 255, 0.45); line-height: 1.5; }
+.ck-tier .t2 { margin-top: 3px; font-size: 11.5px; color: rgba(255, 255, 255, 0.5); line-height: 1.5; }
 .ck-tier .pr { margin-top: 8px; font-size: 17px; font-weight: 800; }
-.ck-tier .pr .was { font-size: 11.5px; color: rgba(255, 255, 255, 0.3); text-decoration: line-through; margin-left: 6px; font-weight: 600; }
+.ck-tier .pr .was { font-size: 11.5px; color: rgba(255, 255, 255, 0.5); text-decoration: line-through; margin-left: 6px; font-weight: 600; }
 .ck-agree {
   display: flex; gap: 10px; align-items: flex-start; margin-top: 22px; padding: 13px 15px;
   border-radius: 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line);
@@ -622,7 +631,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 }
 .ck-cta:hover { background: var(--violet-hi); }
 .ck-cta:disabled { opacity: 0.45; cursor: default; }
-.ck-fine { margin-top: 10px; text-align: center; font-size: 11.5px; color: rgba(255, 255, 255, 0.35); line-height: 1.6; }
+.ck-fine { margin-top: 10px; text-align: center; font-size: 11.5px; color: rgba(255, 255, 255, 0.5); line-height: 1.6; }
 .ck-err { margin-top: 12px; text-align: center; font-size: 12.5px; color: #f9a8d4; display: none; }
 
 /* ══ 리포트 뷰어 ══════════════════════════════ */
@@ -894,15 +903,15 @@ body.report-page { background: #08070c; }
 
 /* ══ 내 리포트(보관함) ═══════════════════════════ */
 .lib { max-width: 640px; margin: 0 auto; padding: 0 16px 120px; }
-.lib-empty { text-align: center; padding: 80px 20px; color: rgba(255, 255, 255, 0.4); font-size: 14px; line-height: 1.8; }
+.lib-empty { text-align: center; padding: 80px 20px; color: rgba(255, 255, 255, 0.5); font-size: 14px; line-height: 1.8; }
 .lib-card {
   display: flex; gap: 14px; align-items: center; padding: 14px; border-radius: 16px; margin-bottom: 10px;
   background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line-strong); transition: border-color 0.15s;
 }
-.lib-card:hover { border-color: rgba(255, 255, 255, 0.25); }
+.lib-card:hover { border-color: rgba(255, 255, 255, 0.5); }
 .lib-card img { width: 52px; height: 68px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
 .lib-card .tt { font-size: 14.5px; font-weight: 700; line-height: 1.4; }
-.lib-card .mt { margin-top: 4px; font-size: 11.5px; color: rgba(255, 255, 255, 0.4); }
+.lib-card .mt { margin-top: 4px; font-size: 11.5px; color: rgba(255, 255, 255, 0.5); }
 .lib-card .go { margin-left: auto; flex-shrink: 0; font-size: 12px; color: var(--violet-soft); font-weight: 700; }
 
 /* 소형 화면(폰) — 원국표 4열·월 스트립이 좁은 폭에서도 잘리지 않게 축소 조정 */
@@ -959,7 +968,7 @@ body.report-page { background: #08070c; }
 }
 .hub-card:hover { background: rgba(255, 255, 255, 0.06); border-color: rgba(167, 139, 250, 0.4); transform: translateY(-2px); }
 .hub-card b { display: block; font-size: 15px; font-weight: 700; color: #EDE9FF; }
-.hub-card span { display: block; margin-top: 5px; font-size: 12.5px; line-height: 1.65; color: rgba(255, 255, 255, 0.45); }
+.hub-card span { display: block; margin-top: 5px; font-size: 12.5px; line-height: 1.65; color: rgba(255, 255, 255, 0.5); }
 /* 자료실 타일 인장 — /term/·/cheongan/ 목록과 같은 표기 체계를 홈에도 이어 둔다. */
 /* 설명이 두 줄인 타일에서 인장과 글자가 겹쳤다 — 아래 여백을 인장 높이만큼 준다. */
 .hub-card { position: relative; overflow: hidden; padding-bottom: 34px; }
@@ -970,7 +979,7 @@ body.report-page { background: #08070c; }
   pointer-events: none; transition: opacity 0.16s;
 }
 .hub-card:hover .hmark { opacity: 0.3; }
-.hub-fine { margin: 22px 0 0; font-size: 12px; line-height: 1.7; color: rgba(255, 255, 255, 0.32); }
+.hub-fine { margin: 22px 0 0; font-size: 12px; line-height: 1.7; color: rgba(255, 255, 255, 0.5); }
 
 /* ── 홈 첫 화면: 가치 히어로 ─────────────────────────
    가격 배너를 대신한다. 첫인상을 금액이 잡지 않게 하고, 가격은 보조 CTA 부제로만 둔다.

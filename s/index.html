@@ -31,7 +31,9 @@
        CTA 골드 = 앱 tabAccent 채움의 웹 정합(180deg #a78bfa→#a78bfa→#7c3aed, onGold #08080d)
        종류별 본문 액센트(--acc)는 앱 SharedResultActivity 와 동일: 융합=aiAccent #7c3aed ·
        궁합/그룹=red #E58A80 · 관상=orangeDeep #7E6034 (JS 가 kind 에 맞춰 갱신) */
-    :root { --acc: #7c3aed; }
+    :root { --acc: #7c3aed; --acc-ink: #a78bfa; }
+    /* ⚠️ --acc 는 '히어로 글로우'용 진한 값이고, 글자에 그대로 쓰면 다크 위에서 3.4:1 로 떨어진다.
+       본문 헤딩·용어·점은 반드시 --acc-ink(밝은 변형)를 쓸 것. */
     * { box-sizing: border-box; }
     html { -webkit-text-size-adjust: 100%; }
     body {
@@ -166,10 +168,10 @@
     }
     /* 섹션 헤딩 = 앱 SectionTitle(산세리프 굵게 + 종류 액센트, 장식 없음) */
     .report h2 {
-      font-size: 17px; margin: 34px 0 10px; color: var(--acc); font-weight: 800; line-height: 1.5;
+      font-size: 17px; margin: 34px 0 10px; color: var(--acc-ink); font-weight: 800; line-height: 1.5;
     }
     .report h2:first-child { margin-top: 4px; }
-    .report h3 { font-size: 15.5px; margin: 24px 0 8px; color: var(--acc); font-weight: 700; }
+    .report h3 { font-size: 15.5px; margin: 24px 0 8px; color: var(--acc-ink); font-weight: 700; }
     .report p { font-size: 15.5px; line-height: 1.78; color: #F4F1FF; margin: 0 0 16px; }
     /* 불릿 = 앱 액센트 도트(텍스트 "•" 가 아니라 6px 원) */
     .report ul { list-style: none; margin: 0 0 16px; padding-left: 10px; }
@@ -179,52 +181,57 @@
     }
     .report li::before {
       content: ""; position: absolute; left: 0; top: 11px; width: 6px; height: 6px;
-      border-radius: 50%; background: var(--acc); opacity: 0.78;
+      border-radius: 50%; background: var(--acc-ink); opacity: 0.78;
     }
     .report strong { color: #ededed; }
     /* [[용어]] = 앱 용어 링크 표기(액센트 + 밑줄) */
     .term {
-      color: var(--acc); font-weight: 600; text-decoration: underline;
+      color: var(--acc-ink); font-weight: 600; text-decoration: underline;
       text-underline-offset: 3px; text-decoration-thickness: 1px;
     }
 
-    /* 신뢰 카드(앱 SharedTrustCard — 딥네이비 메달리온 + 브랜드 한 줄) */
+    /* 신뢰 카드(앱 SharedTrustCard — 딥네이비 메달리온 + 브랜드 한 줄)
+       ⚠️ 2026-09-03 웜 페이퍼 폐기 때 글자색만 흰색으로 뒤집히고 서피스(#fff · 크림 CTA 독)는
+          그대로 남아, 신뢰 카드·복사 버튼·하단 CTA 문구가 '흰 배경 위 흰 글자'였다.
+          공유 링크로 들어온 사람이 가장 먼저 보는 화면이라 다크 서피스로 맞춘다. */
     .trust {
-      display: flex; gap: 12px; align-items: center; background: #fff;
-      border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px 15px; margin: 30px 0 0;
+      display: flex; gap: 12px; align-items: center;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.10); border-radius: 16px; padding: 14px 15px; margin: 30px 0 0;
     }
     .trust .medal {
       width: 36px; height: 36px; border-radius: 12px; flex: none;
       display: flex; align-items: center; justify-content: center;
-      background: linear-gradient(135deg, #08080d, #120F19); color: #c4b5fd; font-size: 15px;
+      background: linear-gradient(135deg, #241c3f, #120F19); color: #c4b5fd; font-size: 15px;
+      border: 1px solid rgba(167,139,250,.35);
     }
     .trust b { display: block; font-size: 13.5px; color: #ededed; }
-    .trust span { display: block; font-size: 12.5px; color: rgba(255,255,255,.55); line-height: 1.55; margin-top: 2px; }
+    .trust span { display: block; font-size: 12.5px; color: rgba(255,255,255,.58); line-height: 1.55; margin-top: 2px; }
 
     /* 재공유(링크 복사) — 앱 하단 보조 버튼의 웹 대응 */
     .sharerow { display: flex; align-items: center; gap: 10px; margin: 14px 0 0; }
     .copybtn {
-      padding: 10px 16px; border: 1px solid #a78bfa; background: #fff; color: #a78bfa;
+      padding: 10px 16px; border: 1px solid rgba(167,139,250,.55); background: rgba(139,92,246,.14); color: #c4b5fd;
       border-radius: 999px; font-size: 13.5px; font-weight: 800; cursor: pointer;
     }
-    .copymsg { font-size: 12.5px; color: rgba(255,255,255,.45); opacity: 0; transition: opacity 0.3s; }
+    .copymsg { font-size: 12.5px; color: rgba(255,255,255,.58); opacity: 0; transition: opacity 0.3s; }
     .copymsg.on { opacity: 1; }
 
     .meta {
-      margin-top: 26px; padding-top: 14px; border-top: 1px solid rgba(51, 48, 43, 0.12);
-      font-size: 12px; color: rgba(255,255,255,.45); line-height: 1.7;
+      margin-top: 26px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 12px; color: rgba(255,255,255,.55); line-height: 1.7;
     }
 
     /* 하단 고정 CTA 독 — 앱 스티키 독(여명 배경 페이드 + 골드 프라이머리) */
     .ctabar {
       position: fixed; left: 0; right: 0; bottom: 0; display: none;
-      background: rgba(250, 245, 235, 0.96);
-      -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
-      border-top: 1px solid rgba(126, 99, 50, 0.18);
+      background: rgba(8, 8, 13, 0.92);
+      -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255, 255, 255, 0.10);
       padding: 10px 18px calc(10px + env(safe-area-inset-bottom));
     }
     .ctabar .inner { max-width: 720px; margin: 0 auto; display: flex; gap: 12px; align-items: center; }
-    .ctabar .hint { flex: 1; font-size: 12.5px; line-height: 1.5; color: rgba(255,255,255,.55); min-width: 0; }
+    .ctabar .hint { flex: 1; font-size: 12.5px; line-height: 1.5; color: rgba(255,255,255,.62); min-width: 0; }
     .ctabar a.cta { margin-top: 0; padding: 13px 22px; font-size: 14px; white-space: nowrap; flex-shrink: 0; }
 
     /* ── 선물 포장 오버레이(?gift=1) — 딥스페이스 포장지. 로딩도 함께 가려준다. ── */
@@ -322,11 +329,14 @@
       function mdInline(s) {
         return esc(s)
           .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+          // 백틱은 본문 규약에 없지만 모델이 간헐적으로 흘린다 — 문법이 날것으로 보이느니 벗긴다.
+          .replace(/`([^`]+)`/g, '$1')
           // `[[계유|癸酉]]` 처럼 금지된 파이프 형식이 오면 앞부분만 용어로 남긴다(모델 간헐 위반).
           .replace(/\[\[([^\]|]+)\|[^\]]*\]\]/g, '<span class="term">$1</span>')
           .replace(/\[\[([^\]]+)\]\]/g, '<span class="term">$1</span>');
       }
       // AI 융합 본문이 실제로 쓰는 마크다운 부분집합만: #/##/### 헤딩, - 불릿, 빈 줄 단락, **굵게**, [[용어]].
+      // 규약 밖 문법(백틱·인용부호)은 지원하지 않되, 날것으로 노출되지 않게 마커만 벗긴다.
       function mdToHtml(md) {
         var out = [], para = [], inList = false;
         function flushPara() { if (para.length) { out.push('<p>' + para.map(mdInline).join('<br />') + '</p>'); para = []; } }
@@ -341,6 +351,8 @@
             if (!inList) { out.push('<ul>'); inList = true; }
             out.push('<li>' + mdInline(line.slice(2)) + '</li>');
           } else if (line === '') { flushPara(); closeList(); }
+          // 인용부호도 규약 밖이지만 같은 이유로 마커만 걷어 문단으로 흘린다.
+          else if (line.indexOf('> ') === 0) { closeList(); para.push(line.slice(2)); }
           else { closeList(); para.push(line); }
         });
         flushPara(); closeList();
@@ -445,7 +457,7 @@
               document.getElementById('giftSub').textContent =
                 d.name_a + '님을 위해 만든 AI 사주 리포트예요.';
             }
-            var hero = '', paper = '', acc = '#7c3aed';
+            var hero = '', paper = '', acc = '#7c3aed', accInk = '#a78bfa';
             // AI 리포트(ai-report + report_kind). 'saju-fusion' 은 일반화 이전 구행 하위호환.
             var isAiReport = (d.scene_type === 'ai-report' || d.scene_type === 'saju-fusion') && d.body_md;
             if (isAiReport) {
@@ -453,7 +465,7 @@
               var KIND = {
                 'fusion': {
                   glyph: '☯', label: 'AI 융합 해석', subjectSuffix: '님의 사주 리포트',
-                  titleSuffix: '님의 사주 AI 융합 해석', acc: '#7c3aed',
+                  titleSuffix: '님의 사주 AI 융합 해석', acc: '#7c3aed', accInk: '#a78bfa',
                   chip: '🔮 AI 융합 해석',
                   meta: '이 리포트는 삼라만상 앱의 AI 융합 해석(사주 · 자미두수 · 별자리)으로 생성됐어요.',
                   hint: '내 사주도 이렇게 깊이 분석받고 싶다면',
@@ -461,7 +473,7 @@
                 },
                 'compat': {
                   glyph: '💞', label: '1:1 궁합 AI 해석', subjectSuffix: ' 궁합 AI 리포트',
-                  titleSuffix: ' 궁합 AI 해석', acc: '#E58A80',
+                  titleSuffix: ' 궁합 AI 해석', acc: '#E58A80', accInk: '#E58A80',
                   chip: '💞 궁합 AI 해석',
                   meta: '이 리포트는 삼라만상 앱의 1:1 궁합 AI 해석(사주 기반)으로 생성됐어요.',
                   hint: '우리 궁합도 이렇게 깊이 보고 싶다면',
@@ -469,7 +481,7 @@
                 },
                 'group': {
                   glyph: '👥', label: '그룹 궁합 AI 해석', subjectSuffix: ' 그룹 궁합 리포트',
-                  titleSuffix: ' 그룹 궁합 AI 해석', acc: '#E58A80',
+                  titleSuffix: ' 그룹 궁합 AI 해석', acc: '#E58A80', accInk: '#E58A80',
                   chip: '👥 그룹 궁합 AI 해석',
                   meta: '이 리포트는 삼라만상 앱의 그룹 궁합 AI 해석(사주 기반)으로 생성됐어요.',
                   hint: '우리 모임 궁합도 이렇게 보고 싶다면',
@@ -478,7 +490,7 @@
                 'theme': {
                   // 테마 리포트: name_a 가 "○○님의 <상품명>" 완결 문장 — 접미사 없이 그대로 제목.
                   glyph: '\u{1F58B}', label: '테마 리포트', subjectSuffix: '',
-                  titleSuffix: '', acc: '#a78bfa',
+                  titleSuffix: '', acc: '#a78bfa', accInk: '#c4b5fd',
                   chip: '\u{1F58B} 테마 리포트',
                   meta: '이 리포트는 삼라만상 앱 스토어의 테마 리포트(고민 하나를 깊게 파는 단건 리딩)예요.',
                   hint: '내 사주로도 이렇게 만들어 보고 싶다면',
@@ -487,7 +499,7 @@
                 'gwansang': {
                   // 관상은 name_a 자체가 완결 라벨("관상 보고서") — 타인 사진 케이스가 많아 소유격 없음.
                   glyph: '相', label: 'AI 관상 보고서', subjectSuffix: '',
-                  titleSuffix: '', acc: '#7E6034',
+                  titleSuffix: '', acc: '#7E6034', accInk: '#D9B978',
                   chip: '🧿 AI 관상 보고서',
                   meta: '이 보고서는 삼라만상 앱의 관상 분석(온디바이스 관상 + AI 심층)으로 생성됐어요. 얼굴 사진은 포함되지 않아요.',
                   hint: '내 얼굴의 기운도 읽어 보고 싶다면',
@@ -495,7 +507,7 @@
                 }
               };
               var b = KIND[d.report_kind] || KIND['fusion'];
-              acc = b.acc;
+              acc = b.acc; accInk = b.accInk;
               document.title = d.name_a + b.titleSuffix + ' | 삼라만상';
               hero += heroTop();
               hero += '<div class="orb">' + b.glyph + '</div>';
@@ -510,14 +522,14 @@
               document.getElementById('ctahint').textContent = b.hint;
             } else {
               // 1:1 궁합 스냅샷(비 AI) — 골드 링 점수 + 밴드 스케일(앱 수신 화면과 동일 구간).
-              acc = '#E58A80';
+              acc = '#E58A80'; accInk = '#E58A80';
               document.title = d.name_a + ' × ' + d.name_b + ' 궁합 | 삼라만상';
               var pct = Math.max(0, Math.min(100, Number(d.score) || 0));
               var bandIdx = pct >= 80 ? 4 : pct >= 65 ? 3 : pct >= 50 ? 2 : pct >= 35 ? 1 : 0;
               var bandColor = pct >= 65 ? '#6FCF97' : pct >= 50 ? '#AEBECC' : pct >= 35 ? '#D9B978' : '#E58A80';
               var bands = ['어긋남', '주의', '보통', '좋음', '강한 인연'].map(function (lb, i) {
                 return i === bandIdx
-                  ? '<span class="band on" style="background:' + bandColor + '">' + lb + '</span>'
+                  ? '<span class="band on" style="background:' + bandColor + ';color:#08080d">' + lb + '</span>'
                   : '<span class="band">' + lb + '</span>';
               }).join('');
               hero += heroTop();
@@ -537,6 +549,7 @@
             }
             // 종류 액센트 반영 — 본문 헤딩·도트·용어(앱 headingColor)와 히어로 성운 글로우.
             document.documentElement.style.setProperty('--acc', acc);
+            document.documentElement.style.setProperty('--acc-ink', accInk);
             document.getElementById('glow').style.background =
               'radial-gradient(closest-side, ' + hexRgba(acc, 0.20) + ', transparent 70%)';
             document.getElementById('heroInner').innerHTML = hero;

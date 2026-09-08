@@ -27,8 +27,11 @@ a:hover{text-decoration:underline}
   padding:10px 14px;position:sticky;top:0;z-index:5}
 .wordmark{display:inline-flex;align-items:center;gap:7px;color:#F4F1FF;font-weight:800;letter-spacing:.02em;font-size:15px}
 .wordmark svg{display:block;flex:none}
-.topbar nav{display:flex;align-items:center;gap:12px;min-width:0}
-.topbar nav a{color:rgba(255,255,255,.55);font-size:14px;white-space:nowrap}
+.topbar nav{display:flex;align-items:center;gap:2px;min-width:0}
+/* 탭 타깃 — 예전엔 여백이 없어 24×24 였다(손가락 기준 너무 작다). 세로 여백으로 40px 를 만든다. */
+.topbar nav a{color:rgba(255,255,255,.55);font-size:14px;white-space:nowrap;
+  padding:10px 8px;border-radius:9px}
+.topbar nav a:hover{background:rgba(255,255,255,.05)}
 .topbar nav a:hover{color:#F4F1FF;text-decoration:none}
 
 .hero{position:relative;overflow:hidden;text-align:center;color:#F4F1FF;
@@ -245,7 +248,7 @@ p{margin:0 0 14px}
   color:#fff;background:var(--eld,var(--el,rgba(255,255,255,.45)))}
 
 .topbar nav a.nav-calc{color:#08080d;background:#a78bfa;border-radius:999px;
-  padding:3px 12px;font-weight:800}
+  padding:8px 13px;margin-left:4px;font-weight:800}
 .topbar nav a.nav-calc:hover{background:#c4b5fd;color:#08080d;text-decoration:none}
 .cta-alt{font-size:13px;color:rgba(255,255,255,.55);margin:14px 0 0}
 .cta-alt a{color:#c4b5fd;font-weight:700;text-decoration:underline}
@@ -267,9 +270,9 @@ a.cta:hover{text-decoration:none}
 
 /* 아주 좁은 화면(≤380px)에서는 '연예인'을 접어 계산기 버튼 자리를 지킨다 — 계산기가 1차 행동. */
 @media (max-width:380px){
-  .topbar{padding:9px 12px}
-  .topbar nav{gap:9px}
-  .topbar nav a{font-size:13px}
+  .topbar{padding:9px 8px}
+  .topbar nav{gap:0}
+  .topbar nav a{font-size:13px;padding:10px 6px}
   .topbar nav a[href="/celeb/"]{display:none}
 }
 @media (min-width:640px){
