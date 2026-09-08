@@ -261,11 +261,14 @@ function renderView(data) {
   sprinkle($("#stars"), rid, 46);
 
   // 지면 — 앱 결과 화면과 같은 구성: 명식 오프닝 → 챕터 사이에 분석지 시각 카드가 스민다.
-  const chAccent = darkenHex(CAT.color, 0.30); // 카테고리색을 지면 대비로 눌러 챕터 액센트로
+  // 카테고리색을 지면 대비로 눌러 챕터 액센트로.
+  // 0.30 으로는 금색 계열(인연·궁합 #fbbf24, 재물 #eab308)이 3.2:1 에 그친다 —
+  // 0.50 이면 7색 전부 5.6:1 이상이면서 색상(hue)은 그대로 남는다.
+  const chAccent = darkenHex(CAT.color, 0.50);
   let paper = sheetOpeningHtml(data);
   const anchors = anchorSheetVisuals(data.chapters);
   data.chapters.forEach(ch => {
-    if (ch.idx > 0) paper += `<div class="rp-divider"><span>✦</span></div>`;
+    if (ch.idx > 0) paper += `<div class="rp-divider" aria-hidden="true"><span>✦</span></div>`;
     const no = String(ch.idx + 1).padStart(2, "0");
     paper += `<section class="rp-ch" style="--chacc:${chAccent}">
       <div class="rp-ch-head">

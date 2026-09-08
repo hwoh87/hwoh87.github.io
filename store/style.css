@@ -801,18 +801,26 @@ body.report-page { background: #08070c; }
 .sheet { display: grid; gap: 12px; }
 .sh-card { background: #fff; border: 1px solid #e8e0d0; border-radius: 16px; padding: 16px; }
 .sh-t { font-size: 12px; font-weight: 800; letter-spacing: 0.1em; color: #7c5fd3; margin-bottom: 12px; }
-.sh-t small { font-weight: 600; letter-spacing: 0; color: #a89e8c; margin-left: 6px; }
+/* ── 종이 지면 잉크 하한 (2026-09-09) ──────────────────────
+   유료 리포트 뷰어와 PDF 책자가 같은 잉크를 쓴다. 대비를 재 보니 지장간이 8px·2.29:1,
+   12운성·기둥 라벨·대운 나이가 3.15:1 이었다 — 돈 주고 받은 지면에서 안 읽히는 값이다.
+   종이(#fdfaf3)·흰 카드(#fff) 양쪽에서 AA 를 넘도록 잉크를 내렸다:
+     #a89e8c(2.5) → #7a7264(4.6)   가장 흐린 보조
+     #8d8578(3.5) → #6f6759(5.4)   라벨·수치
+   9px 미만이던 지장간은 크기도 함께 올렸다(작을수록 대비 여유가 더 필요하다).
+   인쇄에도 유리한 방향이라 PDF 쪽 별도 조정은 없다. */
+.sh-t small { font-weight: 600; letter-spacing: 0; color: #7a7264; margin-left: 6px; }
 .sh-pgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .sh-pgrid.three { grid-template-columns: repeat(3, 1fr); }
 .sh-p { text-align: center; padding: 10px 4px 9px; border-radius: 12px; background: #f7f3ea; border: 1px solid #e5dcc8; }
 .sh-p.day { background: #f1ecfb; border-color: #cdbdf0; }
-.sh-p .lb { font-size: 10px; color: #8d8578; }
+.sh-p .lb { font-size: 10px; color: #6f6759; }
 .sh-p .gz { font-family: "Noto Serif KR", "MaruBuri", serif; font-size: 21px; font-weight: 600; color: #241c3f; margin-top: 3px; letter-spacing: 0.06em; }
 .sh-p .kr { font-size: 10.5px; color: #6d6659; margin-top: 1px; }
 .sh-p .ss { margin-top: 5px; font-size: 10.5px; font-weight: 700; color: #6742c9; }
-.sh-p .un { font-size: 9.5px; color: #8d8578; margin-top: 2px; }
-.sh-p .jj { font-size: 9px; color: #a89e8c; margin-top: 3px; letter-spacing: 0.04em; }
-.sh-note { margin-top: 10px; font-size: 11.5px; color: #8d8578; line-height: 1.6; }
+.sh-p .un { font-size: 9.5px; color: #6f6759; margin-top: 2px; }
+.sh-p .jj { font-size: 9.5px; color: #6f6759; margin-top: 3px; letter-spacing: 0.04em; }
+.sh-note { margin-top: 10px; font-size: 11.5px; color: #6f6759; line-height: 1.6; }
 .sh-el { display: grid; gap: 7px; }
 .sh-el .row { display: flex; align-items: center; gap: 9px; }
 .sh-el .nm { width: 44px; font-size: 11.5px; font-weight: 700; color: #55503f; flex-shrink: 0; }
@@ -822,7 +830,7 @@ body.report-page { background: #08070c; }
 .sh-gauge { height: 10px; border-radius: 999px; overflow: hidden; display: flex; background: #f0ebdf; }
 .sh-gauge .h { background: linear-gradient(90deg, #8a76d8, #b7a5ec); }
 .sh-gauge .w { background: #ddd5c4; }
-.sh-gauge-lb { display: flex; justify-content: space-between; margin-top: 6px; font-size: 11px; color: #8d8578; }
+.sh-gauge-lb { display: flex; justify-content: space-between; margin-top: 6px; font-size: 11px; color: #6f6759; }
 .sh-badge-row { display: flex; flex-wrap: wrap; gap: 7px; }
 .sh-badge {
   display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px; border-radius: 999px;
@@ -838,16 +846,16 @@ body.report-page { background: #08070c; }
   background: #f7f3ea; border: 1px solid #e5dcc8;
 }
 .sh-dw .cell.cur { background: #f1ecfb; border-color: #8a76d8; }
-.sh-dw .age { font-size: 9.5px; color: #8d8578; }
+.sh-dw .age { font-size: 9.5px; color: #6f6759; }
 .sh-dw .gz { font-family: "Noto Serif KR", serif; font-size: 14px; font-weight: 600; color: #241c3f; margin-top: 2px; }
 .sh-dw .tn { margin-top: 4px; font-size: 9px; font-weight: 700; }
-.sh-dw .tag { margin-top: 3px; font-size: 8.5px; color: #7c5fd3; font-weight: 700; }
+.sh-dw .tag { margin-top: 3px; font-size: 8.5px; color: #5b3fa8; font-weight: 700; }
 .sh-mo { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
 .sh-mo .cell { text-align: center; padding: 7px 2px; border-radius: 10px; background: #f7f3ea; border: 1px solid #e5dcc8; }
 .sh-mo .m { font-size: 10px; font-weight: 700; color: #55503f; }
 .sh-mo .gz { font-family: "Noto Serif KR", serif; font-size: 12px; color: #241c3f; margin-top: 1px; }
 .sh-mo .tn { margin-top: 3px; font-size: 9px; font-weight: 700; }
-.tn-길 { color: #3f7154; } .tn-약길 { color: #5c8a6e; } .tn-중립 { color: #8d8578; }
+.tn-길 { color: #3f7154; } .tn-약길 { color: #5c8a6e; } .tn-중립 { color: #6f6759; }
 .tn-약흉 { color: #a8794a; } .tn-흉 { color: #9c5d58; }
 .sh-score { display: flex; gap: 16px; align-items: center; }
 .sh-ring {
@@ -857,7 +865,7 @@ body.report-page { background: #08070c; }
 /* 링 채움은 SVG 스트로크(store-api.js) — conic+mask 는 html2canvas(PDF)가 못 그려 교체. */
 .sh-ringsvg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .sh-ring .n { font-size: 26px; font-weight: 800; color: #241c3f; line-height: 1; }
-.sh-ring .u { font-size: 9.5px; color: #8d8578; margin-top: 3px; }
+.sh-ring .u { font-size: 9.5px; color: #6f6759; margin-top: 3px; }
 .sh-axes { flex: 1; display: grid; gap: 6px; min-width: 0; }
 .sh-axes .row { display: flex; align-items: center; gap: 8px; }
 .sh-axes .nm { width: 44px; font-size: 11px; font-weight: 700; color: #55503f; flex-shrink: 0; }
@@ -942,7 +950,7 @@ body.report-page { background: #08070c; }
   .sh-p .kr { font-size: 9.5px; }
   .sh-p .ss { font-size: 9px; }
   .sh-p .un { font-size: 8.5px; }
-  .sh-p .jj { font-size: 8px; letter-spacing: 0; }
+  .sh-p .jj { font-size: 8.5px; letter-spacing: 0; }
   .sh-mo { grid-template-columns: repeat(4, 1fr); }
   .sh-score { flex-direction: column; align-items: stretch; }
   .sh-ring { margin: 0 auto; }
