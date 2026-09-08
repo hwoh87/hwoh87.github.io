@@ -3,29 +3,40 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>무료 출생 차트 — 별자리 네이탈 차트 계산기 | 만세력</title>
+<title>무료 출생 차트 — 별자리 네이탈 차트 계산기 | 삼라만상</title>
 <meta name="description" content="태어난 순간의 하늘을 그대로 계산해요. 태양·달·상승궁과 행성 배치, 하우스, 주요 각까지 — 설치·회원가입 없이 무료." />
 <link rel="canonical" href="https://samra.cc/calc/star/" />
 <meta property="og:type" content="website" />
-<meta property="og:site_name" content="만세력" />
-<meta property="og:title" content="무료 출생 차트 — 별자리 네이탈 차트 계산기 | 만세력" />
+<meta property="og:site_name" content="삼라만상" />
+<meta property="og:title" content="무료 출생 차트 — 별자리 네이탈 차트 계산기 | 삼라만상" />
 <meta property="og:description" content="태어난 순간의 하늘을 그대로 계산해요. 태양·달·상승궁과 행성 배치, 하우스, 주요 각까지 — 설치·회원가입 없이 무료." />
 <meta property="og:url" content="https://samra.cc/calc/star/" />
 <meta property="og:image" content="https://samra.cc/og-share.png" />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="stylesheet" href="/assets/seo.css" />
 <script src="/assets/track.js" defer></script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "만세력 출생 차트 계산기", "url": "https://samra.cc/calc/star/", "applicationCategory": "LifestyleApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "KRW"}, "inLanguage": "ko", "publisher": {"@type": "Organization", "name": "만세력"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "만세력 출생 차트 계산기", "url": "https://samra.cc/calc/star/", "applicationCategory": "LifestyleApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "KRW"}, "inLanguage": "ko", "publisher": {"@type": "Organization", "name": "삼라만상"}}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "홈", "item": "https://samra.cc/"}, {"@type": "ListItem", "position": 2, "name": "출생 차트"}]}</script>
 <style>
 .calc-form{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:20px 18px;margin:0 0 26px}
 .calc-form .row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
 .calc-form label{font-size:13px;font-weight:700;color:rgba(255,255,255,.55);display:block;margin-bottom:5px}
 .calc-form select,.calc-form input[type=number]{
-  padding:10px 12px;border:1px solid rgba(255,255,255,.14);border-radius:12px;font-size:16px;background:rgba(255,255,255,.06);color:#F4F1FF}
+  width:100%;padding:11px 12px;border:1px solid rgba(255,255,255,.14);border-radius:12px;font-size:16px;
+  background:rgba(255,255,255,.06);color:#F4F1FF;transition:border-color .15s,box-shadow .15s}
+/* 기본 select 화살표는 OS 마다 제각각이라(윈도우에선 회색 사각형) 직접 그린다. */
+.calc-form select{appearance:none;-webkit-appearance:none;padding-right:32px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' stroke='%23a78bfa' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 11px center;background-size:11px}
+.calc-form select:focus,.calc-form input[type=number]:focus{outline:none;border-color:#a78bfa;
+  box-shadow:0 0 0 3px rgba(139,92,246,.22)}
 .calc-form .grow{flex:1;min-width:88px}
-.chk{display:flex;align-items:center;gap:7px;font-size:14px;color:rgba(255,255,255,.65);padding:6px 0}
-.chk input{width:18px;height:18px;accent-color:#a78bfa}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;color:rgba(255,255,255,.65);
+  padding:8px 12px;border:1px solid rgba(255,255,255,.10);border-radius:12px;background:rgba(255,255,255,.03);
+  cursor:pointer;transition:border-color .15s,color .15s}
+.chk:hover{border-color:rgba(167,139,250,.5);color:#F4F1FF}
+.chk:has(input:checked){border-color:rgba(167,139,250,.7);background:rgba(139,92,246,.14);color:#F4F1FF}
+.chk input{width:17px;height:17px;accent-color:#a78bfa;margin:0}
 .calc-btn{width:100%;padding:15px;border:0;border-radius:16px;font-size:16px;font-weight:800;cursor:pointer;
   color:#08080d;background:linear-gradient(180deg,#a78bfa,#a78bfa,#7c3aed);box-shadow:0 6px 18px rgba(124,58,237,.45)}
 .calc-btn[disabled]{opacity:.62;cursor:progress}
@@ -53,6 +64,22 @@
 .toolrail .tk{display:block;font-size:11.5px;font-weight:800;color:rgba(255,255,255,.45);letter-spacing:.04em}
 .toolrail strong{display:block;font-size:16px;margin:3px 0 3px}
 .toolrail span.sub{display:block;font-size:12.5px;color:rgba(255,255,255,.55);line-height:1.5}
+
+/* ── 출생 차트 휠 ─────────────────────────────────────────── */
+.wheel{display:block;width:100%;max-width:420px;margin:0 auto 14px;aspect-ratio:1}
+.wheel .wl-ring{fill:none;stroke:rgba(255,255,255,.14)}
+.wheel .wl-thin{stroke:rgba(255,255,255,.10)}
+.wheel .wl-cusp{stroke:rgba(255,255,255,.12);stroke-dasharray:2 3}
+.wheel .wl-axis{stroke:rgba(167,139,250,.75);stroke-width:1.4}
+.wheel .wl-tick{stroke:rgba(255,255,255,.35)}
+.wheel .wl-sign{font-size:16px;text-anchor:middle;opacity:.95}
+.wheel .wl-hn{font-size:9.5px;fill:rgba(255,255,255,.42);text-anchor:middle;font-weight:700}
+.wheel .wl-ang{font-size:9.5px;fill:#c4b5fd;font-weight:800;letter-spacing:.06em}
+.wheel .wl-pl{font-size:15px;fill:#F4F1FF;text-anchor:middle}
+.wheel .wl-asp{stroke-width:1}
+.wheel .wl-asp.harm{stroke:rgba(127,168,217,.55)}
+.wheel .wl-asp.tense{stroke:rgba(229,138,128,.5)}
+.wheel .wl-asp.conj{stroke:rgba(251,191,36,.5)}
 
 .core3{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:0 0 16px}
 .core3 .c{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px 15px}
@@ -87,7 +114,7 @@
 </head>
 <body>
 <header class="topbar">
-  <a class="wordmark" href="/">만세력</a>
+  <a class="wordmark" href="/"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="11" r="7.2" fill="#fbbf24" opacity="0.92"/><circle cx="14.6" cy="9" r="6.2" fill="#0c0c14" opacity="0.55"/><path d="M3 18.5 h8 M6 21 h12" stroke="#a78bfa" stroke-width="1.6" stroke-linecap="round"/></svg>삼라만상</a>
   <nav>
     <a href="/calc/">사주</a><a href="/calc/gunghap/">궁합</a><a href="/calc/jami/">자미두수</a>
     <a href="/calc/star/">별자리</a><a href="/ilju/">일주</a>
@@ -135,6 +162,12 @@
   <ul class="hl" id="highlights"></ul>
   <p class="note" id="timeNotice"></p>
 
+  <h2>출생 차트</h2>
+  <svg class="wheel" id="wheel" viewBox="0 0 400 400" role="img"
+       aria-label="출생 차트 — 황도 12궁과 하우스, 행성 배치"></svg>
+  <p class="note">상승궁(ASC)이 왼쪽 9시 방향, 천정(MC)이 위쪽이에요. 안쪽 선은 행성끼리 이루는 각이고,
+    붉은 선은 긴장각(각·대립), 푸른 선은 조화각(삼각·육각)이에요.</p>
+
   <h2>행성 배치</h2>
   <div class="angles" id="angles"></div>
   <table class="ptable" id="ptable" aria-label="행성 배치">
@@ -180,8 +213,10 @@
 <div class="toolrail"><a href="/calc/" data-cta="tool-saju"><span class="tk">사주</span><strong>사주팔자 명식</strong><span class="sub">명식·십신·12운성·신살·대운과 격국·용신까지</span></a><a href="/calc/gunghap/" data-cta="tool-gunghap"><span class="tk">궁합</span><strong>1:1 궁합</strong><span class="sub">여덟 글자 전체로 보는 두 사람의 결 — 17개 축</span></a><a href="/calc/jami/" data-cta="tool-jami"><span class="tk">자미두수</span><strong>자미두수 명반</strong><span class="sub">12궁 주성·사화·대한 — 궁마다 풀이와 행동 처방</span></a></div>
 </div></main>
 <footer class="foot">
-  <p><a href="/">만세력</a> — 사주 · 자미두수 · 별자리 · 궁합</p>
+  <p><a href="/">삼라만상</a> — 사주 · 자미두수 · 별자리 · 궁합</p>
   <p class="fine">천체 위치는 Moshier 천체력으로 브라우저에서 직접 계산해요. 계산은 브라우저 안에서 수행되며 입력값을 저희 서버로 올리지 않습니다. 결과 공유 링크에는 입력한 생년월일이 담깁니다.</p>
+  <p class="fine">오효컴퍼니 · 대표 오효완 · 사업자등록번호 520-24-01358 · 통신판매업신고 제2026-서울관악-0773호<br>
+  서울특별시 관악구 성현로 80 · 010-8504-3265 · ohy3264@gmail.com</p>
 </footer>
 <script>
 
@@ -322,6 +357,7 @@ function runNow(){
   }
   renderCore(t);
   renderPlanets(chart);
+  drawWheel(chart);
   renderBars("elBars", t.elementBalance, "count");
   renderBars("mdBars", t.modalityBalance, "count");
   renderBars("traitBars", t.traitScores, "score");
@@ -334,6 +370,106 @@ function runNow(){
   res.style.display = "block";
   res.scrollIntoView({behavior:"smooth"});
   if (window.__track) window.__track("calc_done");
+}
+
+
+/* ── 출생 차트 휠 ────────────────────────────────────────────
+   점성술 결과에서 사람들이 실제로 기대하는 그림이 이거였는데 표만 있었다.
+   엔진이 이미 황경(longitude)·하우스 커스프·각을 다 주므로 그대로 그리기만 하면 된다.
+   관례대로 ASC 를 9시에 두고 황경이 커질수록 반시계로 돈다:
+     화면각(수학 좌표계) = 180° + (황경 − ASC황경) */
+var ZODIAC = [
+  ["♈","Α",1],["♉","",2],["♊","",3],["♋","",4],
+  ["♌","",1],["♍","",2],["♎","",3],["♏","",4],
+  ["♐","",1],["♑","",2],["♒","",3],["♓","",4]
+];
+// 4원소 색 — 1 화 · 2 지 · 3 풍 · 4 수. 사주 오행 색과 같은 계열로 맞춘다.
+var ZCOL = {1:"#E58A80", 2:"#D9B978", 3:"#C4B5FD", 4:"#7FA8D9"};
+function hexA(hex, a){
+  return "rgba(" + parseInt(hex.slice(1,3),16) + "," + parseInt(hex.slice(3,5),16)
+       + "," + parseInt(hex.slice(5,7),16) + "," + a + ")";
+}
+
+function drawWheel(chart){
+  var svg = document.getElementById("wheel");
+  if (!svg || !chart.houses || !chart.houses.length) return;
+  var cx = 200, cy = 200;
+  var rOut = 192, rZin = 160, rHouse = 116, rAsp = 112;
+  var asc = chart.houses[0].cuspLongitude;
+  var rad = function(lon){ return (180 + (lon - asc)) * Math.PI / 180; };
+  var xy = function(lon, r){
+    var a = rad(lon);
+    return [cx + Math.cos(a) * r, cy - Math.sin(a) * r];
+  };
+  var f = function(n){ return n.toFixed(1); };
+  var line = function(lon, r1, r2, cls){
+    var a = xy(lon, r1), b = xy(lon, r2);
+    return '<line class="'+cls+'" x1="'+f(a[0])+'" y1="'+f(a[1])+'" x2="'+f(b[0])+'" y2="'+f(b[1])+'" />';
+  };
+  var arc = function(lon1, lon2, r1, r2, fill){
+    var a1 = xy(lon1, r1), a2 = xy(lon2, r1), b2 = xy(lon2, r2), b1 = xy(lon1, r2);
+    // 30° 섹터라 큰-호 플래그는 항상 0. sweep 은 반시계라 1 → 0(화면 y 반전 때문).
+    return '<path fill="'+fill+'" d="M'+f(a1[0])+' '+f(a1[1])
+      + 'A'+r1+' '+r1+' 0 0 0 '+f(a2[0])+' '+f(a2[1])
+      + 'L'+f(b2[0])+' '+f(b2[1])
+      + 'A'+r2+' '+r2+' 0 0 1 '+f(b1[0])+' '+f(b1[1])+'Z" />';
+  };
+
+  var g = [];
+  // 황도 12궁 링
+  for (var i = 0; i < 12; i++){
+    var lon = i * 30, z = ZODIAC[i], col = ZCOL[z[2]];
+    // 원소별 옅은 틴트 — 12칸이 그냥 검은 띠였다. 색만으로 화·지·풍·수가 읽힌다.
+    g.push(arc(lon, lon + 30, rOut, rZin, hexA(col, i % 2 ? 0.10 : 0.055)));
+    g.push(line(lon, rZin, rOut, "wl-thin"));
+    var m = xy(lon + 15, (rOut + rZin) / 2);
+    // U+FE0E = 텍스트 표현 요청. 없으면 애플/안드로이드가 별자리 기호를 컬러 이모지로 그려
+    // 보라색 둥근 네모가 12개 박힌다.
+    g.push('<text class="wl-sign" x="'+f(m[0])+'" y="'+f(m[1] + 6)+'" fill="'+col+'">'+z[0]+'︎</text>');
+  }
+  g.push('<circle class="wl-ring" cx="200" cy="200" r="'+rOut+'" />');
+  g.push('<circle class="wl-ring" cx="200" cy="200" r="'+rZin+'" />');
+  g.push('<circle class="wl-ring" cx="200" cy="200" r="'+rHouse+'" />');
+
+  // 하우스 커스프 + 번호
+  chart.houses.forEach(function(h, idx){
+    var next = chart.houses[(idx + 1) % 12].cuspLongitude;
+    var span = ((next - h.cuspLongitude) % 360 + 360) % 360;
+    var axis = (h.number === 1 || h.number === 10 || h.number === 4 || h.number === 7);
+    g.push(line(h.cuspLongitude, rHouse, rZin, axis ? "wl-axis" : "wl-cusp"));
+    var mid = xy(h.cuspLongitude + span / 2, rHouse + 13);
+    g.push('<text class="wl-hn" x="'+f(mid[0])+'" y="'+f(mid[1] + 3.5)+'">'+h.number+'</text>');
+  });
+  // ASC · MC 라벨
+  var ascP = xy(asc, rHouse - 16), mcP = xy(chart.houses[9].cuspLongitude, rHouse - 16);
+  g.push('<text class="wl-ang" x="'+f(ascP[0] + 16)+'" y="'+f(ascP[1] + 3.5)+'">ASC</text>');
+  g.push('<text class="wl-ang" x="'+f(mcP[0])+'" y="'+f(mcP[1] + 12)+'" text-anchor="middle">MC</text>');
+
+  // 각(아스펙트) — 안쪽 원에 선으로
+  var lonOf = {};
+  (chart.planets || []).forEach(function(p){ lonOf[p.ko] = p.longitude; });
+  (chart.aspects || []).forEach(function(a){
+    var l1 = lonOf[a.p1], l2 = lonOf[a.p2];
+    if (l1 === undefined || l2 === undefined) return;
+    var cls = a.tone === "조화" ? "wl-asp harm" : (a.type === "CONJUNCTION" ? "wl-asp conj" : "wl-asp tense");
+    var p1 = xy(l1, rAsp), p2 = xy(l2, rAsp);
+    g.push('<line class="'+cls+'" x1="'+f(p1[0])+'" y1="'+f(p1[1])+'" x2="'+f(p2[0])+'" y2="'+f(p2[1])+'" />');
+  });
+
+  // 행성 — 가까운 것끼리 겹치지 않게 반지름을 번갈아 밀어낸다
+  var sorted = (chart.planets || []).slice().sort(function(a, b){ return a.longitude - b.longitude; });
+  var lastLon = -99, lane = 0;
+  sorted.forEach(function(p){
+    var d = p.longitude - lastLon;
+    lane = (d < 8 && lastLon > -99) ? (lane + 1) % 3 : 0;
+    lastLon = p.longitude;
+    var r = rHouse + 30 - lane * 14;   // 30 · 16 · 2 — 셋 다 하우스 원 바깥이라 ASC/MC 글자와 안 겹친다
+    var q = xy(p.longitude, r);
+    g.push(line(p.longitude, rZin - 5, rZin, "wl-tick"));
+    g.push('<text class="wl-pl" x="'+f(q[0])+'" y="'+f(q[1] + 5)+'">'+p.symbol+'︎</text>');
+  });
+
+  svg.innerHTML = g.join("");
 }
 
 function renderCore(t){
@@ -351,7 +487,9 @@ function renderCore(t){
   ((t.overview && t.overview.highlights) || []).forEach(function(s){
     var li = document.createElement("li"); li.textContent = s; hl.appendChild(li);
   });
-  document.getElementById("timeNotice").textContent = t.missingTimeNotice || "";
+  var tn = document.getElementById("timeNotice");
+  tn.textContent = t.missingTimeNotice || "";
+  tn.style.display = t.missingTimeNotice ? "" : "none";  // 빈 말풍선이 떠 있던 것
 }
 
 function renderPlanets(chart){
@@ -359,7 +497,7 @@ function renderPlanets(chart){
   (chart.planets || []).forEach(function(p){
     var tr = document.createElement("tr");
     tr.innerHTML = '<td class="sym">' + esc(p.symbol) + "</td><td>" + esc(p.ko) + "</td>" +
-      "<td>" + esc(p.signSymbol) + " " + esc(p.signKo) + "</td>" +
+      "<td>" + esc(p.signSymbol) + "︎ " + esc(p.signKo) + "</td>" +
       "<td>" + esc(p.degreeLabel) + "</td>" +
       "<td>" + (p.house ? p.house + "하우스" : "—") + "</td>" +
       '<td class="rx">' + (p.isRetrograde ? "R" : "") + "</td>";
@@ -369,7 +507,7 @@ function renderPlanets(chart){
   if (chart.angles){
     [["상승궁 ASC", chart.angles.asc], ["천정 MC", chart.angles.mc]].forEach(function(pair){
       var s = document.createElement("span");
-      s.textContent = pair[0] + " " + pair[1].signSymbol + " " + pair[1].signKo + " " + pair[1].degreeLabel;
+      s.textContent = pair[0] + " " + pair[1].signSymbol + "︎ " + pair[1].signKo + " " + pair[1].degreeLabel;
       ang.appendChild(s);
     });
   }

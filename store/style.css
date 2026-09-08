@@ -14,7 +14,9 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+/* 다크 사이트라고 브라우저에 알려 준다 — 네이티브 컨트롤(체크박스·셀렉트 드롭다운)이
+   라이트로 그려지는 것을 막는다. */
+html { scroll-behavior: smooth; color-scheme: dark; }
 body {
   background: var(--bg);
   color: var(--ink);
@@ -235,7 +237,8 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .reader-card p { font-size: 11px; color: rgba(255, 255, 255, 0.45); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
 /* ── 무료 맛보기 ───────────────────────────────── */
-.teaser { padding-top: 24px; padding-bottom: 96px; scroll-margin-top: 80px; }
+.teaser { padding-top: 24px; padding-bottom: 40px; scroll-margin-top: 80px; }
+.lead-side { scroll-margin-top: 80px; }
 .teaser-head { max-width: 560px; margin: 0 auto 32px; text-align: center; }
 .teaser-head .pill {
   display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: 999px;
@@ -532,6 +535,25 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 }
 .sj-pillar .lb { font-size: 10px; color: rgba(255, 255, 255, 0.35); margin-bottom: 6px; }
 .sj-pillar .gz { font-size: 20px; font-weight: 800; letter-spacing: 0.04em; }
+/* 오행색 — 앱 WuxingTokens 의 바 색과 같은 값. 다크 위에서 읽히는 밝은 변형이다. */
+.sj-pillar .gz span { color: var(--el, #F4F1FF); }
+.e-tree { --el: #7FBF8F } .e-fire { --el: #E58A80 } .e-earth { --el: #D9B978 }
+.e-metal { --el: #AEBECC } .e-water { --el: #7FA8D9 }
+.sj-pillar.day { border-color: rgba(251, 191, 36, 0.55); background: rgba(251, 191, 36, 0.07); }
+
+/* 맛보기 결과의 일주 일러스트 */
+.sj-art {
+  display: block; position: relative; margin-top: 12px; border-radius: 16px; overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1); background: #111018; transition: border-color 0.16s;
+}
+.sj-art:hover { border-color: rgba(167, 139, 250, 0.6); }
+.sj-art img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+.sj-art .cap {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 26px 14px 11px;
+  background: linear-gradient(180deg, transparent, rgba(8, 8, 13, 0.9) 58%);
+}
+.sj-art .cap b { display: block; font-size: 16px; font-weight: 800; color: #F4F1FF; }
+.sj-art .cap span { display: block; font-size: 11.5px; color: rgba(255, 255, 255, 0.62); margin-top: 2px; }
 .sj-pillar .ss { margin-top: 5px; font-size: 10.5px; color: var(--violet-soft); }
 .sj-pillar.empty { opacity: 0.45; }
 .sj-line { margin-top: 14px; font-size: 13.5px; color: rgba(255, 255, 255, 0.7); line-height: 1.7; text-align: center; }
@@ -942,9 +964,61 @@ body.report-page { background: #08070c; }
 
 /* ── 홈 첫 화면: 가치 히어로 ─────────────────────────
    가격 배너를 대신한다. 첫인상을 금액이 잡지 않게 하고, 가격은 보조 CTA 부제로만 둔다.
-   바로 아래가 무료 맛보기라 여기 1차 CTA 는 "무료로 보기"를 가리킨다. */
+   넓은 화면에서는 오른쪽에 무료 맛보기 폼을 붙여 2단으로 세운다 — 예전엔 가치 문구가
+   1024px 폭의 왼쪽 절반만 쓰고 오른쪽은 비어 있었고, 무료 맛보기는 한 화면 아래로
+   밀려 첫 화면에 '할 수 있는 것'이 하나도 안 보였다. */
+.hero-band { position: relative; isolation: isolate; overflow: hidden; }
+/* 밤하늘 — 상품 커버 아트가 전부 밤 배경이라 첫 화면도 같은 하늘 아래 두려는 것. */
+.hero-sky { position: absolute; inset: -1px 0 0; pointer-events: none; z-index: -1; }
+.hero-sky .neb {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(58% 62% at 18% 4%, rgba(124, 58, 237, 0.30), transparent 62%),
+    radial-gradient(46% 54% at 88% 18%, rgba(59, 130, 246, 0.16), transparent 66%),
+    radial-gradient(70% 48% at 50% 104%, rgba(251, 191, 36, 0.10), transparent 68%);
+}
+.hero-sky .stars {
+  position: absolute; inset: 0; opacity: 0.75;
+  background-image:
+    radial-gradient(1px 1px at 12% 22%, #DCE6FF 50%, transparent 51%),
+    radial-gradient(1px 1px at 74% 12%, #DCE6FF 50%, transparent 51%),
+    radial-gradient(1px 1px at 33% 68%, #DCE6FF 50%, transparent 51%),
+    radial-gradient(1px 1px at 62% 52%, #DCE6FF 50%, transparent 51%),
+    radial-gradient(1px 1px at 91% 62%, #DCE6FF 50%, transparent 51%),
+    radial-gradient(1px 1px at 47% 8%, #DCE6FF 50%, transparent 51%),
+    radial-gradient(1.6px 1.6px at 24% 46%, #c4b5fd 50%, transparent 51%),
+    radial-gradient(1.6px 1.6px at 82% 36%, #c4b5fd 50%, transparent 51%),
+    radial-gradient(1.6px 1.6px at 55% 84%, #c4b5fd 50%, transparent 51%);
+  animation: skyTwinkle 7.2s ease-in-out infinite alternate;
+}
+@keyframes skyTwinkle { from { opacity: 0.45 } to { opacity: 0.9 } }
+@media (prefers-reduced-motion: reduce) { .hero-sky .stars { animation: none } }
+
 .lead-hero { padding-top: 56px; padding-bottom: 40px; }
+.lead-grid { display: grid; gap: 28px; }
 .lead-inner { max-width: 720px; }
+/* 2단은 폼이 눌리지 않는 폭(≥960px)부터. 그 아래는 지금처럼 세로로 쌓인다. */
+@media (min-width: 960px) {
+  .lead-hero { padding-top: 72px; padding-bottom: 72px; }
+  .lead-grid { grid-template-columns: minmax(0, 1.02fr) minmax(392px, 0.98fr); gap: 44px; align-items: center; }
+  /* 결과가 펼쳐지면 오른쪽이 1200px 넘게 길어진다 — 그때 가운데 정렬이면 왼쪽 문구가
+     허공에 뜬다. 결과가 열린 뒤에는 위로 붙인다. */
+  .lead-grid:has(.sj-result.on) { align-items: start; }
+  .lead-grid:has(.sj-result.on) .lead-inner { position: sticky; top: 84px; }
+  .lead-inner { max-width: none; }
+  .lead-side .teaser-head { margin-bottom: 18px; text-align: left; max-width: none; }
+  .lead-side .teaser-head h2 { font-size: 21px; }
+  .lead-side .teaser-head p { font-size: 13.5px; line-height: 1.7; }
+  .lead-side .teaser-box { max-width: none; }
+  /* 유리 카드로 띄워 하늘 위에 얹는다 */
+  .lead-side {
+    border: 1px solid rgba(255, 255, 255, 0.10); border-radius: 24px; padding: 26px 24px 28px;
+    background: linear-gradient(180deg, rgba(26, 26, 46, 0.72), rgba(12, 12, 20, 0.68));
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  }
+  .teaser { padding-top: 0; padding-bottom: 0; }
+}
 .lead-eyebrow {
   font-size: 12px; font-weight: 800; letter-spacing: 0.1em;
   color: var(--violet-soft, #a78bfa); text-transform: none;

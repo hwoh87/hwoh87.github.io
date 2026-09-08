@@ -13,17 +13,22 @@
 @font-face{font-family:"MaruBuri";font-weight:600;font-display:swap;
   src:url(https://hangeul.pstatic.net/hangeul_static/webfont/MaruBuri/MaruBuri-SemiBold.woff2) format("woff2")}
 *,*::before,*::after{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
+/* 다크 사이트라고 브라우저에 알려 준다 — 없으면 체크박스·셀렉트 드롭다운 같은 네이티브
+   컨트롤이 라이트로 그려져(흰 네모) 어두운 폼 위에 흰 사각형이 박힌다. */
+html{-webkit-text-size-adjust:100%;color-scheme:dark}
 body{margin:0;background:#0c0c14;color:#ededed;
   font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;line-height:1.7}
 a{color:#a78bfa;text-decoration:none}
 a:hover{text-decoration:underline}
 
-.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;
-  background:#08080d;padding:10px 18px;position:sticky;top:0;z-index:5;flex-wrap:wrap}
-.wordmark{color:#F4F1FF;font-weight:800;letter-spacing:.02em;font-size:15px}
-.topbar nav{display:flex;gap:14px}
-.topbar nav a{color:rgba(255,255,255,.55);font-size:14px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  background:rgba(8,8,13,.86);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(255,255,255,.06);
+  padding:10px 14px;position:sticky;top:0;z-index:5}
+.wordmark{display:inline-flex;align-items:center;gap:7px;color:#F4F1FF;font-weight:800;letter-spacing:.02em;font-size:15px}
+.wordmark svg{display:block;flex:none}
+.topbar nav{display:flex;align-items:center;gap:12px;min-width:0}
+.topbar nav a{color:rgba(255,255,255,.55);font-size:14px;white-space:nowrap}
 .topbar nav a:hover{color:#F4F1FF;text-decoration:none}
 
 .hero{position:relative;overflow:hidden;text-align:center;color:#F4F1FF;
@@ -61,6 +66,66 @@ a:hover{text-decoration:underline}
 .badge a{color:inherit}
 .heroband{height:18px;background:linear-gradient(#08080d,rgba(12,12,20,0));margin-bottom:-18px;position:relative;z-index:1}
 
+/* ── 히어로 키아트 ───────────────────────────────────────────
+   앱의 60갑자 일러스트를 그대로 깐다(export_web_art.py). 그림은 피사체가 오른쪽,
+   왼쪽 아래가 비도록 그려져 있어서 글자를 왼쪽 아래에 앉히고 오른쪽을 살려 자른다.
+   스크림은 두 겹 — 위/아래 어둠(글자 대비)과 오행색 글로우(페이지 정체성). */
+.hero.has-art{min-height:300px;display:flex;align-items:flex-end;text-align:left;
+  padding:120px 20px 26px;background:#08080d}
+.hero.has-art::before{display:none}
+.hero-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  object-position:72% 38%;opacity:.85}
+.hero-scrim{position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(180deg,rgba(8,8,13,.72) 0%,rgba(8,8,13,.12) 30%,rgba(8,8,13,.74) 68%,#0c0c14 100%),
+    radial-gradient(130% 85% at 22% 108%,var(--elg,rgba(124,58,237,.42)),transparent 60%)}
+.hero.has-art .hero-inner{margin:0 auto;width:100%;max-width:760px}
+.hero.has-art .badges{justify-content:flex-start}
+.hero.has-art h1{text-shadow:0 2px 22px rgba(8,8,13,.85)}
+.hero.has-art .kicker{color:#c4b5fd}
+/* 오행 글로우 — --el 은 바 색이라 그대로 쓰면 히어로가 탁해진다. 저채도로 깔되 색은 남긴다. */
+.e-tree{--elg:rgba(62,107,76,.55)}.e-fire{--elg:rgba(143,75,68,.55)}
+.e-earth{--elg:rgba(124,96,56,.55)}.e-metal{--elg:rgba(87,100,112,.55)}
+.e-water{--elg:rgba(60,88,120,.55)}
+
+/* ── 글자 엠블럼(천간·지지·용어 히어로) ────────────────────
+   오행색 링 + 한자 인장. 오행이 없는 용어(십신 등)는 보라 기본값으로 떨어진다. */
+.emblem{position:relative;width:88px;height:88px;margin:0 auto 16px;border-radius:50%;
+  display:grid;place-items:center;
+  border:1px solid var(--el,rgba(167,139,250,.55));
+  background:radial-gradient(circle at 50% 42%,color-mix(in srgb,var(--el,#a78bfa) 26%,transparent),rgba(8,8,13,.5) 72%);
+  box-shadow:0 0 0 6px rgba(255,255,255,.03),0 10px 34px color-mix(in srgb,var(--el,#7c3aed) 34%,transparent)}
+.emblem span{font-family:"Noto Serif KR",serif;font-weight:600;line-height:1;
+  color:var(--el,#c4b5fd);text-shadow:0 2px 14px rgba(8,8,13,.7);
+  font-size:40px;letter-spacing:-.02em}
+.emblem span:not(:only-child),.emblem span{max-width:74px;text-align:center}
+/* 두 글자(比肩·驛馬) 는 한 글자보다 작게 — 링을 넘지 않게 */
+.emblem.two span{font-size:29px;letter-spacing:.02em}
+
+/* ── 일러스트 카드 그리드(도감 허브·연예인·같은 일간 목록) ── */
+.artgrid{list-style:none;margin:0 0 22px;padding:0;display:grid;
+  grid-template-columns:repeat(2,1fr);gap:12px}
+.artgrid a{display:block;position:relative;border-radius:16px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.09);background:#111018;
+  transition:border-color .18s,transform .18s}
+.artgrid a:hover{border-color:rgba(167,139,250,.6);transform:translateY(-2px);text-decoration:none}
+.artgrid img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;object-position:70% 40%}
+.artgrid .cap{position:absolute;left:0;right:0;bottom:0;padding:22px 12px 10px;
+  background:linear-gradient(180deg,transparent,rgba(8,8,13,.88) 62%)}
+.artgrid .cap b{display:block;font-size:15px;font-weight:800;color:#F4F1FF;letter-spacing:-.01em}
+.artgrid .cap .sub{display:block;font-size:11.5px;color:rgba(255,255,255,.62);margin-top:1px}
+.artgrid .dot{position:absolute;top:9px;right:9px;width:9px;height:9px;border-radius:50%;
+  background:var(--el,rgba(255,255,255,.5));box-shadow:0 0 0 3px rgba(8,8,13,.45)}
+
+/* ── 본문 물상 삽화 ─────────────────────────────────────── */
+.mulsang{margin:0 0 22px;position:relative;border-radius:20px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.09)}
+.mulsang img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}
+.mulsang figcaption{position:absolute;left:0;right:0;bottom:0;padding:30px 16px 14px;
+  font-size:13.5px;color:rgba(255,255,255,.78);line-height:1.6;
+  background:linear-gradient(180deg,transparent,rgba(8,8,13,.9) 55%)}
+.mulsang figcaption b{color:#F4F1FF;font-weight:800}
+
 .paper{padding:26px 20px 60px}
 .paper-inner{max-width:760px;margin:0 auto}
 h2{font-family:"MaruBuri","Noto Serif KR",serif;font-size:19px;margin:34px 0 12px;color:#a78bfa;font-weight:600;
@@ -88,6 +153,8 @@ p{margin:0 0 14px}
 .tbl th,.tbl td{padding:9px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.06)}
 .tbl th{background:rgba(255,255,255,.05);color:rgba(255,255,255,.55);font-size:13px;font-weight:700}
 .tbl tr:last-child td{border-bottom:none}
+/* 표 안의 간지 한자도 오행색으로 — 계산기·명식표와 같은 규약 */
+.tbl a.gz b{font-family:"Noto Serif KR",serif;font-size:15px;color:var(--el,#a78bfa);margin-right:3px}
 
 .note{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-left:3px solid #a78bfa;
   border-radius:12px;padding:13px 15px;margin:0 0 18px;font-size:14.5px;color:rgba(255,255,255,.65)}
@@ -99,6 +166,13 @@ p{margin:0 0 14px}
 .linkgrid a:hover{border-color:#a78bfa;text-decoration:none}
 .linkgrid a .sub{display:block;font-size:12px;font-weight:500;color:rgba(255,255,255,.45);margin-top:2px}
 .linkgrid.tools{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+/* 인장 타일 — 사전·낱자 목록은 그림이 없다. 대신 그 글자를 옅게 새겨 벽 같던 목록에
+   결을 준다(오행이 있는 글자는 오행색으로). */
+.linkgrid.seal a{position:relative;overflow:hidden;padding:13px 12px 30px}
+.linkgrid.seal .mark{position:absolute;right:6px;bottom:-9px;font-family:"Noto Serif KR",serif;
+  font-size:30px;font-weight:600;line-height:1;letter-spacing:-.04em;pointer-events:none;
+  color:var(--el,#a78bfa);opacity:.30}
+.linkgrid.seal a:hover .mark{opacity:.5}
 .linkgrid.tools a{text-align:left;padding:14px 15px;font-size:16px}
 
 /* 연예인 명식표 · 오행 바 (build_celeb_site.py 가 쓴다) */
@@ -106,7 +180,10 @@ p{margin:0 0 14px}
   border:1px solid rgba(255,255,255,.08);border-radius:20px;overflow:hidden;text-align:center;font-size:14px}
 .myeongsik th{background:rgba(255,255,255,.05);color:rgba(255,255,255,.55);font-size:12.5px;padding:8px 4px;font-weight:700}
 .myeongsik td{padding:8px 4px;border-top:1px solid rgba(255,255,255,.06)}
-.myeongsik .hj{font-size:26px;font-weight:800;line-height:1.2;color:#F4F1FF}
+.myeongsik .hj{font-size:26px;font-weight:800;line-height:1.2;color:var(--el,#F4F1FF)}
+.myeongsik td.gz{background:color-mix(in srgb,var(--el,transparent) 12%,transparent)}
+.myeongsik .elx{display:block;font-size:10.5px;font-weight:700;color:var(--el,rgba(255,255,255,.45));
+  letter-spacing:.06em;margin-top:1px;opacity:.85}
 .myeongsik .kr{font-size:11.5px;color:rgba(255,255,255,.45)}
 .myeongsik td.ss{font-size:13px;font-weight:700;color:#a78bfa}
 .myeongsik td.ss a{color:inherit}
@@ -166,8 +243,19 @@ a.cta:hover{text-decoration:none}
 .foot a{color:rgba(255,255,255,.60)}
 .foot .fine{max-width:620px;margin:10px auto 0;font-size:12px;line-height:1.65;color:rgba(255,255,255,.55)}
 
+/* 아주 좁은 화면(≤380px)에서는 '연예인'을 접어 계산기 버튼 자리를 지킨다 — 계산기가 1차 행동. */
+@media (max-width:380px){
+  .topbar{padding:9px 12px}
+  .topbar nav{gap:9px}
+  .topbar nav a{font-size:13px}
+  .topbar nav a[href="/celeb/"]{display:none}
+}
 @media (min-width:640px){
+  .topbar{padding:10px 18px}
   .hero{padding:44px 24px 48px}
+  .hero.has-art{min-height:400px;padding:160px 24px 34px}
+  .hero-art{object-position:center 34%}
   .hero h1{font-size:32px}
   .paper{padding:34px 24px 70px}
+  .artgrid{grid-template-columns:repeat(3,1fr);gap:14px}
 }
