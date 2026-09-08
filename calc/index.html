@@ -311,6 +311,7 @@ document.addEventListener("DOMContentLoaded", function init(){
   restoreFromUrl();
 });
 function link(url, text){ return url ? '<a href="'+url+'">'+text+'</a>' : text; }
+var SHARE_LABEL = "";   // 계산 후 "임자일주(壬子) · 상관격" 처럼 채워진다
 var EL_KR = {"木":"목","火":"화","土":"토","金":"금","水":"수"};
 var EL_CLS = {"木":"e-tree","火":"e-fire","土":"e-earth","金":"e-metal","水":"e-water"};
 function elName(h){ return h ? h+"("+(EL_KR[h]||"")+")" : "—"; }
@@ -361,7 +362,9 @@ function restoreFromUrl(){
 function share(){
   var msg = document.getElementById("shareMsg");
   var url = location.href;
-  var text = "내 사주 명식 — 무료 만세력";
+  /* 결과를 제목에 담는다 — 공유 시트·카톡 본문에 그대로 뜬다.
+     (og:image 는 정적 호스팅이라 쪽 단위 고정이므로 제목이 유일하게 개인화되는 자리다) */
+  var text = (SHARE_LABEL || "내 사주 명식") + " — 무료 만세력 계산기";
   if (window.__track) window.__track("cta", "share-calc");
   if (navigator.share){
     navigator.share({title:text, url:url}).catch(function(){});
@@ -389,6 +392,7 @@ function renderInterpret(v){
 
   var gg = t.geokguk || {};
   document.getElementById("ggLabel").textContent = gg.hangul || "—";
+  if (gg.hangul && SHARE_LABEL.indexOf("·") < 0) SHARE_LABEL += " · " + gg.hangul;
   var why = [];
   if (gg.resolvedBy) why.push(gg.resolvedBy + " 기준");
   if (gg.transparentStem) why.push(gg.transparentStem + (gg.transparentPosition ? " " + gg.transparentPosition : "") + " 투출");
@@ -513,6 +517,7 @@ function runNow(){
   fillPillar("d", r.pillars.day);  fillPillar("t", r.pillars.time);
   document.getElementById("ss-t").innerHTML = r.pillars.time ? '<span class="ss">'+link(LINKS.sipsin[r.pillars.time.stemSipsin], r.pillars.time.stemSipsin)+'</span>' : '<span class="kr">시간 미상</span>';
   var iljuUrl = LINKS.ilju[r.iljuKr];
+  SHARE_LABEL = r.iljuKr + "일주(" + r.pillars.day.ganzi + ")";
   document.getElementById("iljuLine").innerHTML =
     "내 일주는 <strong>"+r.iljuKr+"일주("+r.pillars.day.ganzi+")</strong> — " +
     (iljuUrl ? '<a href="'+iljuUrl+'">일주 도감에서 성격·직업·인연 풀이 보기</a>' : "");

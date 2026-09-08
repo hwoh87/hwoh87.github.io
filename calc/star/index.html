@@ -496,6 +496,8 @@ function renderCore(t){
   tn.style.display = t.missingTimeNotice ? "" : "none";  // 빈 말풍선이 떠 있던 것
 }
 
+var LAST_CHART = "";   // 공유 제목 — "태양 양자리 · 달 궁수자리 · ASC 쌍둥이자리"
+
 function renderPlanets(chart){
   var tb = document.getElementById("ptbody"); tb.innerHTML = "";
   (chart.planets || []).forEach(function(p){
@@ -507,6 +509,11 @@ function renderPlanets(chart){
       '<td class="rx">' + (p.isRetrograde ? "R" : "") + "</td>";
     tb.appendChild(tr);
   });
+  var sun = (chart.planets || []).filter(function(p){ return p.id === "Sun"; })[0];
+  var moon = (chart.planets || []).filter(function(p){ return p.id === "Moon"; })[0];
+  LAST_CHART = [sun && "태양 " + sun.signKo, moon && "달 " + moon.signKo,
+                chart.angles && chart.angles.asc && "ASC " + chart.angles.asc.signKo]
+               .filter(Boolean).join(" · ");
   var ang = document.getElementById("angles"); ang.innerHTML = "";
   if (chart.angles){
     [["상승궁 ASC", chart.angles.asc], ["천정 MC", chart.angles.mc]].forEach(function(pair){
@@ -574,7 +581,8 @@ function renderDeep(t){
 function share(){
   var msg = document.getElementById("shareMsg"), url = location.href;
   if (window.__track) window.__track("cta", "share-star");
-  if (navigator.share){ navigator.share({title:"내 출생 차트 — 무료 만세력", url:url}).catch(function(){}); return; }
+  var title = LAST_CHART ? LAST_CHART + " — 무료 출생 차트" : "내 출생 차트 — 무료 출생 차트";
+  if (navigator.share){ navigator.share({title:title, url:url}).catch(function(){}); return; }
   var done = function(){ msg.textContent = "링크를 복사했어요"; setTimeout(function(){ msg.textContent=""; }, 2600); };
   if (navigator.clipboard && navigator.clipboard.writeText)
     navigator.clipboard.writeText(url).then(done, function(){ msg.textContent = url; });

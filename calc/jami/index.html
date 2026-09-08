@@ -514,7 +514,14 @@ function renderSanfang(thisYear){
 function share(){
   var msg = document.getElementById("shareMsg"), url = location.href;
   if (window.__track) window.__track("cta", "share-jami");
-  if (navigator.share){ navigator.share({title:"내 자미두수 명반 — 무료 만세력", url:url}).catch(function(){}); return; }
+  /* 명궁 주성 + 오행국 — 명반에서 가장 먼저 말하는 두 가지다.
+     ⚠️ wuXingJu.name 에 이미 '局'이 들어 있으므로 number+"국"을 덧붙이면 "土五局5국"이 된다. */
+  var mg = interpOf("命宮") || {};
+  var stars = (mg.mainStars || []).map(function(x){ return x.name; }).join(" ");
+  var title = (stars || (INTERP && INTERP.wuXingJu))
+    ? ("명궁 " + (stars || "공궁") + (INTERP && INTERP.wuXingJu ? " · " + INTERP.wuXingJu.name : ""))
+    : "내 자미두수 명반";
+  if (navigator.share){ navigator.share({title:title + " — 무료 자미두수 명반", url:url}).catch(function(){}); return; }
   var done = function(){ msg.textContent = "링크를 복사했어요"; setTimeout(function(){ msg.textContent=""; }, 2600); };
   if (navigator.clipboard && navigator.clipboard.writeText)
     navigator.clipboard.writeText(url).then(done, function(){ msg.textContent = url; });
