@@ -21,6 +21,14 @@ body{margin:0;background:#0c0c14;color:#ededed;
   font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;line-height:1.7}
 a{color:#a78bfa;text-decoration:none}
 a:hover{text-decoration:underline}
+/* ── 키보드 포커스 ─────────────────────────────────────────
+   키보드로 훑을 때 지금 어디에 있는지가 거의 안 보였다(포커스 규칙이 폼 입력에만 있었다).
+   :focus-visible 이라 마우스 클릭에는 링이 안 뜬다 — 키보드·보조기기에서만 보인다. */
+:where(a,button,input,select,textarea,summary,[tabindex]):focus-visible{
+  outline:2px solid #c4b5fd;outline-offset:3px;border-radius:8px}
+/* 카드처럼 큰 타깃은 모서리를 카드에 맞춘다(사각 링이 튀어나오지 않게) */
+.artgrid a:focus-visible,.iljucard:focus-visible{outline-offset:2px;border-radius:16px}
+.emblem:focus-visible{border-radius:50%}
 
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;
   background:rgba(8,8,13,.86);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
