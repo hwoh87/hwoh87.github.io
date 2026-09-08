@@ -11,7 +11,9 @@
 <meta property="og:title" content="무료 자미두수 명반 — 12궁 · 사화 · 대한 | 삼라만상" />
 <meta property="og:description" content="생년월일시로 자미두수 명반을 바로 세워요. 12궁 주성·사화·대한과 궁마다의 풀이까지 — 설치·회원가입 없이 무료." />
 <meta property="og:url" content="https://samra.cc/calc/jami/" />
-<meta property="og:image" content="https://samra.cc/og-share.png" />
+<meta property="og:image" content="https://samra.cc/og-jami.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="stylesheet" href="/assets/seo.css" />
 <script src="/assets/track.js" defer></script>
@@ -67,15 +69,41 @@
 
 .mb{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,minmax(96px,auto));
   gap:6px;margin:0 0 16px}
-.mb .cell{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:8px 8px 7px;
+.mb .cell{position:relative;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:8px 8px 7px;
   text-align:left;cursor:pointer;font:inherit;color:inherit;display:flex;flex-direction:column;gap:3px}
 .mb .cell:hover,.mb .cell[aria-pressed=true]{border-color:#a78bfa;box-shadow:0 0 0 2px rgba(139,92,246,.25)}
 .mb .cell .pn{font-size:12px;font-weight:800;color:#a78bfa}
 .mb .cell .gz{font-size:11px;color:rgba(255,255,255,.45);margin-left:4px;font-weight:600}
 .mb .cell .ms{font-size:14px;font-weight:800;color:#F4F1FF;line-height:1.35}
 .mb .cell .as{font-size:10.5px;color:rgba(255,255,255,.45);line-height:1.4}
-.mb .cell .sh{font-size:10px;font-weight:800;color:#ff8a80}
+/* 사화(四化)는 명반에서 색으로 읽는 표기다 — 넷을 같은 빨강으로 찍어 두면
+   록(길)과 기(막힘)가 구분이 안 된다. 명반 관례대로 색을 갈라 동그란 인장으로 찍는다. */
+.mb .cell .sh{display:inline-grid;place-items:center;width:17px;height:17px;margin-left:2px;
+  border-radius:50%;font-family:"Noto Serif KR",serif;font-size:11px;font-weight:600;line-height:1;
+  vertical-align:2px;color:#08080d;background:var(--hua,#AEBECC)}
+/* 사화 범례 — 색으로 읽는 표기라 무슨 색이 무슨 뜻인지 한 줄로 밝혀 둔다. */
+.hualeg{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 16px;font-size:12.5px;color:rgba(255,255,255,.55)}
+.hualeg span{display:inline-flex;align-items:center;gap:5px}
+.hualeg i{display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;
+  font-family:"Noto Serif KR",serif;font-style:normal;font-size:11px;font-weight:600;
+  color:#08080d;background:var(--hua,#AEBECC)}
+.hua-lu{--hua:#7FBF8F}.hua-gwon{--hua:#E58A80}.hua-gwa{--hua:#7FA8D9}.hua-gi{--hua:#f472b6}
+/* 밝기(廟旺得利平陷) — 廟旺은 별이 제 힘을 다 쓰는 자리, 陷은 못 쓰는 자리다. */
 .mb .cell .em{font-size:11.5px;color:rgba(255,255,255,.45)}
+.mb .cell .br{font-size:10px;font-weight:700;margin-left:1px;color:rgba(255,255,255,.42)}
+.mb .cell .br.hi{color:#fbbf24}
+.mb .cell .br.lo{color:#E58A80}
+/* 명궁 = 명반의 기준점. 신궁은 그 다음. 예전엔 이름 옆 '· 신궁' 글자뿐이었다. */
+.mb .cell.ming{border-color:rgba(251,191,36,.55);background:rgba(251,191,36,.06)}
+.mb .cell.ming .pn{color:#fbbf24}
+.mb .cell.shen{border-color:rgba(167,139,250,.42)}
+.mb .cell .mark{position:absolute;top:5px;right:6px;font-family:"Noto Serif KR",serif;
+  font-size:10.5px;font-weight:600;color:rgba(251,191,36,.85);letter-spacing:0}
+.mb .cell.shen .mark{color:rgba(167,139,250,.85)}
+/* 삼방사정 — 궁 하나를 고르면 그 궁이 실제로 함께 읽히는 세 자리를 같이 밝힌다. */
+.mb .cell.sf{border-color:rgba(139,92,246,.55);background:rgba(139,92,246,.10)}
+.mb .cell.sf::after{content:"";position:absolute;inset:0;border-radius:12px;
+  box-shadow:inset 0 0 22px rgba(139,92,246,.22);pointer-events:none}
 .mb .core{grid-column:2/4;grid-row:2/4;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:14px;
   padding:12px;display:flex;flex-direction:column;justify-content:center;gap:5px;text-align:center}
 .mb .core b{font-size:15px;color:#F4F1FF}
@@ -117,8 +145,10 @@
   </nav>
 </header>
 <section class="hero">
+  <div class="stars" aria-hidden="true"></div>
   <div class="hero-inner">
     <nav class="crumbs" aria-label="위치"><a href="/">홈</a> › <span>자미두수 명반</span></nav>
+    <div class="emblem two" aria-hidden="true"><span>紫微</span></div>
     <p class="kicker">무료 자미두수</p>
     <h1>자미두수 명반<small>12궁 · 주성 · 사화 · 대한을 브라우저에서 바로</small></h1>
   </div>
@@ -149,6 +179,12 @@
   <h2>내 명반</h2>
   <p class="note" id="leadLine"></p>
   <div class="mb" id="mb"></div>
+  <div class="hualeg" aria-label="사화 범례">
+    <span><i class="hua-lu">祿</i>화록 · 풀리는 자리</span>
+    <span><i class="hua-gwon">權</i>화권 · 힘이 실리는 자리</span>
+    <span><i class="hua-gwa">科</i>화과 · 이름이 나는 자리</span>
+    <span><i class="hua-gi">忌</i>화기 · 막히는 자리</span>
+  </div>
   <div class="pdetail" id="pd"></div>
 
   <h2>대한 흐름</h2>
@@ -332,11 +368,26 @@ function interpOf(name){
   for (var i=0;i<list.length;i++) if (list[i] && list[i].name === name) return list[i];
   return null;
 }
+/* 사화 네 글자는 뜻이 정반대라 색으로 갈라 읽는다(록=길 · 권=힘 · 과=명예 · 기=막힘). */
+var HUA_CLS = {"祿":"hua-lu", "權":"hua-gwon", "科":"hua-gwa", "忌":"hua-gi"};
+/* 밝기: 廟旺 은 별이 제 힘을 다 쓰는 자리, 陷·不 은 못 쓰는 자리. 得利平 은 중간. */
+var BR_HI = "廟旺", BR_LO = "陷不";
 function starLabel(s){
-  var br = s.brightness ? '<span class="em">' + esc(s.brightness) + '</span>' : "";
+  var b = s.brightness || "";
+  var brCls = b && BR_HI.indexOf(b) >= 0 ? " hi" : (b && BR_LO.indexOf(b) >= 0 ? " lo" : "");
+  var br = b ? '<span class="br' + brCls + '">' + esc(b) + '</span>' : "";
   /* 명반 관례: 이름 → 밝기(廟旺得利平陷) → 사화 한 글자(祿權科忌) */
-  var hua = s.siHua ? '<span class="sh">' + esc(s.siHua.slice(-1)) + '</span>' : "";
+  var h = s.siHua ? s.siHua.slice(-1) : "";
+  var hua = h ? '<span class="sh ' + (HUA_CLS[h] || "") + '">' + esc(h) + '</span>' : "";
   return esc(s.name) + br + hua;
+}
+
+/* 삼방사정 = 본궁 + 대궁(+6) + 삼합 두 궁(±4). 12지 고리 위의 고정 규칙이다. */
+var ZHI12 = "子丑寅卯辰巳午未申酉戌亥";
+function sanfangZhi(zhi){
+  var i = ZHI12.indexOf(zhi);
+  if (i < 0) return [];
+  return [(i + 4) % 12, (i + 8) % 12, (i + 6) % 12].map(function(k){ return ZHI12[k]; });
 }
 /* 서술격 조사 — 받침이 있으면 '이에요' */
 function eyo(word){
@@ -354,14 +405,18 @@ function renderBoard(){
     var pos = ZPOS[p.zhi];
     var cell = document.createElement("button");
     cell.type = "button";
-    cell.className = "cell";
+    var isMing = p.zhi === CHART.mingGongZhi;
+    cell.className = "cell " + (EL_CLS_KR[(LINKS.el || {})[p.ganZhi ? p.ganZhi[0] : ""]] || "")
+      + (isMing ? " ming" : "") + (p.isShenGong ? " shen" : "");
     cell.setAttribute("aria-pressed", "false");
     cell.dataset.palace = p.name;
+    cell.dataset.zhi = p.zhi;
     if (pos){ cell.style.gridRow = pos[0]; cell.style.gridColumn = pos[1]; }
     var main = (ip.mainStars || []).map(starLabel).join(" ");
     var aux  = (ip.auxStars || []).slice(0, 6).map(function(s){ return esc(s.name); }).join(" ");
     cell.innerHTML =
-      '<span class="pn">' + esc(ip.kr || p.name) + (p.isShenGong ? " · 신궁" : "") +
+      (isMing ? '<span class="mark">命</span>' : (p.isShenGong ? '<span class="mark">身</span>' : "")) +
+      '<span class="pn">' + esc(ip.kr || p.name) +
         '<span class="gz">' + esc(p.ganZhi) + '</span></span>' +
       '<span class="ms">' + (main || '<span class="em">공궁</span>') + '</span>' +
       (aux ? '<span class="as">' + aux + '</span>' : "");
@@ -379,8 +434,14 @@ function renderBoard(){
 function selectPalace(name){
   SELECTED = name;
   var cells = document.querySelectorAll(".mb .cell");
-  for (var i=0;i<cells.length;i++)
-    cells[i].setAttribute("aria-pressed", cells[i].dataset.palace === name ? "true" : "false");
+  var picked = null;
+  for (var i=0;i<cells.length;i++) if (cells[i].dataset.palace === name) picked = cells[i];
+  var sf = picked ? sanfangZhi(picked.dataset.zhi) : [];
+  for (var i=0;i<cells.length;i++){
+    var on = cells[i].dataset.palace === name;
+    cells[i].setAttribute("aria-pressed", on ? "true" : "false");
+    cells[i].classList.toggle("sf", !on && sf.indexOf(cells[i].dataset.zhi) >= 0);
+  }
 
   var ip = interpOf(name);
   var pd = document.getElementById("pd");
@@ -401,6 +462,7 @@ function selectPalace(name){
   pd.innerHTML =
     "<h3>" + esc(ip.kr) + (ip.theme ? " — " + esc(ip.theme) : "") + "</h3>" +
     '<p class="role">' + esc(ip.role) + "</p>" +
+    '<p class="role">명반에서 함께 밝힌 세 칸이 이 궁의 <strong>삼방사정</strong>이에요 — 마주 보는 궁과 삼합 두 궁을 같이 읽어야 이 자리가 제대로 보여요.</p>' +
     (ip.hint ? '<p class="role">' + esc(ip.hint) + "</p>" : "") +
     (ip.isEmpty ? '<p class="role">이 궁은 주성이 없는 공궁이에요. 마주 보는 궁의 별을 빌려 읽어요.</p>' : "") +
     starHtml +

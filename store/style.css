@@ -960,6 +960,16 @@ body.report-page { background: #08070c; }
 .hub-card:hover { background: rgba(255, 255, 255, 0.06); border-color: rgba(167, 139, 250, 0.4); transform: translateY(-2px); }
 .hub-card b { display: block; font-size: 15px; font-weight: 700; color: #EDE9FF; }
 .hub-card span { display: block; margin-top: 5px; font-size: 12.5px; line-height: 1.65; color: rgba(255, 255, 255, 0.45); }
+/* 자료실 타일 인장 — /term/·/cheongan/ 목록과 같은 표기 체계를 홈에도 이어 둔다. */
+/* 설명이 두 줄인 타일에서 인장과 글자가 겹쳤다 — 아래 여백을 인장 높이만큼 준다. */
+.hub-card { position: relative; overflow: hidden; padding-bottom: 34px; }
+.hub-card .hmark {
+  position: absolute; right: 10px; bottom: -7px; margin: 0;
+  font-family: "Noto Serif KR", serif; font-size: 38px; font-weight: 600; line-height: 1;
+  letter-spacing: -0.04em; color: var(--violet-soft, #a78bfa); opacity: 0.18;
+  pointer-events: none; transition: opacity 0.16s;
+}
+.hub-card:hover .hmark { opacity: 0.3; }
 .hub-fine { margin: 22px 0 0; font-size: 12px; line-height: 1.7; color: rgba(255, 255, 255, 0.32); }
 
 /* ── 홈 첫 화면: 가치 히어로 ─────────────────────────
