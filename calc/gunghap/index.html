@@ -52,6 +52,24 @@
 .chk:hover{border-color:rgba(167,139,250,.5);color:#F4F1FF}
 .chk:has(input:checked){border-color:rgba(167,139,250,.7);background:rgba(139,92,246,.14);color:#F4F1FF}
 .chk input{width:17px;height:17px;accent-color:#a78bfa;margin:0}
+/* ── 읽는 순서 ─────────────────────────────────────────────
+   표를 던져 놓고 "어떻게 읽는지"는 안 알려주고 있었다(daysaju 는 읽는 순서를 옆에 적어 둔다).
+   설명이자 목차다 — 누르면 해당 섹션으로 간다. */
+.howto{counter-reset:h;list-style:none;margin:0 0 20px;padding:0;display:grid;gap:8px}
+@media(min-width:620px){.howto{grid-template-columns:1fr 1fr}}
+.howto li{counter-increment:h}
+/* ⚠️ flex 자식은 [번호, .c] 둘뿐이어야 한다 — 본문을 감싸지 않으면 <b>·텍스트·<span> 이
+   각각 flex 아이템이 돼 "일 / 간 / 부터 봐 / 요" 처럼 쪼개진다(한 번 밟음). */
+.howto a{display:flex;gap:11px;align-items:flex-start;padding:12px 14px;border-radius:14px;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+  font-size:14px;line-height:1.5;color:rgba(255,255,255,.72);transition:border-color .15s,background .15s}
+.howto .c{min-width:0}
+.howto a:hover{border-color:rgba(167,139,250,.5);background:rgba(255,255,255,.06);text-decoration:none}
+.howto a::before{content:counter(h);flex:none;margin-top:1px;width:21px;height:21px;border-radius:50%;
+  display:grid;place-items:center;font-size:11.5px;font-weight:800;
+  background:rgba(139,92,246,.22);color:#c4b5fd}
+.howto b{color:#F4F1FF;font-weight:700}
+.howto span{display:block;margin-top:3px;font-size:12.5px;color:rgba(255,255,255,.55);line-height:1.55}
 .calc-btn{width:100%;padding:15px;border:0;border-radius:16px;font-size:16px;font-weight:800;cursor:pointer;
   color:#08080d;background:linear-gradient(180deg,#a78bfa,#a78bfa,#7c3aed);box-shadow:0 6px 18px rgba(124,58,237,.45)}
 .calc-btn[disabled]{opacity:.62;cursor:progress}

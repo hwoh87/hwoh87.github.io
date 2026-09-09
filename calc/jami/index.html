@@ -52,6 +52,24 @@
 .chk:hover{border-color:rgba(167,139,250,.5);color:#F4F1FF}
 .chk:has(input:checked){border-color:rgba(167,139,250,.7);background:rgba(139,92,246,.14);color:#F4F1FF}
 .chk input{width:17px;height:17px;accent-color:#a78bfa;margin:0}
+/* ── 읽는 순서 ─────────────────────────────────────────────
+   표를 던져 놓고 "어떻게 읽는지"는 안 알려주고 있었다(daysaju 는 읽는 순서를 옆에 적어 둔다).
+   설명이자 목차다 — 누르면 해당 섹션으로 간다. */
+.howto{counter-reset:h;list-style:none;margin:0 0 20px;padding:0;display:grid;gap:8px}
+@media(min-width:620px){.howto{grid-template-columns:1fr 1fr}}
+.howto li{counter-increment:h}
+/* ⚠️ flex 자식은 [번호, .c] 둘뿐이어야 한다 — 본문을 감싸지 않으면 <b>·텍스트·<span> 이
+   각각 flex 아이템이 돼 "일 / 간 / 부터 봐 / 요" 처럼 쪼개진다(한 번 밟음). */
+.howto a{display:flex;gap:11px;align-items:flex-start;padding:12px 14px;border-radius:14px;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+  font-size:14px;line-height:1.5;color:rgba(255,255,255,.72);transition:border-color .15s,background .15s}
+.howto .c{min-width:0}
+.howto a:hover{border-color:rgba(167,139,250,.5);background:rgba(255,255,255,.06);text-decoration:none}
+.howto a::before{content:counter(h);flex:none;margin-top:1px;width:21px;height:21px;border-radius:50%;
+  display:grid;place-items:center;font-size:11.5px;font-weight:800;
+  background:rgba(139,92,246,.22);color:#c4b5fd}
+.howto b{color:#F4F1FF;font-weight:700}
+.howto span{display:block;margin-top:3px;font-size:12.5px;color:rgba(255,255,255,.55);line-height:1.55}
 .calc-btn{width:100%;padding:15px;border:0;border-radius:16px;font-size:16px;font-weight:800;cursor:pointer;
   color:#08080d;background:linear-gradient(180deg,#a78bfa,#a78bfa,#7c3aed);box-shadow:0 6px 18px rgba(124,58,237,.45)}
 .calc-btn[disabled]{opacity:.62;cursor:progress}
@@ -191,8 +209,16 @@
 </form>
 
 <section id="result">
-  <h2>내 명반</h2>
+  <h2 id="sec-mb">내 명반</h2>
   <p class="note" id="leadLine"></p>
+  <!-- 명반을 세워 주고 어떻게 읽는지는 맨 아래 산문에만 있었다(CTA 뒤라 아무도 안 본다).
+       사주 계산기와 같은 카드로 결과 바로 옆에 놓는다 — 설명이자 목차다. -->
+  <ol class="howto">
+    <li><a href="#sec-mb"><span class="c"><b>명궁</b>부터 봐요<span>금색 命 칸 — 삶 전체의 기본 색을 정하는 자리</span></span></a></li>
+    <li><a href="#sec-mb"><span class="c"><b>삼방사정</b>을 같이 봐요<span>칸을 누르면 함께 밝아지는 세 칸 — 혼자 읽으면 안 되는 자리</span></span></a></li>
+    <li><a href="#sec-mb"><span class="c"><b>사화</b>를 찾아요<span>祿權科忌 인장 — 같은 별도 작동 방식이 달라져요</span></span></a></li>
+    <li><a href="#sec-dx"><span class="c"><b>대한</b>으로 시간을 봐요<span>10년마다 명반을 옮겨 읽는 구간</span></span></a></li>
+  </ol>
   <div class="mb" id="mb"></div>
   <div class="hualeg" aria-label="사화 범례">
     <span><i class="hua-lu">祿</i>화록 · 풀리는 자리</span>
@@ -202,11 +228,11 @@
   </div>
   <div class="pdetail" id="pd"></div>
 
-  <h2>대한 흐름</h2>
+  <h2 id="sec-dx">대한 흐름</h2>
   <div class="dx" id="dx"></div>
   <p class="note" id="dxNote">대한(大限)은 10년 단위로 명반을 옮겨 읽는 구간이에요. 칸의 궁이 그 10년의 주제가 돼요.</p>
 
-  <h2>삼방사정</h2>
+  <h2 id="sec-sf">삼방사정</h2>
   <p class="note" id="sfLine"></p>
   <div class="tagrow" id="tags"></div>
 
