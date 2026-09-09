@@ -239,6 +239,7 @@
     <span class="cap"><b id="iljuName"></b><span id="iljuSub"></span></span>
   </a>
   <p id="iljuLine" class="note"></p>
+  <p id="ttiLine" class="note" style="display:none"></p>
 
   <!-- 명식을 던져만 주고 어떻게 읽는지는 안 알려주고 있었다(daysaju 는 읽는 순서를 옆에 적어 둔다).
        각 항목이 아래 해당 섹션으로 데려간다 — 설명이자 목차다. -->
@@ -803,6 +804,32 @@ function runNow(){
   document.getElementById("iljuLine").innerHTML =
     "내 일주는 <strong>"+r.iljuKr+"일주("+r.pillars.day.ganzi+")</strong> — " +
     (iljuUrl ? '<a href="'+iljuUrl+'">일주 도감에서 성격·직업·인연 풀이 보기</a>' : "");
+  /* 년주 → 띠·년생 도감. 입춘 전 출생은 년주가 전년도라 입력 연도가 아니라 년주 간지로 해를 되찾는다.
+     (DOM 으로 조립 — 이 문자열은 파이썬 이스케이프를 한 번 더 타고, href="…" 리터럴은 링크 검사기가 읽는다) */
+  (function(){
+    var el = document.getElementById("ttiLine"); if (!el) return;
+    var yp = r.pillars.year; if (!yp || !yp.ganzi){ el.style.display = "none"; return; }
+    var G = "甲乙丙丁戊己庚辛壬癸", Z = "子丑寅卯辰巳午未申酉戌亥";
+    var AN = {"子":"쥐","丑":"소","寅":"호랑이","卯":"토끼","辰":"용","巳":"뱀","午":"말","未":"양","申":"원숭이","酉":"닭","戌":"개","亥":"돼지"};
+    var SL = {"子":"jwitti","丑":"sotti","寅":"horangitti","卯":"tokkitti","辰":"yongtti","巳":"baemtti","午":"maltti","未":"yangtti","申":"wonsungitti","酉":"daktti","戌":"gaetti","亥":"dwaejitti"};
+    function gz(yr){ var i = ((yr - 1984) % 60 + 60) % 60; return G[i % 10] + Z[i % 12]; }
+    var br = yp.ganzi[1], yr = gz(v.y) === yp.ganzi ? v.y : (gz(v.y - 1) === yp.ganzi ? v.y - 1 : 0);
+    var an = AN[br];
+    if (!an){ el.style.display = "none"; return; }
+    el.textContent = "";
+    el.appendChild(document.createTextNode("년주는 "));
+    var b = document.createElement("strong"); b.textContent = yp.ganzi; el.appendChild(b);
+    el.appendChild(document.createTextNode(" — "));
+    var a1 = document.createElement("a"); a1.href = "/tti/" + SL[br] + "/"; a1.textContent = an + "띠 성격·12띠 궁합"; el.appendChild(a1);
+    if (yr){
+      el.appendChild(document.createTextNode(" · "));
+      var a2 = document.createElement("a"); a2.href = "/year/" + yr + "/"; a2.textContent = yr + "년생 사주·같은 해 연예인"; el.appendChild(a2);
+      if (yr !== v.y){
+        var sp = document.createElement("span"); sp.className = "kr"; sp.textContent = " (입춘 전 출생이라 년주는 " + yr + "년)"; el.appendChild(sp);
+      }
+    }
+    el.style.display = "block";
+  })();
   // 일주 일러스트 — 앱이 쓰는 그림 그대로(export_web_art.py). 숫자표만 있던 결과에
   // 얼굴을 하나 준다. 계산기에서 도감으로 넘어가는 길이기도 하다.
   var card = document.getElementById("iljuCard"), slug = LINKS.iljuSlug[r.iljuKr];
