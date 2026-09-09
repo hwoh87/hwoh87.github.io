@@ -283,6 +283,7 @@
   <div class="share-row">
     <button class="share-btn" id="share" type="button">결과 링크 공유</button>
     <button class="share-btn" id="copyAi" type="button">AI 해석용으로 복사</button>
+    <button class="share-btn" id="saveImg" type="button">명식 카드 저장</button>
     <span class="share-msg" id="shareMsg"></span>
   </div>
   <p class="note" style="margin-top:10px">복사한 내용을 챗봇에 붙여넣고 이렇게 물어보세요 —
@@ -401,6 +402,8 @@ document.addEventListener("DOMContentLoaded", function init(){
   //    AI 복사 버튼은 /calc/ 에만 있으므로 없으면 조용히 건너뛴다.
   var ca = document.getElementById("copyAi");
   if (ca && typeof copyAi === "function") ca.addEventListener("click", copyAi);
+  var si = document.getElementById("saveImg");
+  if (si && typeof saveCard === "function") si.addEventListener("click", saveCard);
   restoreFromUrl();
 });
 function link(url, text){ return url ? '<a href="'+url+'">'+text+'</a>' : text; }
@@ -881,6 +884,182 @@ function showCal(note){
   if (!el) return;
   el.textContent = note || "";
   el.style.display = note ? "block" : "none";
+}
+
+/* ── 명식 카드 이미지 저장 ───────────────────────────────────
+   사주매니아에도 있는 기능인데, 저장된 이미지는 그대로 유입 자산이 된다(카톡으로 돌아다닌다).
+   OG 카드와 같은 디자인 언어로 굽되, 여기선 캔버스라 폰트를 문자열로 직접 지정해야 한다 —
+   웹폰트가 준비되기 전에 그리면 시스템 폰트로 구워지므로 document.fonts.ready 를 기다린다. */
+var CARD_W = 1080, CARD_H = 1350;
+var EL_HEX = {"목":"#7FBF8F","화":"#E58A80","토":"#D9B978","금":"#AEBECC","수":"#7FA8D9"};
+
+function roundRect(c, x, y, w, h, r){
+  c.beginPath();
+  c.moveTo(x + r, y);
+  c.arcTo(x + w, y, x + w, y + h, r);
+  c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r);
+  c.arcTo(x, y, x + w, y, r);
+  c.closePath();
+}
+
+function drawCard(r, t, ctx){
+  var cv = document.createElement("canvas");
+  cv.width = CARD_W; cv.height = CARD_H;
+  var c = cv.getContext("2d");
+
+  /* 배경 — 홈 히어로와 같은 밤하늘 */
+  c.fillStyle = "#0c0c14"; c.fillRect(0, 0, CARD_W, CARD_H);
+  var g = c.createRadialGradient(180, 40, 0, 180, 40, 900);
+  g.addColorStop(0, "rgba(124,58,237,.38)"); g.addColorStop(1, "rgba(124,58,237,0)");
+  c.fillStyle = g; c.fillRect(0, 0, CARD_W, CARD_H);
+  var seed = (r.iljuKr || "x").charCodeAt(0) * 7919;
+  var rnd = function(){ seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+  for (var i = 0; i < 90; i++){
+    c.globalAlpha = 0.2 + rnd() * 0.55;
+    c.fillStyle = rnd() < 0.28 ? "#c4b5fd" : "#DCE6FF";
+    c.beginPath(); c.arc(rnd() * CARD_W, rnd() * CARD_H, rnd() < 0.25 ? 2.4 : 1.4, 0, 6.2832); c.fill();
+  }
+  c.globalAlpha = 1;
+
+  /* 머리 */
+  c.fillStyle = "#c4b5fd";
+  c.font = "800 26px 'Wanted Sans Variable', system-ui, sans-serif";
+  c.fillText("삼라만상 · 무료 만세력", 72, 96);
+  c.fillStyle = "#F4F1FF";
+  c.font = "600 62px MaruBuri, 'Noto Serif KR', serif";
+  c.fillText(r.iljuKr + "일주 " + r.pillars.day.ganzi, 72, 176);
+
+  /* 원국표 — 시·일·월·년 */
+  var order = [["time","시주"],["day","일주"],["month","월주"],["year","연주"]];
+  var bx = 72, by = 236, bw = (CARD_W - 144), cw = bw / 4, ch = 300;
+  order.forEach(function(pair, i){
+    var key = pair[0], lb = pair[1], p = r.pillars[key];
+    var x = bx + i * cw;
+    c.fillStyle = key === "day" ? "rgba(139,92,246,.20)" : "rgba(255,255,255,.045)";
+    roundRect(c, x + 6, by, cw - 12, ch, 22); c.fill();
+    c.strokeStyle = key === "day" ? "rgba(167,139,250,.7)" : "rgba(255,255,255,.10)";
+    c.lineWidth = 2; c.stroke();
+    c.textAlign = "center";
+    var cx = x + cw / 2;
+    c.fillStyle = "rgba(255,255,255,.55)";
+    c.font = "700 24px 'Wanted Sans Variable', system-ui, sans-serif";
+    c.fillText(lb, cx, by + 46);
+    if (!p){
+      c.fillStyle = "rgba(255,255,255,.42)";
+      c.font = "600 34px MaruBuri, serif"; c.fillText("시간 미상", cx, by + 160);
+      c.textAlign = "left"; return;
+    }
+    var elS = (LINKS.el || {})[p.ganzi[0]] || "", elB = (LINKS.el || {})[p.ganzi[1]] || "";
+    c.fillStyle = EL_HEX[elS] || "#F4F1FF";
+    c.font = "600 78px 'Noto Serif KR', serif"; c.fillText(p.ganzi[0], cx, by + 132);
+    c.fillStyle = EL_HEX[elB] || "#F4F1FF";
+    c.fillText(p.ganzi[1], cx, by + 226);
+    c.fillStyle = "rgba(255,255,255,.55)";
+    c.font = "600 22px 'Wanted Sans Variable', system-ui, sans-serif";
+    c.fillText(p.stemKr + " · " + p.branchKr, cx, by + 268);
+    c.textAlign = "left";
+  });
+
+  /* 오행 분포 */
+  var els = (t && t.elements) || {}, sum = 0;
+  ["木","火","土","金","水"].forEach(function(k){ sum += (els[k] || 0); });
+  var ky = by + ch + 86;
+  c.fillStyle = "#a78bfa";
+  c.font = "800 28px 'Wanted Sans Variable', system-ui, sans-serif";
+  c.fillText("오행 분포", 72, ky - 26);
+  ["木","火","土","金","水"].forEach(function(k, i){
+    var kr = {"木":"목","火":"화","土":"토","金":"금","水":"수"}[k];
+    var pc = sum ? (els[k] || 0) / sum : 0;
+    var y = ky + i * 52;
+    c.fillStyle = "rgba(255,255,255,.62)";
+    c.font = "700 26px 'Wanted Sans Variable', system-ui, sans-serif";
+    c.fillText(kr + " " + k, 72, y + 26);
+    c.fillStyle = "rgba(255,255,255,.08)";
+    roundRect(c, 172, y + 8, 700, 22, 11); c.fill();
+    c.fillStyle = EL_HEX[kr];
+    roundRect(c, 172, y + 8, Math.max(8, 700 * pc), 22, 11); c.fill();
+    c.fillStyle = "rgba(255,255,255,.55)";
+    c.font = "700 24px 'Wanted Sans Variable', system-ui, sans-serif";
+    c.fillText(Math.round(pc * 100) + "%", 890, y + 27);
+  });
+
+  /* 읽기 요약 */
+  var sy = ky + 5 * 52 + 54;
+  var gg = (t && t.geokguk && t.geokguk.hangul) || "";
+  var st = (t && t.strength && t.strength.label) || "";
+  var ys = (t && t.yongsin && t.yongsin.yong || []).join(" · ");
+  [["격국", gg], ["일간 강약", st], ["용신", ys]].forEach(function(pair, i){
+    if (!pair[1]) return;
+    var x = 72 + i * 316;
+    c.fillStyle = "rgba(255,255,255,.045)";
+    roundRect(c, x, sy, 300, 110, 20); c.fill();
+    c.strokeStyle = "rgba(255,255,255,.10)"; c.lineWidth = 2; c.stroke();
+    c.fillStyle = "rgba(255,255,255,.5)";
+    c.font = "700 22px 'Wanted Sans Variable', system-ui, sans-serif";
+    c.fillText(pair[0], x + 24, sy + 42);
+    c.fillStyle = "#F4F1FF";
+    c.font = "800 34px 'Wanted Sans Variable', system-ui, sans-serif";
+    c.fillText(pair[1], x + 24, sy + 84);
+  });
+
+  /* 지금 흐름 — 대운과 올해. 카드가 '내 사주'가 아니라 '지금 내 사주'가 된다. */
+  var fy = sy + 158;
+  var age = new Date().getFullYear() - r.adjusted.year + 1;
+  var dwCur = null;
+  (r.daewoon || []).forEach(function(x){ if (age >= x.age) dwCur = x; });
+  var yrCur = ctx && (ctx.years || []).filter(function(x){
+    return x.year === new Date().getFullYear(); })[0];
+  if (dwCur || yrCur){
+    c.fillStyle = "#a78bfa";
+    c.font = "800 28px 'Wanted Sans Variable', system-ui, sans-serif";
+    c.fillText("지금 흐름", 72, fy);
+    c.fillStyle = "rgba(255,255,255,.045)";
+    roundRect(c, 72, fy + 22, CARD_W - 144, 118, 20); c.fill();
+    c.strokeStyle = "rgba(255,255,255,.10)"; c.lineWidth = 2; c.stroke();
+    var line = [];
+    if (dwCur) line.push("대운 " + dwCur.ganzi + " (" + dwCur.age + "세~)");
+    if (yrCur) line.push("올해 " + yrCur.year + " " + yrCur.ganji + " · " + yrCur.stemSipsin);
+    c.fillStyle = "#F4F1FF";
+    c.font = "700 32px 'Wanted Sans Variable', system-ui, sans-serif";
+    c.fillText(line.join("      "), 100, fy + 92);
+  }
+
+  /* 꼬리 */
+  c.fillStyle = "rgba(255,255,255,.45)";
+  c.font = "600 24px 'Wanted Sans Variable', system-ui, sans-serif";
+  c.fillText("samra.cc · 절입시각·진태양시 반영 · 브라우저에서 계산", 72, CARD_H - 56);
+  return cv;
+}
+
+function saveCard(){
+  var msg = document.getElementById("shareMsg");
+  var v = readForm(), r, t;
+  try {
+    r = JSON.parse(SajuCalc().calculate(v.y, v.mo, v.d, v.h, v.mi, v.g, v.tst, v.lon));
+    t = JSON.parse(SajuCalc().interpret(v.y, v.mo, v.d, v.h, v.mi, v.g, v.tst, v.lon));
+  } catch(e){ msg.textContent = "먼저 계산해 주세요"; return; }
+  var ctx = null, now = new Date();
+  try {
+    ctx = JSON.parse(StoreCalc().context(v.y, v.mo, v.d, v.h, v.mi, v.g, v.tst, v.lon,
+      now.getFullYear(), now.getMonth() + 1, now.getDate()));
+  } catch(e){ /* 세운 없이도 카드는 나온다 */ }
+  if (window.__track) window.__track("cta", "save-card");
+  var go = function(){
+    var cv = drawCard(r, t, ctx);
+    cv.toBlob(function(blob){
+      if (!blob){ msg.textContent = "이미지를 만들지 못했어요"; return; }
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url; a.download = r.iljuKr + "일주-명식-삼라만상.png";
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+      msg.textContent = "명식 카드를 저장했어요";
+      setTimeout(function(){ msg.textContent = ""; }, 3000);
+    }, "image/png");
+  };
+  /* 웹폰트가 준비되기 전에 그리면 시스템 폰트로 구워진다. */
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(go, go); else go();
 }
 
 </script>

@@ -320,6 +320,8 @@ document.addEventListener("DOMContentLoaded", function(){
   //    AI 복사 버튼은 /calc/ 에만 있으므로 없으면 조용히 건너뛴다.
   var ca = document.getElementById("copyAi");
   if (ca && typeof copyAi === "function") ca.addEventListener("click", copyAi);
+  var si = document.getElementById("saveImg");
+  if (si && typeof saveCard === "function") si.addEventListener("click", saveCard);
   warmEngine();
   fillCities("city", true).then(restoreFromUrl, function(){});
 });
