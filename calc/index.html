@@ -143,6 +143,24 @@
 .t-흉,.t-약{color:#E58A80}
 .t-강{color:#D9B978}
 .dw-cell .gm{font-size:10.5px;color:#c4b5fd;font-weight:700}
+/* ── 읽는 순서 ─────────────────────────────────────────────
+   표를 던져 놓고 "어떻게 읽는지"는 안 알려주고 있었다(daysaju 는 읽는 순서를 옆에 적어 둔다).
+   설명이자 목차다 — 누르면 해당 섹션으로 간다. */
+.howto{counter-reset:h;list-style:none;margin:0 0 20px;padding:0;display:grid;gap:8px}
+@media(min-width:620px){.howto{grid-template-columns:1fr 1fr}}
+.howto li{counter-increment:h}
+/* ⚠️ flex 자식은 [번호, .c] 둘뿐이어야 한다 — 본문을 감싸지 않으면 <b>·텍스트·<span> 이
+   각각 flex 아이템이 돼 "일 / 간 / 부터 봐 / 요" 처럼 쪼개진다(한 번 밟음). */
+.howto a{display:flex;gap:11px;align-items:flex-start;padding:12px 14px;border-radius:14px;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+  font-size:14px;line-height:1.5;color:rgba(255,255,255,.72);transition:border-color .15s,background .15s}
+.howto .c{min-width:0}
+.howto a:hover{border-color:rgba(167,139,250,.5);background:rgba(255,255,255,.06);text-decoration:none}
+.howto a::before{content:counter(h);flex:none;margin-top:1px;width:21px;height:21px;border-radius:50%;
+  display:grid;place-items:center;font-size:11.5px;font-weight:800;
+  background:rgba(139,92,246,.22);color:#c4b5fd}
+.howto b{color:#F4F1FF;font-weight:700}
+.howto span{display:block;margin-top:3px;font-size:12.5px;color:rgba(255,255,255,.55);line-height:1.55}
 .badge-row{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 10px}
 .badge-row span{font-size:13px;font-weight:700;padding:6px 12px;border-radius:999px;
   border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:rgba(255,255,255,.72)}
@@ -199,7 +217,7 @@
 </form>
 
 <section id="result">
-  <h2>내 명식</h2>
+  <h2 id="sec-myeongsik">내 명식</h2>
   <table class="myeongsik" aria-label="사주 명식">
     <thead><tr><th>구분</th><th>시주</th><th>일주</th><th>월주</th><th>년주</th></tr></thead>
     <tbody>
@@ -217,7 +235,16 @@
   </a>
   <p id="iljuLine" class="note"></p>
 
-  <h2>대운 흐름</h2>
+  <!-- 명식을 던져만 주고 어떻게 읽는지는 안 알려주고 있었다(daysaju 는 읽는 순서를 옆에 적어 둔다).
+       각 항목이 아래 해당 섹션으로 데려간다 — 설명이자 목차다. -->
+  <ol class="howto">
+    <li><a href="#sec-myeongsik"><span class="c"><b>일간</b>부터 봐요<span>여덟 글자 가운데 나 자신 — 표에서 '본원' 자리</span></span></a></li>
+    <li><a href="#sec-read"><span class="c"><b>기운의 균형</b>을 봐요<span>일간이 강한지 약한지, 어떤 오행이 모자란지</span></span></a></li>
+    <li><a href="#sec-read"><span class="c"><b>십신</b>이 어디에 섰는지 봐요<span>재물·관계·표현이 내 자리에서 어떻게 놓였는지</span></span></a></li>
+    <li><a href="#sec-flow"><span class="c"><b>대운과 세운</b>으로 시간을 봐요<span>큰 흐름 위에 올해가 어떻게 얹히는지</span></span></a></li>
+  </ol>
+
+  <h2 id="sec-flow">대운 흐름</h2>
   <div class="dw-strip" id="dw"></div>
   <p class="note" id="gmLine"></p>
 
@@ -225,7 +252,7 @@
   <div class="dw-strip" id="sw"></div>
   <p class="note" id="swNote"></p>
 
-  <h2>내 사주 읽기</h2>
+  <h2 id="sec-read">내 사주 읽기</h2>
   <div class="read-grid">
     <div class="read-card"><span class="rk">격국</span><strong id="ggLabel">—</strong><p id="ggWhy"></p></div>
     <div class="read-card"><span class="rk">일간 강약</span><strong id="stLabel">—</strong><p id="stWhy"></p></div>
@@ -250,8 +277,13 @@
 
   <div class="share-row">
     <button class="share-btn" id="share" type="button">결과 링크 공유</button>
+    <button class="share-btn" id="copyAi" type="button">AI 해석용으로 복사</button>
     <span class="share-msg" id="shareMsg"></span>
   </div>
+  <p class="note" style="margin-top:10px">복사한 내용을 챗봇에 붙여넣고 이렇게 물어보세요 —
+    <em>"다음은 내 사주 명식이야. 성격의 강점과 약점을 짚어줘."</em> ·
+    <em>"올해 가장 조심할 구간과 밀어붙일 구간을 알려줘."</em>
+    깊은 해석은 <a href="/#tests">사주 분석 리포트</a>에서 술사가 직접 길게 써 드려요.</p>
 
   <aside class="cta-box">
     <p class="cta-lead">이 명식, 여기서 끝이 아니에요</p>
@@ -358,6 +390,10 @@ document.addEventListener("DOMContentLoaded", function init(){
   warmEngine();
   document.getElementById("go").addEventListener("click", run);
   document.getElementById("share").addEventListener("click", share);
+  // ⚠️ 이 줄은 네 도구의 init 에 모두 들어간다(같은 문자열을 공유한다).
+  //    AI 복사 버튼은 /calc/ 에만 있으므로 없으면 조용히 건너뛴다.
+  var ca = document.getElementById("copyAi");
+  if (ca && typeof copyAi === "function") ca.addEventListener("click", copyAi);
   restoreFromUrl();
 });
 function link(url, text){ return url ? '<a href="'+url+'">'+text+'</a>' : text; }
@@ -410,6 +446,65 @@ function restoreFromUrl(){
   run();
 }
 
+/* ── AI 해석용 복사 ──────────────────────────────────────────
+   혼천의(sky.told.me)가 하듯, 사람들이 어차피 챗봇에 붙여넣는 행동을 정면으로 받는다.
+   막을 수 없다면 경로를 우리가 설계하는 편이 낫다 — 출처 한 줄이 따라붙게 한다. */
+function aiText(){
+  var t = function(id){ var e = document.getElementById(id); return e ? e.textContent.trim() : ""; };
+  var cells = function(sel){
+    return Array.prototype.map.call(document.querySelectorAll(sel), function(c){
+      return c.textContent.trim().replace(/\s+/g, " ");
+    });
+  };
+  var L = [];
+  L.push("# 사주 명식 (삼라만상 samra.cc 만세력 계산)");
+  L.push("");
+  L.push("## 원국");
+  ["y","m","d","t"].forEach(function(sfx){
+    var lb = {y:"년주", m:"월주", d:"일주", t:"시주"}[sfx];
+    var tg = t("tg-" + sfx), jj = t("jj-" + sfx);
+    if (tg || jj) L.push("- " + lb + ": " + tg.replace(/\s+/g, "") + " / " + jj.replace(/\s+/g, "")
+      + " · 십신 " + (sfx === "d" ? "본원" : t("ss-" + sfx)) + "·" + t("bs-" + sfx)
+      + " · 12운성 " + t("us-" + sfx) + " · 12신살 " + t("sl-" + sfx));
+  });
+  L.push("- " + t("iljuLine").replace(/\s+/g, " "));
+  L.push("- " + t("gmLine"));
+  L.push("");
+  L.push("## 읽기");
+  L.push("- 격국: " + t("ggLabel") + " (" + t("ggWhy") + ")");
+  L.push("- 일간 강약: " + t("stLabel") + " (" + t("stWhy") + ")");
+  L.push("- 용신: " + t("ysYong") + " / " + t("ysGi"));
+  var jc = document.getElementById("johuCard");
+  if (jc && jc.style.display !== "none" && t("johuEl") !== "—")
+    L.push("- 조후: " + t("johuEl") + " (" + t("johuWhy") + ")");
+  L.push("- 오행 분포: " + cells("#ohang .row2").join(" · "));
+  L.push("");
+  L.push("## 대운"); L.push(cells("#dw .dw-cell").join(" | "));
+  L.push("");
+  L.push("## 세운"); L.push(cells("#sw .dw-cell").join(" | "));
+  L.push("");
+  L.push("## 신살과 귀인"); L.push(cells("#sinsal span").join(" · "));
+  L.push("");
+  L.push("## 형충회합"); L.push(cells("#rel li").join(" · "));
+  if (t("samjae")) { L.push(""); L.push("## 삼재"); L.push(t("samjae")); }
+  L.push("");
+  L.push("— 출처: 삼라만상 무료 만세력 " + location.href);
+  return L.join("\n");
+}
+function copyAi(){
+  var msg = document.getElementById("shareMsg"), txt = aiText();
+  if (window.__track) window.__track("cta", "copy-ai");
+  var done = function(){ msg.textContent = "복사했어요 — 챗봇에 붙여넣으세요"; setTimeout(function(){ msg.textContent=""; }, 3200); };
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done, function(){ msg.textContent = "복사에 실패했어요"; });
+  } else {
+    var ta = document.createElement("textarea");
+    ta.value = txt; document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); done(); } catch(e){ msg.textContent = "복사에 실패했어요"; }
+    document.body.removeChild(ta);
+  }
+}
+
 function share(){
   var msg = document.getElementById("shareMsg");
   var url = location.href;
@@ -451,6 +546,19 @@ function subjP(w){
   if (c < 0xAC00 || c > 0xD7A3) return "가";
   return ((c - 0xAC00) % 28) ? "이" : "가";
 }
+/** 가로 스크롤 띠에서 '지금' 칸을 가운데로.
+ *  ⚠️ #result 가 display:none 인 동안에는 offsetLeft·clientWidth 가 0 이라 스크롤이 안 먹는다 —
+ *     반드시 결과를 보이게 한 뒤에 부를 것. */
+function centerStrips(){
+  ["dw", "sw"].forEach(function(id){
+    var box = document.getElementById(id);
+    if (!box) return;
+    var cell = box.querySelector(".now");
+    if (!cell) return;
+    box.scrollLeft = Math.max(0, cell.offsetLeft - (box.clientWidth - cell.offsetWidth) / 2);
+  });
+}
+
 function renderExtras(v){
   var ctx, now = new Date();
   try {
@@ -476,6 +584,8 @@ function renderExtras(v){
       + (x.isGongmang ? '<div class="gm">공망</div>' : "");
     sw.appendChild(c);
   });
+  /* 가로 스크롤 띠는 왼쪽 끝(2018년)에서 시작한다 — 정작 보고 싶은 '올해'가 화면 밖이다.
+     올해 칸을 가운데로 끌어다 놓는다. 대운도 같은 이유로 현재 칸을 맞춘다. */
   var cur = (ctx.years || []).filter(function(x){ return x.year === thisYear; })[0];
   document.getElementById("swNote").textContent = cur
     ? ("올해 " + thisYear + "년은 " + cur.ganji + " — 일간에게 " + cur.stemSipsin
@@ -685,9 +795,14 @@ function runNow(){
     card.style.display = "block";
   } else if (card) { card.style.display = "none"; }
   var dw = document.getElementById("dw"); dw.innerHTML="";
-  r.daewoon.forEach(function(x){
-    var c=document.createElement("div"); c.className="dw-cell";
-    c.className = "dw-cell " + (EL_KR_CLS[LINKS.el[x.ganzi[0]]] || "");
+  /* 지금 어느 대운에 있는지 표시가 없었다 — 열 칸 중 내 자리를 못 찾는다.
+     연나이로 현재 구간을 골라 강조하고 가운데로 끌어온다(대운 age 와 같은 기준). */
+  var age = new Date().getFullYear() - v.y + 1;
+  var curIdx = -1;
+  r.daewoon.forEach(function(x, i){ if (age >= x.age) curIdx = i; });
+  r.daewoon.forEach(function(x, i){
+    var c=document.createElement("div");
+    c.className = "dw-cell " + (EL_KR_CLS[LINKS.el[x.ganzi[0]]] || "") + (i === curIdx ? " now" : "");
     c.innerHTML='<div class="g">'+x.ganzi+'</div><div class="a">'+x.age+"세 · "+x.startYear+'</div><div class="s">'+link(LINKS.sipsin[x.stemSipsin], x.stemSipsin)+'</div>';
     dw.appendChild(c);
   });
@@ -699,6 +814,7 @@ function runNow(){
   var cta = document.getElementById("storeCta");
   if (cta) cta.href = storeUrlWith(v);
   document.getElementById("result").style.display="block";
+  centerStrips();
   document.getElementById("result").scrollIntoView({behavior:"smooth"});
   if (window.__track) window.__track("calc_done");
 }
