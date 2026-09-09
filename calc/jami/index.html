@@ -37,6 +37,13 @@
 .calc-form select:focus,.calc-form input[type=number]:focus{outline:none;border-color:#a78bfa;
   box-shadow:0 0 0 3px rgba(139,92,246,.22)}
 .calc-form .grow{flex:1;min-width:88px}
+/* 성별 세그먼트 — 두 개짜리 select 는 모바일에서 탭·시트·선택·닫기 4동작이다. 여기선 1동작. */
+.seg{display:flex;gap:6px}
+.seg button{flex:1;padding:11px 6px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;
+  border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:rgba(255,255,255,.62);
+  transition:border-color .15s,background .15s,color .15s}
+.seg button:hover{border-color:rgba(167,139,250,.55);color:#F4F1FF}
+.seg button.on{border-color:#a78bfa;background:rgba(139,92,246,.22);color:#F4F1FF}
 .chk{display:flex;align-items:center;gap:8px;font-size:14px;color:rgba(255,255,255,.65);
   padding:8px 12px;border:1px solid rgba(255,255,255,.10);border-radius:12px;background:rgba(255,255,255,.03);
   cursor:pointer;transition:border-color .15s,color .15s}
@@ -168,8 +175,8 @@
   </div>
   <div class="row">
     <div class="grow"><label for="h">시</label><select id="h"></select></div>
-    <div class="grow"><label for="mi">분</label><select id="mi"></select></div>
-    <div class="grow"><label for="g">성별</label><select id="g"><option value="M">남</option><option value="F">여</option></select></div>
+    <div class="grow"><label for="mi">분</label><input id="mi" type="number" inputmode="numeric" min="0" max="59" value="0" /></div>
+    <div class="grow"><label>성별</label><div class="seg" role="group" aria-label="성별"><button type="button" class="on" data-g="M" data-for="g">남</button><button type="button" data-g="F" data-for="g">여</button></div><input type="hidden" id="g" value="M" /></div>
   </div>
   <div class="row">
     <div class="grow"><label for="city">출생 지역</label><select id="city" aria-label="출생 지역"></select></div>
@@ -222,7 +229,7 @@
 <p><strong>사화(四化)</strong>는 화록(祿)·화권(權)·화과(科)·화기(忌) 네 가지 변화예요. 같은 별이라도 사화가 붙으면 그 별의 작동 방식이 달라져요. <strong>대한(大限)</strong>은 10년 단위로 명반을 옮겨 읽는 구간이고요.</p>
 <p class="note">이 계산기는 절입시각과 음력 변환을 반영한 정통 배성법으로 명반을 세워요. 앱과 같은 엔진이에요.</p>
 
-<div class="toolrail"><a href="/calc/" data-cta="tool-saju"><span class="tk">사주</span><strong>사주팔자 명식</strong><span class="sub">명식·십신·12운성·신살·대운과 격국·용신까지</span></a><a href="/calc/gunghap/" data-cta="tool-gunghap"><span class="tk">궁합</span><strong>1:1 궁합</strong><span class="sub">여덟 글자 전체로 보는 두 사람의 결 — 17개 축</span></a><a href="/calc/star/" data-cta="tool-star"><span class="tk">별자리</span><strong>출생 차트</strong><span class="sub">행성 배치·ASC/MC·주요 각과 기질 해석</span></a></div>
+<div class="toolrail"><a href="/calc/" data-cta="tool-saju" data-carry="saju"><span class="tk">사주</span><strong>사주팔자 명식</strong><span class="sub">명식·십신·12운성·신살·대운과 격국·용신까지</span></a><a href="/calc/gunghap/" data-cta="tool-gunghap" data-carry="gunghap"><span class="tk">궁합</span><strong>1:1 궁합</strong><span class="sub">여덟 글자 전체로 보는 두 사람의 결 — 17개 축</span></a><a href="/calc/star/" data-cta="tool-star" data-carry="star"><span class="tk">별자리</span><strong>출생 차트</strong><span class="sub">행성 배치·ASC/MC·주요 각과 기질 해석</span></a></div>
 </div></main>
 <footer class="foot">
   <p><a href="/">삼라만상</a> — 사주 · 자미두수 · 별자리 · 궁합</p>
@@ -303,7 +310,7 @@ document.addEventListener("DOMContentLoaded", function(){
   opt(mo, Array.from({length:12},function(_,i){return i+1;}));
   opt(d, Array.from({length:31},function(_,i){return i+1;}));
   opt(h, Array.from({length:24},function(_,i){return i;}), Array.from({length:24},function(_,i){return pad(i)+"시";}));
-  opt(mi, Array.from({length:60},function(_,i){return i;}), Array.from({length:60},function(_,i){return pad(i)+"분";}));
+
   document.getElementById("go").addEventListener("click", run);
   document.getElementById("share").addEventListener("click", share);
   warmEngine();
@@ -331,6 +338,7 @@ function restoreFromUrl(){
   var set=function(id,val){ if(val!==null&&val!=="") document.getElementById(id).value=val; };
   ["y","mo","d","h","mi","g"].forEach(function(k){ set(k, q.get(k)); });
   set("city", q.get("lon"));
+  if (typeof syncSegs === "function") syncSegs();
   run();
 }
 function storeUrlWith(v){
@@ -359,6 +367,7 @@ function runNow(){
   document.getElementById("leadLine").textContent =
     INTERP.lead + " 오행국은 " + INTERP.wuXingJu.name + "(" + INTERP.wuXingJu.number + "국)이에요.";
   syncUrl(v);
+  carryBirth(v);
   var cta = document.getElementById("storeCta");
   if (cta) cta.href = storeUrlWith(v);
   var res = document.getElementById("result");
@@ -473,7 +482,7 @@ function selectPalace(name){
     (actions ? "<ul>" + actions + "</ul>" : "");
 }
 
-var LINKS = {"ilju": {"갑자": "/ilju/gapja/", "갑인": "/ilju/gapin/", "갑진": "/ilju/gapjin/", "갑오": "/ilju/gapo/", "갑신": "/ilju/gapsin/", "갑술": "/ilju/gapsul/", "을축": "/ilju/eulchuk/", "을묘": "/ilju/eulmyo/", "을사": "/ilju/eulsa/", "을미": "/ilju/eulmi/", "을유": "/ilju/eulyu/", "을해": "/ilju/eulhae/", "병자": "/ilju/byeongja/", "병인": "/ilju/byeongin/", "병진": "/ilju/byeongjin/", "병오": "/ilju/byeongo/", "병신": "/ilju/byeongsin/", "병술": "/ilju/byeongsul/", "정축": "/ilju/jeongchuk/", "정묘": "/ilju/jeongmyo/", "정사": "/ilju/jeongsa/", "정미": "/ilju/jeongmi/", "정유": "/ilju/jeongyu/", "정해": "/ilju/jeonghae/", "무자": "/ilju/muja/", "무인": "/ilju/muin/", "무진": "/ilju/mujin/", "무오": "/ilju/muo/", "무신": "/ilju/musin/", "무술": "/ilju/musul/", "기축": "/ilju/gichuk/", "기묘": "/ilju/gimyo/", "기사": "/ilju/gisa/", "기미": "/ilju/gimi/", "기유": "/ilju/giyu/", "기해": "/ilju/gihae/", "경자": "/ilju/gyeongja/", "경인": "/ilju/gyeongin/", "경진": "/ilju/gyeongjin/", "경오": "/ilju/gyeongo/", "경신": "/ilju/gyeongsin/", "경술": "/ilju/gyeongsul/", "신축": "/ilju/sinchuk/", "신묘": "/ilju/sinmyo/", "신사": "/ilju/sinsa/", "신미": "/ilju/sinmi/", "신유": "/ilju/sinyu/", "신해": "/ilju/sinhae/", "임자": "/ilju/imja/", "임인": "/ilju/imin/", "임진": "/ilju/imjin/", "임오": "/ilju/imo/", "임신": "/ilju/imsin/", "임술": "/ilju/imsul/", "계축": "/ilju/gyechuk/", "계묘": "/ilju/gyemyo/", "계사": "/ilju/gyesa/", "계미": "/ilju/gyemi/", "계유": "/ilju/gyeyu/", "계해": "/ilju/gyehae/"}, "sipsin": {"본원": "/term/bonwon/", "비견": "/term/bigyeon/", "겁재": "/term/geopjae/", "식신": "/term/siksin/", "상관": "/term/sanggwan/", "편재": "/term/pyeonjae/", "정재": "/term/jeongjae/", "편관": "/term/pyeongwan/", "정관": "/term/jeonggwan/", "편인": "/term/pyeonin/", "정인": "/term/jeongin/"}, "meteor": {"絶": {"kr": "절", "url": "/term/jeol/"}, "胎": {"kr": "태", "url": "/term/tae/"}, "養": {"kr": "양", "url": "/term/yang/"}, "長生": {"kr": "장생", "url": "/term/jangsaeng/"}, "沐浴": {"kr": "목욕", "url": "/term/mokyok/"}, "冠帶": {"kr": "관대", "url": "/term/gwandae/"}, "乾祿": {"kr": "건록", "url": "/term/geonrok/"}, "帝旺": {"kr": "제왕", "url": "/term/jewang/"}, "衰": {"kr": "쇠", "url": "/term/soe/"}, "病": {"kr": "병", "url": "/term/byeong/"}, "死": {"kr": "사", "url": "/term/sa/"}, "墓": {"kr": "묘", "url": "/term/myo/"}}, "spirit": {"劫殺": {"kr": "겁살", "url": "/term/geopsal/"}, "災殺": {"kr": "재살", "url": "/term/jaesal/"}, "天殺": {"kr": "천살", "url": "/term/cheonsal/"}, "地殺": {"kr": "지살", "url": "/term/jisal/"}, "年殺": {"kr": "연살", "url": "/term/yeonsal/"}, "月殺": {"kr": "월살", "url": "/term/wolsal/"}, "亡身": {"kr": "망신살", "url": "/term/mangsinsal/"}, "將星": {"kr": "장성살", "url": "/term/jangseongsal/"}, "攀鞍": {"kr": "반안살", "url": "/term/banansal/"}, "驛馬": {"kr": "역마살", "url": "/term/yeokmasal/"}, "六害": {"kr": "육해살", "url": "/term/yukhaesal/"}, "華蓋": {"kr": "화개살", "url": "/term/hwagaesal/"}}, "el": {"甲": "목", "乙": "목", "丙": "화", "丁": "화", "戊": "토", "己": "토", "庚": "금", "辛": "금", "壬": "수", "癸": "수", "子": "수", "丑": "토", "寅": "목", "卯": "목", "辰": "토", "巳": "화", "午": "화", "未": "토", "申": "금", "酉": "금", "戌": "토", "亥": "수"}, "iljuSlug": {"갑자": "gapja", "갑인": "gapin", "갑진": "gapjin", "갑오": "gapo", "갑신": "gapsin", "갑술": "gapsul", "을축": "eulchuk", "을묘": "eulmyo", "을사": "eulsa", "을미": "eulmi", "을유": "eulyu", "을해": "eulhae", "병자": "byeongja", "병인": "byeongin", "병진": "byeongjin", "병오": "byeongo", "병신": "byeongsin", "병술": "byeongsul", "정축": "jeongchuk", "정묘": "jeongmyo", "정사": "jeongsa", "정미": "jeongmi", "정유": "jeongyu", "정해": "jeonghae", "무자": "muja", "무인": "muin", "무진": "mujin", "무오": "muo", "무신": "musin", "무술": "musul", "기축": "gichuk", "기묘": "gimyo", "기사": "gisa", "기미": "gimi", "기유": "giyu", "기해": "gihae", "경자": "gyeongja", "경인": "gyeongin", "경진": "gyeongjin", "경오": "gyeongo", "경신": "gyeongsin", "경술": "gyeongsul", "신축": "sinchuk", "신묘": "sinmyo", "신사": "sinsa", "신미": "sinmi", "신유": "sinyu", "신해": "sinhae", "임자": "imja", "임인": "imin", "임진": "imjin", "임오": "imo", "임신": "imsin", "임술": "imsul", "계축": "gyechuk", "계묘": "gyemyo", "계사": "gyesa", "계미": "gyemi", "계유": "gyeyu", "계해": "gyehae"}};
+var LINKS = {"ilju": {"갑자": "/ilju/gapja/", "갑인": "/ilju/gapin/", "갑진": "/ilju/gapjin/", "갑오": "/ilju/gapo/", "갑신": "/ilju/gapsin/", "갑술": "/ilju/gapsul/", "을축": "/ilju/eulchuk/", "을묘": "/ilju/eulmyo/", "을사": "/ilju/eulsa/", "을미": "/ilju/eulmi/", "을유": "/ilju/eulyu/", "을해": "/ilju/eulhae/", "병자": "/ilju/byeongja/", "병인": "/ilju/byeongin/", "병진": "/ilju/byeongjin/", "병오": "/ilju/byeongo/", "병신": "/ilju/byeongsin/", "병술": "/ilju/byeongsul/", "정축": "/ilju/jeongchuk/", "정묘": "/ilju/jeongmyo/", "정사": "/ilju/jeongsa/", "정미": "/ilju/jeongmi/", "정유": "/ilju/jeongyu/", "정해": "/ilju/jeonghae/", "무자": "/ilju/muja/", "무인": "/ilju/muin/", "무진": "/ilju/mujin/", "무오": "/ilju/muo/", "무신": "/ilju/musin/", "무술": "/ilju/musul/", "기축": "/ilju/gichuk/", "기묘": "/ilju/gimyo/", "기사": "/ilju/gisa/", "기미": "/ilju/gimi/", "기유": "/ilju/giyu/", "기해": "/ilju/gihae/", "경자": "/ilju/gyeongja/", "경인": "/ilju/gyeongin/", "경진": "/ilju/gyeongjin/", "경오": "/ilju/gyeongo/", "경신": "/ilju/gyeongsin/", "경술": "/ilju/gyeongsul/", "신축": "/ilju/sinchuk/", "신묘": "/ilju/sinmyo/", "신사": "/ilju/sinsa/", "신미": "/ilju/sinmi/", "신유": "/ilju/sinyu/", "신해": "/ilju/sinhae/", "임자": "/ilju/imja/", "임인": "/ilju/imin/", "임진": "/ilju/imjin/", "임오": "/ilju/imo/", "임신": "/ilju/imsin/", "임술": "/ilju/imsul/", "계축": "/ilju/gyechuk/", "계묘": "/ilju/gyemyo/", "계사": "/ilju/gyesa/", "계미": "/ilju/gyemi/", "계유": "/ilju/gyeyu/", "계해": "/ilju/gyehae/"}, "sipsin": {"본원": "/term/bonwon/", "비견": "/term/bigyeon/", "겁재": "/term/geopjae/", "식신": "/term/siksin/", "상관": "/term/sanggwan/", "편재": "/term/pyeonjae/", "정재": "/term/jeongjae/", "편관": "/term/pyeongwan/", "정관": "/term/jeonggwan/", "편인": "/term/pyeonin/", "정인": "/term/jeongin/"}, "meteor": {"絶": {"kr": "절", "url": "/term/jeol/"}, "胎": {"kr": "태", "url": "/term/tae/"}, "養": {"kr": "양", "url": "/term/yang/"}, "長生": {"kr": "장생", "url": "/term/jangsaeng/"}, "沐浴": {"kr": "목욕", "url": "/term/mokyok/"}, "冠帶": {"kr": "관대", "url": "/term/gwandae/"}, "乾祿": {"kr": "건록", "url": "/term/geonrok/"}, "帝旺": {"kr": "제왕", "url": "/term/jewang/"}, "衰": {"kr": "쇠", "url": "/term/soe/"}, "病": {"kr": "병", "url": "/term/byeong/"}, "死": {"kr": "사", "url": "/term/sa/"}, "墓": {"kr": "묘", "url": "/term/myo/"}}, "spirit": {"劫殺": {"kr": "겁살", "url": "/term/geopsal/"}, "災殺": {"kr": "재살", "url": "/term/jaesal/"}, "天殺": {"kr": "천살", "url": "/term/cheonsal/"}, "地殺": {"kr": "지살", "url": "/term/jisal/"}, "年殺": {"kr": "연살", "url": "/term/yeonsal/"}, "月殺": {"kr": "월살", "url": "/term/wolsal/"}, "亡身": {"kr": "망신살", "url": "/term/mangsinsal/"}, "將星": {"kr": "장성살", "url": "/term/jangseongsal/"}, "攀鞍": {"kr": "반안살", "url": "/term/banansal/"}, "驛馬": {"kr": "역마살", "url": "/term/yeokmasal/"}, "六害": {"kr": "육해살", "url": "/term/yukhaesal/"}, "華蓋": {"kr": "화개살", "url": "/term/hwagaesal/"}}, "el": {"甲": "목", "乙": "목", "丙": "화", "丁": "화", "戊": "토", "己": "토", "庚": "금", "辛": "금", "壬": "수", "癸": "수", "子": "수", "丑": "토", "寅": "목", "卯": "목", "辰": "토", "巳": "화", "午": "화", "未": "토", "申": "금", "酉": "금", "戌": "토", "亥": "수"}, "iljuSlug": {"갑자": "gapja", "갑인": "gapin", "갑진": "gapjin", "갑오": "gapo", "갑신": "gapsin", "갑술": "gapsul", "을축": "eulchuk", "을묘": "eulmyo", "을사": "eulsa", "을미": "eulmi", "을유": "eulyu", "을해": "eulhae", "병자": "byeongja", "병인": "byeongin", "병진": "byeongjin", "병오": "byeongo", "병신": "byeongsin", "병술": "byeongsul", "정축": "jeongchuk", "정묘": "jeongmyo", "정사": "jeongsa", "정미": "jeongmi", "정유": "jeongyu", "정해": "jeonghae", "무자": "muja", "무인": "muin", "무진": "mujin", "무오": "muo", "무신": "musin", "무술": "musul", "기축": "gichuk", "기묘": "gimyo", "기사": "gisa", "기미": "gimi", "기유": "giyu", "기해": "gihae", "경자": "gyeongja", "경인": "gyeongin", "경진": "gyeongjin", "경오": "gyeongo", "경신": "gyeongsin", "경술": "gyeongsul", "신축": "sinchuk", "신묘": "sinmyo", "신사": "sinsa", "신미": "sinmi", "신유": "sinyu", "신해": "sinhae", "임자": "imja", "임인": "imin", "임진": "imjin", "임오": "imo", "임신": "imsin", "임술": "imsul", "계축": "gyechuk", "계묘": "gyemyo", "계사": "gyesa", "계미": "gyemi", "계유": "gyeyu", "계해": "gyehae"}, "rel": {"合": {"kr": "합", "url": "/term/hap/"}, "六合": {"kr": "육합", "url": "/term/yukhap/"}, "半合": {"kr": "반합", "url": "/term/banhap/"}, "三合": {"kr": "삼합", "url": "/term/samhap/"}, "方合": {"kr": "방합", "url": "/term/banghap/"}, "沖": {"kr": "충", "url": "/term/chung/"}, "刑": {"kr": "형", "url": "/term/hyeong/"}, "破": {"kr": "파", "url": "/term/pa/"}, "害": {"kr": "해", "url": "/term/hae/"}, "怨嗔": {"kr": "원진", "url": "/term/wonjin/"}, "鬼門": {"kr": "귀문", "url": "/term/gwimun/"}}};
 var EL_CLS_KR = {"목":"e-tree","화":"e-fire","토":"e-earth","금":"e-metal","수":"e-water"};
 
 function renderDaxian(){
@@ -530,6 +539,38 @@ function share(){
   if (navigator.clipboard && navigator.clipboard.writeText)
     navigator.clipboard.writeText(url).then(done, function(){ msg.textContent = url; });
   else msg.textContent = url;
+}
+
+/* 성별 세그먼트 — 숨은 input 이 값을 나르고 버튼은 표시만 한다.
+   기존 코드가 전부 getElementById(id).value 를 읽으므로 호출부는 손대지 않는다. */
+function bindSegs(){
+  Array.prototype.forEach.call(document.querySelectorAll(".seg button[data-for]"), function(b){
+    b.addEventListener("click", function(){
+      document.getElementById(b.dataset.for).value = b.dataset.g;
+      syncSegs();
+    });
+  });
+}
+/* URL 복원·프리필이 hidden 값을 바꾼 뒤 버튼 표시를 맞춘다. */
+function syncSegs(){
+  Array.prototype.forEach.call(document.querySelectorAll(".seg button[data-for]"), function(b){
+    var el = document.getElementById(b.dataset.for);
+    if (el) b.classList.toggle("on", el.value === b.dataset.g);
+  });
+}
+document.addEventListener("DOMContentLoaded", function(){ bindSegs(); syncSegs(); });
+
+/* ── 도구 간 생년월일 이어주기 ─────────────────────────────
+   같은 생일로 네 도구를 다 보려면 네 번 입력해야 했다. 계산을 마치면 레일의 링크에
+   그 도구가 읽는 이름으로 파라미터를 실어 둔다(궁합은 'a' 접두사, 나머지는 접두사 없음). */
+function carryBirth(v){
+  if (!v || !v.y) return;
+  Array.prototype.forEach.call(document.querySelectorAll("a[data-carry]"), function(a){
+    var t = a.dataset.carry, p = t === "gunghap" ? "a" : "";
+    var q = [p+"y="+v.y, p+"mo="+v.mo, p+"d="+v.d, p+"g="+v.g];
+    if (v.unk) q.push(p+"unk=1"); else q.push(p+"h="+v.h, p+"mi="+v.mi);
+    a.href = a.href.split("?")[0] + "?" + q.join("&");
+  });
 }
 
 </script>

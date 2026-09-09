@@ -37,6 +37,13 @@
 .calc-form select:focus,.calc-form input[type=number]:focus{outline:none;border-color:#a78bfa;
   box-shadow:0 0 0 3px rgba(139,92,246,.22)}
 .calc-form .grow{flex:1;min-width:88px}
+/* 성별 세그먼트 — 두 개짜리 select 는 모바일에서 탭·시트·선택·닫기 4동작이다. 여기선 1동작. */
+.seg{display:flex;gap:6px}
+.seg button{flex:1;padding:11px 6px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;
+  border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:rgba(255,255,255,.62);
+  transition:border-color .15s,background .15s,color .15s}
+.seg button:hover{border-color:rgba(167,139,250,.55);color:#F4F1FF}
+.seg button.on{border-color:#a78bfa;background:rgba(139,92,246,.22);color:#F4F1FF}
 .chk{display:flex;align-items:center;gap:8px;font-size:14px;color:rgba(255,255,255,.65);
   padding:8px 12px;border:1px solid rgba(255,255,255,.10);border-radius:12px;background:rgba(255,255,255,.03);
   cursor:pointer;transition:border-color .15s,color .15s}
@@ -146,7 +153,7 @@
   </div>
   <div class="row">
     <div class="grow"><label for="h">시</label><select id="h"></select></div>
-    <div class="grow"><label for="mi">분</label><select id="mi"></select></div>
+    <div class="grow"><label for="mi">분</label><input id="mi" type="number" inputmode="numeric" min="0" max="59" value="0" /></div>
     <div class="grow"><label for="city">출생 도시</label><select id="city" aria-label="출생 도시"></select></div>
   </div>
   <div class="row">
@@ -155,8 +162,7 @@
   <div class="row">
     <div class="grow"><label for="hs">하우스 시스템</label><select id="hs">
       <option value="P">플라시두스</option><option value="W">홀사인</option></select></div>
-    <div class="grow"><label for="g">성별</label><select id="g">
-      <option value="M">남</option><option value="F">여</option></select></div>
+    <div class="grow"><label>성별</label><div class="seg" role="group" aria-label="성별"><button type="button" class="on" data-g="M" data-for="g">남</button><button type="button" data-g="F" data-for="g">여</button></div><input type="hidden" id="g" value="M" /></div>
   </div>
   <button class="calc-btn" id="go">내 출생 차트 보기</button>
   <p class="err" id="err"></p>
@@ -218,7 +224,7 @@
 <p><strong>하우스</strong>는 그 기운이 삶의 어느 영역에서 쓰이는지를 나타내고, <strong>각(아스펙트)</strong>은 행성끼리 이루는 각도예요 — 삼각·육각은 흐름이 매끄럽고, 사각·충은 마찰이 있지만 그만큼 힘이 실려요.</p>
 <p class="note">천체 위치는 Moshier 천체력으로 계산해요. 별도 데이터 파일 없이 브라우저에서 직접 계산하고, 계산은 브라우저 안에서 끝나요 — 입력값을 저희 서버로 올리지 않아요.</p>
 
-<div class="toolrail"><a href="/calc/" data-cta="tool-saju"><span class="tk">사주</span><strong>사주팔자 명식</strong><span class="sub">명식·십신·12운성·신살·대운과 격국·용신까지</span></a><a href="/calc/gunghap/" data-cta="tool-gunghap"><span class="tk">궁합</span><strong>1:1 궁합</strong><span class="sub">여덟 글자 전체로 보는 두 사람의 결 — 17개 축</span></a><a href="/calc/jami/" data-cta="tool-jami"><span class="tk">자미두수</span><strong>자미두수 명반</strong><span class="sub">12궁 주성·사화·대한 — 궁마다 풀이와 행동 처방</span></a></div>
+<div class="toolrail"><a href="/calc/" data-cta="tool-saju" data-carry="saju"><span class="tk">사주</span><strong>사주팔자 명식</strong><span class="sub">명식·십신·12운성·신살·대운과 격국·용신까지</span></a><a href="/calc/gunghap/" data-cta="tool-gunghap" data-carry="gunghap"><span class="tk">궁합</span><strong>1:1 궁합</strong><span class="sub">여덟 글자 전체로 보는 두 사람의 결 — 17개 축</span></a><a href="/calc/jami/" data-cta="tool-jami" data-carry="jami"><span class="tk">자미두수</span><strong>자미두수 명반</strong><span class="sub">12궁 주성·사화·대한 — 궁마다 풀이와 행동 처방</span></a></div>
 </div></main>
 <footer class="foot">
   <p><a href="/">삼라만상</a> — 사주 · 자미두수 · 별자리 · 궁합</p>
@@ -297,7 +303,7 @@ document.addEventListener("DOMContentLoaded", function(){
   opt(mo, Array.from({length:12},function(_,i){return i+1;}));
   opt(d, Array.from({length:31},function(_,i){return i+1;}));
   opt(h, Array.from({length:24},function(_,i){return i;}), Array.from({length:24},function(_,i){return pad(i)+"시";}));
-  opt(mi, Array.from({length:60},function(_,i){return i;}), Array.from({length:60},function(_,i){return pad(i)+"분";}));
+
   document.getElementById("unk").addEventListener("change", function(){
     document.getElementById("h").disabled = this.checked;
     document.getElementById("mi").disabled = this.checked;
@@ -338,6 +344,7 @@ function restoreFromUrl(){
     document.getElementById("h").disabled = true; document.getElementById("mi").disabled = true;
   } else { set("h", q.get("h")); set("mi", q.get("mi")); }
   set("city", q.get("geo"));
+  if (typeof syncSegs === "function") syncSegs();
   run();
 }
 /* 별자리는 시(時) 없이도 태양·행성이 나오므로 시간 미상이면 na 로 넘긴다(앱이 같은 규약으로 복원).
@@ -372,6 +379,7 @@ function runNow(){
   renderAspects(t);
   renderDeep(t);
   syncUrl(v);
+  carryBirth(v);
   var cta = document.getElementById("storeCta");
   if (cta) cta.href = storeUrlWith(v);
   var res = document.getElementById("result");
@@ -591,6 +599,38 @@ function share(){
   if (navigator.clipboard && navigator.clipboard.writeText)
     navigator.clipboard.writeText(url).then(done, function(){ msg.textContent = url; });
   else msg.textContent = url;
+}
+
+/* 성별 세그먼트 — 숨은 input 이 값을 나르고 버튼은 표시만 한다.
+   기존 코드가 전부 getElementById(id).value 를 읽으므로 호출부는 손대지 않는다. */
+function bindSegs(){
+  Array.prototype.forEach.call(document.querySelectorAll(".seg button[data-for]"), function(b){
+    b.addEventListener("click", function(){
+      document.getElementById(b.dataset.for).value = b.dataset.g;
+      syncSegs();
+    });
+  });
+}
+/* URL 복원·프리필이 hidden 값을 바꾼 뒤 버튼 표시를 맞춘다. */
+function syncSegs(){
+  Array.prototype.forEach.call(document.querySelectorAll(".seg button[data-for]"), function(b){
+    var el = document.getElementById(b.dataset.for);
+    if (el) b.classList.toggle("on", el.value === b.dataset.g);
+  });
+}
+document.addEventListener("DOMContentLoaded", function(){ bindSegs(); syncSegs(); });
+
+/* ── 도구 간 생년월일 이어주기 ─────────────────────────────
+   같은 생일로 네 도구를 다 보려면 네 번 입력해야 했다. 계산을 마치면 레일의 링크에
+   그 도구가 읽는 이름으로 파라미터를 실어 둔다(궁합은 'a' 접두사, 나머지는 접두사 없음). */
+function carryBirth(v){
+  if (!v || !v.y) return;
+  Array.prototype.forEach.call(document.querySelectorAll("a[data-carry]"), function(a){
+    var t = a.dataset.carry, p = t === "gunghap" ? "a" : "";
+    var q = [p+"y="+v.y, p+"mo="+v.mo, p+"d="+v.d, p+"g="+v.g];
+    if (v.unk) q.push(p+"unk=1"); else q.push(p+"h="+v.h, p+"mi="+v.mi);
+    a.href = a.href.split("?")[0] + "?" + q.join("&");
+  });
 }
 
 </script>
