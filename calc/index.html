@@ -443,6 +443,13 @@ function syncUrl(v){
 /** ?y=..&mo=.. 로 들어오면 폼을 채우고 바로 계산한다(공유 링크 수신). */
 function restoreFromUrl(){
   var q = new URLSearchParams(location.search);
+  /* py= 는 연도만 미리 채운다(년생 페이지에서 넘어온 사람). y= 와 달리 자동 계산하지 않는다 —
+     월·일이 없는데 1월 1일로 계산해 버리면 엉뚱한 명식이 먼저 보인다. */
+  if (q.get("py") && !q.get("y")){
+    document.getElementById("y").value = q.get("py");
+    var mo = document.getElementById("mo"); if (mo) mo.focus();
+    return;
+  }
   if (!q.get("y")) return;
   var set = function(id, val){ if (val !== null && val !== "") document.getElementById(id).value = val; };
   set("y", q.get("y")); set("mo", q.get("mo")); set("d", q.get("d")); set("g", q.get("g"));
