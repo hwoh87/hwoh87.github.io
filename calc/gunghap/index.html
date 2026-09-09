@@ -92,6 +92,24 @@
 .pairart .cap b{display:block;font-size:14.5px;font-weight:800;color:#F4F1FF}
 .pairart .cap span{display:block;font-size:11px;color:rgba(255,255,255,.6);margin-top:1px}
 .pairart .x{flex:none;font-size:17px;font-weight:800;color:rgba(167,139,250,.85)}
+/* ── 두 사람의 원국 ─────────────────────────────────────────
+   점수와 판정 문장만 있고 **근거가 되는 여덟 글자**는 안 보여주고 있었다.
+   유료 리포트 분석지에는 있는 카드다 — 표는 무료, AI 집필은 유료라는 선을 여기도 적용한다. */
+.wg{margin:0 0 14px}
+.wg .who{font-size:13px;font-weight:800;color:#a78bfa;margin:0 0 7px}
+.wg .who small{font-weight:600;color:rgba(255,255,255,.55);margin-left:6px}
+.wg .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.wg .p{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;padding:10px 4px 9px;text-align:center}
+.wg .p.day{border-color:rgba(167,139,250,.5);background:rgba(139,92,246,.12)}
+/* ⚠️ 전부 <span> 이라 그냥 두면 인라인으로 흘러 "시주乙" 처럼 붙는다 — 블록으로 쌓는다. */
+.wg .p .lb,.wg .p .gz,.wg .p .kr,.wg .p .ss{display:block}
+.wg .p .lb{font-size:10.5px;color:rgba(255,255,255,.5)}
+.wg .p .gz{font-family:"Noto Serif KR",serif;font-size:25px;font-weight:600;line-height:1.15;
+  margin-top:3px;color:var(--el,#F4F1FF)}
+.wg .p .gz i{display:block;font-style:normal;color:var(--el2,#F4F1FF)}
+.wg .p .kr{font-size:10.5px;color:rgba(255,255,255,.5);margin-top:3px}
+.wg .p .ss{font-size:11px;font-weight:700;color:#c4b5fd;margin-top:3px}
 
 .pform{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
 .pform .pcol{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px}
@@ -181,30 +199,30 @@
   <div class="pform">
     <div class="pcol">
       <p class="pt">나</p>
+      <div class="row"><div class="grow"><label>달력</label><div class="seg cal" role="group" aria-label="달력"><button type="button" class="on" data-g="S" data-for="acal">양력</button><button type="button" data-g="L" data-for="acal">음력</button><button type="button" data-g="LL" data-for="acal">음력 윤달</button></div><input type="hidden" id="acal" value="S" /></div></div>
       <div class="row">
-<div class="row"><div class="grow"><label>달력</label><div class="seg cal" role="group" aria-label="달력"><button type="button" class="on" data-g="S" data-for="acal">양력</button><button type="button" data-g="L" data-for="acal">음력</button><button type="button" data-g="LL" data-for="acal">음력 윤달</button></div><input type="hidden" id="acal" value="S" /></div></div>
         <div class="grow"><label for="ay">년</label><input id="ay" type="number" min="1940" max="2026" value="1995" /></div>
         <div class="grow"><label for="amo">월</label><select id="amo"></select></div>
         <div class="grow"><label for="ad">일</label><select id="ad"></select></div>
       </div>
       <div class="row">
         <div class="grow"><label for="ah">시</label><select id="ah"></select></div>
-        <div class="grow"><label for="ami">분</label><select id="ami"></select></div>
+        <div class="grow"><label for="ami">분</label><input id="ami" type="number" inputmode="numeric" min="0" max="59" value="0" /></div>
         <div class="grow"><label>성별</label><div class="seg" role="group" aria-label="성별"><button type="button" class="on" data-g="M" data-for="ag">남</button><button type="button" data-g="F" data-for="ag">여</button></div><input type="hidden" id="ag" value="M" /></div>
       </div>
       <label class="chk"><input type="checkbox" id="aunk" /> 시간을 몰라요</label>
     </div>
     <div class="pcol">
       <p class="pt">상대</p>
+      <div class="row"><div class="grow"><label>달력</label><div class="seg cal" role="group" aria-label="달력"><button type="button" class="on" data-g="S" data-for="bcal">양력</button><button type="button" data-g="L" data-for="bcal">음력</button><button type="button" data-g="LL" data-for="bcal">음력 윤달</button></div><input type="hidden" id="bcal" value="S" /></div></div>
       <div class="row">
-<div class="row"><div class="grow"><label>달력</label><div class="seg cal" role="group" aria-label="달력"><button type="button" class="on" data-g="S" data-for="bcal">양력</button><button type="button" data-g="L" data-for="bcal">음력</button><button type="button" data-g="LL" data-for="bcal">음력 윤달</button></div><input type="hidden" id="bcal" value="S" /></div></div>
         <div class="grow"><label for="by">년</label><input id="by" type="number" min="1940" max="2026" value="1996" /></div>
         <div class="grow"><label for="bmo">월</label><select id="bmo"></select></div>
         <div class="grow"><label for="bd">일</label><select id="bd"></select></div>
       </div>
       <div class="row">
         <div class="grow"><label for="bh">시</label><select id="bh"></select></div>
-        <div class="grow"><label for="bmi">분</label><select id="bmi"></select></div>
+        <div class="grow"><label for="bmi">분</label><input id="bmi" type="number" inputmode="numeric" min="0" max="59" value="0" /></div>
         <div class="grow"><label>성별</label><div class="seg" role="group" aria-label="성별"><button type="button" class="on" data-g="M" data-for="bg">남</button><button type="button" data-g="F" data-for="bg">여</button></div><input type="hidden" id="bg" value="M" /></div>
       </div>
       <label class="chk"><input type="checkbox" id="bunk" /> 시간을 몰라요</label>
@@ -237,6 +255,11 @@
     <span class="x" aria-hidden="true">×</span>
     <a class="pa" id="paB"><img id="paBimg" src="" alt="" width="440" height="246" loading="lazy" decoding="async" /><span class="cap"><b id="paBname"></b><span>상대</span></span></a>
   </div>
+
+  <h2>두 사람의 원국</h2>
+  <p class="note">궁합은 여기서 나온다 — 점수보다 이 여덟 글자끼리의 관계가 먼저다.</p>
+  <div class="wg" id="wgA"></div>
+  <div class="wg" id="wgB"></div>
 
   <div class="subs" id="subs"></div>
 
@@ -398,8 +421,6 @@ document.addEventListener("DOMContentLoaded", function(){
     opt(document.getElementById(p+"d"), Array.from({length:31},function(_,i){return i+1;}));
     opt(document.getElementById(p+"h"), Array.from({length:24},function(_,i){return i;}),
         Array.from({length:24},function(_,i){return pad(i)+"시";}));
-    opt(document.getElementById(p+"mi"), Array.from({length:60},function(_,i){return i;}),
-        Array.from({length:60},function(_,i){return pad(i)+"분";}));
     document.getElementById(p+"unk").addEventListener("change", function(){
       document.getElementById(p+"h").disabled = this.checked;
       document.getElementById(p+"mi").disabled = this.checked;
@@ -519,6 +540,33 @@ var LINKS = {"ilju": {"갑자": "/ilju/gapja/", "갑인": "/ilju/gapin/", "갑�
 var LAST_VERDICT = "";   // 공유 제목에 쓴다 — "노아 × 지원 74점 보통" 같은 결과 한 줄
 var KIND_KR = {COUPLE:"연인·부부", FRIEND:"친구", FAMILY:"가족", BUSINESS:"동업·동료"};
 
+/* 두 사람의 원국 — analyze 는 일주만 준다. 명식은 SajuCalc 로 각각 계산한다(같은 번들). */
+var EL_KR_CLS3 = {"목":"e-tree","화":"e-fire","토":"e-earth","금":"e-metal","수":"e-water"};
+var EL_HEX3 = {"목":"#7FBF8F","화":"#E58A80","토":"#D9B978","금":"#AEBECC","수":"#7FA8D9"};
+function drawWongook(boxId, v, label){
+  var box = document.getElementById(boxId);
+  if (!box) return;
+  var r;
+  try { r = JSON.parse(SajuCalc().calculate(v.y, v.mo, v.d, v.h, v.mi, v.g, false, 126.978)); }
+  catch(e){ box.innerHTML = ""; return; }
+  var order = [["time","시주"],["day","일주"],["month","월주"],["year","연주"]];
+  var cells = order.map(function(pair){
+    var key = pair[0], lb = pair[1], p = r.pillars[key];
+    if (!p) return '<div class="p"><span class="lb">' + lb + '</span>'
+      + '<span class="gz" style="opacity:.4">—</span><span class="kr">시간 미상</span></div>';
+    var e1 = (LINKS.el || {})[p.ganzi[0]] || "", e2 = (LINKS.el || {})[p.ganzi[1]] || "";
+    return '<div class="p' + (key === "day" ? " day" : "") + '"'
+      + ' style="--el:' + (EL_HEX3[e1] || "#F4F1FF") + ';--el2:' + (EL_HEX3[e2] || "#F4F1FF") + '">'
+      + '<span class="lb">' + lb + '</span>'
+      + '<span class="gz">' + esc(p.ganzi[0]) + '<i>' + esc(p.ganzi[1]) + '</i></span>'
+      + '<span class="kr">' + esc(p.stemKr) + '·' + esc(p.branchKr) + '</span>'
+      + '<span class="ss">' + esc(key === "day" ? "본원" : p.stemSipsin) + '</span></div>';
+  }).join("");
+  box.innerHTML = '<p class="who">' + esc(label)
+    + '<small>' + r.iljuKr + '일주 ' + esc(r.pillars.day.ganzi) + '</small></p>'
+    + '<div class="grid">' + cells + '</div>';
+}
+
 /** 두 사람의 일주 일러스트(앱과 같은 그림). 도감이 없는 일주면 통째로 감춘다. */
 function paintPairArt(r){
   var box = document.getElementById("pairart");
@@ -559,6 +607,8 @@ function render(r, f){
     ((r.unknownTimeA || r.unknownTimeB) ? " · 시간 미상이 포함돼 시주 풀이는 뺐어요" : "");
 
   paintPairArt(r);
+  drawWongook("wgA", f.a, "나");
+  drawWongook("wgB", f.b, "상대");
 
   var subs = document.getElementById("subs"); subs.innerHTML = "";
   SUB_META.forEach(function(m){
