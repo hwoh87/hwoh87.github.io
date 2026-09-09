@@ -404,6 +404,8 @@ document.addEventListener("DOMContentLoaded", function init(){
   if (ca && typeof copyAi === "function") ca.addEventListener("click", copyAi);
   var si = document.getElementById("saveImg");
   if (si && typeof saveCard === "function") si.addEventListener("click", saveCard);
+  var sp = document.getElementById("savePair");
+  if (sp && typeof savePairCard === "function") sp.addEventListener("click", savePairCard);
   restoreFromUrl();
 });
 function link(url, text){ return url ? '<a href="'+url+'">'+text+'</a>' : text; }
@@ -886,12 +888,16 @@ function showCal(note){
   el.style.display = note ? "block" : "none";
 }
 
-/* ── 명식 카드 이미지 저장 ───────────────────────────────────
-   사주매니아에도 있는 기능인데, 저장된 이미지는 그대로 유입 자산이 된다(카톡으로 돌아다닌다).
-   OG 카드와 같은 디자인 언어로 굽되, 여기선 캔버스라 폰트를 문자열로 직접 지정해야 한다 —
-   웹폰트가 준비되기 전에 그리면 시스템 폰트로 구워지므로 document.fonts.ready 를 기다린다. */
+/* ── 공유 카드 공용 조각 ─────────────────────────────────────
+   사주 명식 카드와 궁합 카드가 같은 하늘·같은 모서리를 쓴다. 저장된 이미지는 그대로
+   유입 자산이 된다(카톡으로 돌아다니면서 samra.cc 를 달고 다닌다).
+   ⚠️ 캔버스는 CSS 폰트 스택을 못 쓰고 문자열로 직접 지정해야 하며, 웹폰트가 준비되기 전에
+      그리면 시스템 폰트로 구워진다 — 반드시 document.fonts.ready 뒤에 그릴 것. */
 var CARD_W = 1080, CARD_H = 1350;
 var EL_HEX = {"목":"#7FBF8F","화":"#E58A80","토":"#D9B978","금":"#AEBECC","수":"#7FA8D9"};
+var F_SANS = "'Wanted Sans Variable', system-ui, sans-serif";
+var F_SERIF = "MaruBuri, 'Noto Serif KR', serif";
+var F_HANJA = "'Noto Serif KR', serif";
 
 function roundRect(c, x, y, w, h, r){
   c.beginPath();
@@ -903,24 +909,54 @@ function roundRect(c, x, y, w, h, r){
   c.closePath();
 }
 
-function drawCard(r, t, ctx){
-  var cv = document.createElement("canvas");
-  cv.width = CARD_W; cv.height = CARD_H;
-  var c = cv.getContext("2d");
-
-  /* 배경 — 홈 히어로와 같은 밤하늘 */
+/** 밤하늘 배경 — 씨드를 주면 별밭이 결과마다 달라진다(같은 결과는 같은 그림). */
+function drawSky(c, seedStr){
   c.fillStyle = "#0c0c14"; c.fillRect(0, 0, CARD_W, CARD_H);
   var g = c.createRadialGradient(180, 40, 0, 180, 40, 900);
   g.addColorStop(0, "rgba(124,58,237,.38)"); g.addColorStop(1, "rgba(124,58,237,0)");
   c.fillStyle = g; c.fillRect(0, 0, CARD_W, CARD_H);
-  var seed = (r.iljuKr || "x").charCodeAt(0) * 7919;
+  var seed = 7919, ss = seedStr || "x";
+  for (var i = 0; i < ss.length; i++) seed = (seed * 31 + ss.charCodeAt(i)) >>> 0;
   var rnd = function(){ seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
-  for (var i = 0; i < 90; i++){
+  for (var k = 0; k < 90; k++){
     c.globalAlpha = 0.2 + rnd() * 0.55;
     c.fillStyle = rnd() < 0.28 ? "#c4b5fd" : "#DCE6FF";
     c.beginPath(); c.arc(rnd() * CARD_W, rnd() * CARD_H, rnd() < 0.25 ? 2.4 : 1.4, 0, 6.2832); c.fill();
   }
   c.globalAlpha = 1;
+}
+
+/** 캔버스를 PNG 로 내려받는다. */
+function downloadCanvas(cv, filename, msgEl){
+  cv.toBlob(function(blob){
+    if (!blob){ if (msgEl) msgEl.textContent = "이미지를 만들지 못했어요"; return; }
+    var url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+    if (msgEl){
+      msgEl.textContent = "카드를 저장했어요";
+      setTimeout(function(){ msgEl.textContent = ""; }, 3000);
+    }
+  }, "image/png");
+}
+
+/** 웹폰트가 준비된 뒤 그린다. */
+function whenFontsReady(fn){
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fn, fn); else fn();
+}
+
+/* ── 명식 카드 이미지 저장 ───────────────────────────────────
+   사주매니아에도 있는 기능인데, 저장된 이미지는 그대로 유입 자산이 된다(카톡으로 돌아다닌다).
+   OG 카드와 같은 디자인 언어로 굽되, 여기선 캔버스라 폰트를 문자열로 직접 지정해야 한다 —
+   웹폰트가 준비되기 전에 그리면 시스템 폰트로 구워지므로 document.fonts.ready 를 기다린다. */
+
+function drawCard(r, t, ctx){
+  var cv = document.createElement("canvas");
+  cv.width = CARD_W; cv.height = CARD_H;
+  var c = cv.getContext("2d");
+
+  drawSky(c, r.iljuKr || "x");
 
   /* 머리 */
   c.fillStyle = "#c4b5fd";
@@ -1045,21 +1081,9 @@ function saveCard(){
       now.getFullYear(), now.getMonth() + 1, now.getDate()));
   } catch(e){ /* 세운 없이도 카드는 나온다 */ }
   if (window.__track) window.__track("cta", "save-card");
-  var go = function(){
-    var cv = drawCard(r, t, ctx);
-    cv.toBlob(function(blob){
-      if (!blob){ msg.textContent = "이미지를 만들지 못했어요"; return; }
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement("a");
-      a.href = url; a.download = r.iljuKr + "일주-명식-삼라만상.png";
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
-      msg.textContent = "명식 카드를 저장했어요";
-      setTimeout(function(){ msg.textContent = ""; }, 3000);
-    }, "image/png");
-  };
-  /* 웹폰트가 준비되기 전에 그리면 시스템 폰트로 구워진다. */
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(go, go); else go();
+  whenFontsReady(function(){
+    downloadCanvas(drawCard(r, t, ctx), r.iljuKr + "일주-명식-삼라만상.png", msg);
+  });
 }
 
 </script>

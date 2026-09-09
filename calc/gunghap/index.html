@@ -282,6 +282,7 @@
 
   <div class="share-row">
     <button class="share-btn" id="share" type="button">결과 링크 공유</button>
+    <button class="share-btn" id="savePair" type="button">궁합 카드 저장</button>
     <span class="share-msg" id="shareMsg"></span>
   </div>
   <p class="note" style="font-size:12.5px">공유 링크에는 두 사람의 생년월일이 담겨요 — 상대의 동의를 받고 공유해 주세요.</p>
@@ -434,6 +435,8 @@ document.addEventListener("DOMContentLoaded", function(){
   if (ca && typeof copyAi === "function") ca.addEventListener("click", copyAi);
   var si = document.getElementById("saveImg");
   if (si && typeof saveCard === "function") si.addEventListener("click", saveCard);
+  var sp = document.getElementById("savePair");
+  if (sp && typeof savePairCard === "function") sp.addEventListener("click", savePairCard);
   document.getElementById("f").addEventListener("input", function(){ USER_EDITED = true; });
   document.getElementById("f").addEventListener("change", function(){ USER_EDITED = true; });
   warmEngine();
@@ -525,6 +528,7 @@ function runNow(){
   } catch(e){
     hideResult(); err.textContent = "계산 중 오류가 났어요. 날짜를 확인해 주세요."; err.style.display = "block"; return;
   }
+  LAST_RESULT = {r: r, f: f};
   render(r, f);
   syncUrl(f);
   carryBirth(f.a);
@@ -538,6 +542,7 @@ function runNow(){
 
 var LINKS = {"ilju": {"갑자": "/ilju/gapja/", "갑인": "/ilju/gapin/", "갑진": "/ilju/gapjin/", "갑오": "/ilju/gapo/", "갑신": "/ilju/gapsin/", "갑술": "/ilju/gapsul/", "을축": "/ilju/eulchuk/", "을묘": "/ilju/eulmyo/", "을사": "/ilju/eulsa/", "을미": "/ilju/eulmi/", "을유": "/ilju/eulyu/", "을해": "/ilju/eulhae/", "병자": "/ilju/byeongja/", "병인": "/ilju/byeongin/", "병진": "/ilju/byeongjin/", "병오": "/ilju/byeongo/", "병신": "/ilju/byeongsin/", "병술": "/ilju/byeongsul/", "정축": "/ilju/jeongchuk/", "정묘": "/ilju/jeongmyo/", "정사": "/ilju/jeongsa/", "정미": "/ilju/jeongmi/", "정유": "/ilju/jeongyu/", "정해": "/ilju/jeonghae/", "무자": "/ilju/muja/", "무인": "/ilju/muin/", "무진": "/ilju/mujin/", "무오": "/ilju/muo/", "무신": "/ilju/musin/", "무술": "/ilju/musul/", "기축": "/ilju/gichuk/", "기묘": "/ilju/gimyo/", "기사": "/ilju/gisa/", "기미": "/ilju/gimi/", "기유": "/ilju/giyu/", "기해": "/ilju/gihae/", "경자": "/ilju/gyeongja/", "경인": "/ilju/gyeongin/", "경진": "/ilju/gyeongjin/", "경오": "/ilju/gyeongo/", "경신": "/ilju/gyeongsin/", "경술": "/ilju/gyeongsul/", "신축": "/ilju/sinchuk/", "신묘": "/ilju/sinmyo/", "신사": "/ilju/sinsa/", "신미": "/ilju/sinmi/", "신유": "/ilju/sinyu/", "신해": "/ilju/sinhae/", "임자": "/ilju/imja/", "임인": "/ilju/imin/", "임진": "/ilju/imjin/", "임오": "/ilju/imo/", "임신": "/ilju/imsin/", "임술": "/ilju/imsul/", "계축": "/ilju/gyechuk/", "계묘": "/ilju/gyemyo/", "계사": "/ilju/gyesa/", "계미": "/ilju/gyemi/", "계유": "/ilju/gyeyu/", "계해": "/ilju/gyehae/"}, "sipsin": {"본원": "/term/bonwon/", "비견": "/term/bigyeon/", "겁재": "/term/geopjae/", "식신": "/term/siksin/", "상관": "/term/sanggwan/", "편재": "/term/pyeonjae/", "정재": "/term/jeongjae/", "편관": "/term/pyeongwan/", "정관": "/term/jeonggwan/", "편인": "/term/pyeonin/", "정인": "/term/jeongin/"}, "meteor": {"絶": {"kr": "절", "url": "/term/jeol/"}, "胎": {"kr": "태", "url": "/term/tae/"}, "養": {"kr": "양", "url": "/term/yang/"}, "長生": {"kr": "장생", "url": "/term/jangsaeng/"}, "沐浴": {"kr": "목욕", "url": "/term/mokyok/"}, "冠帶": {"kr": "관대", "url": "/term/gwandae/"}, "乾祿": {"kr": "건록", "url": "/term/geonrok/"}, "帝旺": {"kr": "제왕", "url": "/term/jewang/"}, "衰": {"kr": "쇠", "url": "/term/soe/"}, "病": {"kr": "병", "url": "/term/byeong/"}, "死": {"kr": "사", "url": "/term/sa/"}, "墓": {"kr": "묘", "url": "/term/myo/"}}, "spirit": {"劫殺": {"kr": "겁살", "url": "/term/geopsal/"}, "災殺": {"kr": "재살", "url": "/term/jaesal/"}, "天殺": {"kr": "천살", "url": "/term/cheonsal/"}, "地殺": {"kr": "지살", "url": "/term/jisal/"}, "年殺": {"kr": "연살", "url": "/term/yeonsal/"}, "月殺": {"kr": "월살", "url": "/term/wolsal/"}, "亡身": {"kr": "망신살", "url": "/term/mangsinsal/"}, "將星": {"kr": "장성살", "url": "/term/jangseongsal/"}, "攀鞍": {"kr": "반안살", "url": "/term/banansal/"}, "驛馬": {"kr": "역마살", "url": "/term/yeokmasal/"}, "六害": {"kr": "육해살", "url": "/term/yukhaesal/"}, "華蓋": {"kr": "화개살", "url": "/term/hwagaesal/"}}, "el": {"甲": "목", "乙": "목", "丙": "화", "丁": "화", "戊": "토", "己": "토", "庚": "금", "辛": "금", "壬": "수", "癸": "수", "子": "수", "丑": "토", "寅": "목", "卯": "목", "辰": "토", "巳": "화", "午": "화", "未": "토", "申": "금", "酉": "금", "戌": "토", "亥": "수"}, "iljuSlug": {"갑자": "gapja", "갑인": "gapin", "갑진": "gapjin", "갑오": "gapo", "갑신": "gapsin", "갑술": "gapsul", "을축": "eulchuk", "을묘": "eulmyo", "을사": "eulsa", "을미": "eulmi", "을유": "eulyu", "을해": "eulhae", "병자": "byeongja", "병인": "byeongin", "병진": "byeongjin", "병오": "byeongo", "병신": "byeongsin", "병술": "byeongsul", "정축": "jeongchuk", "정묘": "jeongmyo", "정사": "jeongsa", "정미": "jeongmi", "정유": "jeongyu", "정해": "jeonghae", "무자": "muja", "무인": "muin", "무진": "mujin", "무오": "muo", "무신": "musin", "무술": "musul", "기축": "gichuk", "기묘": "gimyo", "기사": "gisa", "기미": "gimi", "기유": "giyu", "기해": "gihae", "경자": "gyeongja", "경인": "gyeongin", "경진": "gyeongjin", "경오": "gyeongo", "경신": "gyeongsin", "경술": "gyeongsul", "신축": "sinchuk", "신묘": "sinmyo", "신사": "sinsa", "신미": "sinmi", "신유": "sinyu", "신해": "sinhae", "임자": "imja", "임인": "imin", "임진": "imjin", "임오": "imo", "임신": "imsin", "임술": "imsul", "계축": "gyechuk", "계묘": "gyemyo", "계사": "gyesa", "계미": "gyemi", "계유": "gyeyu", "계해": "gyehae"}, "rel": {"合": {"kr": "합", "url": "/term/hap/"}, "六合": {"kr": "육합", "url": "/term/yukhap/"}, "半合": {"kr": "반합", "url": "/term/banhap/"}, "三合": {"kr": "삼합", "url": "/term/samhap/"}, "方合": {"kr": "방합", "url": "/term/banghap/"}, "沖": {"kr": "충", "url": "/term/chung/"}, "刑": {"kr": "형", "url": "/term/hyeong/"}, "破": {"kr": "파", "url": "/term/pa/"}, "害": {"kr": "해", "url": "/term/hae/"}, "怨嗔": {"kr": "원진", "url": "/term/wonjin/"}, "鬼門": {"kr": "귀문", "url": "/term/gwimun/"}}};
 var LAST_VERDICT = "";   // 공유 제목에 쓴다 — "노아 × 지원 74점 보통" 같은 결과 한 줄
+var LAST_RESULT = null;  // 궁합 카드 이미지가 다시 쓴다
 var KIND_KR = {COUPLE:"연인·부부", FRIEND:"친구", FAMILY:"가족", BUSINESS:"동업·동료"};
 
 /* 두 사람의 원국 — analyze 는 일주만 준다. 명식은 SajuCalc 로 각각 계산한다(같은 번들). */
@@ -756,6 +761,218 @@ function showCal(note){
   if (!el) return;
   el.textContent = note || "";
   el.style.display = note ? "block" : "none";
+}
+
+/* ── 공유 카드 공용 조각 ─────────────────────────────────────
+   사주 명식 카드와 궁합 카드가 같은 하늘·같은 모서리를 쓴다. 저장된 이미지는 그대로
+   유입 자산이 된다(카톡으로 돌아다니면서 samra.cc 를 달고 다닌다).
+   ⚠️ 캔버스는 CSS 폰트 스택을 못 쓰고 문자열로 직접 지정해야 하며, 웹폰트가 준비되기 전에
+      그리면 시스템 폰트로 구워진다 — 반드시 document.fonts.ready 뒤에 그릴 것. */
+var CARD_W = 1080, CARD_H = 1350;
+var EL_HEX = {"목":"#7FBF8F","화":"#E58A80","토":"#D9B978","금":"#AEBECC","수":"#7FA8D9"};
+var F_SANS = "'Wanted Sans Variable', system-ui, sans-serif";
+var F_SERIF = "MaruBuri, 'Noto Serif KR', serif";
+var F_HANJA = "'Noto Serif KR', serif";
+
+function roundRect(c, x, y, w, h, r){
+  c.beginPath();
+  c.moveTo(x + r, y);
+  c.arcTo(x + w, y, x + w, y + h, r);
+  c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r);
+  c.arcTo(x, y, x + w, y, r);
+  c.closePath();
+}
+
+/** 밤하늘 배경 — 씨드를 주면 별밭이 결과마다 달라진다(같은 결과는 같은 그림). */
+function drawSky(c, seedStr){
+  c.fillStyle = "#0c0c14"; c.fillRect(0, 0, CARD_W, CARD_H);
+  var g = c.createRadialGradient(180, 40, 0, 180, 40, 900);
+  g.addColorStop(0, "rgba(124,58,237,.38)"); g.addColorStop(1, "rgba(124,58,237,0)");
+  c.fillStyle = g; c.fillRect(0, 0, CARD_W, CARD_H);
+  var seed = 7919, ss = seedStr || "x";
+  for (var i = 0; i < ss.length; i++) seed = (seed * 31 + ss.charCodeAt(i)) >>> 0;
+  var rnd = function(){ seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+  for (var k = 0; k < 90; k++){
+    c.globalAlpha = 0.2 + rnd() * 0.55;
+    c.fillStyle = rnd() < 0.28 ? "#c4b5fd" : "#DCE6FF";
+    c.beginPath(); c.arc(rnd() * CARD_W, rnd() * CARD_H, rnd() < 0.25 ? 2.4 : 1.4, 0, 6.2832); c.fill();
+  }
+  c.globalAlpha = 1;
+}
+
+/** 캔버스를 PNG 로 내려받는다. */
+function downloadCanvas(cv, filename, msgEl){
+  cv.toBlob(function(blob){
+    if (!blob){ if (msgEl) msgEl.textContent = "이미지를 만들지 못했어요"; return; }
+    var url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+    if (msgEl){
+      msgEl.textContent = "카드를 저장했어요";
+      setTimeout(function(){ msgEl.textContent = ""; }, 3000);
+    }
+  }, "image/png");
+}
+
+/** 웹폰트가 준비된 뒤 그린다. */
+function whenFontsReady(fn){
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fn, fn); else fn();
+}
+
+/* ── 궁합 카드 ───────────────────────────────────────────────
+   둘이서 보는 결과라 명식 카드보다 공유될 확률이 높다. 두 일주 일러스트를 나란히 얹고
+   점수·판정·네 축을 담는다. 그림은 같은 출처(assets/art)라 캔버스가 오염되지 않는다. */
+function loadImg(src){
+  return new Promise(function(res){
+    var im = new Image();
+    im.onload = function(){ res(im); };
+    im.onerror = function(){ res(null); };
+    im.src = src;
+  });
+}
+
+function drawPairCard(r, f, imgs, pillars){
+  var cv = document.createElement("canvas");
+  cv.width = CARD_W; cv.height = CARD_H;
+  var c = cv.getContext("2d");
+  drawSky(c, r.iljuA.kr + r.iljuB.kr);
+
+  c.fillStyle = "#c4b5fd"; c.font = "800 26px " + F_SANS;
+  c.fillText("삼라만상 · 무료 궁합 계산기", 72, 92);
+
+  /* 두 일주 그림 — 16:9 를 나란히 */
+  var iw = (CARD_W - 144 - 26) / 2, ih = Math.round(iw * 9 / 16), iy = 128;
+  [[imgs[0], 72, r.iljuA.kr, "나"], [imgs[1], 72 + iw + 26, r.iljuB.kr, "상대"]].forEach(function(t){
+    var im = t[0], x = t[1];
+    c.save();
+    roundRect(c, x, iy, iw, ih, 20); c.clip();
+    if (im) c.drawImage(im, x, iy, iw, ih);
+    else { c.fillStyle = "rgba(255,255,255,.05)"; c.fillRect(x, iy, iw, ih); }
+    var sc = c.createLinearGradient(0, iy + ih * 0.45, 0, iy + ih);
+    sc.addColorStop(0, "rgba(8,8,13,0)"); sc.addColorStop(1, "rgba(8,8,13,.92)");
+    c.fillStyle = sc; c.fillRect(x, iy, iw, ih);
+    c.restore();
+    c.strokeStyle = "rgba(255,255,255,.12)"; c.lineWidth = 2;
+    roundRect(c, x, iy, iw, ih, 20); c.stroke();
+    c.fillStyle = "#F4F1FF"; c.font = "800 30px " + F_SANS;
+    c.fillText(t[2] + "일주", x + 22, iy + ih - 44);
+    c.fillStyle = "rgba(255,255,255,.62)"; c.font = "700 22px " + F_SANS;
+    c.fillText(t[3], x + 22, iy + ih - 16);
+  });
+  c.textAlign = "center";
+  c.fillStyle = "#a78bfa"; c.font = "800 34px " + F_SANS;
+  c.fillText("×", CARD_W / 2, iy + ih / 2 + 12);
+  c.textAlign = "left";
+
+  /* 점수 링 */
+  var ry = iy + ih + 108, rc = CARD_W / 2, rr = 78;
+  var pct = Math.max(0, Math.min(100, r.totalScore || 0));
+  c.lineWidth = 14; c.lineCap = "round";
+  c.strokeStyle = "rgba(255,255,255,.10)";
+  c.beginPath(); c.arc(rc, ry, rr, 0, 6.2832); c.stroke();
+  c.strokeStyle = "#a78bfa";
+  c.beginPath(); c.arc(rc, ry, rr, -Math.PI / 2, -Math.PI / 2 + 6.2832 * (pct / 100)); c.stroke();
+  c.textAlign = "center";
+  c.fillStyle = "#F4F1FF"; c.font = "800 62px " + F_SANS;
+  c.fillText(String(r.totalScore), rc, ry + 14);
+  c.fillStyle = "rgba(255,255,255,.55)"; c.font = "700 22px " + F_SANS;
+  c.fillText("궁합 점수", rc, ry + 46);
+
+  /* 판정 — verdict 는 가공 금지 계약이라 " — " 로만 나눈다(앱과 동일) */
+  var vp = String(r.verdict || "").split(" — ");
+  c.fillStyle = "#F4F1FF"; c.font = "600 42px " + F_SERIF;
+  c.fillText(vp[0] || "", rc, ry + rr + 66);
+  if (vp[1]){
+    c.fillStyle = "rgba(255,255,255,.66)"; c.font = "600 26px " + F_SANS;
+    var sub = vp.slice(1).join(" — ");
+    if (sub.length > 34) sub = sub.slice(0, 33) + "…";
+    c.fillText(sub, rc, ry + rr + 108);
+  }
+  c.textAlign = "left";
+
+  /* 네 축 */
+  var AX = [["bond","결속력","#7FBF8F"],["stability","안정성","#7FA8D9"],
+            ["growth","성장성","#D9B978"],["consumption","소모도","#E58A80"]];
+  var ay = ry + rr + 168, aw = (CARD_W - 144 - 3 * 18) / 4;
+  AX.forEach(function(a, i){
+    var x = 72 + i * (aw + 18), v = (r.subScores && r.subScores[a[0]]) || 0;
+    c.fillStyle = "rgba(255,255,255,.045)";
+    roundRect(c, x, ay, aw, 128, 20); c.fill();
+    c.strokeStyle = "rgba(255,255,255,.10)"; c.lineWidth = 2; c.stroke();
+    c.fillStyle = "rgba(255,255,255,.55)"; c.font = "700 22px " + F_SANS;
+    c.fillText(a[1], x + 20, ay + 40);
+    c.fillStyle = "#F4F1FF"; c.font = "800 44px " + F_SANS;
+    c.fillText(String(v), x + 20, ay + 88);
+    c.fillStyle = "rgba(255,255,255,.10)";
+    roundRect(c, x + 20, ay + 102, aw - 40, 12, 6); c.fill();
+    c.fillStyle = a[2];
+    roundRect(c, x + 20, ay + 102, Math.max(6, (aw - 40) * v / 100), 12, 6); c.fill();
+  });
+
+  var KIND = {COUPLE:"연인·부부", FRIEND:"친구", FAMILY:"가족", BUSINESS:"동업·동료"};
+  c.fillStyle = "rgba(255,255,255,.5)"; c.font = "700 24px " + F_SANS;
+  c.fillText((KIND[f.kind] || "궁합") + " 기준 · 여덟 글자 전체로 계산", 72, ay + 190);
+
+  /* 두 사람의 원국 — 카드 아래가 350px 비어 있었다(행 밀도로 확인).
+     궁합의 근거가 되는 여덟 글자를 채워 넣으면 카드가 '기록'으로 남는다. */
+  var wy = ay + 226;
+  [[pillars[0], r.iljuA.kr, "나"], [pillars[1], r.iljuB.kr, "상대"]].forEach(function(t, row){
+    var pr = t[0];
+    if (!pr) return;
+    var y0 = wy + row * 152;
+    c.fillStyle = "#a78bfa"; c.font = "800 24px " + F_SANS;
+    c.fillText(t[2] + " · " + t[1] + "일주", 72, y0 + 4);
+    var order = ["time", "day", "month", "year"], lbs = ["시", "일", "월", "년"];
+    var cw = (CARD_W - 144 - 3 * 14) / 4;
+    order.forEach(function(key, i){
+      var pp = pr.pillars[key], x = 72 + i * (cw + 14), y = y0 + 20;
+      c.fillStyle = key === "day" ? "rgba(139,92,246,.16)" : "rgba(255,255,255,.04)";
+      roundRect(c, x, y, cw, 96, 16); c.fill();
+      c.strokeStyle = key === "day" ? "rgba(167,139,250,.55)" : "rgba(255,255,255,.09)";
+      c.lineWidth = 2; c.stroke();
+      c.textAlign = "center";
+      var cx = x + cw / 2;
+      c.fillStyle = "rgba(255,255,255,.45)"; c.font = "700 18px " + F_SANS;
+      c.fillText(lbs[i] + "주", cx, y + 26);
+      if (!pp){
+        c.fillStyle = "rgba(255,255,255,.35)"; c.font = "600 24px " + F_SANS;
+        c.fillText("미상", cx, y + 66);
+      } else {
+        var e1 = (LINKS.el || {})[pp.ganzi[0]] || "", e2 = (LINKS.el || {})[pp.ganzi[1]] || "";
+        c.font = "600 34px " + F_HANJA;
+        c.fillStyle = EL_HEX[e1] || "#F4F1FF"; c.fillText(pp.ganzi[0], cx - 20, y + 70);
+        c.fillStyle = EL_HEX[e2] || "#F4F1FF"; c.fillText(pp.ganzi[1], cx + 20, y + 70);
+      }
+      c.textAlign = "left";
+    });
+  });
+  c.fillStyle = "rgba(255,255,255,.45)"; c.font = "600 24px " + F_SANS;
+  c.fillText("samra.cc · 무료 궁합 계산기", 72, CARD_H - 56);
+  return cv;
+}
+
+function savePairCard(){
+  var msg = document.getElementById("shareMsg");
+  if (!LAST_RESULT){ msg.textContent = "먼저 계산해 주세요"; return; }
+  if (window.__track) window.__track("cta", "save-pair-card");
+  var slugs = LINKS.iljuSlug || {};
+  var sa = slugs[LAST_RESULT.r.iljuA.kr], sb = slugs[LAST_RESULT.r.iljuB.kr];
+  Promise.all([
+    sa ? loadImg("/assets/art/ilju/" + sa + ".webp") : Promise.resolve(null),
+    sb ? loadImg("/assets/art/ilju/" + sb + ".webp") : Promise.resolve(null)
+  ]).then(function(imgs){
+    var pil = ["a", "b"].map(function(k){
+      var v = LAST_RESULT.f[k];
+      try { return JSON.parse(SajuCalc().calculate(v.y, v.mo, v.d, v.h, v.mi, v.g, false, 126.978)); }
+      catch(e){ return null; }
+    });
+    whenFontsReady(function(){
+      downloadCanvas(drawPairCard(LAST_RESULT.r, LAST_RESULT.f, imgs, pil),
+        LAST_RESULT.r.iljuA.kr + "-" + LAST_RESULT.r.iljuB.kr + "-궁합-삼라만상.png", msg);
+    });
+  });
 }
 
 </script>

@@ -325,6 +325,8 @@ document.addEventListener("DOMContentLoaded", function(){
   if (ca && typeof copyAi === "function") ca.addEventListener("click", copyAi);
   var si = document.getElementById("saveImg");
   if (si && typeof saveCard === "function") si.addEventListener("click", saveCard);
+  var sp = document.getElementById("savePair");
+  if (sp && typeof savePairCard === "function") sp.addEventListener("click", savePairCard);
   warmEngine();
   fillCities("city", false).then(restoreFromUrl, function(){});
 });
