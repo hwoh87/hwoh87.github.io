@@ -44,6 +44,8 @@
   transition:border-color .15s,background .15s,color .15s}
 .seg button:hover{border-color:rgba(167,139,250,.55);color:#F4F1FF}
 .seg button.on{border-color:#a78bfa;background:rgba(139,92,246,.22);color:#F4F1FF}
+/* 달력은 3칸(양력·음력·음력 윤달)이라 한 칸이 좁다 — 글자만 살짝 줄인다. */
+.seg.cal button{font-size:13.5px;padding:11px 4px}
 .chk{display:flex;align-items:center;gap:8px;font-size:14px;color:rgba(255,255,255,.65);
   padding:8px 12px;border:1px solid rgba(255,255,255,.10);border-radius:12px;background:rgba(255,255,255,.03);
   cursor:pointer;transition:border-color .15s,color .15s}
@@ -168,6 +170,7 @@
 <main class="paper"><div class="paper-inner">
 
 <form class="calc-form" id="f" onsubmit="return false">
+<div class="row"><div class="grow"><label>달력</label><div class="seg cal" role="group" aria-label="달력"><button type="button" class="on" data-g="S" data-for="cal">양력</button><button type="button" data-g="L" data-for="cal">음력</button><button type="button" data-g="LL" data-for="cal">음력 윤달</button></div><input type="hidden" id="cal" value="S" /></div></div>
   <div class="row">
     <div class="grow"><label for="y">년</label><input id="y" type="number" min="1940" max="2026" value="1995" /></div>
     <div class="grow"><label for="mo">월</label><select id="mo"></select></div>
@@ -183,7 +186,8 @@
   </div>
   <button class="calc-btn" id="go">내 명반 뽑기</button>
   <p class="err" id="err"></p>
-  <p class="note" style="margin-top:14px">양력 생일 기준이에요. <strong>자미두수는 태어난 시(時)가 명궁을 정하기 때문에 시간이 꼭 필요해요</strong> — 시간을 모르면 사주 명식부터 보는 편이 나아요.</p>
+  <p class="note" id="calNote" style="display:none"></p>
+  <p class="note" style="margin-top:14px">음력 생일도 달력을 고르면 그대로 넣을 수 있어요. <strong>자미두수는 태어난 시(時)가 명궁을 정하기 때문에 시간이 꼭 필요해요</strong> — 시간을 모르면 사주 명식부터 보는 편이 나아요.</p>
 </form>
 
 <section id="result">
@@ -246,7 +250,9 @@ function loadEngine(){
   if (__engP) return __engP;
   __engP = new Promise(function(res, rej){
     var s = document.createElement("script");
-    s.src = "/calc/saju-engine.js";
+    /* ⚠️ 파일명이 고정이라 엔진을 고쳐 배포해도 돌아온 방문자는 캐시된 구버전을 계속 쓴다
+       (예전 '본원 오표기' 수정도 이런 식으로 늦게 도착했다). 내용 해시를 붙여 강제로 새로 받게 한다. */
+    s.src = "/calc/saju-engine.js?v=47503b1e5a";
     s.onload = function(){ res(window["engine-core"]); };
     s.onerror = function(){ __engP = null; rej(new Error("engine")); };
     document.head.appendChild(s);
@@ -322,10 +328,11 @@ document.addEventListener("DOMContentLoaded", function(){
 });
 
 function readForm(){
+  var _c = toSolar(+document.getElementById("y").value, +document.getElementById("mo").value,
+                   +document.getElementById("d").value, calMode("cal"));
+  showCal(_c.converted);
   return {
-    y:+document.getElementById("y").value,
-    mo:+document.getElementById("mo").value,
-    d:+document.getElementById("d").value,
+    y:_c.y, mo:_c.mo, d:_c.d,
     h:+document.getElementById("h").value,
     mi:+document.getElementById("mi").value,
     g:document.getElementById("g").value,
@@ -575,6 +582,30 @@ function carryBirth(v){
     if (v.unk) q.push(p+"unk=1"); else q.push(p+"h="+v.h, p+"mi="+v.mi);
     a.href = a.href.split("?")[0] + "?" + q.join("&");
   });
+}
+
+/* ── 음력 입력 ───────────────────────────────────────────────
+   웹 계산기가 양력만 받고 있어서, 자기 생일을 음력으로만 아는 사람은 도구를 아예 못 썼다
+   (월천·FateUp·사주매니아 전부 양력·음력·윤달을 받는다). 엔진 Core 에 이미 있던 변환을
+   노출해서(SajuCalc.lunarToSolar) 입력 단계에서만 양력으로 바꿔 넘긴다 —
+   계산·URL·공유는 전부 양력 하나로 유지된다(두 체계가 섞이면 재계산에서 어긋난다). */
+function calMode(id){ var e = document.getElementById(id); return e ? e.value : "S"; }
+/** 음력이면 양력으로 바꿔 돌려준다. 실패하면 입력을 그대로 쓴다(계산을 막지 않는다). */
+function toSolar(y, mo, d, mode){
+  if (mode === "S" || !y) return {y:y, mo:mo, d:d, converted:null};
+  try {
+    var r = JSON.parse(SajuCalc().lunarToSolar(y, mo, d, mode === "LL"));
+    return {y:r.year, mo:r.month, d:r.day,
+            converted:"음력 " + y + "." + mo + "." + d + (mode === "LL" ? "(윤달)" : "")
+                      + " → 양력 " + r.year + "." + r.month + "." + r.day};
+  } catch(e){ return {y:y, mo:mo, d:d, converted:null}; }
+}
+/** 변환 안내를 폼 아래에 적는다(사용자가 맞게 들어갔는지 확인할 수 있어야 한다). */
+function showCal(note){
+  var el = document.getElementById("calNote");
+  if (!el) return;
+  el.textContent = note || "";
+  el.style.display = note ? "block" : "none";
 }
 
 </script>

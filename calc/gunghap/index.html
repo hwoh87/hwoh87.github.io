@@ -44,6 +44,8 @@
   transition:border-color .15s,background .15s,color .15s}
 .seg button:hover{border-color:rgba(167,139,250,.55);color:#F4F1FF}
 .seg button.on{border-color:#a78bfa;background:rgba(139,92,246,.22);color:#F4F1FF}
+/* 달력은 3칸(양력·음력·음력 윤달)이라 한 칸이 좁다 — 글자만 살짝 줄인다. */
+.seg.cal button{font-size:13.5px;padding:11px 4px}
 .chk{display:flex;align-items:center;gap:8px;font-size:14px;color:rgba(255,255,255,.65);
   padding:8px 12px;border:1px solid rgba(255,255,255,.10);border-radius:12px;background:rgba(255,255,255,.03);
   cursor:pointer;transition:border-color .15s,color .15s}
@@ -180,6 +182,7 @@
     <div class="pcol">
       <p class="pt">나</p>
       <div class="row">
+<div class="row"><div class="grow"><label>달력</label><div class="seg cal" role="group" aria-label="달력"><button type="button" class="on" data-g="S" data-for="acal">양력</button><button type="button" data-g="L" data-for="acal">음력</button><button type="button" data-g="LL" data-for="acal">음력 윤달</button></div><input type="hidden" id="acal" value="S" /></div></div>
         <div class="grow"><label for="ay">년</label><input id="ay" type="number" min="1940" max="2026" value="1995" /></div>
         <div class="grow"><label for="amo">월</label><select id="amo"></select></div>
         <div class="grow"><label for="ad">일</label><select id="ad"></select></div>
@@ -194,6 +197,7 @@
     <div class="pcol">
       <p class="pt">상대</p>
       <div class="row">
+<div class="row"><div class="grow"><label>달력</label><div class="seg cal" role="group" aria-label="달력"><button type="button" class="on" data-g="S" data-for="bcal">양력</button><button type="button" data-g="L" data-for="bcal">음력</button><button type="button" data-g="LL" data-for="bcal">음력 윤달</button></div><input type="hidden" id="bcal" value="S" /></div></div>
         <div class="grow"><label for="by">년</label><input id="by" type="number" min="1940" max="2026" value="1996" /></div>
         <div class="grow"><label for="bmo">월</label><select id="bmo"></select></div>
         <div class="grow"><label for="bd">일</label><select id="bd"></select></div>
@@ -214,7 +218,8 @@
   <p class="minorgate" id="minorGate">미성년자가 포함된 연인·부부 궁합은 제공하지 않아요. 관계를 친구·가족으로 바꾸면 볼 수 있어요.</p>
   <button class="calc-btn" id="go">우리 궁합 계산하기</button>
   <p class="err" id="err"></p>
-  <p class="note" style="margin-top:14px">양력 생일 기준이에요. 시간을 모르면 시주(時柱) 관련 풀이만 빼고 계산해요.
+  <p class="note" id="calNote" style="display:none"></p>
+  <p class="note" style="margin-top:14px">음력 생일도 달력을 고르면 그대로 넣을 수 있어요. 시간을 모르면 시주(時柱) 관련 풀이만 빼고 계산해요.
   앱 궁합과 <strong>같은 엔진</strong>이고, 계산은 브라우저 안에서 끝나요 — 입력값을 저희 서버로 올리지 않아요.</p>
 </form>
 
@@ -296,7 +301,9 @@ function loadEngine(){
   if (__engP) return __engP;
   __engP = new Promise(function(res, rej){
     var s = document.createElement("script");
-    s.src = "/calc/saju-engine.js";
+    /* ⚠️ 파일명이 고정이라 엔진을 고쳐 배포해도 돌아온 방문자는 캐시된 구버전을 계속 쓴다
+       (예전 '본원 오표기' 수정도 이런 식으로 늦게 도착했다). 내용 해시를 붙여 강제로 새로 받게 한다. */
+    s.src = "/calc/saju-engine.js?v=47503b1e5a";
     s.onload = function(){ res(window["engine-core"]); };
     s.onerror = function(){ __engP = null; rej(new Error("engine")); };
     document.head.appendChild(s);
@@ -412,18 +419,23 @@ document.addEventListener("DOMContentLoaded", function(){
 
 function readPerson(p){
   var unk = document.getElementById(p+"unk").checked;
+  var c = toSolar(+document.getElementById(p+"y").value, +document.getElementById(p+"mo").value,
+                  +document.getElementById(p+"d").value, calMode(p+"cal"));
+  if (c.converted) CAL_NOTES.push((p === "a" ? "나: " : "상대: ") + c.converted);
   return {
-    y:+document.getElementById(p+"y").value,
-    mo:+document.getElementById(p+"mo").value,
-    d:+document.getElementById(p+"d").value,
+    y:c.y, mo:c.mo, d:c.d,
     unk:unk,
     h:unk?-1:+document.getElementById(p+"h").value,
     mi:unk?0:+document.getElementById(p+"mi").value,
     g:document.getElementById(p+"g").value
   };
 }
+var CAL_NOTES = [];
 function readForm(){
-  return { a:readPerson("a"), b:readPerson("b"), kind:document.getElementById("kind").value };
+  CAL_NOTES = [];
+  var f = { a:readPerson("a"), b:readPerson("b"), kind:document.getElementById("kind").value };
+  showCal(CAL_NOTES.join(" · "));
+  return f;
 }
 function personQ(pfx, v){
   return "&"+pfx+"y="+v.y+"&"+pfx+"mo="+v.mo+"&"+pfx+"d="+v.d+"&"+pfx+"g="+v.g
@@ -668,6 +680,30 @@ function carryBirth(v){
     if (v.unk) q.push(p+"unk=1"); else q.push(p+"h="+v.h, p+"mi="+v.mi);
     a.href = a.href.split("?")[0] + "?" + q.join("&");
   });
+}
+
+/* ── 음력 입력 ───────────────────────────────────────────────
+   웹 계산기가 양력만 받고 있어서, 자기 생일을 음력으로만 아는 사람은 도구를 아예 못 썼다
+   (월천·FateUp·사주매니아 전부 양력·음력·윤달을 받는다). 엔진 Core 에 이미 있던 변환을
+   노출해서(SajuCalc.lunarToSolar) 입력 단계에서만 양력으로 바꿔 넘긴다 —
+   계산·URL·공유는 전부 양력 하나로 유지된다(두 체계가 섞이면 재계산에서 어긋난다). */
+function calMode(id){ var e = document.getElementById(id); return e ? e.value : "S"; }
+/** 음력이면 양력으로 바꿔 돌려준다. 실패하면 입력을 그대로 쓴다(계산을 막지 않는다). */
+function toSolar(y, mo, d, mode){
+  if (mode === "S" || !y) return {y:y, mo:mo, d:d, converted:null};
+  try {
+    var r = JSON.parse(SajuCalc().lunarToSolar(y, mo, d, mode === "LL"));
+    return {y:r.year, mo:r.month, d:r.day,
+            converted:"음력 " + y + "." + mo + "." + d + (mode === "LL" ? "(윤달)" : "")
+                      + " → 양력 " + r.year + "." + r.month + "." + r.day};
+  } catch(e){ return {y:y, mo:mo, d:d, converted:null}; }
+}
+/** 변환 안내를 폼 아래에 적는다(사용자가 맞게 들어갔는지 확인할 수 있어야 한다). */
+function showCal(note){
+  var el = document.getElementById("calNote");
+  if (!el) return;
+  el.textContent = note || "";
+  el.style.display = note ? "block" : "none";
 }
 
 </script>
