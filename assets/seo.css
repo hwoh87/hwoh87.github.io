@@ -278,7 +278,7 @@ a.cta:hover{text-decoration:none}
 .foot{background:#08080d;color:rgba(255,255,255,.55);padding:26px 20px 40px;text-align:center;font-size:13px}
 .foot a{color:rgba(255,255,255,.60)}
 .foot .fine{max-width:620px;margin:10px auto 0;font-size:12px;line-height:1.65;color:rgba(255,255,255,.55)}
-.foot .hubs{margin:0 0 10px;font-size:12.5px;line-height:1.9}.foot .hubs span{color:rgba(255,255,255,.4);margin-right:6px}.foot .hubs a{white-space:nowrap}
+.foot .hubs{margin:0 0 10px;font-size:12.5px;line-height:1.9}.foot .hubs span{color:rgba(255,255,255,.55);margin-right:6px}.foot .hubs a{white-space:nowrap}
 
 /* 아주 좁은 화면(≤380px)에서는 '연예인'을 접어 계산기 버튼 자리를 지킨다 — 계산기가 1차 행동. */
 @media (max-width:380px){
