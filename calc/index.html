@@ -214,6 +214,9 @@
     <label class="chk"><input type="checkbox" id="tst" /> 진태양시 보정</label>
     <span class="grow" id="cityWrap" style="display:none"><select id="city" aria-label="출생 도시"></select></span>
   </div>
+  <p class="note" id="tstNote" style="display:none">진태양시 보정은 <strong>동경 135°(한국 표준시)</strong>를 기준으로 계산해요 —
+  태어난 곳의 경도만큼 시계와 실제 태양의 위치가 어긋나는 걸 되돌리는 거예요. 서울은 약 32분 빨라요.
+  <strong>해외에서 태어났다면</strong> 그곳의 표준시가 달라 이 보정이 맞지 않아요. 보정을 끄고 현지 시계 시각 그대로 넣어 주세요.</p>
   <button class="calc-btn" id="go">내 사주 계산하기</button>
   <p class="err" id="err"></p>
   <p class="note" id="calNote" style="display:none"></p>
@@ -392,6 +395,7 @@ document.addEventListener("DOMContentLoaded", function init(){
   }, function(){});
   document.getElementById("tst").addEventListener("change", function(){
     document.getElementById("cityWrap").style.display = this.checked ? "block" : "none";
+    var tn = document.getElementById("tstNote"); if (tn) tn.style.display = this.checked ? "block" : "none";
   });
   document.getElementById("unk").addEventListener("change", function(){
     document.getElementById("h").disabled = this.checked;
@@ -462,6 +466,7 @@ function restoreFromUrl(){
   if (q.get("tst") === "1"){
     document.getElementById("tst").checked = true;
     document.getElementById("cityWrap").style.display = "block";
+    var _tn = document.getElementById("tstNote"); if (_tn) _tn.style.display = "block";
     set("city", q.get("lon"));
   }
   if (typeof syncSegs === "function") syncSegs();
