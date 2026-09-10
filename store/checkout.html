@@ -40,6 +40,8 @@
 
 <script src="catalog.js"></script>
 <script src="store-api.js"></script>
+<script src="/assets/art/ilju-index.js"></script>
+<script src="birth-field.js"></script>
 <script>
 const $ = s => document.querySelector(s);
 function toast(msg) {
@@ -168,7 +170,7 @@ const LEGAL_LINKS = `<a href="../legal/terms/" style="text-decoration:underline"
 function fineHtml(mode) {
   return mode === "app"
     ? `결제와 리포트 생성은 <b>만세력 앱</b>(Google Play)에서 이어져요 · 완성된 리포트는 앱 '내 리포트'에 보관돼요<br>${LEGAL_LINKS}<br>${BIZ_LINE}`
-    : `카드 결제는 <b>토스페이먼츠</b>를 통해 안전하게 처리돼요 · 카드 정보는 저희 서버에 남지 않아요<br>완성된 리포트는 이 브라우저의 '내 리포트'에 남고, PDF로 저장할 수 있어요 · 1년간 보관돼요<br>${LEGAL_LINKS}<br>${BIZ_LINE}`;
+    : `완성된 리포트는 이 브라우저의 '내 리포트'에 남고, PDF로 저장할 수 있어요 · 1년간 보관돼요<br>${LEGAL_LINKS}<br>${BIZ_LINE}`;
 }
 
 /** 덩어리 번호를 보이는 것만 세서 다시 매긴다 — 앱 인계로 갈아입으면 상대·아이 덩어리가 빠지므로
@@ -195,6 +197,7 @@ function applyAppMode(announce) {
     });
     renumber();
     $("#handoff").hidden = false;
+    const tr = document.getElementById("trust"); if (tr) tr.hidden = true;
     $("#go").textContent = "앱에서 이어서 받기 →";
     $("#fine").innerHTML = fineHtml("app");
   }
@@ -252,12 +255,49 @@ document.getElementById("ck").innerHTML = `
     <span>이 분석은 명리 계산과 AI 술사 해석에 기반한 <b>참고용·엔터테인먼트 콘텐츠</b>임을 이해했어요. 입력한 생년월일은 리포트 생성에만 쓰여요.${inputType === "pair" || p.slug === "love-sal" ? " (연애·궁합 분석은 만 19세 이상만 신청할 수 있어요)" : ""}</span>
   </label>
 
+  <div class="ck-trust" id="trust">
+    <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>
+      <span><b>토스페이먼츠</b> 안전결제 · 카드 정보는 저희 서버에 남지 않아요</span></div>
+    <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3.5 4.5v4.5H8"/></svg>
+      <span>리포트를 <b>열어 보기 전</b>이면 결제일부터 7일 안에 <b>전액 환불</b> · <a href="../legal/refund/">환불정책</a></span></div>
+  </div>
   <button class="ck-cta" id="go" data-cta="store-checkout-${p.slug}">${won(priceOf(p.slug))} 결제하고 받기 →</button>
   <p class="ck-fine" id="fine">${fineHtml("web")}</p>
   <p class="ck-err" id="err"></p>
 `;
 
 renumber();
+
+/* 생년월일 한 칸(birth-field.js) + 단계 체크 + "이제 눌러도 돼" 신호.
+   let 을 먼저 선언한다 — enhance() 가 이어받기 값을 채우며 콜백을 즉시 부르므로
+   const 로 받으면 그 순간 아직 초기화 전(TDZ)이다. */
+let bfMe = null, bfPt = null;
+function blockDone(id, ok) {
+  const no = document.querySelector("#" + id + " h2.sec .no");
+  if (no) no.classList.toggle("done", !!ok);
+}
+function refreshReady() {
+  const has = id => !!(document.getElementById(id) || {}).value;
+  const meDate = bfMe ? bfMe.isValid() : (has("meY") && has("meMo") && has("meD"));
+  const meOk = meDate && !!$("#meName").value.trim();
+  blockDone("blk-me", meOk);
+  let ok = meOk;
+  const pt = document.getElementById("blk-pt");
+  if (pt && !pt.hidden) { const ptOk = bfPt ? bfPt.isValid() : true; blockDone("blk-pt", ptOk); ok = ok && ptOk; }
+  const pet = document.getElementById("blk-pet");
+  if (pet && !pet.hidden) { const petOk = +$("#petYear").value > 0; blockDone("blk-pet", petOk); ok = ok && petOk; }
+  blockDone("blk-tier", true);
+  const go = $("#go");
+  go.classList.toggle("ready", ok && $("#agree").checked && !go.disabled);
+}
+if (window.SamraBirth) {
+  bfMe = SamraBirth.enhance("me", { share: true }, refreshReady);
+  if (inputType === "pair") bfPt = SamraBirth.enhance("pt", { who: "그 사람" }, refreshReady);
+}
+$("#meName").addEventListener("input", refreshReady);
+$("#agree").addEventListener("change", refreshReady);
+if (document.getElementById("petYear")) $("#petYear").addEventListener("input", refreshReady);
+refreshReady();
 
 // 성별 토글 배선
 const genders = { me: "F", pt: "F" };
@@ -283,7 +323,7 @@ function readPerson(prefix, label, nameRequired) {
   const y = +$("#" + prefix + "Y").value, mo = +$("#" + prefix + "Mo").value, d = +$("#" + prefix + "D").value;
   const hv = +$("#" + prefix + "H").value;
   if (!y || !mo || !d) throw new Error(label + " 생년월일을 채워줘 🌙");
-  if (y < 1900 || y > 2026 || mo < 1 || mo > 12 || d < 1 || d > 31) throw new Error(label + " 생년월일을 다시 확인해줘");
+  if (y < 1900 || y > new Date().getFullYear() || mo < 1 || mo > 12 || d < 1 || d > 31) throw new Error(label + " 생년월일을 다시 확인해줘");
   const name = $("#" + prefix + "Name").value.trim();
   if (nameRequired && !name) throw new Error("리포트에 불릴 이름을 넣어줘");
   return { name, gender: genders[prefix], birth: { y, mo, d, h: hv < 0 ? -1 : hv, mi: hv < 0 ? 0 : 30 } };
@@ -359,7 +399,7 @@ $("#go").addEventListener("click", async () => {
     if (inputType === "pair" && PAY_MODE !== "app") partner = readPerson("pt", "그 사람의", false);
     if (inputType === "pet" && PAY_MODE !== "app") {
       const py = +$("#petYear").value;
-      if (!py || py < 1985 || py > 2026) throw new Error("아이가 태어난 해를 넣어줘 (예: 2019)");
+      if (!py || py < 1985 || py > new Date().getFullYear()) throw new Error("아이가 태어난 해를 넣어줘 (예: 2019)");
       pet = { name: $("#petName").value.trim(), species: $("#petSpecies").value.trim(), birthYear: py };
     }
     if (extraFields.length && PAY_MODE !== "app") {
@@ -383,6 +423,7 @@ $("#go").addEventListener("click", async () => {
   if (PAY_MODE === "app") { goApp(me); return; }
 
   btn.disabled = true;
+  btn.classList.add("is-busy"); btn.classList.remove("ready");
   btn.textContent = "여덟 글자를 세우는 중…";
   try {
     const { inputs, context } = await buildOrder(me, partner, pet, extra);
@@ -398,6 +439,7 @@ $("#go").addEventListener("click", async () => {
       if (e.code === "web_orders_closed" || e.code === "payment_not_configured") {
         applyAppMode(true);
         btn.disabled = false;
+        btn.classList.remove("is-busy");
         return;
       }
       throw e;
@@ -420,7 +462,9 @@ $("#go").addEventListener("click", async () => {
     await pay(order);
   } catch (e) {
     btn.disabled = false;
+    btn.classList.remove("is-busy");
     btn.textContent = label;
+    refreshReady();
     err(e.code ? storeErrMsg(e)
       : e.message === "engine" ? "계산 엔진을 불러오지 못했어요. 새로고침해줘"
       : e.message === "pgsdk" ? "결제창을 불러오지 못했어요. 네트워크를 확인하고 다시 시도해줘"

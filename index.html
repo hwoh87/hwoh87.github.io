@@ -26,6 +26,7 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "삼라만상", "url": "https://samra.cc/", "inLanguage": "ko"}</script>
 <script src="/assets/track.js" defer></script>
 <script src="/assets/art/ilju-index.js" defer></script>
+<script src="/store/birth-field.js" defer></script>
 </head>
 <body>
 
@@ -322,11 +323,18 @@ const EL_OF = {};
 "壬癸亥子".split("").forEach(c => EL_OF[c] = "e-water");
 const elCls = ch => EL_OF[ch] || "";
 
+// 생년월일 한 칸(store/birth-field.js · defer) — 인라인보다 늦게 실행되므로 DOMContentLoaded 에서 붙인다.
+// 하한 1940 은 이 맛보기 계산 경로의 하한과 같게 둔다(칸이 ✓ 인데 버튼이 거절하는 일이 없게).
+document.addEventListener("DOMContentLoaded", () => {
+  if (window.SamraBirth) SamraBirth.enhance("sj", { share: true, minYear: 1940 });
+});
+
 document.getElementById("sjGo").addEventListener("click", () => {
   const y = +$("#sjY").value, mo = +$("#sjMo").value, d = +$("#sjD").value;
   const hv = +$("#sjH").value;
+  const maxY = new Date().getFullYear();
   if (!y || !mo || !d) { sjErr("생년월일을 채워줘 🌙"); return; }
-  if (y < 1940 || y > 2026) { sjErr("연도는 1940~2026년 사이로 넣어줘"); return; }
+  if (y < 1940 || y > maxY) { sjErr("연도는 1940~" + maxY + "년 사이로 넣어줘"); return; }
   sjErr("");
   const btn = document.getElementById("sjGo");
   const label = btn.textContent;

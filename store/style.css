@@ -1100,3 +1100,99 @@ body.report-page { background: #08070c; }
   .lead-cta { flex-direction: column; }
   .lead-primary, .lead-secondary { width: 100%; }
 }
+
+/* ══ 모션 토큰 · 페이지 전환 ══════════════════════
+   손으로 흩어져 있던 0.15s 선형 전환을 한 벌의 곡선·길이로 묶는다.
+   화려함은 "움직임의 수"가 아니라 "같은 물리"에서 나온다 — 새 모션은 이 토큰만 쓴다. */
+:root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --d1: 0.16s; --d2: 0.28s; --d3: 0.5s;
+}
+/* 같은 사이트 안 이동을 부드럽게 잇는다(크로미움 계열만 — 나머지는 그냥 이동). 머리글은 제자리. */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: vt-out 0.18s var(--ease-out) both; }
+::view-transition-new(root) { animation: vt-in 0.34s var(--ease-out) both; }
+@keyframes vt-out { to { opacity: 0; } }
+@keyframes vt-in { from { opacity: 0; transform: translateY(8px); } }
+.site-head { view-transition-name: site-head; }
+
+/* ══ 결제 버튼 — 누름·빛결·진행 ═════════════════ */
+.ck-cta, .draw-btn { position: relative; overflow: hidden; }
+.ck-cta {
+  transition: background var(--d1), transform var(--d2) var(--ease-spring), box-shadow var(--d3) var(--ease-out);
+}
+.ck-cta:active:not(:disabled), .draw-btn:active { transform: scale(0.975); }
+.ck-cta::after, .draw-btn::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.26) 50%, transparent 65%);
+  transform: translateX(-120%);
+}
+.ck-cta:hover:not(:disabled)::after, .draw-btn:hover::after { animation: sheen 0.9s var(--ease-out); }
+/* 필수 입력이 다 차면 한 번 빛결이 지나가고 은은하게 떠오른다 — "이제 눌러도 돼"라는 신호. 반복하지 않는다. */
+.ck-cta.ready { box-shadow: 0 10px 34px -10px rgba(124, 58, 237, 0.75); }
+.ck-cta.ready::after { animation: sheen 1.1s var(--ease-out) 0.12s; }
+@keyframes sheen { to { transform: translateX(120%); } }
+.ck-cta.is-busy:disabled { opacity: 1; cursor: progress; }
+.ck-cta.is-busy::before {
+  content: ""; display: inline-block; width: 15px; height: 15px; margin: -3px 9px 0 0; vertical-align: middle;
+  border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.35); border-top-color: #fff;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ══ 주문서 단계 체크 · 신뢰 줄 ═══════════════════ */
+.ck h2.sec .no { transition: background var(--d2) var(--ease-out), color var(--d2); }
+.ck h2.sec .no.done { background: var(--violet); color: #fff; font-size: 0; }
+.ck h2.sec .no.done::before { content: "✓"; font-size: 12px; animation: pop 0.38s var(--ease-spring); }
+@keyframes pop { from { transform: scale(0.4); opacity: 0; } }
+.ck-trust { margin-top: 16px; display: grid; gap: 8px; }
+.ck-trust[hidden] { display: none; }
+.ck-trust > div {
+  display: flex; align-items: center; gap: 11px; padding: 11px 14px; border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line-strong);
+  font-size: 12.5px; color: rgba(255, 255, 255, 0.76); line-height: 1.5;
+}
+.ck-trust svg { flex-shrink: 0; width: 18px; height: 18px; color: #c4b5fd; }
+.ck-trust b { color: #fff; font-weight: 700; }
+.ck-trust a { color: #ddd6fe; text-decoration: underline; text-underline-offset: 2px; }
+
+/* ══ 생년월일 한 칸(birth-field.js) ═══════════════ */
+.bf-box { position: relative; }
+.bf .bf-in { font-size: 16px; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; padding-right: 46px; } /* 16px: iOS 확대 방지 */
+.bf-ok {
+  position: absolute; right: 13px; top: 50%; width: 22px; height: 22px; margin-top: -11px;
+  border-radius: 50%; background: var(--violet); transform: scale(0);
+  transition: transform var(--d2) var(--ease-spring);
+}
+.bf-ok::after {
+  content: ""; position: absolute; left: 8px; top: 4px; width: 5px; height: 10px;
+  border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg);
+}
+.bf.is-ok .bf-ok { transform: scale(1); }
+.bf.is-ok .bf-in { border-color: rgba(139, 92, 246, 0.7); }
+.bf.is-bad .bf-in { border-color: rgba(249, 168, 212, 0.75); animation: nudge 0.32s var(--ease-out); }
+@keyframes nudge { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.bf-msg { margin: 7px 2px 0; font-size: 12px; color: #f9a8d4; }
+.bf-msg:empty { display: none; }
+.bf-ilju {
+  display: flex; align-items: center; gap: 12px; margin-top: 10px; padding: 8px 12px 8px 8px;
+  border-radius: 14px; background: rgba(124, 58, 237, 0.1); border: 1px solid rgba(139, 92, 246, 0.32);
+}
+.bf-ilju[hidden] { display: none; }
+.bf-ilju img { width: 96px; height: 54px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: #16131f; }
+.bf-ilju img[hidden] { display: none; }
+.bf-ilju b { display: block; font-size: 14.5px; font-weight: 800; color: #f4f1ff; }
+.bf-ilju b .hz { font-family: "Noto Serif KR", "Nanum Myeongjo", serif; font-weight: 600; color: #ddd6fe; margin-left: 3px; }
+.bf-ilju .bf-t span { display: block; margin-top: 2px; font-size: 11.5px; color: rgba(255, 255, 255, 0.66); }
+.bf-ilju.pop { animation: rise 0.42s var(--ease-out); }
+@keyframes rise { from { opacity: 0; transform: translateY(6px) scale(0.98); } }
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+  .ck-cta, .bf-ok, .ck h2.sec .no { transition: none; }
+  .ck-cta::after, .draw-btn::after, .ck-cta.ready::after, .bf.is-bad .bf-in, .bf-ilju.pop,
+  .ck h2.sec .no.done::before { animation: none; }
+  .ck-cta:active:not(:disabled), .draw-btn:active { transform: none; }
+  .ck-cta.is-busy::before { animation-duration: 1.8s; }
+}
