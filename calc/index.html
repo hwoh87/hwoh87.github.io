@@ -112,6 +112,20 @@
 .calc-btn:active{transform:scale(.975)}
 @media print{.rv,.rvc{opacity:1!important;transform:none!important}}
 @media (prefers-reduced-motion:reduce){.rv,.rvc{opacity:1!important;transform:none!important}.calc-btn:active{transform:none}}
+/* 계산 결과 → 스토어 리포트 제안(XSELL_JS) */
+.xsell{margin:22px 0 26px;padding:16px;border-radius:18px;background:linear-gradient(160deg,rgba(124,58,237,.16),rgba(255,255,255,.02));border:1px solid rgba(167,139,250,.3)}
+.xsell[hidden]{display:none}
+.xsell .xh{font-size:15px;font-weight:800;color:#F4F1FF;margin:0}
+.xsell .xs{font-size:12.5px;color:rgba(255,255,255,.66);margin:4px 0 12px;line-height:1.6}
+.xsell .xrow{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(220px,1fr);gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px}
+.xsell a.xc{scroll-snap-align:start;display:flex;gap:11px;align-items:center;padding:10px;border-radius:14px;background:rgba(12,12,20,.6);border:1px solid rgba(255,255,255,.1);text-decoration:none;color:inherit;transition:border-color .15s,transform .28s cubic-bezier(.22,1,.36,1)}
+.xsell a.xc:hover{border-color:rgba(167,139,250,.6);transform:translateY(-2px)}
+.xsell a.xc img{width:52px;height:68px;border-radius:10px;object-fit:cover;flex-shrink:0;background:#16131f}
+.xsell .xt{min-width:0}
+.xsell .xt .why{display:block;font-size:11.5px;font-weight:700;color:#c4b5fd;margin-bottom:2px}
+.xsell .xt b{display:block;font-size:13.5px;line-height:1.35;color:#F4F1FF}
+.xsell .xt .pr{display:block;margin-top:4px;font-size:12px;color:rgba(255,255,255,.66)}
+@media (prefers-reduced-motion:reduce){.xsell a.xc:hover{transform:none}}
 
 .myeongsik{width:100%;min-width:0;border-collapse:collapse;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:20px;
   overflow:hidden;text-align:center;margin:0 0 18px;font-size:14px}
@@ -268,6 +282,7 @@
     <li><a href="#sec-flow"><span class="c"><b>대운과 세운</b>으로 시간을 봐요<span>큰 흐름 위에 올해가 어떻게 얹히는지</span></span></a></li>
   </ol>
 
+  <div class="xsell" id="xsell" hidden></div>
   <h2 id="sec-flow">대운 흐름</h2>
   <div class="dw-strip" id="dw"></div>
   <p class="note" id="gmLine"></p>
@@ -647,6 +662,7 @@ function renderExtras(v){
   var box = document.getElementById("sinsal");
   box.innerHTML = "";
   var list = ctx.sinsal || [];
+  if (typeof renderXsellSaju === "function") renderXsellSaju(list);
   if (!list.length){
     box.innerHTML = '<span>원국에 강하게 도는 특수 신살이 없어요</span>';
   } else {
@@ -1188,6 +1204,61 @@ function revealResult(root){
       setTimeout(function(){ show(el); }, 30);
     } else io.observe(el);
   });
+}
+
+/* 계산 결과 → 스토어 리포트 제안 카드.
+   무료 계산기(웹 유입 상위 도구)에서 유료 리포트로 가는 길이 하나도 없었다 — 앱 설치 버튼뿐이었다.
+   명식을 막 본 순간에, 그 결과와 이어지는 리포트를 세 개만 보여 준다.
+   ⚠️ 판정을 새로 만들지 않는다. 근거 문구는 이 페이지가 이미 보여 준 신살 이름만 쓰고
+      (도화·홍염 → 연애 살 리포트), 나머지 카드는 상품 분류 이름만 단다.
+   제목·가격·표지·장 수는 store/catalog.js 가 정본이라 결과가 처음 나올 때 한 번 불러온다.
+   클릭 라벨 xsell-* 은 web_cta_class 에 아직 분류가 없어 'other' 로 잡힌다 — 라벨로 직접 센다. */
+var __catP = null;
+function loadCatalog(){
+  if (__catP) return __catP;
+  __catP = new Promise(function(res, rej){
+    if (typeof PRODUCT_BY_SLUG !== "undefined") return res();
+    var s = document.createElement("script");
+    s.src = "/store/catalog.js";
+    s.onload = function(){ typeof PRODUCT_BY_SLUG !== "undefined" ? res() : rej(); };
+    s.onerror = rej;
+    document.head.appendChild(s);
+  });
+  return __catP;
+}
+function iga(w){ var c = w.charCodeAt(w.length - 1) - 0xAC00; return c >= 0 && c < 11172 && c % 28 ? "이" : "가"; }
+function renderXsell(boxId, picks, from){
+  var box = document.getElementById(boxId);
+  if (!box) return;
+  loadCatalog().then(function(){
+    var cards = picks.map(function(pk){
+      var p = PRODUCT_BY_SLUG[pk.slug];
+      if (!p) return "";
+      var why = pk.why || ((CATS[p.cat] || {}).label || "");
+      return '<a class="xc" href="/store/product.html?id=' + p.slug + '" data-cta="xsell-' + from + '-' + p.slug + '">'
+        + '<img src="/store/art/covers/' + p.slug + '.webp" alt="" width="52" height="68" loading="lazy" decoding="async">'
+        + '<span class="xt"><span class="why">' + esc(why) + '</span><b>' + esc(p.title) + '</b>'
+        + '<span class="pr">' + (p.chaptersN ? p.chaptersN + "장 리포트 · " : "") + won(priceOf(p.slug)) + '</span></span></a>';
+    }).join("");
+    if (!cards){ box.hidden = true; return; }
+    var carried = false;
+    try { carried = !!JSON.parse(sessionStorage.getItem("samra.birth.v1") || "{}").y; } catch(e){}
+    box.innerHTML = '<p class="xh">이 명식으로 더 깊이 읽기</p>'
+      + '<p class="xs">술사가 여덟 글자를 장마다 따로 풀어 쓰는 리포트예요.'
+      + (carried ? " 여기 넣은 생년월일이 주문서에 그대로 이어져요." : "") + '</p>'
+      + '<div class="xrow">' + cards + '</div>';
+    box.hidden = false;
+  }, function(){ box.hidden = true; });
+}
+function renderXsellSaju(sinsal){
+  var names = (sinsal || []).map(function(x){ return x && x.name ? String(x.name) : ""; })
+    .filter(function(n){ return /도화|홍염/.test(n); });
+  var first = { slug: "love-sal" };
+  if (names.length){
+    var n0 = names[0];
+    first.why = "명식에 " + n0 + iga(n0) + " 보여요";
+  }
+  renderXsell("xsell", [first, { slug: "three-months" }, { slug: "money-bowl" }], "calc");
 }
 
 </script>

@@ -38,6 +38,7 @@
   <p class="line" id="genLine">잠깐이면 돼요.</p>
   <div class="bar" id="genBar" style="display:none"><i id="genBarFill"></i></div>
   <p class="pct" id="genPct"></p>
+  <ul class="rp-steps" id="genSteps" hidden aria-label="장별 진행"></ul>
   <div class="err-box" id="genErr">
     <button class="retry" id="genRetry" type="button">이어서 다시 쓰기</button>
     <p class="alt"><a href="/store/library.html">내 리포트에서 찾기</a> · <a href="/">홈으로</a></p>
@@ -214,21 +215,49 @@ async function ensureGenerated(data) {
   $("#genWhoImg").src = "art/readers/" + PROD.reader + ".webp";
   $("#genTitle").textContent = READER.emoji + " " + READER.name + " 술사가 리포트를 쓰고 있어요";
   $("#genBar").style.display = "";
+  $("#genBar").classList.add("live");
   startLines(READER.name);
   const doneBase = data.chunks - missing.length;
   let doneCnt = 0;
+  const baseTitle = document.title;
+
+  /* 장 목록 — 이미 받아 둔 장은 ✓, 이번에 쓰는 청크의 장은 "쓰는 중". 청크는 병렬로 쓰므로 여러 줄이
+     동시에 돈다. 줄이 ✓ 로 바뀌는 시점은 그 청크 응답이 실제로 도착한 때뿐이다(가짜 진행 없음). */
+  const stepsEl = document.getElementById("genSteps");
+  const titles = (PROD && PROD.chapters) || [];
+  if (stepsEl && titles.length) {
+    stepsEl.innerHTML = titles.slice(0, data.total).map((t, k) =>
+      `<li data-k="${k}" class="${have.has(k) ? "done" : "writing"}"><span class="dot" aria-hidden="true"></span>` +
+      `<span>${String(k + 1).padStart(2, "0")} · ${escHtml(t)}</span></li>`).join("");
+    stepsEl.hidden = false;
+  }
+  const markChunk = (i, cls) => {
+    if (!stepsEl) return;
+    const [from, to] = ranges[i];
+    for (let k = from; k < to; k++) {
+      const li = stepsEl.querySelector(`li[data-k="${k}"]`);
+      if (li && li.className !== "done") li.className = cls;
+    }
+  };
+
   const paint = () => {
     const pct = Math.round(((doneBase + doneCnt) / data.chunks) * 100);
+    const doneCh = Math.min(data.total, (doneBase + doneCnt) * size);
     $("#genBarFill").style.width = pct + "%";
-    $("#genPct").textContent = `${data.total}장 중 ${Math.min(data.total, (doneBase + doneCnt) * size)}장 완성`;
+    $("#genPct").textContent = `${data.total}장 중 ${doneCh}장 완성`;
+    // 탭을 옮겨 둔 사람도 제목 표시줄에서 진행을 본다
+    document.title = `(${doneCh}/${data.total}) ${READER.name} 술사가 쓰는 중 · 삼라만상`;
   };
   paint();
 
   const results = await Promise.allSettled(missing.map(i =>
-    storeApi({ action: "generate", rid, chunk: i }).then(r => { doneCnt++; paint(); return r; })
+    storeApi({ action: "generate", rid, chunk: i }).then(r => { doneCnt++; markChunk(i, "done"); paint(); return r; })
   ));
   const failed = results.filter(x => x.status === "rejected");
+  $("#genBar").classList.remove("live");
+  document.title = baseTitle;
   if (failed.length) {
+    if (stepsEl) stepsEl.querySelectorAll("li.writing").forEach(li => { li.className = ""; });
     clearInterval(lineTimer);
     const e = failed[0].reason || {};
     $("#genTitle").textContent = "붓이 잠깐 멈췄어요";
@@ -237,7 +266,12 @@ async function ensureGenerated(data) {
     throw new Error("gen_failed");
   }
   clearInterval(lineTimer);
-  return await storeApi({ action: "get", rid });
+  // 완성 순간을 한 박자 보여 준다 — 본문을 불러오는 동안이라 대기 시간을 늘리지 않는다(최소 0.65초).
+  $("#gen").classList.add("complete");
+  $("#genTitle").textContent = "완성됐어요 — 펼쳐 볼게요";
+  const calm = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const [full] = await Promise.all([storeApi({ action: "get", rid }), calm ? null : sleep(650)]);
+  return full;
 }
 
 // ── 렌더 ────────────────────────────────────────────────────

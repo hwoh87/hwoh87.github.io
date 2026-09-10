@@ -233,6 +233,38 @@ document.getElementById("stickyBar").style.display = "";
 document.getElementById("sbLine").textContent = `${p.chaptersN}장 리포트 · 계산 근거 ${p.basisN}종`;
 document.getElementById("sbPrice").textContent = won(priceOf(p.slug));
 
+/* 프리미엄 모션 — 스크롤 등장 · 고정 바 · 첫 CTA 빛결.
+   고정 바는 본문 CTA(히어로·가격 카드·마무리)가 화면에 보이는 동안 내려간다 — 같은 행동을 부르는
+   버튼 두 개가 한 화면에 겹치면 둘 다 약해진다. 동작 줄이기이거나 뒤 탭에서 연 경우엔 등장 없이 바로 보인다
+   (숨은 탭은 관찰자가 멈춰 본문이 투명한 채로 남을 수 있다). */
+(function premiumMotion() {
+  const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const bar = document.getElementById("stickyBar");
+  const info = bar.querySelector(".info");
+  if (info && !bar.querySelector(".thumb")) {
+    const im = document.createElement("img");
+    im.className = "thumb"; im.alt = ""; im.decoding = "async";
+    im.src = "art/covers/" + p.slug + ".webp";
+    info.parentNode.insertBefore(im, info);
+  }
+  const hero = document.querySelector("#pd .pd-cta");
+  if (hero && !reduce) hero.classList.add("glint");
+  if (!("IntersectionObserver" in window)) return;
+
+  const seen = new Set();
+  const barIo = new IntersectionObserver(es => {
+    es.forEach(e => (e.isIntersecting ? seen.add(e.target) : seen.delete(e.target)));
+    bar.classList.toggle("is-away", seen.size > 0);
+  }, { threshold: 0.15 });
+  document.querySelectorAll("#pd .pd-cta, #pd .price-card button").forEach(el => barIo.observe(el));
+
+  if (reduce || document.visibilityState === "hidden") return;
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+  }), { threshold: 0.08, rootMargin: "0px 0px -6% 0px" });
+  document.querySelectorAll("#pd > section, #pd > .pd-close").forEach(el => { el.classList.add("fade-up"); io.observe(el); });
+})();
+
 /* 결제 채널을 서버에 물어보고 고지를 맞춘다 — 웹 결제가 닫혀 있는데 "카드 결제는 토스페이먼츠로"
    라고 적어 두면, 주문서까지 간 사람이 거기서야 앱으로 가라는 말을 듣는다(주문서도 같은 값을 본다). */
 document.addEventListener("DOMContentLoaded", () => {
