@@ -1,4 +1,4 @@
-/* 만세력 웹 퍼스트파티 계측 — 쿠키·localStorage·개인식별자 없음.
+/* 만세력 웹 퍼스트파티 계측 — 쿠키·개인식별자 없음.
  *
  * 재는 것 딱 셋:
  *   pageview   어느 쪽에 사람이 왔나 (+ 검색엔진에서 왔나 / 어느 채널이 보냈나)
@@ -6,10 +6,29 @@
  *   calc_done  계산기에서 실제로 명식을 뽑았나  → window.__track('calc_done')
  *
  * 실패해도 페이지는 그대로 — 전부 fire-and-forget. DNT 켜진 브라우저는 아무것도 보내지 않는다.
+ *
+ * 안 세는 곳(2026-09-11 — 원시 방문 수가 크롤러·QA 로 5~20배 부풀어 있었다):
+ *   · 우리 도메인이 아닌 곳(localhost 미리보기·file://)
+ *   · 자동화 브라우저(navigator.webdriver)
+ *   · QA 브라우저: 아무 쪽에서 ?notrack=1 한 번 → 그 브라우저는 계속 제외(?notrack=0 으로 해제).
+ *     localStorage 는 이 제외 플래그 하나만 쓰고, 서버로 보내지 않는다.
+ *   크롤러 UA·타 출처는 서버(supabase/functions/web-beacon/filter.ts)가 한 번 더 거른다.
+ * 꺼져 있어도 window.__track 은 빈 함수로 둔다 — 페이지의 __track(...) 호출이 터지면 안 된다.
  */
 (function () {
   "use strict";
-  if (navigator.doNotTrack === "1" || window.doNotTrack === "1") return;
+  function off() {
+    if (navigator.doNotTrack === "1" || window.doNotTrack === "1") return true;
+    if (!/^(www\.)?samra\.cc$|^hwoh87\.github\.io$/.test(location.hostname)) return true;
+    if (navigator.webdriver) return true;
+    try {
+      var nt = new URLSearchParams(location.search).get("notrack");
+      if (nt === "1") localStorage.setItem("samra_notrack", "1");
+      else if (nt === "0") localStorage.removeItem("samra_notrack");
+      return localStorage.getItem("samra_notrack") === "1";
+    } catch (e) { return false; /* 저장소가 막힌 브라우저는 그냥 센다 */ }
+  }
+  if (off()) { window.__track = function () {}; return; }
 
   var URL_ = "https://sidxbzpbesbaiokxrqsf.supabase.co/functions/v1/web-beacon";
   var mobile = window.matchMedia && window.matchMedia("(max-width: 767px)").matches;
