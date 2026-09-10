@@ -200,6 +200,8 @@ p{margin:0 0 14px}
 .linkgrid a:hover{border-color:#a78bfa;text-decoration:none}
 .linkgrid a .sub{display:block;font-size:12px;font-weight:500;color:rgba(255,255,255,.45);margin-top:2px}
 .linkgrid.tools{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.linkgrid.pairs .pl{display:block;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 12px;font-weight:700;font-size:14px;color:#F4F1FF}
+.linkgrid.pairs .pl .sub{display:block;font-size:12px;font-weight:500;color:rgba(255,255,255,.45);margin-top:2px}
 /* 인장 타일 — 사전·낱자 목록은 그림이 없다. 대신 그 글자를 옅게 새겨 벽 같던 목록에
    결을 준다(오행이 있는 글자는 오행색으로). */
 .linkgrid.seal a{position:relative;overflow:hidden;padding:13px 12px 30px}
