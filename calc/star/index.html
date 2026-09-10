@@ -21,20 +21,22 @@
 <meta name="theme-color" content="#0c0c14" />
 <link rel="stylesheet" href="/assets/seo.css" />
 <script src="/assets/track.js" defer></script>
+<script src="/assets/art/ilju-index.js" defer></script>
+<script src="/store/birth-field.js" defer></script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "만세력 출생 차트 계산기", "url": "https://samra.cc/calc/star/", "applicationCategory": "LifestyleApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "KRW"}, "inLanguage": "ko", "publisher": {"@type": "Organization", "name": "삼라만상"}}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "홈", "item": "https://samra.cc/"}, {"@type": "ListItem", "position": 2, "name": "출생 차트"}]}</script>
 <style>
 .calc-form{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:20px 18px;margin:0 0 26px}
 .calc-form .row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
 .calc-form label{font-size:13px;font-weight:700;color:rgba(255,255,255,.55);display:block;margin-bottom:5px}
-.calc-form select,.calc-form input[type=number]{
+.calc-form select,.calc-form input[type=number],.calc-form .bf-in{
   width:100%;padding:11px 12px;border:1px solid rgba(255,255,255,.14);border-radius:12px;font-size:16px;
   background:rgba(255,255,255,.06);color:#F4F1FF;transition:border-color .15s,box-shadow .15s}
 /* 기본 select 화살표는 OS 마다 제각각이라(윈도우에선 회색 사각형) 직접 그린다. */
 .calc-form select{appearance:none;-webkit-appearance:none;padding-right:32px;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' stroke='%23a78bfa' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 11px center;background-size:11px}
-.calc-form select:focus,.calc-form input[type=number]:focus{outline:none;border-color:#a78bfa;
+.calc-form select:focus,.calc-form input[type=number]:focus,.calc-form .bf-in:focus{outline:none;border-color:#a78bfa;
   box-shadow:0 0 0 3px rgba(139,92,246,.22)}
 .calc-form .grow{flex:1;min-width:88px}
 /* 성별 세그먼트 — 두 개짜리 select 는 모바일에서 탭·시트·선택·닫기 4동작이다. 여기선 1동작. */
@@ -97,6 +99,19 @@
 .toolrail .tk{display:block;font-size:11.5px;font-weight:800;color:rgba(255,255,255,.45);letter-spacing:.04em}
 .toolrail strong{display:block;font-size:16px;margin:3px 0 3px}
 .toolrail span.sub{display:block;font-size:12.5px;color:rgba(255,255,255,.55);line-height:1.5}
+/* 생년월일 한 칸 — 감춘 날짜 행 자리에 들어가므로 그 행과 같은 아래 간격을 준다 */
+.calc-form .bf{margin-bottom:14px}
+/* 결과 단계 등장(MOTION_JS) — 칸은 투명도만, 큰 한자는 살짝 튀어 오른다. 인쇄·동작 줄이기에서는 즉시 보인다. */
+.rv{opacity:0;transform:translateY(12px)}
+.rv.rv-in{opacity:1;transform:none;transition:opacity .55s cubic-bezier(.22,1,.36,1) var(--rd,0ms),transform .55s cubic-bezier(.22,1,.36,1) var(--rd,0ms)}
+.rvc{opacity:0}
+.rvc.rvc-in{opacity:1;transition:opacity .5s cubic-bezier(.22,1,.36,1) var(--rd,0ms)}
+.myeongsik td.rvc .hj{transform:translateY(7px) scale(.9)}
+.myeongsik td.rvc-in .hj{transform:none;transition:transform .62s cubic-bezier(.34,1.56,.64,1) var(--rd,0ms)}
+.calc-btn{position:relative;overflow:hidden}
+.calc-btn:active{transform:scale(.975)}
+@media print{.rv,.rvc{opacity:1!important;transform:none!important}}
+@media (prefers-reduced-motion:reduce){.rv,.rvc{opacity:1!important;transform:none!important}.calc-btn:active{transform:none}}
 
 /* ── 출생 차트 휠 ─────────────────────────────────────────── */
 .wheel{display:block;width:100%;max-width:420px;margin:0 auto 14px;aspect-ratio:1}
@@ -168,7 +183,7 @@
 <form class="calc-form" id="f" onsubmit="return false">
 <div class="row"><div class="grow"><label>달력</label><div class="seg cal" role="group" aria-label="달력"><button type="button" class="on" data-g="S" data-for="cal">양력</button><button type="button" data-g="L" data-for="cal">음력</button><button type="button" data-g="LL" data-for="cal">음력 윤달</button></div><input type="hidden" id="cal" value="S" /></div></div>
   <div class="row">
-    <div class="grow"><label for="y">년</label><input id="y" type="number" min="1900" max="2026" value="1995" /></div>
+    <div class="grow"><label for="y">년</label><input id="y" type="number" min="1900" value="1995" /></div>
     <div class="grow"><label for="mo">월</label><select id="mo"></select></div>
     <div class="grow"><label for="d">일</label><select id="d"></select></div>
   </div>
@@ -353,7 +368,12 @@ document.addEventListener("DOMContentLoaded", function(){
   var sp = document.getElementById("savePair");
   if (sp && typeof savePairCard === "function") sp.addEventListener("click", savePairCard);
   warmEngine();
-  fillCities("city", true).then(restoreFromUrl, function(){});
+  // 생년월일 한 칸(/store/birth-field.js). URL 복원이 끝난 뒤에 붙여 그 값을 이어받는다.
+  // 원래 칸의 기본값(1995·1·1)은 이어받지 않는다 — 안 넣고 누르면 엉뚱한 명식이 나오던 자리.
+  // 이 도구는 도시 목록을 받은 뒤에 URL 을 복원하므로(비동기) 먼저 붙이고, 복원 뒤 pull() 로 끌어온다.
+  var BF = window.SamraBirth ? SamraBirth.enhance("", { ids:["y","mo","d"], row:".row", cal:"cal", share:true, polite:true,
+    minYear:1900, label:"생년월일", fieldId:"birth", prefill:false }) : null;
+  fillCities("city", true).then(function(){ restoreFromUrl(); if (BF) BF.pull(); }, function(){});
 });
 
 function readForm(){
@@ -403,8 +423,9 @@ function run(){ withEngine("go", runNow); }
 function runNow(){
   var err = document.getElementById("err"); err.style.display = "none";
   var v = readForm();
-  if (!v.y || v.y < 1900 || v.y > 2026){
-    err.textContent = "1900~2026년 사이로 입력해 주세요."; err.style.display = "block"; return;
+  var maxY = new Date().getFullYear();
+  if (!v.y || v.y < 1900 || v.y > maxY){
+    err.textContent = "생년월일을 넣어 주세요 (1900~" + maxY + "년)"; err.style.display = "block"; return;
   }
   var chart, t;
   try {
@@ -427,6 +448,7 @@ function runNow(){
   if (cta) cta.href = storeUrlWith(v);
   var res = document.getElementById("result");
   res.style.display = "block";
+  setTimeout(function(){ revealResult(res); }, 0);
   res.scrollIntoView({behavior:"smooth"});
   if (window.__track) window.__track("calc_done");
 }
@@ -698,6 +720,45 @@ function showCal(note){
   if (!el) return;
   el.textContent = note || "";
   el.style.display = note ? "block" : "none";
+}
+
+/* 결과 단계 등장 — 계산이 끝나면 결과가 한꺼번에 튀어나오던 것을 읽는 순서대로 차례로 띄운다.
+   명식 표는 년주 → 시주(오른쪽에서 왼쪽, 명리를 읽는 순서)로 칸이 떠오르고, 대운 칸은 차례로,
+   화면 아래 덩어리는 스크롤해서 들어올 때 올라온다. 동작 줄이기 설정이면 아무것도 하지 않는다. */
+function revealResult(root){
+  if (!root || !window.IntersectionObserver) return;
+  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  // 탭이 뒤에 있으면 등장을 건너뛴다 — 숨은 탭에서는 관찰자·프레임 콜백이 멈춰 결과가 투명한 채로 남는다.
+  if (document.visibilityState === "hidden") return;
+  var kids = Array.prototype.slice.call(root.children).filter(function(el){
+    return el.tagName !== "SCRIPT" && !el.hidden && getComputedStyle(el).display !== "none";
+  });
+  kids.forEach(function(el){ el.classList.remove("rv-in"); el.classList.add("rv"); el.style.removeProperty("--rd"); });
+  Array.prototype.forEach.call(root.querySelectorAll(".myeongsik tr"), function(tr){
+    Array.prototype.forEach.call(tr.children, function(td, i){
+      if (i === 0) return;                       // 0 = 구분 · 1 시주 · 2 일주 · 3 월주 · 4 년주
+      td.classList.remove("rvc-in"); td.classList.add("rvc");
+      td.style.setProperty("--rd", ((4 - i) * 90 + 140) + "ms");
+    });
+  });
+  Array.prototype.forEach.call(root.querySelectorAll(".dw-cell"), function(c, i){
+    c.classList.remove("rvc-in"); c.classList.add("rvc"); c.style.setProperty("--rd", (Math.min(i, 12) * 35) + "ms");
+  });
+  void root.offsetWidth;
+  function show(el){
+    el.classList.add("rv-in");
+    Array.prototype.forEach.call(el.querySelectorAll(".rvc"), function(c){ c.classList.add("rvc-in"); });
+  }
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){ if (e.isIntersecting){ show(e.target); io.unobserve(e.target); } });
+  }, { rootMargin: "0px 0px -6% 0px" });
+  var vh = window.innerHeight || 800, n = 0;
+  kids.forEach(function(el){
+    if (el.getBoundingClientRect().top < vh){
+      el.style.setProperty("--rd", (Math.min(n++, 5) * 70) + "ms");
+      setTimeout(function(){ show(el); }, 30);
+    } else io.observe(el);
+  });
 }
 
 </script>

@@ -300,3 +300,26 @@ a.cta:hover{text-decoration:none}
   .paper{padding:34px 24px 70px}
   .artgrid{grid-template-columns:repeat(3,1fr);gap:14px}
 }
+/* ══ 모션 토큰 · 페이지 전환 · 누름 — store/style.css 와 같은 곡선(두 파일이 같은 물리를 쓴다) ══
+   도감·계산기와 스토어가 서로 다른 제품처럼 움직이지 않게. 크로스 문서 전환은 크로미움 계열만 —
+   나머지 브라우저는 그냥 이동한다. prefers-reduced-motion 에서는 전부 끈다. */
+:root{--ease-out:cubic-bezier(.22,1,.36,1);--ease-spring:cubic-bezier(.34,1.56,.64,1)}
+@view-transition{navigation:auto}
+::view-transition-old(root){animation:vt-out .18s var(--ease-out) both}
+::view-transition-new(root){animation:vt-in .34s var(--ease-out) both}
+@keyframes vt-out{to{opacity:0}}
+@keyframes vt-in{from{opacity:0;transform:translateY(8px)}}
+.topbar{view-transition-name:site-head}
+.cta{position:relative;overflow:hidden;transition:transform .28s var(--ease-spring),filter .15s}
+.cta::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.26) 50%,transparent 65%);transform:translateX(-120%)}
+.cta:hover::after{animation:sheen .9s var(--ease-out)}
+@keyframes sheen{to{transform:translateX(120%)}}
+.cta:active,.quickcta a:active,.nav-calc:active{transform:scale(.975)}
+.linkgrid a,.artgrid a{transition:border-color .15s,transform .28s var(--ease-out)}
+.linkgrid a:hover,.artgrid a:hover{transform:translateY(-2px)}
+@media (prefers-reduced-motion:reduce){
+  @view-transition{navigation:none}
+  .cta::after{animation:none}
+  .cta:active,.quickcta a:active,.nav-calc:active,.linkgrid a:hover,.artgrid a:hover{transform:none}
+}
