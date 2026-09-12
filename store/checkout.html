@@ -263,7 +263,7 @@ document.getElementById("ck").innerHTML = `
   </div>
   <button class="ck-cta" id="go" data-cta="store-checkout-${p.slug}">${won(priceOf(p.slug))} 결제하고 받기 →</button>
   <p class="ck-fine" id="fine">${fineHtml("web")}</p>
-  <p class="ck-err" id="err"></p>
+  <p class="ck-err" id="err" role="alert" aria-live="assertive"></p>
 `;
 
 renumber();
@@ -324,6 +324,9 @@ function readPerson(prefix, label, nameRequired) {
   const hv = +$("#" + prefix + "H").value;
   if (!y || !mo || !d) throw new Error(label + " 생년월일을 채워줘 🌙");
   if (y < 1900 || y > new Date().getFullYear() || mo < 1 || mo > 12 || d < 1 || d > 31) throw new Error(label + " 생년월일을 다시 확인해줘");
+  const actual = new Date(y, mo - 1, d);
+  if (![y, mo, d].every(Number.isInteger) || actual.getFullYear() !== y || actual.getMonth() !== mo - 1 || actual.getDate() !== d)
+    throw new Error(label + " 생년월일이 실제로 있는 날짜인지 확인해줘");
   const name = $("#" + prefix + "Name").value.trim();
   if (nameRequired && !name) throw new Error("리포트에 불릴 이름을 넣어줘");
   return { name, gender: genders[prefix], birth: { y, mo, d, h: hv < 0 ? -1 : hv, mi: hv < 0 ? 0 : 30 } };

@@ -205,6 +205,9 @@
 .relist b{color:#F4F1FF}
 .relist a{color:#c4b5fd;font-weight:700}
 </style>
+<link rel="stylesheet" href="/store/journey.css">
+<script src="/store/reading-summary.js"></script>
+<script src="/store/reading-journey.js" defer></script>
 </head>
 <body>
 <header class="topbar">
@@ -254,6 +257,15 @@
 </form>
 
 <section id="result">
+  <section class="reading-intro" aria-labelledby="readingTitle">
+    <span class="journey-kicker">내 사주 · 무료 기본 풀이</span>
+    <h2 id="readingTitle">내 사주 읽기</h2>
+    <p id="readingSummary"></p>
+    <p class="reading-condition" id="readingCondition"></p>
+    <nav class="reading-nav" aria-label="결과 읽기 순서">
+      <a href="#sec-myeongsik">내 명식</a><a href="#sec-read">풀이 근거</a><a href="#sec-flow">대운 흐름</a>
+    </nav>
+  </section>
   <h2 id="sec-myeongsik">내 명식</h2>
   <table class="myeongsik" aria-label="사주 명식">
     <thead><tr><th>구분</th><th>시주</th><th>일주</th><th>월주</th><th>년주</th></tr></thead>
@@ -715,7 +727,11 @@ function StoreCalc(){ return jsRoot().StoreCalc; }
 function renderInterpret(v){
   var t;
   try { t = JSON.parse(SajuCalc().interpret(v.y,v.mo,v.d,v.h,v.mi,v.g,v.tst,v.lon)); }
-  catch(e){ return; }
+  catch(e){
+    document.getElementById("readingSummary").textContent = "명식은 계산됐지만 요약을 불러오지 못했어요. 아래 계산표를 확인하거나 다시 계산해 주세요.";
+    return;
+  }
+  document.getElementById("readingSummary").textContent = SamraReading.describe(t.strength || {});
 
   var gg = t.geokguk || {};
   document.getElementById("ggLabel").textContent = gg.hangul || "—";
@@ -833,6 +849,7 @@ function fillPillar(sfx, p){
 }
 function run(){ withEngine("go", runNow); }
 function runNow(){
+  document.getElementById("result").style.display = "none";
   var err = document.getElementById("err"); err.style.display="none";
   var v = readForm();
   var y=v.y, mo=v.mo, d=v.d, h=v.h, mi=v.mi, g=v.g, tst=v.tst, lon=v.lon;
@@ -841,6 +858,10 @@ function runNow(){
   var r;
   try { r = JSON.parse(SajuCalc().calculate(y,mo,d,h,mi,g,tst,lon)); }
   catch(e){ err.textContent="계산 중 오류가 났어요. 날짜를 확인해 주세요."; err.style.display="block"; return; }
+  document.getElementById("readingTitle").textContent = r.iljuKr + "일주, 먼저 이렇게 읽어보세요";
+  document.getElementById("readingCondition").textContent = "전통 명리 해석 · " +
+    (v.unk ? "출생시간 미상: 시주를 제외한 풀이이며, 시간을 확인하면 결과가 달라질 수 있어요. " : "입력한 출생 시각 기준. ") +
+    (v.tst ? "진태양시 보정 적용." : "진태양시 보정 안 함.");
   fillPillar("y", r.pillars.year); fillPillar("m", r.pillars.month);
   fillPillar("d", r.pillars.day);  fillPillar("t", r.pillars.time);
   document.getElementById("ss-t").innerHTML = r.pillars.time ? '<span class="ss">'+link(LINKS.sipsin[r.pillars.time.stemSipsin], r.pillars.time.stemSipsin)+'</span>' : '<span class="kr">시간 미상</span>';

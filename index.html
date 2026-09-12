@@ -19,6 +19,7 @@
 <meta name="theme-color" content="#0c0c14">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css">
 <link rel="stylesheet" href="/store/style.css">
+<link rel="stylesheet" href="/store/free-reading.css">
 <link rel="canonical" href="https://samra.cc/">
 <meta property="og:site_name" content="삼라만상">
 <meta property="og:url" content="https://samra.cc/">
@@ -27,6 +28,9 @@
 <script src="/assets/track.js" defer></script>
 <script src="/assets/art/ilju-index.js" defer></script>
 <script src="/store/birth-field.js" defer></script>
+<link rel="stylesheet" href="/store/journey.css">
+<script src="/store/reading-summary.js"></script>
+<script src="/store/reading-journey.js" defer></script>
 </head>
 <body>
 
@@ -58,10 +62,10 @@
   <section class="lead-hero wrap">
    <div class="lead-grid">
     <div class="lead-inner">
-      <p class="lead-eyebrow">구독 아닌 단건 · 고민 하나에 하나씩</p>
-      <h1 class="lead-title">고민 하나를,<br><span class="hl">여덟 글자로 끝까지</span></h1>
-      <p class="lead-sub">연애 · 재회 · 재물 · 시기 — 고민마다 다른 술사가 네 사주만 보고 길게 써.
-        지어낸 말이 아니라 만세력 엔진이 실제로 계산한 명식 위에서.</p>
+      <p class="lead-eyebrow">무료 명식 · 기본 풀이 · 계산 근거</p>
+      <h1 class="lead-title">내 사주를,<br><span class="hl">쉬운 말로 먼저</span></h1>
+      <p class="lead-sub">생년월일로 계산한 내 사주를 먼저 읽어봐.
+        기본 풀이와 전체 명식은 무료로, 고민별 긴 AI 리포트는 목차와 가격을 확인한 뒤 선택해.</p>
       <div class="lead-cta">
         <a class="lead-primary" href="#free">먼저 무료로 내 명식 보기</a>
         <a class="lead-secondary" href="#tests">고민 고르기 · <span id="priceNow"></span></a>
@@ -71,13 +75,13 @@
     <div class="lead-side" id="free">
     <div class="teaser-head fade-up">
       <div class="pill">🌙 생일만 넣으면 끝</div>
-      <h2>고르기 전에,<br><span class="hl">한번 봐볼래?</span></h2>
-      <p>이름이랑 생일 넣어봐. 네 여덟 글자를 진짜로 계산해서, 지금 너한테 가장 크게 흐르는 기운이 뭔지 바로 짚어줄게.</p>
+      <h2>내 사주부터,<br><span class="hl">무료로 읽어봐</span></h2>
+      <p>생년월일을 넣으면 기본 풀이를 바로 볼 수 있어. 이름은 선택이고, 태어난 시간은 몰라도 괜찮아.</p>
     </div>
     <div class="teaser-box">
       <form class="sj-form" id="sjForm" onsubmit="return false">
         <div class="sj-row">
-          <input class="sj-input" id="sjName" type="text" maxlength="20" placeholder="이름 (불릴 이름)" style="flex:1">
+          <input class="sj-input" id="sjName" type="text" maxlength="20" aria-label="이름 (선택)" placeholder="이름 (선택)" style="flex:1">
           <div class="sj-gender">
             <button type="button" id="gF" class="on">여</button>
             <button type="button" id="gM">남</button>
@@ -88,7 +92,7 @@
           <div class="sj-unit"><input class="sj-input" id="sjMo" type="number" inputmode="numeric" placeholder="1~12"><span>월</span></div>
           <div class="sj-unit"><input class="sj-input" id="sjD" type="number" inputmode="numeric" placeholder="1~31"><span>일</span></div>
         </div>
-        <select class="sj-select" id="sjH">
+        <select class="sj-select" id="sjH" aria-label="태어난 시간">
           <option value="-1">태어난 시 모름</option>
           <option value="0">자시 (23:30~01:30)</option>
           <option value="2">축시 (01:30~03:30)</option>
@@ -103,11 +107,18 @@
           <option value="20">술시 (19:30~21:30)</option>
           <option value="22">해시 (21:30~23:30)</option>
         </select>
-        <button class="draw-btn" id="sjGo" type="button">생일 넣고 바로 보기</button>
-        <p class="draw-hint" id="sjErr" style="display:none;color:#f9a8d4"></p>
+        <button class="draw-btn" id="sjGo" type="button">무료로 내 사주 보기</button>
+        <p class="draw-hint" id="sjErr" role="alert" style="display:none;color:#f9a8d4"></p>
       </form>
 
-      <div class="sj-result" id="sjResult">
+      <div class="sj-result" id="sjResult" aria-live="polite">
+        <section class="free-summary" aria-labelledby="sjSummaryTitle">
+          <span class="free-eyebrow">내 사주 · 기본 풀이</span>
+          <h3 id="sjSummaryTitle"></h3>
+          <p id="sjSummary"></p>
+          <p class="free-conditions" id="sjConditions"></p>
+        </section>
+        <details class="free-evidence" id="sjEvidence"><summary>명식과 풀이 근거 펼쳐보기</summary>
         <div class="sj-pillars" id="sjPillars"></div>
         <a class="sj-art" id="sjArt" href="#" style="display:none">
           <img id="sjArtImg" src="" alt="" width="440" height="246" loading="lazy" decoding="async" />
@@ -116,7 +127,7 @@
         <p class="sj-line" id="sjIlju"></p>
         <div class="sj-cards">
           <div class="dr-item">
-            <div class="t"><span class="nm">지금 가장 크게 흐르는 기운</span><span class="ori" id="sjGgWhy"></span></div>
+            <div class="t"><span class="nm">명식의 중심 구조 · 격국</span><span class="ori" id="sjGgWhy"></span></div>
             <p class="tx" id="sjGg" style="font-size:16px;font-weight:800;color:#fff"></p>
           </div>
           <div class="dr-item">
@@ -125,12 +136,13 @@
             <div class="sj-gauge-lb"><span id="sjHelpLb"></span><span id="sjWeakenLb"></span></div>
           </div>
           <div class="dr-item" id="sjHintBox" style="display:none">
-            <div class="t"><span class="nm">지금 들어야 할 조언</span></div>
+            <div class="t"><span class="nm">기본 풀이</span></div>
             <p class="tx" id="sjHint"></p>
           </div>
         </div>
-        <a class="dr-cta" href="#tests">이 사주, 열두 장으로 제대로 풀어보기 →</a>
-        <p class="draw-hint" style="margin-top:10px">명식 전체·대운·자미두수는 <a href="/calc/" style="color:#a78bfa;text-decoration:underline">무료 만세력 계산기</a>에서 더 볼 수 있어</p>
+        </details>
+        <a class="dr-cta" id="sjContinue" href="/calc/">무료로 전체 명식·대운 보기 →</a>
+        <p class="draw-hint">고민별 긴 해석이 필요하면 <a href="#tests">유료 리포트의 목차·가격 보기</a></p>
       </div>
     </div>
     </div>
@@ -329,18 +341,39 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.SamraBirth) SamraBirth.enhance("sj", { share: true, minYear: 1940 });
 });
 
+let readingRevision = 0;
+function clearReading() {
+  readingRevision++;
+  $("#sjResult").classList.remove("on");
+  $("#sjEvidence").open = false;
+}
+$("#sjForm").addEventListener("input", clearReading);
+$("#sjForm").addEventListener("change", clearReading);
+["#gF", "#gM"].forEach(id => $(id).addEventListener("click", clearReading));
+$("#sjContinue").addEventListener("click", () => window.__track?.("cta", "free-result-full"));
+$("#sjEvidence").addEventListener("toggle", () => {
+  if ($("#sjEvidence").open) window.__track?.("cta", "free-result-evidence");
+});
 document.getElementById("sjGo").addEventListener("click", () => {
+  clearReading();
+  const revision = readingRevision;
   const y = +$("#sjY").value, mo = +$("#sjMo").value, d = +$("#sjD").value;
   const hv = +$("#sjH").value;
   const maxY = new Date().getFullYear();
   if (!y || !mo || !d) { sjErr("생년월일을 채워줘 🌙"); return; }
   if (y < 1940 || y > maxY) { sjErr("연도는 1940~" + maxY + "년 사이로 넣어줘"); return; }
+  const date = new Date(y, mo - 1, d);
+  if (![y, mo, d].every(Number.isInteger) || date.getFullYear() !== y || date.getMonth() !== mo - 1 || date.getDate() !== d) {
+    sjErr("실제로 있는 날짜를 넣어줘. 예: 2월 30일은 계산할 수 없어."); return;
+  }
   sjErr("");
+  window.__track?.("cta", "free-reading-start");
   const btn = document.getElementById("sjGo");
   const label = btn.textContent;
   btn.disabled = true; btn.textContent = "하늘의 흐름 계산 중…";
   loadEngine().then(() => {
     btn.disabled = false; btn.textContent = label;
+    if (revision !== readingRevision) return;
     let r, t;
     const h = hv < 0 ? -1 : hv, mi = hv < 0 ? 0 : 30;
     try {
@@ -393,12 +426,21 @@ document.getElementById("sjGo").addEventListener("click", () => {
     if (t.hint) { $("#sjHint").textContent = t.hint; $("#sjHintBox").style.display = ""; }
     else $("#sjHintBox").style.display = "none";
 
+    $("#sjSummaryTitle").textContent = (name ? name + "님의 " : "나의 ") + r.iljuKr + "일주";
+    $("#sjSummary").textContent = SamraReading.describe(st);
+    $("#sjConditions").textContent = "양력 · 한국 표준시 · 태양시 보정 안 함. " +
+      (hv < 0 ? "출생시간 미상: 시주는 표시하지 않으며 시간에 따른 풀이에는 한계가 있어." : "선택한 시간대의 대표 시각으로 계산했어. 정확한 시각·출생지는 전체 계산기에서 조정할 수 있어.");
+    const query = new URLSearchParams({y: String(y), mo: String(mo), d: String(d), g: gender});
+    if (hv < 0) query.set("unk", "1");
+    else { query.set("h", String(h)); query.set("mi", String(mi)); }
+    $("#sjContinue").href = "/calc/?" + query.toString();
+    window.__track?.("calc_done", "home-free");
     const box = $("#sjResult");
     box.classList.add("on");
     box.scrollIntoView({ behavior: "smooth", block: "center" });
   }, () => {
     btn.disabled = false; btn.textContent = label;
-    sjErr("계산 엔진을 불러오지 못했어요. 새로고침해줘");
+    sjErr("계산 엔진을 불러오지 못했어요. 다시 보기 버튼을 눌러줘");
   });
 });
 
