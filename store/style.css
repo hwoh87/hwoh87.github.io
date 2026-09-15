@@ -1232,3 +1232,13 @@ body.report-page { background: #08070c; }
   .sticky-bar .go:active, .pd-cta:active, .price-card button:active { transform: none; }
 }
 
+/* ══ 상품 제공 정보 — 토스페이먼츠 심사 보완(무형 서비스 제공 기간 고지, 2026-09-16) ══
+   가격 카드 바로 아래에서 형태·제공 방법·제공 기간·환불을 한 번에 읽히게 한다. 기간 값은
+   서버 store_orders.expires_at(+365일)과 같아야 한다 — 서버를 바꾸면 이 표·약관 제4조·주문서도 같이. */
+.pd-info { margin: 14px 0 0; display: grid; gap: 1px; border-radius: 14px; overflow: hidden; border: 1px solid var(--line-strong); background: var(--line-strong); }
+.pd-info[hidden] { display: none; }
+.pd-info > div { display: grid; grid-template-columns: 76px 1fr; gap: 12px; padding: 10px 14px; background: #121019; font-size: 12.5px; line-height: 1.55; }
+.pd-info dt { color: rgba(255, 255, 255, 0.6); font-weight: 600; }
+.pd-info dd { margin: 0; color: rgba(255, 255, 255, 0.86); }
+.pd-info a { color: #ddd6fe; text-decoration: underline; text-underline-offset: 2px; }
+

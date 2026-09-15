@@ -170,7 +170,7 @@ const LEGAL_LINKS = `<a href="../legal/terms/" style="text-decoration:underline"
 function fineHtml(mode) {
   return mode === "app"
     ? `결제와 리포트 생성은 <b>만세력 앱</b>(Google Play)에서 이어져요 · 완성된 리포트는 앱 '내 리포트'에 보관돼요<br>${LEGAL_LINKS}<br>${BIZ_LINE}`
-    : `완성된 리포트는 이 브라우저의 '내 리포트'에 남고, PDF로 저장할 수 있어요 · 1년간 보관돼요<br>${LEGAL_LINKS}<br>${BIZ_LINE}`;
+    : `완성된 리포트는 이 브라우저의 '내 리포트'에 남고, PDF로 저장할 수 있어요 · 제공 기간은 결제일부터 12개월이에요<br>${LEGAL_LINKS}<br>${BIZ_LINE}`;
 }
 
 /** 덩어리 번호를 보이는 것만 세서 다시 매긴다 — 앱 인계로 갈아입으면 상대·아이 덩어리가 빠지므로
@@ -260,6 +260,8 @@ document.getElementById("ck").innerHTML = `
       <span><b>토스페이먼츠</b> 안전결제 · 카드 정보는 저희 서버에 남지 않아요</span></div>
     <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3.5 4.5v4.5H8"/></svg>
       <span>리포트를 <b>열어 보기 전</b>이면 결제일부터 7일 안에 <b>전액 환불</b> · <a href="../legal/refund/">환불정책</a></span></div>
+    <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+      <span><b>제공 기간</b> 결제일부터 12개월 · 결제 직후 바로 열람하는 디지털 콘텐츠</span></div>
   </div>
   <button class="ck-cta" id="go" data-cta="store-checkout-${p.slug}">${won(priceOf(p.slug))} 결제하고 받기 →</button>
   <p class="ck-fine" id="fine">${fineHtml("web")}</p>

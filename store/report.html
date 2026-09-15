@@ -56,7 +56,7 @@
   </div>
   <div class="rp-dock">
     <div class="in">
-      <p class="hint" id="dockHint">이 리포트는 1년간 보관돼요.<br>PDF로 내려받으면 평생 소장!</p>
+      <p class="hint" id="dockHint">이 리포트는 결제일부터 12개월 동안 열 수 있어요.<br>기간 안에 PDF로 저장해 두세요!</p>
       <a href="library.html" style="font-size:12px;font-weight:700;color:#6b5c3a;flex-shrink:0">내 리포트</a>
       <button class="pdf" id="pdfBtn" type="button" data-cta="store-report-pdf">📕 PDF로 소장하기</button>
     </div>
@@ -352,7 +352,7 @@ function renderView(data) {
     <p>${escHtml(READER.tag)}</p></div></div>`;
   paper += `<p class="rp-meta">이 리포트는 만세력 엔진의 실제 계산(원국·신살·대운·세운·월운) 위에서 ${escHtml(READER.name)} 술사(AI)가 ${escHtml(name)}님만을 위해 집필했어요.
     해석은 참고용 · 엔터테인먼트 목적이며 의료·법률·투자 판단의 근거가 될 수 없어요.
-    링크는 1년간 유효하고, PDF로 저장하면 계속 소장할 수 있어요.</p>`;
+    링크는 결제일부터 12개월 동안 열 수 있어요 — 기간 안에 PDF로 저장해 두세요.</p>`;
   $("#paperIn").innerHTML = paper;
 
   const askBtn = $("#askBtn");

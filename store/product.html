@@ -112,7 +112,7 @@ const FAQ = [
   ["태어난 시간을 몰라도 돼?", "돼. 시주만 비워 두고 여섯 글자로 계산해 — 일주·오행·대운은 그대로 나와서 해석의 뼈대는 충분해. 시간을 알면 더 정밀해지는 것뿐이야."],
   ["음력 생일인데?", "여기 입력은 양력 기준이야. 양력으로 바꿔서 넣어줘 — 헷갈리면 만세력 앱이 음력 변환을 지원해."],
   ["얼마나 걸려?", `생일을 넣으면 만세력 계산이 바로 돌고, ${r.name}의 리포트까지 1분 안팎이면 완성돼. 읽는 시간은 약 ${p.readMin}분이야.`],
-  ["나중에 다시 볼 수 있어?", "리포트는 1년간 제공돼. 같은 브라우저의 '내 리포트'에서 다시 열 수 있고 PDF로 내려받을 수 있어. 브라우저를 바꾸거나 기록을 지우면 목록이 사라질 수 있으니 주문번호도 보관해줘."],
+  ["나중에 다시 볼 수 있어?", "리포트는 결제일부터 12개월 동안 제공돼. 같은 브라우저의 '내 리포트'에서 다시 열 수 있고 PDF로 내려받을 수 있어. 브라우저를 바꾸거나 기록을 지우면 목록이 사라질 수 있으니 주문번호도 보관해줘."],
   ["사주 처음인데 어려워?", "전혀. 용어를 몰라도 되게 전부 풀어서 써주고, 계산표는 표와 게이지로 먼저 보여줘."],
   ["환불돼?", "리포트를 열람하기 전이면 결제일부터 7일 이내 전액 환불돼. 열람 후의 기준과 예외는 환불정책에서 확인해줘."],
 ];
@@ -217,11 +217,17 @@ document.getElementById("pd").innerHTML = `
         <span class="flag">단건</span>
         <p class="tier">${esc(p.title)} · 사주 분석 리포트</p>
         <p class="amount">${won(priceOf(p.slug))}</p>
-        <ul><li>${p.chaptersN}장 전체 리포트 + 명리 분석지</li><li>PDF 소장 · 내 리포트에 보관</li><li>구독 아님 — 이 리포트 하나만 결제해</li></ul>
+        <ul><li>${p.chaptersN}장 전체 리포트 + 명리 분석지</li><li>결제일부터 <b>12개월 제공</b> · 기간 안에 PDF 저장</li><li>구독 아님 — 이 리포트 하나만 결제해</li></ul>
         <button type="button" onclick="buy()">주문서로 가기</button>
       </div>
     </div>
     <p class="pd-price-tail" id="priceTail">카드 결제는 토스페이먼츠로 안전하게 처리돼. 결제하면 술사가 바로 붓을 들어.</p>
+    <dl class="pd-info" id="pdInfo">
+      <div><dt>상품 형태</dt><dd>디지털 콘텐츠 — 사주 분석 리포트 ${p.chaptersN}장 + 명리 분석지</dd></div>
+      <div><dt>제공 방법</dt><dd>결제 직후 웹에서 생성해 바로 열람 · PDF 저장</dd></div>
+      <div><dt>제공 기간</dt><dd>결제일로부터 12개월(365일)</dd></div>
+      <div><dt>환불</dt><dd>열람 전이면 결제일부터 7일 이내 전액 환불 · <a href="../legal/refund/">환불정책</a></dd></div>
+    </dl>
   </section>
 
   <div class="pd-close">
@@ -278,6 +284,8 @@ document.addEventListener("DOMContentLoaded", () => {
   window.__track?.("paywall_view", "store-product");
   webPayState(p.slug).then(state => {
     if (state !== "closed") return;
+    // 앱 인계면 제공 방법·기간이 앱 쪽 조건이라 웹 제공 정보 표를 감춘다.
+    const info = document.getElementById("pdInfo"); if (info) info.hidden = true;
     document.getElementById("priceTail").innerHTML =
       "웹 결제는 아직 준비 중이야 — 이 리포트는 <b>만세력 앱</b>에서 같은 값에 받을 수 있어. " +
       "주문서에 넣은 생년월일은 앱이 그대로 이어받아.";
