@@ -42,8 +42,13 @@
       // /pair/ 퍼널의 판정 기준이 광고 앵글별 전환율이라, 이 물림이 없으면 앵글을 구분할 수 없다.
       label: label || (FUNNEL[kind] ? CHAN : null),
       path: location.pathname,
-      ref: document.referrer || "",
-      mobile: !!mobile
+      ref: refHost(),
+      mobile: !!mobile,
+      source: ATTR.source,
+      landing_path: ATTR.path,
+      os: /android/i.test(navigator.userAgent) ? "android" :
+        /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+        (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1) ? "ios" : "other"
     });
     try {
       // sendBeacon 은 페이지를 떠나는 중에도 살아남는다(스토어 이동 클릭이 이 경우).
@@ -69,6 +74,33 @@
     } catch (e) { return null; }
   }
 
+  function refHost() {
+    try { return document.referrer ? new URL(document.referrer).origin : ""; }
+    catch (e) { return ""; }
+  }
+  function attribution() {
+    var host = refHost().replace(/^https?:\/\//, "");
+    var own = /^(samra\.cc|www\.samra\.cc|hwoh87\.github\.io)$/.test(host);
+    var payment = /(^|\.)tosspayments\.com$/.test(host);
+    var tagged = chan();
+    var source = tagged || (/^(.*\.)?naver\.com$/.test(host) ? "naver:organic" :
+      /^(www\.)?google\.[a-z.]+$/.test(host) ? "google:organic" :
+      host && !own && !payment ? "referral" : "direct");
+    var now = Date.now();
+    var current = {source: source, path: location.pathname, at: now};
+    try {
+      var old = JSON.parse(sessionStorage.getItem("samra_entry") || "null");
+      // Only tab-local source/path; no visitor ID, birth data or query strings.
+      // New external arrival/UTM resets attribution. Internal activity extends 30 minutes.
+      if (!tagged && (!host || own || payment) && old && now - old.at < 1800000 &&
+          /^[a-z0-9_:-]{1,49}$/.test(old.source) && /^\/(?!\/)[^?#]*$/.test(old.path)) {
+        current = {source: old.source, path: old.path, at: now};
+      }
+      sessionStorage.setItem("samra_entry", JSON.stringify(current));
+    } catch (e) { /* Storage disabled: retain current-page attribution. */ }
+    return current;
+  }
+  var ATTR = attribution();
   var CHAN = chan();
   send("pageview", CHAN);
 
@@ -79,4 +111,28 @@
   }, true);
 
   window.__track = send;
+
+  // Count actual exposure once per element/label, including dynamically added result links.
+  // Hidden result sections do not intersect; large cards use a small threshold.
+  if (window.IntersectionObserver && window.MutationObserver) {
+    var seen = new WeakMap();
+    var observed = new WeakSet();
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting || document.visibilityState === "hidden") return;
+        var el = entry.target;
+        var label = el.getAttribute("data-cta") || el.getAttribute("data-track-view");
+        if (!label || seen.get(el) === label) return;
+        seen.set(el, label);
+        send("cta_view", label);
+      });
+    }, {threshold: 0.1});
+    function scan() {
+      document.querySelectorAll("[data-cta],[data-track-view]").forEach(function (el) {
+        if (!observed.has(el)) { observed.add(el); io.observe(el); }
+      });
+    }
+    scan();
+    new MutationObserver(scan).observe(document.body, {childList: true, subtree: true});
+  }
 })();

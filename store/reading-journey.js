@@ -4,6 +4,7 @@
   if (!host || document.getElementById('readingJourney')) return;
   const section = document.createElement('section');
   section.id = 'readingJourney'; section.className = 'reading-journey';
+  section.setAttribute('data-track-view', 'reading-options');
   section.innerHTML = `<span class="journey-kicker">다음으로 궁금한 것</span><h3>내 고민으로 이어서 읽기</h3><p>관심 주제를 고르면 관련 유료 리포트의 목차와 가격을 확인할 수 있어요. 기본 계산은 계속 무료예요.</p><div class="journey-options" role="group" aria-label="관심 고민"></div><div class="journey-choice" aria-live="polite" hidden></div>`;
   const choices = [
     ['연애','love-sal','내 사주에 연애 살, 진짜 있을까','도화·홍염과 연애 흐름을 읽는 리포트'],
@@ -21,8 +22,21 @@
       const heading = document.createElement('h4'); heading.textContent = title;
       const text = document.createElement('p'); text.textContent = description;
       const link = document.createElement('a'); link.href = '/store/product.html?id=' + slug;
+      link.setAttribute('data-cta', 'reading-product-' + slug);
       link.textContent = '목차·가격 확인하기 →';
       box.append(heading,text,link);
+      if (typeof PRODUCT_BY_SLUG !== 'undefined' && PRODUCT_BY_SLUG[slug]) {
+        const product = PRODUCT_BY_SLUG[slug];
+        const details = document.createElement('p');
+        details.textContent = won(priceOf(slug)) + ' · 단건 리포트 · 전체 ' + product.chaptersN + '장';
+        box.insertBefore(details, link);
+        const contents = document.createElement('ul');
+        contents.setAttribute('aria-label', '리포트 목차 미리보기');
+        product.chapters.slice(0, 3).forEach(chapter => {
+          const item = document.createElement('li'); item.textContent = chapter; contents.append(item);
+        });
+        box.insertBefore(contents, link);
+      }
       window.__track?.('cta','reading-interest-' + slug);
     });
     section.querySelector('.journey-options').append(button);

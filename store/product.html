@@ -83,6 +83,8 @@ function buy() {
 
 const slug = new URLSearchParams(location.search).get("id");
 const p = PRODUCT_BY_SLUG[slug] || PRODUCTS[0];
+// Product arrival is distinct from selecting an interest on the free result.
+window.addEventListener('DOMContentLoaded', () => window.__track?.('paywall_view', 'store-product-' + p.slug));
 const c = CATS[p.cat];
 const r = READERS[p.reader];
 document.title = `${p.title} - ${c.label} 사주 분석 · 삼라만상`;
@@ -281,7 +283,6 @@ document.getElementById("sbPrice").textContent = won(priceOf(p.slug));
 /* 결제 채널을 서버에 물어보고 고지를 맞춘다 — 웹 결제가 닫혀 있는데 "카드 결제는 토스페이먼츠로"
    라고 적어 두면, 주문서까지 간 사람이 거기서야 앱으로 가라는 말을 듣는다(주문서도 같은 값을 본다). */
 document.addEventListener("DOMContentLoaded", () => {
-  window.__track?.("paywall_view", "store-product");
   webPayState(p.slug).then(state => {
     if (state !== "closed") return;
     // 앱 인계면 제공 방법·기간이 앱 쪽 조건이라 웹 제공 정보 표를 감춘다.
