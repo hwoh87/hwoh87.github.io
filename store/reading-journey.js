@@ -41,6 +41,7 @@
     });
     section.querySelector('.journey-options').append(button);
   });
+  const guide = document.createElement('a'); guide.href = '/#tests'; guide.textContent = '아직 고민 중이라면, 질문 두 개로 리포트 찾기 →'; guide.className = 'journey-guide'; guide.dataset.cta = 'reading-interest-guide-open'; section.append(guide);
   const oldSuggestions = host.querySelector('#xsell');
   if (oldSuggestions) {
     oldSuggestions.style.display = 'none';

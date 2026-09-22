@@ -14,6 +14,8 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css">
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="journey.css">
+<link rel="stylesheet" href="discovery.css">
+<script src="report-preview.js" defer></script>
 <script src="/assets/track.js" defer></script>
 <script src="store-api.js" defer></script>
 </head>
@@ -149,9 +151,11 @@ document.getElementById("pd").innerHTML = `
     <span>AI 사주 리포트 · 단건 구매</span>
     <strong>${won(priceOf(p.slug))}</strong>
     <p>${p.chaptersN}장 · 읽는 시간 약 ${p.readMin}분 · 계산 분석지 포함</p>
-    <a href="#report-contents">받게 될 목차 먼저 보기 ↓</a>
+    <a href="#report-preview">리포트 구성 먼저 넘겨보기 ↓</a>
   </div>
   <button type="button" class="pd-cta" onclick="buy()">${won(priceOf(p.slug))} · 주문서로 가기</button>
+
+  <section id="report-preview" aria-label="리포트 구성 미리보기"></section>
 
   <section>
     <h2 class="sec-t"><small>CHECK</small>이런 마음으로 왔다면</h2>
