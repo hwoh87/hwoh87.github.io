@@ -91,7 +91,7 @@
 .share-row{display:flex;align-items:center;gap:10px;margin:16px 0 0;flex-wrap:wrap}
 .share-btn{padding:11px 18px;border:1px solid #a78bfa;background:rgba(255,255,255,.03);color:#a78bfa;
   border-radius:999px;font-size:14px;font-weight:800;cursor:pointer}
-.share-msg{font-size:13px;color:rgba(255,255,255,.45)}
+.share-msg{font-size:13px;color:rgba(255,255,255,.45);overflow-wrap:anywhere;min-width:0}
 .toolrail{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:26px 0 0}
 .toolrail a{display:block;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:13px 15px;
   text-decoration:none;color:#ededed}
@@ -331,7 +331,7 @@
     <button class="share-btn" id="share" type="button">결과 링크 공유</button>
     <button class="share-btn" id="copyAi" type="button">AI 해석용으로 복사</button>
     <button class="share-btn" id="saveImg" type="button">명식 카드 저장</button>
-    <span class="share-msg" id="shareMsg"></span>
+    <span class="share-msg" id="shareMsg" role="status"></span>
   </div>
   <p class="note" style="margin-top:10px">복사한 내용을 챗봇에 붙여넣고 이렇게 물어보세요 —
     <em>"다음은 내 사주 명식이야. 성격의 강점과 약점을 짚어줘."</em> ·
@@ -591,7 +591,7 @@ function share(){
   var text = (SHARE_LABEL || "내 사주 명식") + " — 무료 만세력 계산기";
   if (window.__track) window.__track("cta", "share-calc");
   if (navigator.share){
-    navigator.share({title:text, url:url}).catch(function(){});
+    navigator.share({title:text, url:url}).catch(function(error){ if (!error || error.name !== "AbortError") msg.textContent = "공유창을 열지 못했어요. 링크를 복사해 주세요: " + url; });
     return;
   }
   var done = function(){ msg.textContent = "링크를 복사했어요"; setTimeout(function(){ msg.textContent=""; }, 2600); };

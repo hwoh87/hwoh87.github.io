@@ -91,7 +91,7 @@
 .share-row{display:flex;align-items:center;gap:10px;margin:16px 0 0;flex-wrap:wrap}
 .share-btn{padding:11px 18px;border:1px solid #a78bfa;background:rgba(255,255,255,.03);color:#a78bfa;
   border-radius:999px;font-size:14px;font-weight:800;cursor:pointer}
-.share-msg{font-size:13px;color:rgba(255,255,255,.45)}
+.share-msg{font-size:13px;color:rgba(255,255,255,.45);overflow-wrap:anywhere;min-width:0}
 .toolrail{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:26px 0 0}
 .toolrail a{display:block;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:13px 15px;
   text-decoration:none;color:#ededed}
@@ -269,7 +269,7 @@
 
   <div class="share-row">
     <button class="share-btn" id="share" type="button">결과 링크 공유</button>
-    <span class="share-msg" id="shareMsg"></span>
+    <span class="share-msg" id="shareMsg" role="status"></span>
   </div>
 
   <aside class="cta-box">
@@ -614,7 +614,7 @@ function share(){
   var title = (stars || (INTERP && INTERP.wuXingJu))
     ? ("명궁 " + (stars || "공궁") + (INTERP && INTERP.wuXingJu ? " · " + INTERP.wuXingJu.name : ""))
     : "내 자미두수 명반";
-  if (navigator.share){ navigator.share({title:title + " — 무료 자미두수 명반", url:url}).catch(function(){}); return; }
+  if (navigator.share){ navigator.share({title:title + " — 무료 자미두수 명반", url:url}).catch(function(error){ if (!error || error.name !== "AbortError") msg.textContent = "공유창을 열지 못했어요. 링크를 복사해 주세요: " + url; }); return; }
   var done = function(){ msg.textContent = "링크를 복사했어요"; setTimeout(function(){ msg.textContent=""; }, 2600); };
   if (navigator.clipboard && navigator.clipboard.writeText)
     navigator.clipboard.writeText(url).then(done, function(){ msg.textContent = url; });
