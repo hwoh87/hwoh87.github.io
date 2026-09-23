@@ -88,7 +88,14 @@ const engineRoot = () => window["engine-core"].com.samramanshang.manseryeok.orre
 // ── 보관함(localStorage) — 서버 계정 없이 이 브라우저에 남긴다 ──
 const LIB_KEY = "samra_store_library";
 function libAll() {
-  try { return JSON.parse(localStorage.getItem(LIB_KEY) || "[]"); } catch (e) { return []; }
+  try {
+    const list = JSON.parse(localStorage.getItem(LIB_KEY) || "[]");
+    // 저장소의 형식이 어긋나도 정상 리포트는 열 수 있게 한다. 읽을 때 원본은 덮어쓰지 않는다.
+    return Array.isArray(list) ? list.filter(x =>
+      x && typeof x === "object" && !Array.isArray(x) &&
+      typeof x.rid === "string" && x.rid.trim().length > 0
+    ) : [];
+  } catch (e) { return []; }
 }
 function libAdd(entry) {
   try {
