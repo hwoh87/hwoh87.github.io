@@ -1,0 +1,9 @@
+.rp-contents { margin: 0 0 32px; padding: 18px; border: 1px solid #cfc4b2; border-radius: 12px; color: #37332c; scroll-margin-top: 24px; }
+.rp-contents summary { cursor: pointer; font-weight: 800; padding: 8px 0; }
+.rp-contents ol { margin: 12px 0 0; padding-left: 24px; }
+.rp-contents a { display: block; padding: 10px 4px; color: #51348b; line-height: 1.6; overflow-wrap: anywhere; text-decoration: underline; text-underline-offset: 3px; }
+.rp-ch { scroll-margin-top: 24px; }
+.rp-toc-back { display: inline-block; margin-top: 16px; padding: 12px 0; color: #51348b; font-size: 14px; text-decoration: underline; }
+.rp-contents a:focus-visible, .rp-contents summary:focus-visible, .rp-toc-back:focus-visible { outline: 2px solid #51348b; outline-offset: 3px; }
+@media print { .rp-contents, .rp-toc-back { display: none; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }

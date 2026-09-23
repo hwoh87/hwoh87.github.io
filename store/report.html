@@ -20,6 +20,7 @@
     src:url(https://hangeul.pstatic.net/hangeul_static/webfont/MaruBuri/MaruBuri-SemiBold.woff2) format("woff2")}
 </style>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="report-navigation.css">
 <script src="/assets/track.js" defer></script>
 </head>
 <body class="report-page">
@@ -67,6 +68,7 @@
 
 <script src="catalog.js"></script>
 <script src="store-api.js"></script>
+<script src="report-navigation.js"></script>
 <script>
 const $ = s => document.querySelector(s);
 function toast(msg) {
@@ -299,21 +301,22 @@ function renderView(data) {
   // 0.30 으로는 금색 계열(인연·궁합 #fbbf24, 재물 #eab308)이 3.2:1 에 그친다 —
   // 0.50 이면 7색 전부 5.6:1 이상이면서 색상(hue)은 그대로 남는다.
   const chAccent = darkenHex(CAT.color, 0.50);
-  let paper = sheetOpeningHtml(data);
+  let paper = reportContentsHtml(data.chapters) + sheetOpeningHtml(data);
   const anchors = anchorSheetVisuals(data.chapters);
-  data.chapters.forEach(ch => {
+  data.chapters.forEach((ch, chapterIndex) => {
     if (ch.idx > 0) paper += `<div class="rp-divider" aria-hidden="true"><span>✦</span></div>`;
     const no = String(ch.idx + 1).padStart(2, "0");
-    paper += `<section class="rp-ch" style="--chacc:${chAccent}">
+    paper += `<section class="rp-ch" id="report-chapter-${chapterIndex}" tabindex="-1" aria-labelledby="report-heading-${chapterIndex}" style="--chacc:${chAccent}">
       <div class="rp-ch-head">
         <span class="rp-ch-med">${no}</span>
         <div class="rp-ch-tt">
           <p class="rp-ch-ovl">CHAPTER ${no}</p>
-          <h2 class="rp-ch-title">${escHtml(ch.title)}</h2>
+          <h2 class="rp-ch-title" id="report-heading-${chapterIndex}">${escHtml(ch.title)}</h2>
         </div>
       </div>
       ${anchors[ch.idx] ? `<div class="rp-ch-visual">${sheetVisualHtml(anchors[ch.idx], data)}</div>` : ""}
       <div class="rp-md">${mdToHtml(ch.body)}</div>
+      ${data.chapters.length > 1 ? '<a class="rp-toc-back" href="#report-contents">목차로 돌아가기 ↑</a>' : ""}
     </section>`;
   });
 
