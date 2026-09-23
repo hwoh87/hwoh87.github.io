@@ -106,12 +106,13 @@ function handoffUrl(v, slug) {
 
 const HOUR_OPTIONS = `
   <option value="-1">태어난 시 모름</option>
-  <option value="0">자시 (23:30~01:30)</option><option value="2">축시 (01:30~03:30)</option>
+  <option value="0">자시 · 새벽 (00:00~01:29)</option><option value="2">축시 (01:30~03:30)</option>
   <option value="4">인시 (03:30~05:30)</option><option value="6">묘시 (05:30~07:30)</option>
   <option value="8">진시 (07:30~09:30)</option><option value="10">사시 (09:30~11:30)</option>
   <option value="12">오시 (11:30~13:30)</option><option value="14">미시 (13:30~15:30)</option>
   <option value="16">신시 (15:30~17:30)</option><option value="18">유시 (17:30~19:30)</option>
-  <option value="20">술시 (19:30~21:30)</option><option value="22">해시 (21:30~23:30)</option>`;
+  <option value="20">술시 (19:30~21:30)</option><option value="22">해시 (21:30~23:29)</option>
+  <option value="23">자시 · 밤 (23:30~23:59)</option>`;
 
 function personForm(prefix, title, sub, nameLabel) {
   return `
