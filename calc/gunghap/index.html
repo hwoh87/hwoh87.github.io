@@ -599,7 +599,7 @@ function runNow(){
   var res = document.getElementById("result");
   res.style.display = "block";
   setTimeout(function(){ revealResult(res); }, 0);
-  res.scrollIntoView({behavior:"smooth"});
+  res.scrollIntoView({behavior:window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth"});
   if (window.__track) window.__track("calc_done");
 }
 

@@ -931,7 +931,7 @@ function runNow(){
   document.getElementById("result").style.display="block";
   setTimeout(function(){ revealResult(document.getElementById("result")); }, 0);
   centerStrips();
-  document.getElementById("result").scrollIntoView({behavior:"smooth"});
+  document.getElementById("result").scrollIntoView({behavior:window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth"});
   if (window.__track) window.__track("calc_done");
 }
 
