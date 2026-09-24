@@ -865,7 +865,7 @@ function runNow(){
   catch(e){ err.textContent="계산 중 오류가 났어요. 날짜를 확인해 주세요."; err.style.display="block"; return; }
   document.getElementById("readingTitle").textContent = r.iljuKr + "일주, 먼저 이렇게 읽어보세요";
   document.getElementById("readingCondition").textContent = "전통 명리 해석 · " +
-    (v.unk ? "출생시간 미상: 시주를 제외한 풀이이며, 시간을 확인하면 결과가 달라질 수 있어요. " : "입력한 출생 시각 기준. ") +
+    (v.unk ? "출생시간 미상: 정오 기준으로 계산하고 시주는 제외했어요. 절기 당일이나 밤의 날짜 경계에서는 년·월·일주도 달라질 수 있어요. 위의 시간대 비교로 가능한 명식을 확인해 주세요. " : "입력한 출생 시각 기준. ") +
     (v.tst ? "진태양시 보정 적용." : "진태양시 보정 안 함.");
   fillPillar("y", r.pillars.year); fillPillar("m", r.pillars.month);
   fillPillar("d", r.pillars.day);  fillPillar("t", r.pillars.time);
