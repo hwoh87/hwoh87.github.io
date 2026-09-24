@@ -374,7 +374,7 @@ function loadEngine(){
     var s = document.createElement("script");
     /* ⚠️ 파일명이 고정이라 엔진을 고쳐 배포해도 돌아온 방문자는 캐시된 구버전을 계속 쓴다
        (예전 '본원 오표기' 수정도 이런 식으로 늦게 도착했다). 내용 해시를 붙여 강제로 새로 받게 한다. */
-    s.src = "/calc/saju-engine.js?v=47503b1e5a";
+    s.src = "/calc/saju-engine.js?v=38a9d9c547";
     s.onload = function(){ res(window["engine-core"]); };
     s.onerror = function(){ __engP = null; rej(new Error("engine")); };
     document.head.appendChild(s);
