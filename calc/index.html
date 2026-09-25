@@ -590,6 +590,7 @@ function copyAi(){
 
 function share(){
   var msg = document.getElementById("shareMsg");
+  msg.textContent = "";
   var url = location.href;
   /* 결과를 제목에 담는다 — 공유 시트·카톡 본문에 그대로 뜬다.
      (og:image 는 정적 호스팅이라 쪽 단위 고정이므로 제목이 유일하게 개인화되는 자리다) */

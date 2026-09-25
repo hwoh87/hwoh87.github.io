@@ -762,6 +762,7 @@ function render(r, f){
 
 function share(){
   var msg = document.getElementById("shareMsg"), url = location.href;
+  msg.textContent = "";
   if (window.__track) window.__track("cta", "share-gunghap");
   var title = LAST_VERDICT ? LAST_VERDICT + " — 사주 궁합 계산기" : "우리 궁합 — 무료 궁합 계산기";
   if (navigator.share){ navigator.share({title:title, url:url}).catch(function(error){ if (!error || error.name !== "AbortError") msg.textContent = "공유창을 열지 못했어요. 링크를 복사해 주세요: " + url; }); return; }

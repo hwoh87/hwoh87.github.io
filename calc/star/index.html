@@ -673,6 +673,7 @@ function renderDeep(t){
 
 function share(){
   var msg = document.getElementById("shareMsg"), url = location.href;
+  msg.textContent = "";
   if (window.__track) window.__track("cta", "share-star");
   var title = LAST_CHART ? LAST_CHART + " — 무료 출생 차트" : "내 출생 차트 — 무료 출생 차트";
   if (navigator.share){ navigator.share({title:title, url:url}).catch(function(error){ if (!error || error.name !== "AbortError") msg.textContent = "공유창을 열지 못했어요. 링크를 복사해 주세요: " + url; }); return; }

@@ -607,6 +607,7 @@ function renderSanfang(thisYear){
 
 function share(){
   var msg = document.getElementById("shareMsg"), url = location.href;
+  msg.textContent = "";
   if (window.__track) window.__track("cta", "share-jami");
   /* 명궁 주성 + 오행국 — 명반에서 가장 먼저 말하는 두 가지다.
      ⚠️ wuXingJu.name 에 이미 '局'이 들어 있으므로 number+"국"을 덧붙이면 "土五局5국"이 된다. */
