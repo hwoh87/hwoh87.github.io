@@ -984,8 +984,11 @@ function toSolar(y, mo, d, mode){
   if (mode === "S" || !y) return {y:y, mo:mo, d:d, converted:null};
   try {
     var r = JSON.parse(SajuCalc().lunarToSolar(y, mo, d, mode === "LL"));
+    var actual = JSON.parse(SajuCalc().solarToLunar(r.year, r.month, r.day));
+    var adjusted = actual.year !== y || actual.month !== mo || actual.day !== d || actual.isLeap !== (mode === "LL");
     return {y:r.year, mo:r.month, d:r.day,
-            converted:"음력 " + y + "." + mo + "." + d + (mode === "LL" ? "(윤달)" : "")
+            converted:(adjusted ? "입력한 음력 날짜가 보정됐어요. 평달·윤달과 날짜를 다시 확인해 주세요. 적용: " : "")
+                      + "음력 " + actual.year + "." + actual.month + "." + actual.day + (actual.isLeap ? "(윤달)" : "(평달)")
                       + " → 양력 " + r.year + "." + r.month + "." + r.day};
   } catch(e){ return {y:y, mo:mo, d:d, converted:null}; }
 }
