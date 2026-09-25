@@ -218,7 +218,7 @@
     <div class="grow"><label>성별</label><div class="seg" role="group" aria-label="성별"><button type="button" class="on" data-g="M" data-for="g">남</button><button type="button" data-g="F" data-for="g">여</button></div><input type="hidden" id="g" value="M" /></div>
   </div>
   <button class="calc-btn" id="go">내 출생 차트 보기</button>
-  <p class="err" id="err"></p>
+  <p class="err" id="err" role="alert"></p>
   <p class="note" id="calNote" style="display:none"></p>
   <p class="note" style="margin-top:14px">음력 생일도 달력을 고르면 그대로 넣을 수 있어요. 시간을 모르면 태양·행성 별자리는 그대로 나오지만 <strong>상승궁(ASC)과 하우스는 나오지 않아요</strong> — 하루 사이에 열두 별자리가 다 지나가기 때문이에요. 별자리 계산에 성별은 쓰지 않지만, 앱에서 사주·자미두수까지 이어 보려면 필요해요.</p>
 </form>
@@ -438,7 +438,8 @@ function storeUrlWith(v){
 function run(){ withEngine("go", runNow); }
 function runNow(){
   var err = document.getElementById("err"); err.style.display = "none";
-  var v = readForm();
+  var v = readFormForCalculation();
+  if (!v) return;
   var maxY = new Date().getFullYear();
   if (!v.y || v.y < 1900 || v.y > maxY){
     err.textContent = "생년월일을 넣어 주세요 (1900~" + maxY + "년)"; err.style.display = "block"; return;
@@ -721,7 +722,7 @@ function carryBirth(v){
    노출해서(SajuCalc.lunarToSolar) 입력 단계에서만 양력으로 바꿔 넘긴다 —
    계산·URL·공유는 전부 양력 하나로 유지된다(두 체계가 섞이면 재계산에서 어긋난다). */
 function calMode(id){ var e = document.getElementById(id); return e ? e.value : "S"; }
-/** 음력이면 양력으로 바꿔 돌려준다. 실패하면 입력을 그대로 쓴다(계산을 막지 않는다). */
+/** 음력이면 양력으로 바꿔 돌려준다. 실패하면 계산을 중단하도록 예외를 전달한다. */
 function toSolar(y, mo, d, mode){
   if (mode === "S" || !y) return {y:y, mo:mo, d:d, converted:null};
   try {
@@ -732,7 +733,20 @@ function toSolar(y, mo, d, mode){
             converted:(adjusted ? "입력한 음력 날짜가 보정됐어요. 평달·윤달과 날짜를 다시 확인해 주세요. 적용: " : "")
                       + "음력 " + actual.year + "." + actual.month + "." + actual.day + (actual.isLeap ? "(윤달)" : "(평달)")
                       + " → 양력 " + r.year + "." + r.month + "." + r.day};
-  } catch(e){ return {y:y, mo:mo, d:d, converted:null}; }
+  } catch(e){ throw new Error("Lunar date conversion failed"); }
+}
+/** 변환 실패 시 이전 결과와 안내를 지우고 계산·저장으로 진행하지 않는다. */
+function readFormForCalculation(){
+  var err = document.getElementById("err");
+  err.style.display = "none";
+  showCal(null);
+  try { return readForm(); }
+  catch(e){
+    document.getElementById("result").style.display = "none";
+    err.textContent = "날짜를 변환하지 못했어요. 달력과 생년월일을 확인한 뒤 다시 계산해 주세요.";
+    err.style.display = "block";
+    return null;
+  }
 }
 /** 변환 안내를 폼 아래에 적는다(사용자가 맞게 들어갔는지 확인할 수 있어야 한다). */
 function showCal(note){
