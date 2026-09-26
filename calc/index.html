@@ -1290,7 +1290,7 @@ function renderXsell(boxId, picks, from){
     var carried = false;
     try { carried = !!JSON.parse(sessionStorage.getItem("samra.birth.v1") || "{}").y; } catch(e){}
     box.innerHTML = '<p class="xh">이 명식으로 더 깊이 읽기</p>'
-      + '<p class="xs">술사가 여덟 글자를 장마다 따로 풀어 쓰는 리포트예요.'
+      + '<p class="xs">계산한 명식을 바탕으로 AI가 장별 해석을 구성하는 유료 리포트예요.'
       + (carried ? " 여기 넣은 생년월일이 주문서에 그대로 이어져요." : "") + '</p>'
       + '<div class="xrow">' + cards + '</div>';
     box.hidden = false;
