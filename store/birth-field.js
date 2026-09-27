@@ -176,10 +176,11 @@
       '<div class="bf-box">' +
         '<input class="sj-input bf-in" id="' + fid + '" type="text" inputmode="numeric" maxlength="14"' +
         ' autocomplete="' + (opt.share ? "bday" : "off") + '"' +
+        ' aria-describedby="' + fid + '-message" aria-invalid="false"' +
         ' placeholder="생년월일 8자리 · 1995 03 02" aria-label="' + aria + ' 8자리">' +
         '<span class="bf-ok" aria-hidden="true"></span>' +
       "</div>" +
-      '<p class="bf-msg" role="status" aria-live="polite"></p>' +
+      '<p class="bf-msg" id="' + fid + '-message" role="status" aria-live="polite"></p>' +
       '<div class="bf-ilju" hidden>' +
         '<img alt="" width="96" height="54" decoding="async">' +
         '<div class="bf-t"><b></b><span>여덟 글자 중 ‘' + who + "’" + eul + T.tail + "</span></div>" +
@@ -222,6 +223,7 @@
       var bad = r.state === "bad" || (settled && r.state === "partial" && dg.length > 0);
       wrap.classList.toggle("is-ok", r.state === "ok");
       wrap.classList.toggle("is-bad", bad);
+      inp.setAttribute("aria-invalid", String(bad));
       msg.textContent = r.state === "bad" ? r.msg : (bad ? T.partial : "");
 
       if (r.state === "ok") {
