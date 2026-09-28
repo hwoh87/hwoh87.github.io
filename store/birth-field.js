@@ -131,6 +131,12 @@
   function save(patch) {
     try {
       var o = load();
+      // A different birthday must not inherit another person's checkout details.
+      if (patch.y !== undefined &&
+          (+o.y !== +patch.y || +o.mo !== +patch.mo || +o.d !== +patch.d)) {
+        delete o.name;
+        delete o.h;
+      }
       for (var k in patch) o[k] = patch[k];
       sessionStorage.setItem(KEY, JSON.stringify(o));
     } catch (e) { /* 사생활 보호 모드 등 — 저장 못 해도 입력은 된다 */ }
