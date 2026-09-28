@@ -441,7 +441,7 @@ document.getElementById("sjGo").addEventListener("click", () => {
     window.__track?.("calc_done", "home-free");
     const box = $("#sjResult");
     box.classList.add("on");
-    box.scrollIntoView({ behavior: "smooth", block: "center" });
+    box.scrollIntoView({ behavior: window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "center" });
   }, () => {
     btn.disabled = false; btn.textContent = label;
     sjErr("계산 엔진을 불러오지 못했어요. 다시 보기 버튼을 눌러줘");
