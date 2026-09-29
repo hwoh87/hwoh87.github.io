@@ -79,12 +79,21 @@ function toast(msg) {
   toast._t = setTimeout(() => t.classList.remove("on"), 2600);
 }
 function buy() {
+  if (!p) return;
   if (window.__track) window.__track("cta", "store-buy-" + (slug || "unknown"));
   location.href = "checkout.html?id=" + encodeURIComponent(p.slug);
 }
 
 const slug = new URLSearchParams(location.search).get("id");
-const p = PRODUCT_BY_SLUG[slug] || PRODUCTS[0];
+const p = Object.prototype.hasOwnProperty.call(PRODUCT_BY_SLUG, slug) ? PRODUCT_BY_SLUG[slug] : null;
+if (!p) {
+  document.title = "상품을 찾을 수 없어요 · 삼라만상";
+  document.getElementById("pd").innerHTML = `<section class="pd-close">
+    <h1>상품을 찾을 수 없어요</h1>
+    <p>상품 주소가 없거나 올바르지 않아요. 목록에서 원하는 리포트를 다시 골라 주세요.</p>
+    <a href="./" data-cta="store-product-not-found">리포트 목록 보기</a>
+  </section>`;
+} else {
 // Product arrival is distinct from selecting an interest on the free result.
 window.addEventListener('DOMContentLoaded', () => window.__track?.('paywall_view', 'store-product-' + p.slug));
 const c = CATS[p.cat];
@@ -296,6 +305,7 @@ document.addEventListener("DOMContentLoaded", () => {
       "주문서에 넣은 생년월일은 앱이 그대로 이어받아.";
   });
 });
+}
 </script>
 </body>
 </html>
