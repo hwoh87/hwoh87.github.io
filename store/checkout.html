@@ -129,18 +129,18 @@ function personForm(prefix, title, sub, nameLabel) {
   <h2 class="sec"><span class="no"></span>${title} <small>${sub}</small></h2>
   <form class="sj-form" onsubmit="return false">
     <div class="sj-row">
-      <input class="sj-input" id="${prefix}Name" type="text" maxlength="20" placeholder="${nameLabel}" style="flex:1">
-      <div class="sj-gender">
-        <button type="button" id="${prefix}GF" class="on">여</button>
-        <button type="button" id="${prefix}GM">남</button>
+      <input class="sj-input" id="${prefix}Name" aria-label="${nameLabel}" type="text" maxlength="20" placeholder="${nameLabel}" style="flex:1">
+      <div class="sj-gender" role="group" aria-label="${title} 성별">
+        <button type="button" id="${prefix}GF" class="on" aria-pressed="true">여</button>
+        <button type="button" id="${prefix}GM" aria-pressed="false">남</button>
       </div>
     </div>
     <div class="sj-row">
-      <div class="sj-unit"><input class="sj-input" id="${prefix}Y" type="number" inputmode="numeric" placeholder="1995"><span>연도</span></div>
-      <div class="sj-unit"><input class="sj-input" id="${prefix}Mo" type="number" inputmode="numeric" placeholder="1~12"><span>월</span></div>
-      <div class="sj-unit"><input class="sj-input" id="${prefix}D" type="number" inputmode="numeric" placeholder="1~31"><span>일</span></div>
+      <div class="sj-unit"><input class="sj-input" id="${prefix}Y" aria-label="${title} 태어난 연도" type="number" inputmode="numeric" placeholder="1995"><span>연도</span></div>
+      <div class="sj-unit"><input class="sj-input" id="${prefix}Mo" aria-label="${title} 태어난 월" type="number" inputmode="numeric" placeholder="1~12"><span>월</span></div>
+      <div class="sj-unit"><input class="sj-input" id="${prefix}D" aria-label="${title} 태어난 일" type="number" inputmode="numeric" placeholder="1~31"><span>일</span></div>
     </div>
-    <select class="sj-select" id="${prefix}H">${HOUR_OPTIONS}</select>
+    <select class="sj-select" id="${prefix}H" aria-label="${title} 태어난 시간">${HOUR_OPTIONS}</select>
   </form></div>`;
 }
 
@@ -150,10 +150,10 @@ function petForm() {
   <h2 class="sec"><span class="no"></span>우리 아이 <small>반려동물 정보</small></h2>
   <form class="sj-form" onsubmit="return false">
     <div class="sj-row">
-      <input class="sj-input" id="petName" type="text" maxlength="12" placeholder="아이 이름" style="flex:1.2">
-      <input class="sj-input" id="petSpecies" type="text" maxlength="12" placeholder="강아지 / 고양이 …" style="flex:1">
+      <input class="sj-input" id="petName" aria-label="반려동물 이름" type="text" maxlength="12" placeholder="아이 이름" style="flex:1.2">
+      <input class="sj-input" id="petSpecies" aria-label="반려동물 종류" type="text" maxlength="12" placeholder="강아지 / 고양이 …" style="flex:1">
     </div>
-    <div class="sj-unit"><input class="sj-input" id="petYear" type="number" inputmode="numeric" placeholder="2019"><span>태어난 해</span></div>
+    <div class="sj-unit"><input class="sj-input" id="petYear" aria-label="반려동물이 태어난 해" type="number" inputmode="numeric" placeholder="2019"><span>태어난 해</span></div>
     <p class="ck-hint">정확한 해를 모르면 추정 나이로 계산한 연도를 넣어줘 — 띠(년주) 기준으로 읽는 리딩이야.</p>
   </form></div>`;
 }
@@ -161,7 +161,7 @@ function petForm() {
 function extraForm() {
   if (!extraFields.length) return "";
   const rows = extraFields.map(f => `
-    <div class="sj-unit" style="margin-top:10px"><input class="sj-input" id="ex_${f.key}" type="number" inputmode="numeric" placeholder="${f.ph}"><span></span></div>
+    <div class="sj-unit" style="margin-top:10px"><input class="sj-input" id="ex_${f.key}" aria-label="${escHtml(f.label)} (선택)" type="number" inputmode="numeric" placeholder="${f.ph}"><span></span></div>
     <p class="ck-hint" style="margin-top:4px">${escHtml(f.label)}</p>`).join("");
   return `<div class="ck-block" id="blk-extra" data-no="plus">
   <h2 class="sec"><span class="no">＋</span>알면 더 깊어지는 것 <small>선택 입력</small></h2>${rows}</div>`;
@@ -320,6 +320,8 @@ const genders = { me: "F", pt: "F" };
     genders[prefix] = btn === f ? "F" : "M";
     f.classList.toggle("on", btn === f);
     m.classList.toggle("on", btn === m);
+    f.setAttribute("aria-pressed", String(btn === f));
+    m.setAttribute("aria-pressed", String(btn === m));
   }));
 });
 
