@@ -219,8 +219,7 @@ async function ensureGenerated(data) {
   $("#genBar").style.display = "";
   $("#genBar").classList.add("live");
   startLines(READER.name);
-  const doneBase = data.chunks - missing.length;
-  let doneCnt = 0;
+  const completedChapters = new Set(have);
   const baseTitle = document.title;
 
   /* 장 목록 — 이미 받아 둔 장은 ✓, 이번에 쓰는 청크의 장은 "쓰는 중". 청크는 병렬로 쓰므로 여러 줄이
@@ -243,8 +242,8 @@ async function ensureGenerated(data) {
   };
 
   const paint = () => {
-    const pct = Math.round(((doneBase + doneCnt) / data.chunks) * 100);
-    const doneCh = Math.min(data.total, (doneBase + doneCnt) * size);
+    const doneCh = completedChapters.size;
+    const pct = Math.round((doneCh / data.total) * 100);
     $("#genBarFill").style.width = pct + "%";
     $("#genPct").textContent = `${data.total}장 중 ${doneCh}장 완성`;
     // 탭을 옮겨 둔 사람도 제목 표시줄에서 진행을 본다
@@ -253,7 +252,11 @@ async function ensureGenerated(data) {
   paint();
 
   const results = await Promise.allSettled(missing.map(i =>
-    storeApi({ action: "generate", rid, chunk: i }).then(r => { doneCnt++; markChunk(i, "done"); paint(); return r; })
+    storeApi({ action: "generate", rid, chunk: i }).then(r => {
+      const [from, to] = ranges[i];
+      for (let k = from; k < to; k++) completedChapters.add(k);
+      markChunk(i, "done"); paint(); return r;
+    })
   ));
   const failed = results.filter(x => x.status === "rejected");
   $("#genBar").classList.remove("live");
