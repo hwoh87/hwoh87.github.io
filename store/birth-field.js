@@ -127,7 +127,12 @@
     return { state: "ok", y: y, m: m, d: d, lunar: false };
   }
 
-  function load() { try { return JSON.parse(sessionStorage.getItem(KEY) || "{}"); } catch (e) { return {}; } }
+  function load() {
+    try {
+      var value = JSON.parse(sessionStorage.getItem(KEY) || "{}");
+      return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+    } catch (e) { return {}; }
+  }
   function save(patch) {
     try {
       var o = load();
