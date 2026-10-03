@@ -265,7 +265,7 @@
 <section id="result">
   <section class="reading-intro" aria-labelledby="readingTitle">
     <span class="journey-kicker">내 사주 · 무료 기본 풀이</span>
-    <h2 id="readingTitle">내 사주 읽기</h2>
+    <h2 id="readingTitle" tabindex="-1">내 사주 읽기</h2>
     <p id="readingSummary"></p>
     <p class="reading-condition" id="readingCondition"></p>
     <nav class="reading-nav" aria-label="결과 읽기 순서">
@@ -939,6 +939,9 @@ function runNow(){
   document.getElementById("result").style.display="block";
   setTimeout(function(){ revealResult(document.getElementById("result")); }, 0);
   centerStrips();
+  if (document.activeElement === document.getElementById("go")) {
+    document.getElementById("readingTitle").focus({preventScroll:true});
+  }
   document.getElementById("result").scrollIntoView({behavior:window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth"});
   if (window.__track) window.__track("calc_done");
 }
