@@ -218,7 +218,7 @@ function sheetSinsalHtml(me) {
       <p class="sh-note" style="margin-top:0">원국에 강하게 도는 특수 신살이 없어요 — 소문의 살에 흔들릴 이유가 없다는 뜻이기도 해요.</p></div>`;
   }
   const chips = list.map(s =>
-    `<span class="sh-badge${/귀인|암록|금여|천덕|월덕|문창|학당|복성|천주/.test(s.name) ? " gold" : ""}">${escHtml(s.name)} <small>${escHtml(s.at.join("·"))}</small></span>`
+    `<span class="sh-badge${/귀인|암록|금여|천덕|월덕|문창|학당|복성|천주|관귀학관/.test(s.name) ? " gold" : ""}">${escHtml(s.name)} <small>${escHtml(s.at.join("·"))}</small></span>`
   ).join("");
   return `<div class="sh-card"><p class="sh-t">신살과 귀인 <small>궁위 표기 · 계산으로 확인된 것만</small></p>
     <div class="sh-badge-row">${chips}</div></div>`;
