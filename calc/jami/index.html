@@ -418,6 +418,21 @@ function restoreFromUrl(){
   ["y","mo","d","h","mi","g"].forEach(function(k){ set(k, q.get(k)); });
   set("city", q.get("lon"));
   if (typeof syncSegs === "function") syncSegs();
+  // 시간 미상 링크를 기본 0시 명반으로 바꾸지 않는다.
+  if (q.get("unk") === "1" || !q.get("h")){
+    var hour = document.getElementById("h");
+    if (!hour.querySelector('option[value=""]')){
+      var placeholder = document.createElement("option");
+      placeholder.value = ""; placeholder.textContent = "출생 시 선택";
+      hour.insertBefore(placeholder, hour.firstChild);
+    }
+    hour.value = "";
+    document.getElementById("result").style.display = "none";
+    var err = document.getElementById("err");
+    err.textContent = "자미두수는 출생 시간이 필요해요. 태어난 시를 선택한 뒤 계산해 주세요.";
+    err.style.display = "block";
+    return;
+  }
   run();
 }
 function storeUrlWith(v){
@@ -428,6 +443,13 @@ function storeUrlWith(v){
 function run(){ withEngine("go", runNow); }
 function runNow(){
   var err = document.getElementById("err"); err.style.display = "none";
+  if (document.getElementById("h").value === ""){
+    document.getElementById("result").style.display = "none";
+    err.textContent = "자미두수는 출생 시간이 필요해요. 태어난 시를 선택한 뒤 계산해 주세요.";
+    err.style.display = "block";
+    document.getElementById("h").focus();
+    return;
+  }
   var v = readFormForCalculation();
   if (!v) return;
   var maxY = new Date().getFullYear();
