@@ -240,7 +240,8 @@
   <h2 id="sec-wheel">출생 차트</h2>
   <svg class="wheel" id="wheel" viewBox="0 0 400 400" role="img"
        aria-label="출생 차트 — 황도 12궁과 하우스, 행성 배치"></svg>
-  <p class="note">상승궁(ASC)이 왼쪽 9시 방향, 천정(MC)이 위쪽이에요. 안쪽 선은 행성끼리 이루는 각이고,
+  <p class="note" id="wheelUnknown" style="display:none">출생 시간을 몰라 원반 차트는 표시하지 않아요. 아래에서 정오 기준 행성 배치를 확인해 주세요.</p>
+  <p class="note" id="wheelNote">상승궁(ASC)이 왼쪽 9시 방향, 천정(MC)이 위쪽이에요. 안쪽 선은 행성끼리 이루는 각이고,
     붉은 선은 긴장각(각·대립), 푸른 선은 조화각(삼각·육각)이에요.</p>
 
   <h2>행성 배치</h2>
@@ -490,7 +491,13 @@ function hexA(hex, a){
 
 function drawWheel(chart){
   var svg = document.getElementById("wheel");
-  if (!svg || !chart.houses || !chart.houses.length) return;
+  if (!svg) return;
+  var hasHouses = !!(chart.houses && chart.houses.length);
+  svg.innerHTML = "";
+  svg.style.display = hasHouses ? "block" : "none";
+  document.getElementById("wheelNote").style.display = hasHouses ? "block" : "none";
+  document.getElementById("wheelUnknown").style.display = hasHouses ? "none" : "block";
+  if (!hasHouses) return;
   var cx = 200, cy = 200;
   var rOut = 192, rZin = 160, rHouse = 116, rAsp = 112;
   var asc = chart.houses[0].cuspLongitude;
