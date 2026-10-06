@@ -660,7 +660,11 @@ function bindSegs(){
 function syncSegs(){
   Array.prototype.forEach.call(document.querySelectorAll(".seg button[data-for]"), function(b){
     var el = document.getElementById(b.dataset.for);
-    if (el) b.classList.toggle("on", el.value === b.dataset.g);
+    if (el) {
+      var selected = el.value === b.dataset.g;
+      b.classList.toggle("on", selected);
+      b.setAttribute("aria-pressed", selected ? "true" : "false");
+    }
   });
 }
 document.addEventListener("DOMContentLoaded", function(){ bindSegs(); syncSegs(); });
