@@ -84,9 +84,9 @@
       <form class="sj-form" id="sjForm" onsubmit="return false">
         <div class="sj-row">
           <input class="sj-input" id="sjName" type="text" maxlength="20" aria-label="이름 (선택)" placeholder="이름 (선택)" style="flex:1">
-          <div class="sj-gender">
-            <button type="button" id="gF" class="on">여</button>
-            <button type="button" id="gM">남</button>
+          <div class="sj-gender" role="group" aria-label="성별">
+            <button type="button" id="gF" class="on" aria-pressed="true">여</button>
+            <button type="button" id="gM" aria-pressed="false">남</button>
           </div>
         </div>
         <div class="sj-row">
@@ -320,6 +320,8 @@ let gender = "F";
   gender = id === "gF" ? "F" : "M";
   document.getElementById("gF").classList.toggle("on", gender === "F");
   document.getElementById("gM").classList.toggle("on", gender === "M");
+  document.getElementById("gF").setAttribute("aria-pressed", String(gender === "F"));
+  document.getElementById("gM").setAttribute("aria-pressed", String(gender === "M"));
 }));
 
 const PILLAR_LABELS = [["time", "시주"], ["day", "일주"], ["month", "월주"], ["year", "연주"]];
