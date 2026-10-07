@@ -7,6 +7,8 @@
 // 웹도 같은 값으로 판다(토스페이먼츠). 두 채널이 같은 상품을 다른 값에 파는 일을 막으려고
 // 한곳에서만 쓴다. 여기 숫자를 바꿀 때는 Play 콘솔 가격·appPrice() 를 함께 바꿔야 세 곳이 안 어긋난다.
 // (서버는 이 파일에서 생성된 store-catalog.gen.ts 를 읽으므로 export 스크립트 재실행 필수.)
+const STORE_CATALOG_VERSION = "2026-10-07";
+
 const PRICING = {
   solo: 9900,       // 나 혼자 보는 상품
   pair: 12900,      // 상대 생년월일이 필요한 상품
@@ -527,7 +529,7 @@ const PRODUCTS = [
     axes: "월운 재성 · 대운 접점 · 세운", chaptersN: 10, basisN: 8, readMin: 17,
     kicker: "재물 · 하반기 흐름 리딩",
     headline: "들어오는 달에 벌리고,\n새는 달에 오므린다",
-    pitch: "재물은 물과 같아서, 늘 흐르되 고이는 달이 따로 있는 법이지요. 남은 하반기의 월운을 그대의 재성과 겹쳐 달마다의 물길을 재고, 들어오는 달과 새는 달, 굳게 지켜야 할 시기와 그때마다의 손쓸 일까지 짚어 드리리다.",
+    pitch: "재물은 물과 같아서, 늘 흐르되 고이는 달이 따로 있는 법이지요. 2026년 9~12월의 월운을 그대의 재성과 겹쳐 달마다의 물길을 읽습니다. 지난달은 회고로, 남은 달은 계획으로 살펴보며 그때마다의 손쓸 일을 짚어 드리리다.",
     greeting: "허허, 토정이외다. 그대 재물의 물길이 어느 달에 붇고 어느 달에 마르는지, 지그시 헤아려 보지요.",
     came: [
       "하반기에 큰 지출 계획이 있어 불안하다",
@@ -595,8 +597,31 @@ const STORE_ANGLES = {
   "why-breakup": "extra.metYear/endYear 가 있으면 years 에서 그 해 간지·십신·tone 을 찾아 만남과 균열의 운을 복기하라(없으면 최근 3년 흐름으로). 내 몫은 내 원국의 관계 축 약점(비겁 과다=고집, 상관=말 등 payload 근거로만), 그 사람 몫은 상대 원국에서. 자책 유도 금지 — 몫을 가르는 목적은 다음을 위한 정리임을 유지하라. 남은 기운의 정체는 gunghap 의 남은 합(끌림 축)과 현재 세운으로 갈라라.",
   "reunion": "재회 가능성은 gunghap 의 합 구조(끌림 축 점수)와 years/months 의 현재 흐름으로 읽어라. 창이 열리는 달은 months 에서 tone 길·약길이면서 두 사람 관계에 합이 드는 달로 1~2개만. 상대의 현재를 단정하지 말고('비어 있다' 확정 금지) 흐름의 결로 말하라. 연락은 한 번의 가벼운 안부까지만 제안하고 상대의 답이 없으면 멈추는 것까지가 예의임을 실천 장에 포함하라 — 집착·반복 연락 조장 금지.",
   "money-bowl": "interpret 의 십신 분포에서 정재·편재의 위치·개수로 그릇의 모양을 재고, 식상→재로 이어지는 통로의 유무, 비겁의 개수·위치를 새는 구멍으로 읽어라. 재성이 없으면 없다고 말하고 무재(無財) 사주의 결(재를 좇기보다 식상을 기르는 경로)로 풀어라. 특정 투자상품·종목·금액 언급 금지 — 모으기/불리기 조언은 '결' 수준(꾸준형/승부형, 자동이체형/프로젝트형)까지만.",
-  "money-months": "months 에서 남은 하반기(9~12월)의 달들을 골라 달마다 재성(正財·偏財)이 드는지와 tone 을 함께 읽어라. 들어오는 달 = 재성+길 tone, 새는 달 = 비겁·겁재가 들거나 흉 tone, 지킬 달 = 沖·공망 걸린 달. 금액·수익률 예측 금지, 투자 지시 금지 — 손쓸 일은 행동의 결(계약은 상순에, 큰 지출은 미루기 등)로만. 직답 '얼마나 고이는가'는 숫자가 아니라 흐름의 기울기로 답하라.",
+  "money-months": "대상 기간은 반드시 2026년 9~12월이다. months 에 제공된 해당 연도·월 네 개만 사용하고 다른 해의 같은 달을 섞지 마라. now 보다 이전인 월은 회고, 현재·미래 월은 참고용 계획으로 구분하라. 달마다 실제 ganji·stemSipsin·tone 을 근거로 재성의 흐름을 읽어라. 월운에 없는 충·공망이나 구체 날짜의 길흉을 만들지 마라. 금액·수익률 예측과 투자 지시는 금지한다. 손쓸 일은 지출 점검·기록·계획 같은 행동의 결로만 제안하고 직답은 숫자가 아니라 흐름의 기울기로 답하라.",
 };
+
+// 구매 계약과 진열 메타는 함께 내보내되, 판매 종료가 기존 주문을 삭제하지는 않는다.
+for (const p of PRODUCTS) {
+  p.catId = p.cat;
+  p.catalogVersion = STORE_CATALOG_VERSION;
+  p.searchText = [p.title, p.kicker, p.bullets, CATS[p.cat].label, READERS[p.reader].name].join(" ");
+  p.saleEndsAt = p.slug === "money-months" ? "2027-01-01T00:00:00+09:00" : null;
+  p.fixedPeriod = p.slug === "money-months" ? { year: 2026, fromMonth: 9, toMonth: 12 } : null;
+}
 
 const PRODUCT_BY_SLUG = Object.fromEntries(PRODUCTS.map(p => [p.slug, p]));
 const FEATURED = PRODUCTS.filter(p => p.featured);
+
+function storeAvailable(product, now = Date.now()) {
+  return !!product && (!product.saleEndsAt || Number(now) < Date.parse(product.saleEndsAt));
+}
+
+/** 편집 추천과 짧게 읽는 순. 개인 명식·판매량을 근거로 한 추천으로 표현하지 않는다. */
+function selectStoreProducts({ query = "", category = "all", sort = "recommended", now = Date.now() } = {}) {
+  const words = String(query).normalize("NFKC").toLocaleLowerCase("ko-KR").trim().split(/\s+/).filter(Boolean);
+  return PRODUCTS.map((p, index) => ({ p, index }))
+    .filter(({ p }) => storeAvailable(p, now) && (category === "all" || p.catId === category))
+    .filter(({ p }) => words.every(word => p.searchText.normalize("NFKC").toLocaleLowerCase("ko-KR").includes(word)))
+    .sort((a, b) => (sort === "reading" ? a.p.readMin - b.p.readMin : Number(!!b.p.featured) - Number(!!a.p.featured)) || a.index - b.index)
+    .map(({ p }) => p);
+}

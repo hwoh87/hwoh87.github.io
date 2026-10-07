@@ -4,16 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>내 리포트 · 삼라만상</title>
-<meta name="robots" content="noindex">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
-<meta name="theme-color" content="#0c0c14">
+<meta name="theme-color" content="#191b1c">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css">
 <link rel="stylesheet" href="style.css">
 <script src="/assets/track.js" defer></script>
+<link rel="stylesheet" href="premium.css">
 </head>
 <body>
 
@@ -40,7 +42,10 @@
     <h2>내 리포트</h2>
   </div>
   <p style="line-height:1.8;color:#bbb2c8">이 브라우저에서 주문한 리포트를 다시 열 수 있어요. 결제 취소·미완료 주문도 목록에 남을 수 있으며, 열면 상태를 확인할 수 있어요.</p>
+  <div class="shop-controls"><label class="shop-search">리포트 검색<input id="librarySearch" type="search" placeholder="제목 또는 이름" autocomplete="off"></label><label>상태<select id="libraryFilter"><option value="all">전체</option><option value="pending">미결제</option><option value="confirming">결제 확인 중</option><option value="generating">생성 중</option><option value="ready">완성</option><option value="retry">재시도 필요</option><option value="expired">만료</option></select></label></div>
+  <p id="libraryNotice" role="status" class="shop-result-count">주문 상태를 확인하고 있어요.</p><button class="payment-retry" id="libraryRefresh" type="button">상태 다시 확인</button>
   <div id="list"></div>
+  <section class="recovery-form" aria-labelledby="recoveryTitle"><h3 id="recoveryTitle">개인 복구 링크로 불러오기</h3><p>다른 기기에서 저장한 개인 복구 링크를 붙여넣으면 리포트를 이 보관함에 추가해요. 링크를 가진 사람은 전체 리포트를 열 수 있으니 본인만 보관해 주세요.</p><label for="recoveryInput">개인 복구 링크</label><input id="recoveryInput" type="url" autocomplete="off" placeholder="https://samra.cc/store/recover/#rid=…"><button id="recoveryImport" type="button">리포트 불러오기</button><p id="recoveryError" role="alert"></p></section>
   <section class="lib-empty" style="margin-top:24px">
     <h3>결제한 리포트가 안 보이나요?</h3>
     <p>주문했던 기기와 브라우저에서 먼저 확인해 주세요. 목록을 찾을 수 없으면 주문번호와 결제 일시를 준비해 문의해 주세요.</p>
@@ -51,7 +56,7 @@
 <footer class="site-foot">
   <div class="inner">
     <p class="tag">여기 목록은 <b>이 브라우저에서 만든 리포트</b>예요 · 이 브라우저에만 저장돼요</p>
-    <p class="fine">브라우저를 바꾸거나 기록을 지우면 목록이 사라져요 — PDF로 내려받아 소장해줘.
+    <p class="fine">브라우저를 바꾸거나 기록을 지우면 목록이 사라져요 — 개인 복구 링크와 PDF를 저장해 주세요.
     목록을 잃었는데 결제한 리포트가 있으면 문의처로 알려줘.</p>
     <p class="fine bizinfo">오효컴퍼니 · 대표 오효완 · 사업자등록번호 520-24-01358 · 통신판매업신고 제2026-서울관악-0773호<br>
     서울특별시 관악구 성현로 80 · 010-8504-3265 · ohy3264@gmail.com</p>
@@ -60,27 +65,6 @@
 
 <script src="catalog.js"></script>
 <script src="store-api.js"></script>
-<script>
-const list = libAll();
-const host = document.getElementById("list");
-if (!list.length) {
-  host.innerHTML = `<div class="lib-empty">이 브라우저에 저장된 리포트가 없어요.<br>
-    리포트는 만든 <b>브라우저에 남아요</b> — 다른 기기에서 만든 건 여기 보이지 않아요.<br>
-    <a href="./#tests" style="color:#a78bfa;text-decoration:underline">사주 분석 둘러보기 →</a></div>`;
-} else {
-  host.innerHTML = list.map(x => {
-    const p = PRODUCT_BY_SLUG[x.slug];
-    const d = x.at ? new Date(x.at).toLocaleDateString("ko-KR") : "";
-    return `<a class="lib-card" href="report.html?rid=${encodeURIComponent(x.rid)}">
-      ${p ? `<img src="art/covers/${p.slug}.webp" alt="">` : ""}
-      <div style="min-width:0">
-        <p class="tt">${x.title ? escHtml(x.title) : "사주 리포트"}</p>
-        <p class="mt">${x.name ? escHtml(x.name) + "님 · " : ""}${d}${x.sig ? ` · “${escHtml(x.sig)}”` : ""}</p>
-      </div>
-      <span class="go">열기 →</span>
-    </a>`;
-  }).join("");
-}
-</script>
+<script src="library.js"></script>
 </body>
 </html>

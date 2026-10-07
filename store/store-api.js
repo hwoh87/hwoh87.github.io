@@ -22,6 +22,19 @@ async function storeApi(body) {
 }
 
 const STORE_ERR_KR = {
+  bad_recovery_link: "삼라만상 개인 복구 링크를 확인해 주세요.",
+  original_channel_required: "이 주문을 만든 원래 결제 채널에서 결제를 이어 주세요.",
+  original_channel_unknown: "과거 주문의 결제 채널을 확인할 수 없어요. 주문번호로 문의해 주세요.",
+  sale_closed: "이 리포트는 판매가 종료되었어요. 이미 구매한 리포트는 계속 열 수 있어요.",
+  payment_in_progress: "결제가 진행 중이에요. 새 결제를 시작하지 않고 잠시 후 상태를 다시 확인해 주세요.",
+  payment_not_payable: "취소되거나 환불된 주문은 다시 결제할 수 없어요. 주문 내역을 확인해 주세요.",
+  web_orders_closed: "현재 웹 결제가 닫혀 있어요. 기존 주문번호를 보관하고 나중에 다시 확인해 주세요.",
+  payment_not_configured: "결제 연결이 준비되지 않았어요. 잠시 후 다시 확인해 주세요.",
+  storage_unavailable: "주문 정보를 불러오지 못했어요. 잠시 후 다시 확인해 주세요.",
+  bad_fixed_period: "기간별 계산 근거를 복구하지 못했어요. 주문번호로 문의해 주세요.",
+  sale_ended: "이 리포트는 판매가 종료되었어요. 이미 구매한 리포트는 계속 열 수 있어요.",
+  generation_in_progress: "다른 창에서 이어 쓰는 중이에요. 잠시 후 다시 확인해 주세요.",
+  fixed_period_context_required: "기간별 계산 근거를 복구하지 못했어요. 주문번호로 문의해 주세요.",
   minor_blocked: "이 분석은 만 19세 이상만 신청할 수 있어요.",
   rate_limited: "요청이 너무 잦았어요. 잠시 후 다시 시도해줘.",
   bad_inputs: "입력값을 다시 확인해줘 — 생년월일이 올바른지 봐줘.",
@@ -39,35 +52,33 @@ const STORE_ERR_KR = {
 const storeErrMsg = e =>
   STORE_ERR_KR[e && e.code] || "잠시 연결이 매끄럽지 않았어요. 다시 시도해줘.";
 
-// ── 웹 결제가 지금 열려 있는가 ────────────────────────────────
-/** 서버(STORE_WEB_ORDERS 플래그 + 토스 키)가 웹 카드 결제를 실제로 받는 상태인지 물어본다.
- *
- *  정적 페이지(GitHub Pages)와 서버는 따로 배포돼서 "카드로 결제돼요"라고 적힌 화면이
- *  닫혀 있는 서버를 보고 있는 순간이 늘 있다. 그 어긋남을 **결제 버튼을 누른 뒤에** 알리면,
- *  폼을 다 채우고 명식까지 세운 사람이 아무 설명 없이 Play 스토어로 튕긴다. 그래서 화면이
- *  먼저 물어보고, 닫혀 있으면 처음부터 '앱에서 이어받기'로 갈아입는다.
- *
- *  ⚠️ 전용 엔드포인트가 아니라 create 의 웹 게이트를 이용한다 — store-report 는 웹 채널 차단을
- *     **입력 검증·레이트리밋보다 먼저** 판정하므로, inputs 없이 부르면 주문도 만들지 않고
- *     레이트리밋도 쓰지 않은 채 게이트 상태만 돌아온다(서버 쪽에도 이 순서를 지키라는 주석이 있다).
- *  결제 키만 빠진 경우(payment_not_configured)는 입력을 봐야 나오므로 여기서는 못 잡는다 —
- *  그건 클릭 시점 폴백이 받는다.
- *
- *  @returns Promise<"open"|"closed"|"unknown">  unknown = 못 물어봤다(화면을 그대로 둔다).
- */
-const WEBPAY_KEY = "samra_store_webpay";
-function webPayState(slug) {
+// Read-only capability lookup. Unknown never enables payment; no persisted optimistic cache.
+async function webPayState(slug) {
   try {
-    const cached = sessionStorage.getItem(WEBPAY_KEY);
-    if (cached) return Promise.resolve(cached);
-  } catch (e) { /* 프라이빗 모드 — 캐시 없이 매번 물어본다 */ }
-  return storeApi({ action: "create", slug })
-    .then(() => "open")
-    .catch(e => e.code === "web_orders_closed" ? "closed" : e.code ? "open" : "unknown")
-    .then(state => {
-      if (state !== "unknown") { try { sessionStorage.setItem(WEBPAY_KEY, state); } catch (e) {} }
-      return state;
-    });
+    const config = await storeApi({ action: "config", slug, platform: "web" });
+    if (!config || typeof config.canPurchase !== "boolean") return "unknown";
+    if (config.reason === "sale_closed" || config.reason === "sale_ended") return "ended";
+    return config.canPurchase ? "open" : "closed";
+  } catch (_) { return "unknown"; }
+}
+
+// The same payment launcher serves new orders and resumed orders, retaining the original rid.
+let __storeToss = null;
+async function payStoreOrder(order) {
+  if (!order.payment) throw new Error("payment_missing");
+  if (!__storeToss) __storeToss = new Promise((resolve, reject) => {
+    const script = document.createElement("script"); script.src = "https://js.tosspayments.com/v2/standard";
+    script.onload = () => resolve(window.TossPayments);
+    script.onerror = () => { __storeToss = null; reject(new Error("pgsdk")); };
+    document.head.appendChild(script);
+  });
+  const Toss = await __storeToss, pm = order.payment;
+  const back = new URL("/store/report.html", location.origin); back.searchParams.set("rid", order.rid);
+  await Toss(pm.clientKey).payment({ customerKey: Toss.ANONYMOUS }).requestPayment({
+    method: "CARD", amount: { currency: "KRW", value: pm.amount }, orderId: pm.orderId,
+    orderName: pm.orderName, successUrl: back.toString(), failUrl: back.toString(),
+    card: { useEscrow: false, flowMode: "DEFAULT", useCardPoint: false, useAppCardOnly: false },
+  });
 }
 
 // ── KMP 엔진(landing/calc 공유 번들) ─────────────────────────
@@ -76,7 +87,7 @@ function loadEngine() {
   if (__engP) return __engP;
   __engP = new Promise((res, rej) => {
     const s = document.createElement("script");
-    s.src = "../calc/saju-engine.js";
+    s.src = "/calc/saju-engine.js?v=2026-10-07";
     s.onload = () => res(window["engine-core"]);
     s.onerror = () => { __engP = null; rej(new Error("engine")); };
     document.head.appendChild(s);
@@ -100,9 +111,98 @@ function libAll() {
 function libAdd(entry) {
   try {
     const list = libAll().filter(x => x.rid !== entry.rid);
-    list.unshift(entry);
-    localStorage.setItem(LIB_KEY, JSON.stringify(list.slice(0, 50)));
+    const prior = libAll().find(x => x.rid === entry.rid) || {};
+    list.unshift({ ...prior, ...entry });
+    localStorage.setItem(LIB_KEY, JSON.stringify(list));
   } catch (e) { /* 프라이빗 모드 등 — 보관함만 포기 */ }
+}
+
+// Private recovery is a bearer capability. Keep it in a fragment and out of telemetry.
+function recoveryUrl(rid) { return "https://samra.cc/store/recover/#rid=" + encodeURIComponent(rid); }
+function recoveryRid(value) {
+  try {
+    const u = new URL(String(value).trim());
+    if (u.origin !== "https://samra.cc" || u.username || u.password || u.pathname !== "/store/recover/") return null;
+    const id = new URLSearchParams(u.hash.slice(1)).get("rid");
+    return id && /^[A-Za-z0-9_-]{22}$/.test(id) ? id : null;
+  } catch (_) { return null; }
+}
+function libraryState(order, now = Date.now()) {
+  if (order.reason === "expired" || (order.expires_at && Date.parse(order.expires_at) <= now)) return "expired";
+  if (order.reason === "not_found") return "retry";
+  if (order.status === "confirming") return "confirming";
+  if (order.status === "pending") return "pending";
+  if (order.status === "paid" && (order.done || (order.total > 0 && order.completed >= order.total))) return "ready";
+  if (order.generationFailed || order.generationState === "failed" || order.reason) return "retry";
+  if (order.status === "paid") return "generating";
+  return "checking";
+}
+const LIBRARY_STATE_LABELS = { pending:"미결제", confirming:"결제 확인 중", generating:"생성 중 · 이어쓰기", ready:"완성", retry:"재시도 필요", expired:"만료", checking:"상태 확인 중" };
+async function refreshLibraryStatus(entries) {
+  const result = [];
+  const valid = entries.filter(entry => /^[A-Za-z0-9_-]{16,40}$/.test(entry.rid));
+  entries.filter(entry => !/^[A-Za-z0-9_-]{16,40}$/.test(entry.rid)).forEach(entry => libAdd({rid:entry.rid,reason:"not_found"}));
+  entries = valid;
+  for (let i = 0; i < entries.length; i += 50) {
+    const response = await storeApi({ action:"status", rids:entries.slice(i,i+50).map(x=>x.rid) });
+    for (const order of response.orders || []) { libAdd({...order,reason:order.reason || null,generationFailed:order.generationFailed || false}); result.push(order); }
+    for (const failure of response.errors || []) { const order = {rid:failure.rid, reason:failure.error}; libAdd(order); result.push(order); }
+  }
+  return result;
+}
+async function importRecoveryLink(value) {
+  const rid = recoveryRid(value);
+  if (!rid) throw Object.assign(new Error("bad_recovery_link"), {code:"bad_recovery_link"});
+  let data;
+  try { data = await storeApi({ action:"get", rid }); }
+  catch (error) {
+    if (error.code !== "expired") throw error;
+    const pending = await expiredPendingWebOrder(rid);
+    if (!pending) throw error;
+    libAdd(pending); return rid;
+  }
+  libAdd({rid,slug:data.slug,title:data.product?.title || data.title || "사주 리포트",name:data.inputs?.name || "",status:data.status,channel:data.channel,paymentPlatform:data.paymentPlatform,at:Date.parse(data.created_at)||Date.now(),expires_at:data.expires_at,done:data.done,completed:data.chapters?.length || 0,total:data.total});
+  return rid;
+}
+// An expired unpaid order may still have a provider receipt awaiting reconciliation.
+// Never infer a new payment or reopen an expired paid entitlement here.
+async function expiredPendingWebOrder(rid) {
+  try {
+    const result = await storeApi({action:"status",rids:[rid]});
+    return (result.orders || []).find(order => order.rid === rid && order.status === "pending" &&
+      (order.channel || order.paymentPlatform) === "web") || null;
+  } catch (_) { return null; }
+}
+function reportIdentity(data) {
+  const current = PRODUCT_BY_SLUG[data.slug] || {};
+  const snapshot = data.product || {};
+  const savedReader = snapshot.reader;
+  const readerId = typeof savedReader === "object" && savedReader ? savedReader.id : savedReader || current.reader;
+  const product = {...current,...snapshot,slug:data.slug,reader:readerId};
+  const reader = {...(READERS[readerId] || {name:"삼라",emoji:"",title:"명리 술사",tag:""}), ...(typeof savedReader === "object" && savedReader ? savedReader : {})};
+  const category = CATS[product.cat || product.catId] || {label:"사주 리포트",emoji:"",color:"#bda675"};
+  return {product,reader,category};
+}
+async function repairFixedPeriod(data, rid) {
+  if (!data.fixedPeriodRequired) return data;
+  await loadEngine();
+  const me = data.context?.me, day = me?.base?.pillars?.day?.ganzi;
+  if (!day) throw Object.assign(new Error("fixed_period_context_required"), {code:"fixed_period_context_required"});
+  const ys = me.interpret?.yongsin || {};
+  const months = JSON.parse(engineRoot().StoreCalc.monthRange(day[0],(ys.yong||[]).join(','),(ys.gi||[]).join(','),2026,9,4));
+  await storeApi({action:"repair_fixed_period",rid,months});
+  return storeApi({action:"get",rid});
+}
+
+/** Retry a historical seasonal order only after restoring its saved calculation facts. */
+async function resumeStoreOrder(rid) {
+  try { return await storeApi({action:"resume",rid,platform:"web"}); }
+  catch (error) {
+    if (error.code !== "fixed_period_context_required") throw error;
+    const data = await storeApi({action:"get",rid});
+    await repairFixedPeriod(data,rid);
+    return storeApi({action:"resume",rid,platform:"web"});
+  }
 }
 
 // ── 마크다운(서버 챕터 본문 부분집합) ─────────────────────────
@@ -243,14 +343,14 @@ function sheetDaewoonHtml(me) {
     <div class="sh-dw">${cells}</div></div>`;
 }
 
-function sheetMonthsHtml(me) {
-  const months = (me.months || []).slice(0, 12);
+function sheetMonthsHtml(me, fixedPeriod) {
+  const months = (fixedPeriod?.months || me.months || []).slice(0, 12);
   if (!months.length) return "";
   const cells = months.map(m =>
     `<div class="cell"><p class="m">${m.year % 100}.${m.month}</p>
      <p class="gz">${escHtml(m.ganji)}</p><p class="tn tn-${m.tone}">${m.tone}</p></div>`
   ).join("");
-  return `<div class="sh-card"><p class="sh-t">다가오는 12개월 <small>월건 기운 흐름</small></p>
+  return `<div class="sh-card"><p class="sh-t">${fixedPeriod ? escHtml(fixedPeriod.year + "년 " + fixedPeriod.fromMonth + "~" + fixedPeriod.toMonth + "월") : "다가오는 12개월"} <small>${fixedPeriod ? "지난달은 회고로 읽어요" : "월건 기운 흐름"}</small></p>
     <div class="sh-mo">${cells}</div></div>`;
 }
 
@@ -319,7 +419,7 @@ function sheetVisualHtml(kind, data) {
     case "elements": // 오행 저울 = 오행 분포 + 신강약 + 격국/용신 배지 묶음
       return `<div class="sheet">${[sheetElementsHtml(me), sheetStrengthHtml(me), sheetGeokYongHtml(me)].filter(Boolean).join("")}</div>`;
     case "sinsal": return `<div class="sheet">${sheetSinsalHtml(me)}</div>`;
-    case "months": return `<div class="sheet">${sheetMonthsHtml(me)}</div>`;
+    case "months": return `<div class="sheet">${sheetMonthsHtml(me, data.context?.fixedPeriod)}</div>`;
     case "daewoon": return `<div class="sheet">${sheetDaewoonHtml(me)}</div>`;
     default: return "";
   }
@@ -375,7 +475,7 @@ function renderSheetHtml(data) {
       parts.push(sheetPillarsHtml(ctx.partner, (inputs.partner && inputs.partner.name ? inputs.partner.name + "님" : "그 사람") + "의 원국"));
     }
   }
-  parts.push(sheetElementsHtml(me), sheetStrengthHtml(me), sheetGeokYongHtml(me), sheetSinsalHtml(me), sheetDaewoonHtml(me), sheetMonthsHtml(me));
+  parts.push(sheetElementsHtml(me), sheetStrengthHtml(me), sheetGeokYongHtml(me), sheetSinsalHtml(me), sheetDaewoonHtml(me), sheetMonthsHtml(me, ctx.fixedPeriod));
   parts.push(sheetPetHtml(ctx));
   return `<div class="sheet">${parts.filter(Boolean).join("")}</div>`;
 }

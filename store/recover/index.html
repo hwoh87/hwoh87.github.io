@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><title>개인 리포트 복구 · 삼라만상</title><link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="../premium.css"></head>
+<body><main class="recovery-main"><p class="eyebrow">PRIVATE REPORT</p><h1>개인 리포트 복구</h1><p>이 링크를 가진 사람은 전체 리포트를 열 수 있어요. 본인의 리포트인지 확인한 뒤 보관함에 추가해 주세요.</p><p id="message" role="status">링크를 확인하고 있어요.</p><button id="recover" class="recovery-button" type="button" hidden>내 보관함에 추가하고 열기</button><br><a href="../library.html" rel="noreferrer">내 리포트로 돌아가기</a></main><script src="../store-api.js"></script><script>
+const recoveryLink = "https://samra.cc/store/recover/" + location.hash;
+const valid = recoveryRid(recoveryLink);
+const message = document.getElementById('message'), button = document.getElementById('recover');
+// Bearer data stays in the fragment, which is never sent in HTTP or telemetry.
+if (valid) { message.textContent='개인 복구 링크가 준비됐어요.'; button.hidden=false; }
+else message.textContent='올바른 개인 복구 링크가 아니에요. 저장한 링크 전체를 다시 확인해 주세요.';
+button.addEventListener('click',async () => {button.disabled=true;message.textContent='리포트를 확인하고 있어요.';try {const rid=await importRecoveryLink(recoveryLink);location.replace('../report.html#rid='+encodeURIComponent(rid));}catch(e){message.textContent=storeErrMsg(e);button.disabled=false;}});
+</script></body></html>

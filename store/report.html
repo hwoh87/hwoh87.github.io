@@ -4,11 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>내 사주 리포트 · 삼라만상</title>
-<meta name="robots" content="noindex">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
-<meta name="theme-color" content="#0c0c14">
+<meta name="theme-color" content="#191b1c">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css">
 <link rel="stylesheet" href="/assets/hanja.css">
@@ -22,6 +23,7 @@
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="report-navigation.css">
 <script src="/assets/track.js" defer></script>
+<link rel="stylesheet" href="premium.css">
 </head>
 <body class="report-page">
 
@@ -78,11 +80,18 @@ function toast(msg) {
 }
 
 const QS = new URLSearchParams(location.search);
-const rid = QS.get("rid");
+const rid = QS.get("rid") || new URLSearchParams(location.hash.slice(1)).get("rid");
+// Payment return parameters are read once; remove personal capabilities before deferred telemetry runs.
+if (rid && window.history) history.replaceState(null, "", location.pathname + "#rid=" + encodeURIComponent(rid));
 // 토스 결제창은 결과를 쿼리로 싣고 이 페이지로 돌아온다(successUrl·failUrl 이 둘 다 여기다).
 //   성공 → paymentKey·orderId·amount   /   실패 → code·message
 // paymentKey 는 **승인 참조**다 — 이게 있어야 서버가 confirm_web 으로 실제 승인을 낼 수 있다.
-const PAY_CODE = QS.get("code"), PAY_MSG = QS.get("message"), PAY_KEY = QS.get("paymentKey");
+const PAY_CODE = QS.get("code"), PAY_MSG = QS.get("message");
+let PAY_KEY = QS.get("paymentKey");
+try {
+  if (PAY_KEY) sessionStorage.setItem("samra_pending_payment_"+rid,PAY_KEY);
+  else PAY_KEY = sessionStorage.getItem("samra_pending_payment_"+rid);
+} catch (_) {}
 let DATA = null;   // 서버 get 응답 — PDF 생성기도 이걸 쓴다
 let PROD = null, READER = null, CAT = null;
 
@@ -135,18 +144,38 @@ function chunkRanges(total, chunks, size) {
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-/**
- * 미결제 주문 화면의 CTA — **재주문**으로 바꿔 단다.
- *
- * ⚠️ 기본 버튼은 "이어서 다시 쓰기"(boot 재실행)인데, 결제가 안 된 주문에서는 다시 돌려도 같은
- *    화면이 그대로 다시 그려진다. 사용자 눈에는 "버튼이 안 눌린다"로 보인다(2026-09-08 실사용 제보).
- *    결제 전 주문에서 할 수 있는 유일한 다음 행동은 재주문뿐이라, 여기서는 링크를 지우고 버튼을 쓴다.
- */
-function reorderCta(slug) {
+function resumeCta(data) {
   const btn = $("#genRetry");
-  btn.textContent = "다시 주문하기";
-  btn.dataset.href = "checkout.html?id=" + encodeURIComponent(slug);
+  const channel = data.channel || data.paymentPlatform;
+  btn.disabled = false;
+  if (data.reason === "expired" && data.status === "pending" && (channel === "web" || channel === "toss")) {
+    btn.textContent = "결제 상태 다시 확인"; btn.dataset.resume = "true";
+    $("#genLine").textContent = "미결제 주문의 보관 기간이 지났어요. 새 결제 없이, 이미 완료한 결제가 있는지만 확인할 수 있어요.";
+    $("#genErr").style.display = "block"; return;
+  }
+  if (data.reason === "expired") {
+    btn.textContent = "제공 기간 만료"; btn.dataset.resume = ""; btn.disabled = true;
+    $("#genLine").textContent = storeErrMsg({code:data.reason}); $("#genErr").style.display = "block"; return;
+  }
+  if ((data.reason === "sale_closed" || data.reason === "sale_ended") && (channel === "web" || channel === "toss")) {
+    btn.textContent = "결제 상태 다시 확인"; btn.dataset.resume = "true";
+    $("#genLine").textContent = "신규 판매가 종료되었어요. 이미 완료한 결제가 있는지 같은 주문으로 확인할 수 있어요.";
+    $("#genErr").style.display = "block"; return;
+  }
+  btn.textContent = channel === "web" || channel === "toss" ? "같은 주문으로 결제 이어가기" : "결제 상태 다시 확인";
+  btn.dataset.resume = channel === "web" || channel === "toss" ? "true" : "";
+  if (channel && channel !== "web" && channel !== "toss") $("#genLine").textContent = "앱에서 만든 주문이에요. 앱에서 구매 복원과 결제를 이어 주세요.";
+  if (!channel) $("#genLine").textContent = "과거 주문의 결제 채널을 확인할 수 없어요. 주문번호를 준비해 문의해 주세요.";
   $("#genErr").style.display = "block";
+}
+async function resumePayment() {
+  const btn = $("#genRetry"); btn.disabled = true;
+  try {
+    const order = await resumeStoreOrder(rid);
+    if (order.status === "paid") { btn.dataset.resume=""; await boot(); }
+    else await payStoreOrder(order);
+  } catch(e) { $("#genLine").textContent = storeErrMsg(e); }
+  finally { btn.disabled=false; }
 }
 
 /**
@@ -161,24 +190,27 @@ function reorderCta(slug) {
  */
 async function ensurePaid(data) {
   if (data.status === "paid") return data;
+  libAdd({rid,status:"confirming"});
 
   // 토스가 실패를 명시했다(failUrl) — 두드릴 이유가 없다.
   if (PAY_CODE) {
     $("#genTitle").textContent = "결제가 완료되지 않았어요";
     $("#genLine").innerHTML = escHtml(PAY_MSG || "결제창에서 취소되었거나 승인이 거절됐어요.");
-    reorderCta(data.slug);
+    libAdd({rid,status:data.status});
+    resumeCta(data);
     throw new Error("pay_stopped");
   }
 
   $("#genTitle").textContent = "결제를 확인하는 중…";
   // 승인 참조 없이 온 pending 주문 — 결제창을 끝까지 통과하지 않았다는 뜻이다(보관함으로 재방문한
-  // 경우가 대부분). 웹훅이 방금 확정했을 수도 있으니 한 번만 다시 읽어 보고, 아니면 재주문으로 보낸다.
+  // 경우가 대부분). 서버를 다시 확인하고 같은 주문의 결제를 이어가도록 안내한다.
   if (!PAY_KEY) {
     const again = await storeApi({ action: "get", rid });
     if (again.status === "paid") return again;
     $("#genTitle").textContent = "결제가 완료되지 않았어요";
-    $("#genLine").innerHTML = "결제창을 끝까지 통과하지 않아 결제가 이뤄지지 않았어 — <b>결제된 금액은 없어</b>.";
-    reorderCta(data.slug);
+    $("#genLine").innerHTML = "아직 결제가 확인되지 않았어요. 같은 주문번호로 결제를 이어갈 수 있어요. 이미 결제했다면 결제 확인 후 다시 열어 주세요.";
+    libAdd({rid,status:data.status});
+    resumeCta(again);
     throw new Error("pay_pending");
   }
 
@@ -190,7 +222,17 @@ async function ensurePaid(data) {
       if (window.__track) window.__track("pay_done");
       return await storeApi({ action: "get", rid });
     } catch (e) {
-      // 토스 쪽이 흔들렸다 — 다시 두드린다. 그 밖의 오류(카드사 거절 포함)는 즉시 알린다.
+      if (e.code === "payment_required") {
+        const again = await storeApi({action:"get",rid});
+        if (again.status === "paid") return again;
+        PAY_KEY = null;
+        try { sessionStorage.removeItem("samra_pending_payment_"+rid); } catch (_) {}
+        libAdd({rid,status:again.status});
+        $("#genTitle").textContent = "결제 승인이 완료되지 않았어요";
+        $("#genLine").textContent = "같은 주문번호로 결제 상태를 다시 확인하고 이어갈 수 있어요.";
+        resumeCta(again); throw new Error("pay_stopped");
+      }
+      // Provider/network failures retain the approval reference for a safe retry.
       if (e.code !== "toss_confirm_failed" && e.code !== "toss_lookup_failed") throw e;
     }
   }
@@ -252,7 +294,12 @@ async function ensureGenerated(data) {
   paint();
 
   const results = await Promise.allSettled(missing.map(i =>
-    storeApi({ action: "generate", rid, chunk: i }).then(r => {
+    (async () => {
+      for (let attempt=0; ; attempt++) {
+        try { return await storeApi({ action: "generate", rid, chunk: i }); }
+        catch (e) { if (e.code !== "generation_in_progress" || attempt >= 60) throw e; await sleep(2000); }
+      }
+    })().then(r => {
       const [from, to] = ranges[i];
       for (let k = from; k < to; k++) completedChapters.add(k);
       markChunk(i, "done"); paint(); return r;
@@ -268,6 +315,7 @@ async function ensureGenerated(data) {
     $("#genTitle").textContent = "붓이 잠깐 멈췄어요";
     $("#genLine").textContent = storeErrMsg(e) + (failed.length < missing.length ? " (일부 장은 이미 완성됐어요)" : "");
     $("#genErr").style.display = "block";
+    if (typeof libAdd === "function") libAdd({rid,generationFailed:true});
     throw new Error("gen_failed");
   }
   clearInterval(lineTimer);
@@ -305,6 +353,7 @@ function renderView(data) {
   // 0.50 이면 7색 전부 5.6:1 이상이면서 색상(hue)은 그대로 남는다.
   const chAccent = darkenHex(CAT.color, 0.50);
   let paper = reportContentsHtml(data.chapters) + sheetOpeningHtml(data);
+  if (data.context?.fixedPeriod) paper += '<p class="recovery-help">2026년 9~12월의 흐름을 다루는 리포트예요. 이미 지난달은 회고로 읽어 주세요.</p>';
   const anchors = anchorSheetVisuals(data.chapters);
   data.chapters.forEach((ch, chapterIndex) => {
     if (ch.idx > 0) paper += `<div class="rp-divider" aria-hidden="true"><span>✦</span></div>`;
@@ -359,17 +408,23 @@ function renderView(data) {
   paper += `<p class="rp-meta">이 리포트는 만세력 엔진의 실제 계산(원국·신살·대운·세운·월운) 위에서 ${escHtml(READER.name)} 술사(AI)가 ${escHtml(name)}님만을 위해 집필했어요.
     해석은 참고용 · 엔터테인먼트 목적이며 의료·법률·투자 판단의 근거가 될 수 없어요.
     링크는 결제일부터 12개월 동안 열 수 있어요 — 기간 안에 PDF로 저장해 두세요.</p>`;
+  paper += `<section class="recovery-help"><h3>개인 복구 링크 보관</h3><p>다른 기기의 앱·웹에서 전체 리포트를 열 수 있어요. 링크를 가진 사람은 누구나 열 수 있으므로 공개 공유와 구분해 본인만 보관해 주세요.</p><button class="recovery-button" id="copyRecovery" type="button">개인 복구 링크 복사</button><p id="recoveryCopyStatus" role="status"></p></section>`;
   $("#paperIn").innerHTML = paper;
 
   const askBtn = $("#askBtn");
   if (askBtn) askBtn.addEventListener("click", onAsk);
+  $("#copyRecovery").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(recoveryUrl(rid)); $("#recoveryCopyStatus").textContent="복사했어요. 개인 메모 등 안전한 곳에 보관해 주세요."; }
+    catch (_) { const field = document.createElement("input"); field.value=recoveryUrl(rid); field.readOnly=true; field.setAttribute("aria-label","개인 복구 링크"); $("#recoveryCopyStatus").replaceChildren(field); field.select(); }
+  });
 
   $("#gen").style.display = "none";
   $("#view").style.display = "block";
   document.body.style.background = "#faf5ee";
 
   // 보관함 갱신(관통문구 포함)
-  libAdd({ rid, slug: data.slug, title: PROD.title, name: inputs.name || "", at: Date.parse(data.created_at) || Date.now(), sig: data.one_liner || "" });
+  libAdd({ rid, slug: data.slug, title: PROD.title, name: inputs.name || "", at: Date.parse(data.created_at) || Date.now(), sig: data.one_liner || "", status:data.status,channel:data.channel,paymentPlatform:data.paymentPlatform,expires_at:data.expires_at,total:data.total,completed:data.chapters.length,done:data.done,generationFailed:false });
+  if (!renderView.positionBound) { bindReadingPosition(rid); renderView.positionBound=true; }
 }
 
 async function onAsk() {
@@ -420,21 +475,46 @@ $("#pdfBtn").addEventListener("click", async () => {
 });
 
 // ── 시작 ────────────────────────────────────────────────────
+async function loadReportForView() {
+  try { return await storeApi({action:"get",rid}); }
+  catch (error) {
+    if (error.code !== "expired" || !PAY_KEY || PAY_CODE) throw error;
+    // A successful payment return remains confirmable when the pending order expired moments ago.
+    // The server validates the receipt and derives the entitlement from the actual payment date.
+    try { await storeApi({action:"confirm_web",rid,paymentKey:PAY_KEY}); }
+    catch (approvalError) {
+      if (approvalError.code !== "payment_required") throw approvalError;
+      PAY_KEY = null;
+      try { sessionStorage.removeItem("samra_pending_payment_"+rid); } catch (_) {}
+      throw error;
+    }
+    return storeApi({action:"get",rid});
+  }
+}
 async function boot() {
   if (!rid) { $("#genTitle").textContent = "리포트 주소가 올바르지 않아요"; $("#genLine").textContent = "링크를 다시 확인해줘."; return; }
   try {
-    let data = await storeApi({ action: "get", rid });
-    PROD = PRODUCT_BY_SLUG[data.slug];
-    READER = READERS[PROD.reader];
-    CAT = CATS[PROD.cat];
+    let data = await loadReportForView();
+    const identity = reportIdentity(data);
+    PROD = identity.product; READER = identity.reader; CAT = identity.category;
     document.title = `${PROD.title} · 내 사주 리포트 · 삼라만상`;
     // 결제 → 생성 순서다. 확정 전에 generate 를 부르면 402 만 돌아온다.
+    libAdd({rid,slug:data.slug,title:PROD.title,name:data.inputs?.name || "",status:data.status,channel:data.channel,paymentPlatform:data.paymentPlatform,expires_at:data.expires_at,total:data.total,completed:data.chapters.length,at:Date.parse(data.created_at)||Date.now()});
     if (data.status !== "paid") data = await ensurePaid(data);
+    try { sessionStorage.removeItem("samra_pending_payment_"+rid); } catch (_) {}
+    if (!data.done) data = await repairFixedPeriod(data,rid);
     if (!data.done) data = await ensureGenerated(data);
     if (!data.done) throw new Error("incomplete");
     DATA = data;
     renderView(data);
   } catch (e) {
+    if (e.code === "expired") {
+      const pending = await expiredPendingWebOrder(rid);
+      if (pending) {
+        libAdd(pending); $("#genTitle").textContent = "기존 주문의 결제를 확인해 주세요";
+        resumeCta(pending); return;
+      }
+    }
     // 아래 셋은 이미 제 화면(재시도 버튼·안내문)을 그려 뒀다 — 덮어쓰지 않는다.
     if (e.message === "gen_failed" || e.message === "pay_pending" || e.message === "pay_stopped") return;
     $("#genTitle").textContent = "리포트를 열 수 없어요";
@@ -445,9 +525,7 @@ async function boot() {
   }
 }
 $("#genRetry").addEventListener("click", () => {
-  // reorderCta 가 실어 둔 목적지가 있으면 재실행이 아니라 이동이다(미결제 주문).
-  const go = $("#genRetry").dataset.href;
-  if (go) { location.href = go; return; }
+  if ($("#genRetry").dataset.resume === "true") { resumePayment(); return; }
   $("#genErr").style.display = "none";
   $("#genTitle").textContent = "다시 먹을 가는 중…";
   boot();

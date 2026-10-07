@@ -4,16 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>주문서 · 삼라만상</title>
-<meta name="robots" content="noindex">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
-<meta name="theme-color" content="#0c0c14">
+<meta name="theme-color" content="#191b1c">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css">
 <link rel="stylesheet" href="style.css">
 <script src="/assets/track.js" defer></script>
+<link rel="stylesheet" href="premium.css">
 </head>
 <body>
 
@@ -52,6 +54,12 @@ function toast(msg) {
 }
 
 const qs = new URLSearchParams(location.search);
+const pendingRid = qs.get("rid") || new URLSearchParams((location.hash || "").slice(1)).get("rid");
+if (pendingRid) {
+  if (/^[A-Za-z0-9_-]{16,40}$/.test(pendingRid)) location.replace("report.html#rid=" + encodeURIComponent(pendingRid));
+  else document.getElementById("ck").innerHTML = '<section class="pd-close"><h1>주문 주소가 올바르지 않아요</h1><p>개인 복구 링크 또는 내 리포트에서 기존 주문을 다시 열어 주세요.</p><a href="library.html">내 리포트 보기</a></section>';
+  return;
+}
 const slug = qs.get("id");
 const p = Object.prototype.hasOwnProperty.call(PRODUCT_BY_SLUG, slug) ? PRODUCT_BY_SLUG[slug] : null;
 if (!p) {
@@ -168,8 +176,9 @@ function extraForm() {
 }
 
 /* 이 주문서가 어느 채널로 결제되는지 — 서버가 정본이다(webPayState).
-   "unknown" 은 아직 못 물어본 상태로, 화면은 웹 결제 모습 그대로 두고 클릭 시점에 다시 판정한다. */
-let PAY_MODE = "unknown"; // "unknown" | "web" | "app"
+   "unknown" 에서는 결제 버튼을 비활성화하고 읽기 전용 config 조회 재시도를 제공한다. */
+let PAY_MODE = "unknown";
+let currentOrder = null; // "unknown" | "web" | "app"
 
 // 결제 화면에도 상호·사업자 정보를 띄운다 — 토스 심사 항목이고, 전자상거래법상 표시 의무이기도 하다.
 const BIZ_LINE = `오효컴퍼니 · 대표 오효완 · 사업자등록번호 520-24-01358 · 통신판매업신고 제2026-서울관악-0773호 · 서울특별시 관악구 성현로 80 · 010-8504-3265 · ohy3264@gmail.com`;
@@ -209,6 +218,7 @@ function applyAppMode(announce) {
     $("#handoff").hidden = false;
     const tr = document.getElementById("trust"); if (tr) tr.hidden = true;
     $("#go").textContent = "앱에서 이어서 받기 →";
+    $("#go").disabled = false;
     $("#fine").innerHTML = fineHtml("app");
   }
   if (announce) {
@@ -237,7 +247,7 @@ document.getElementById("ck").innerHTML = `
   <div class="ck-handoff" id="handoff" hidden>
     <p class="hd-t">웹 결제는 아직 준비 중이에요</p>
     <p class="hd-b">카드 결제 연결이 끝나지 않아서, 이 리포트는 지금 <b>만세력 앱</b>에서 받을 수 있어요.
-      값은 여기와 같은 <b>${won(priceOf(p.slug))}</b>이고, 같은 술사가 같은 분량으로 써요.</p>
+      표시 가격은 <b>${won(priceOf(p.slug))}</b>이며 앱의 Google Play 주문서에서 최종 금액을 확인해 주세요.</p>
     <p class="hd-b">아래에 넣은 생년월일은 앱이 그대로 이어받아요 — 앱에서 다시 입력하지 않아도 돼요.${
       inputType === "pair" ? " 상대 정보는 앱 주문서에서 한 번만 받아요."
       : inputType === "pet" ? " 아이 정보는 앱 주문서에서 한 번만 받아요." : ""}</p>
@@ -265,7 +275,7 @@ document.getElementById("ck").innerHTML = `
     <span>이 분석은 명리 계산과 AI 술사 해석에 기반한 <b>참고용·엔터테인먼트 콘텐츠</b>임을 이해했어요. 입력한 생년월일은 리포트 생성에만 쓰여요.${inputType === "pair" || p.slug === "love-sal" ? " (연애·궁합 분석은 만 19세 이상만 신청할 수 있어요)" : ""}</span>
   </label>
 
-  <div class="ck-trust" id="trust">
+  <div class="ck-trust" id="trust" hidden>
     <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>
       <span><b>토스페이먼츠</b> 안전결제 · 카드 정보는 저희 서버에 남지 않아요</span></div>
     <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3.5 4.5v4.5H8"/></svg>
@@ -273,7 +283,9 @@ document.getElementById("ck").innerHTML = `
     <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
       <span><b>제공 기간</b> 결제일부터 12개월 · 결제 직후 바로 열람하는 디지털 콘텐츠</span></div>
   </div>
-  <button class="ck-cta" id="go" data-cta="store-checkout-${p.slug}">${won(priceOf(p.slug))} 결제하고 받기 →</button>
+  <p class="ck-payment-state" id="paymentState" role="status">결제 가능 여부를 확인하고 있어요.</p>
+  <button class="payment-retry" id="paymentRetry" type="button" hidden>결제 상태 다시 확인</button>
+  <button class="ck-cta" id="go" data-cta="store-checkout-${p.slug}" disabled>결제 가능 여부 확인 중…</button>
   <p class="ck-fine" id="fine">${fineHtml("web")}</p>
   <p class="ck-err" id="err" role="alert" aria-live="assertive"></p>
 `;
@@ -371,6 +383,12 @@ async function buildOrder(me, partner, pet, extra) {
     context.pet = { name: pet.name, species: pet.species, birthYear: pet.birthYear, yearGanzi: root.StoreCalc.yearGanzi(pet.birthYear) };
   }
 
+  if (p.fixedPeriod) {
+    const day = context.me.base.pillars.day.ganzi[0], ys = context.me.interpret.yongsin || {};
+    const period = p.fixedPeriod;
+    const months = JSON.parse(root.StoreCalc.monthRange(day, (ys.yong || []).join(','), (ys.gi || []).join(','), period.year, period.fromMonth, period.toMonth - period.fromMonth + 1));
+    context.fixedPeriod = {...period, months};
+  }
   const inputs = { name: me.name, gender: me.gender, birth: me.birth };
   if (partner) inputs.partner = partner;
   if (pet) inputs.pet = pet;
@@ -406,7 +424,18 @@ async function pay(order) {
 
 $("#go").addEventListener("click", async () => {
   err("");
+  if (PAY_MODE === "unknown") { await checkPayment(); return; }
   const btn = $("#go");
+  if (currentOrder) {
+    btn.disabled = true;
+    try {
+      const existing = await resumeStoreOrder(currentOrder.rid);
+      if (existing.status === "paid") location.href = "report.html#rid="+encodeURIComponent(existing.rid);
+      else await pay(existing);
+    } catch(e) { err(e.code ? storeErrMsg(e) : "결제창을 열지 못했어요. 같은 주문으로 다시 시도해 주세요."); btn.disabled=false; }
+    return;
+  }
+  if (!storeAvailable(p)) { err("이 리포트의 신규 판매가 종료되었어요."); return; }
   const label = btn.textContent;
   let me, partner = null, pet = null, extra = null;
   try {
@@ -464,12 +493,16 @@ $("#go").addEventListener("click", async () => {
 
     // 보관함 기록은 **결제 전에** 남긴다 — 결제하고 창을 닫아도 이 브라우저에 rid 가 남아야
     // '내 리포트'로 되찾을 수 있다(웹 주문의 재열람 키는 rid 하나뿐이다).
-    libAdd({ rid: order.rid, slug: p.slug, title: p.title, name: me.name, at: Date.now() });
+    currentOrder = order;
+    // Reloading after an SDK failure must reopen this order, never create another pending order.
+    if (window.history) history.replaceState(null,"","checkout.html?id="+encodeURIComponent(p.slug)+"#rid="+encodeURIComponent(order.rid));
+    libAdd({ rid: order.rid, slug: p.slug, title: p.title, name: me.name, at: Date.now(), status:order.status, channel:"web", total:p.chaptersN, completed:0 });
+    ["blk-me","blk-pt","blk-pet","blk-extra"].forEach(id=>document.getElementById(id)?.querySelectorAll("input,select,button").forEach(input=>input.disabled=true));
 
     // 사전 오픈(무료 모드)이면 결제 단계가 없다 — 바로 뷰어로.
     if (order.status === "paid" || !order.payment) {
       if (window.__track) window.__track("cta", "store-order-" + p.slug);
-      location.href = "report.html?rid=" + encodeURIComponent(order.rid);
+      location.href = "report.html#rid=" + encodeURIComponent(order.rid);
       return;
     }
 
@@ -491,10 +524,26 @@ $("#go").addEventListener("click", async () => {
 
 /* 웹 결제가 열려 있는지 먼저 묻는다 — 주문도 레이트리밋도 쓰지 않는 조회(webPayState).
    닫혀 있으면 폼을 채우기 전에 앱 인계로 갈아입어, 다 채우고 누른 뒤에야 알게 되는 일을 막는다. */
-webPayState(p.slug).then(state => {
-  if (state === "closed") applyAppMode(false);
-  else if (state === "open") PAY_MODE = "web";
-});
+async function checkPayment() {
+  $("#go").disabled = true; $("#paymentRetry").hidden = true;
+  const state = await webPayState(p.slug);
+  if (!storeAvailable(p) || state === "ended") {
+    $("#paymentState").textContent = "2026년 9~12월 리포트의 신규 판매가 종료되었어요. 기존 구매는 내 리포트에서 열어 주세요.";
+    $("#go").textContent = "판매 종료"; return;
+  }
+  if (state === "closed") {
+    applyAppMode(false); $("#paymentState").textContent = "Google Play · 앱 주문서에서 최종 가격을 확인해 주세요.";
+  } else if (state === "open") {
+    PAY_MODE = "web"; $("#go").disabled = false; $("#go").textContent = won(priceOf(p.slug)) + " 결제하고 받기 →";
+    $("#trust").hidden = false; $("#paymentState").textContent = "웹 · 토스페이먼츠 카드 결제";
+  } else {
+    PAY_MODE = "unknown"; $("#paymentState").textContent = "결제 가능 여부를 확인하지 못했어요. 다시 확인해 주세요.";
+    $("#go").textContent = "결제 확인 필요"; $("#paymentRetry").hidden = false;
+  }
+  refreshReady();
+}
+$("#paymentRetry").addEventListener("click",checkPayment);
+checkPayment();
 
 // 폼이 보이는 동안 엔진을 미리 받아 둔다(앱 인계면 쓸 일이 없어 받지 않는다).
 setTimeout(() => { if (PAY_MODE !== "app") loadEngine().catch(() => {}); }, 600);
