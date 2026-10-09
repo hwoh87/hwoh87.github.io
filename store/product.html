@@ -100,6 +100,11 @@ window.addEventListener('DOMContentLoaded', () => window.__track?.('paywall_view
 const c = CATS[p.cat];
 const r = READERS[p.reader];
 document.title = `${p.title} - ${c.label} 사주 분석 · 삼라만상`;
+document.querySelector('meta[name="description"]').content = `${p.title}. ${p.bullets} · ${p.chaptersN}장 AI 사주 리포트 · 삼라만상.`;
+const canonical = document.createElement('link');
+canonical.rel = 'canonical';
+canonical.href = `https://samra.cc/store/product.html?id=${encodeURIComponent(p.slug)}`;
+document.head.appendChild(canonical);
 
 // 상세 공통 블록 — ENGINE/분석지 문구는 landing/calc 실 엔진이 실제로 계산하는 것만 적는다.
 const SHEET_CHIPS = ["오행 분포 차트", "십신 집계", "신강약 게이지", "격국 배지", "신살·귀인 목록", "대운 타임라인", "공망·간여지동"];
