@@ -85,6 +85,31 @@
         if (minRoom != null && remaining() < minRoom) freshPaper();
         inner.appendChild(block);
         if (overflowed()) {
+          // 목록 전체를 옮겨도 한 페이지보다 길면 잘린다. 항목의 마크업과
+          // 순서를 유지한 채 남은 공간부터 채우고, 넘치는 항목만 다음 장으로 넘긴다.
+          const list = block.classList.contains("pdf-body") && block.firstElementChild;
+          if (list && list.tagName === "UL" && list.children.length > 1) {
+            const items = Array.from(list.children);
+            inner.removeChild(block);
+            let chunk = block.cloneNode(false);
+            let chunkList = list.cloneNode(false);
+            chunk.appendChild(chunkList);
+            inner.appendChild(chunk);
+            for (const item of items) {
+              chunkList.appendChild(item);
+              if (overflowed()) {
+                chunkList.removeChild(item);
+                if (!chunkList.childElementCount) chunk.remove();
+                freshPaper();
+                chunk = block.cloneNode(false);
+                chunkList = list.cloneNode(false);
+                chunk.appendChild(chunkList);
+                chunkList.appendChild(item);
+                inner.appendChild(chunk);
+              }
+            }
+            return;
+          }
           inner.removeChild(block);
           freshPaper();
           inner.appendChild(block);
