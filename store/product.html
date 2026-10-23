@@ -167,7 +167,7 @@ document.getElementById("pd").innerHTML = `
     <strong>${won(priceOf(p.slug))}</strong>
     <p>${p.chaptersN}장 · 읽는 시간 약 ${p.readMin}분 · 계산 분석지 포함</p>
     <p>${STORE_INPUT[p.slug] === "pair" ? "두 사람의 생년월일 필요" : STORE_INPUT[p.slug] === "pet" ? "나의 생년월일과 반려동물 정보 필요" : "나의 생년월일 필요"} · 결제일부터 12개월 제공</p>
-    ${p.fixedPeriod ? '<p>2026년 9~12월을 다룹니다. 이미 지난달은 회고로 읽어 주세요.</p>' : ''}
+    ${p.fixedPeriod ? `<p>${p.fixedPeriod.year}년 ${p.fixedPeriod.fromMonth}~${p.fixedPeriod.toMonth}월을 다룹니다. 이미 지난달은 회고로 읽어 주세요.</p>` : ''}
     <a href="#report-preview">리포트 구성 먼저 넘겨보기 ↓</a>
   </div>
   <button type="button" class="pd-cta" onclick="buy()">${won(priceOf(p.slug))} · 주문서로 가기</button>

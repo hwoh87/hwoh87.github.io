@@ -528,7 +528,7 @@ async function checkPayment() {
   $("#go").disabled = true; $("#paymentRetry").hidden = true;
   const state = await webPayState(p.slug);
   if (!storeAvailable(p) || state === "ended") {
-    $("#paymentState").textContent = "2026년 9~12월 리포트의 신규 판매가 종료되었어요. 기존 구매는 내 리포트에서 열어 주세요.";
+    $("#paymentState").textContent = "이 리포트의 신규 판매가 종료되었어요. 기존 구매는 내 리포트에서 열어 주세요.";
     $("#go").textContent = "판매 종료"; return;
   }
   if (state === "closed") {
