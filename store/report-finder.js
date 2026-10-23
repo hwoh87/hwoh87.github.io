@@ -1,11 +1,11 @@
 /* Editorial routing by the visitor's chosen question, not a personal saju diagnosis. */
 (() => {
   const topics = [
-    {id:'love', label:'연애·썸', mark:'♡', question:'연애에서 어떤 점이 궁금한가요?', options:[['나의 연애 성향부터','love-sal'],['상대와의 관계를 읽고 싶어요','love-mind'],['먼저 연락할지 고민돼요','contact-timing']]},
+    {id:'love', label:'연애·썸', mark:'♡', question:'연애에서 어떤 점이 궁금한가요?', options:[['2027년 연애 흐름 전체','love-2027','2027-12-31'],['나의 연애 성향부터','love-sal'],['상대와의 관계를 읽고 싶어요','love-mind'],['먼저 연락할지 고민돼요','contact-timing']]},
     {id:'pair', label:'궁합·결혼', mark:'合', question:'두 사람의 어떤 모습을 보고 싶나요?', options:[['전반적인 궁합','gunghap'],['결혼을 앞둔 관계','marriage'],['더 깊은 관계의 결','sok-hap']]},
     {id:'breakup', label:'이별·재회', mark:'↔', question:'지금 더 필요한 이야기는 무엇인가요?', options:[['헤어진 관계를 돌아보고 싶어요','why-breakup'],['다시 만날 가능성을 읽고 싶어요','reunion']]},
-    {id:'work', label:'일·앞으로의 흐름', mark:'路', question:'어느 범위로 읽어보고 싶나요?', options:[['이직을 고민하고 있어요','job-change'],['앞으로 석 달을 넓게 보고 싶어요','three-months']]},
-    {id:'money', label:'재물', mark:'財', question:'돈에 대해 무엇부터 살펴볼까요?', options:[['돈을 버는 성향과 새는 지출','money-bowl'],['2026년 하반기 월별 흐름','money-months','2026-12-31']]},
+    {id:'work', label:'일·앞으로의 흐름', mark:'路', question:'어느 범위로 읽어보고 싶나요?', options:[['2027년 종합 흐름','year-2027','2027-12-31'],['2027년 직장과 성장','career-2027','2027-12-31'],['이직을 고민하고 있어요','job-change'],['앞으로 석 달을 넓게 보고 싶어요','three-months']]},
+    {id:'money', label:'재물', mark:'財', question:'돈에 대해 무엇부터 살펴볼까요?', options:[['2027년 1~12월 재물 흐름','money-2027','2027-12-31'],['돈을 버는 성향과 새는 지출','money-bowl'],['2026년 하반기 월별 흐름','money-months','2026-12-31']]},
     {id:'self', label:'나·특별한 인연', mark:'緣', question:'어떤 이야기에 마음이 가나요?', options:[['겉과 다른 내면의 나','midnight-self'],['두 사람의 인연을 이야기로','past-life'],['반려동물과 나의 인연','pet-past-life']]},
   ];
   const host = document.querySelector('[data-report-finder]');
