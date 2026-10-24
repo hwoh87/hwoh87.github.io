@@ -343,15 +343,18 @@ function sheetDaewoonHtml(me) {
     <div class="sh-dw">${cells}</div></div>`;
 }
 
-function sheetMonthsHtml(me, fixedPeriod) {
-  const months = (fixedPeriod?.months || me.months || []).slice(0, 12);
+function sheetMonthsHtml(me, fixedPeriod, slug) {
+  const three = slug === "three-months";
+  const months = (fixedPeriod?.months || me.months || []).slice(0, three ? 3 : 12);
   if (!months.length) return "";
+  const first = months[0], last = months[months.length - 1];
+  const threeTitle = first.year === last.year ? `${first.year}년 ${first.month}~${last.month}월` : `${first.year}년 ${first.month}월~${last.year}년 ${last.month}월`;
   const cells = months.map(m =>
     `<div class="cell"><p class="m">${m.year % 100}.${m.month}</p>
      <p class="gz">${escHtml(m.ganji)}</p><p class="tn tn-${m.tone}">${m.tone}</p></div>`
   ).join("");
-  return `<div class="sh-card"><p class="sh-t">${fixedPeriod ? escHtml(fixedPeriod.year + "년 " + fixedPeriod.fromMonth + "~" + fixedPeriod.toMonth + "월") : "다가오는 12개월"} <small>${fixedPeriod ? "지난달은 회고로 읽어요" : "월건 기운 흐름"}</small></p>
-    <div class="sh-mo">${cells}</div></div>`;
+  return `<div class="sh-card"><p class="sh-t">${three ? escHtml(threeTitle) : fixedPeriod ? escHtml(fixedPeriod.year + "년 " + fixedPeriod.fromMonth + "~" + fixedPeriod.toMonth + "월") : "다가오는 12개월"} <small>${three ? "주문한 달과 다음 두 달" : fixedPeriod ? "지난달은 회고로 읽어요" : "월건 기운 흐름"}</small></p>
+    <div class="sh-mo"${three ? ' style="grid-template-columns:repeat(3,minmax(0,1fr))"' : ""}>${cells}</div></div>`;
 }
 
 function sheetGunghapHtml(g, nameA, nameB) {
@@ -419,7 +422,7 @@ function sheetVisualHtml(kind, data) {
     case "elements": // 오행 저울 = 오행 분포 + 신강약 + 격국/용신 배지 묶음
       return `<div class="sheet">${[sheetElementsHtml(me), sheetStrengthHtml(me), sheetGeokYongHtml(me)].filter(Boolean).join("")}</div>`;
     case "sinsal": return `<div class="sheet">${sheetSinsalHtml(me)}</div>`;
-    case "months": return `<div class="sheet">${sheetMonthsHtml(me, data.context?.fixedPeriod)}</div>`;
+    case "months": return `<div class="sheet">${sheetMonthsHtml(me, data.context?.fixedPeriod, data.slug)}</div>`;
     case "daewoon": return `<div class="sheet">${sheetDaewoonHtml(me)}</div>`;
     default: return "";
   }
@@ -475,7 +478,7 @@ function renderSheetHtml(data) {
       parts.push(sheetPillarsHtml(ctx.partner, (inputs.partner && inputs.partner.name ? inputs.partner.name + "님" : "그 사람") + "의 원국"));
     }
   }
-  parts.push(sheetElementsHtml(me), sheetStrengthHtml(me), sheetGeokYongHtml(me), sheetSinsalHtml(me), sheetDaewoonHtml(me), sheetMonthsHtml(me, ctx.fixedPeriod));
+  parts.push(sheetElementsHtml(me), sheetStrengthHtml(me), sheetGeokYongHtml(me), sheetSinsalHtml(me), sheetDaewoonHtml(me), sheetMonthsHtml(me, ctx.fixedPeriod, data.slug));
   parts.push(sheetPetHtml(ctx));
   return `<div class="sheet">${parts.filter(Boolean).join("")}</div>`;
 }
