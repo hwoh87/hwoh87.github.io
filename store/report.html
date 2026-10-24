@@ -293,18 +293,24 @@ async function ensureGenerated(data) {
   };
   paint();
 
-  const results = await Promise.allSettled(missing.map(i =>
-    (async () => {
+  const results = [];
+  for (const i of missing) {
+    try {
+      const r = await (async () => {
       for (let attempt=0; ; attempt++) {
         try { return await storeApi({ action: "generate", rid, chunk: i }); }
         catch (e) { if (e.code !== "generation_in_progress" || attempt >= 60) throw e; await sleep(2000); }
       }
-    })().then(r => {
+      })();
       const [from, to] = ranges[i];
       for (let k = from; k < to; k++) completedChapters.add(k);
-      markChunk(i, "done"); paint(); return r;
-    })
-  ));
+      markChunk(i, "done"); paint();
+      results.push({ status: "fulfilled", value: r });
+    } catch (reason) {
+      results.push({ status: "rejected", reason });
+      break;
+    }
+  }
   const failed = results.filter(x => x.status === "rejected");
   $("#genBar").classList.remove("live");
   document.title = baseTitle;
@@ -313,7 +319,7 @@ async function ensureGenerated(data) {
     clearInterval(lineTimer);
     const e = failed[0].reason || {};
     $("#genTitle").textContent = "붓이 잠깐 멈췄어요";
-    $("#genLine").textContent = storeErrMsg(e) + (failed.length < missing.length ? " (일부 장은 이미 완성됐어요)" : "");
+    $("#genLine").textContent = storeErrMsg(e) + (completedChapters.size > 0 ? " (일부 장은 이미 완성됐어요)" : "");
     $("#genErr").style.display = "block";
     if (typeof libAdd === "function") libAdd({rid,generationFailed:true});
     throw new Error("gen_failed");
