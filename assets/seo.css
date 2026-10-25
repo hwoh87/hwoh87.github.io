@@ -7,8 +7,8 @@
       다크 위에서 읽히도록 밝은 변형을 따로 준다 — 임의로 어둡게 되돌리지 말 것. */
 /* 한자 세리프 — 마루부리에 한자 글리프가 없어 h2·.hanja 의 한자는 이 폰트가 받는다.
    구글 폰트는 KR 폰트를 유니코드 슬라이스로 쪼개 서빙해 실제로 쓰인 글자 조각만 내려온다. */
-/* 한자 289자만 받는 서브셋 — collect_hanja() 산출. 손으로 고치지 말 것. */
-@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600&text=%E4%B8%81%E4%B8%83%E4%B8%89%E4%B8%8D%E4%B8%91%E4%B8%99%E4%B8%AD%E4%B8%BB%E4%B9%8B%E4%B9%99%E4%B9%BE%E4%BA%82%E4%BA%8C%E4%BA%92%E4%BA%94%E4%BA%A1%E4%BA%A4%E4%BA%A5%E4%BA%BA%E4%BB%81%E4%BD%90%E5%80%9F%E5%81%8F%E5%82%B7%E5%85%83%E5%85%84%E5%85%8B%E5%85%A5%E5%85%A9%E5%85%AB%E5%85%AD%E5%86%A0%E5%87%8D%E5%88%83%E5%88%86%E5%88%91%E5%88%A9%E5%88%B6%E5%89%8B%E5%8A%88%E5%8A%AB%E5%8B%A2%E5%8C%96%E5%8D%81%E5%8D%88%E5%8D%8A%E5%8D%AF%E5%8D%B0%E5%8E%84%E5%8F%8B%E5%8F%A3%E5%8F%B3%E5%90%88%E5%90%8C%E5%91%BD%E5%92%8C%E5%97%94%E5%9B%9B%E5%9C%96%E5%9C%9F%E5%9C%A8%E5%9C%B0%E5%A0%82%E5%A2%93%E5%A3%93%E5%A3%AC%E5%A3%BD%E5%A4%9A%E5%A4%A7%E5%A4%A9%E5%A4%AA%E5%A4%AB%E5%A5%B3%E5%A6%BB%E5%A8%81%E5%AD%90%E5%AD%97%E5%AD%98%E5%AD%A4%E5%AD%B8%E5%AE%85%E5%AE%98%E5%AE%AE%E5%AE%B3%E5%AE%B6%E5%AF%85%E5%AF%92%E5%AF%B6%E5%B0%87%E5%B0%8D%E5%B1%80%E5%B7%A6%E5%B7%A8%E5%B7%B1%E5%B7%B3%E5%B8%9B%E5%B8%9D%E5%B8%B6%E5%B9%B2%E5%B9%B3%E5%B9%B4%E5%BA%9A%E5%BA%9C%E5%BA%A7%E5%BA%AB%E5%BB%89%E5%BB%9A%E5%BB%9F%E5%BB%BA%E5%BC%8F%E5%BC%95%E5%BC%9F%E5%BC%B1%E5%BC%BA%E5%BC%BC%E5%BD%B9%E5%BE%97%E5%BE%AE%E5%BE%B7%E5%BF%8C%E6%80%A7%E6%80%A8%E6%81%83%E6%81%A9%E6%83%85%E6%85%88%E6%87%B8%E6%88%8A%E6%88%8C%E6%88%90%E6%89%8B%E6%8C%81%E6%8F%9B%E6%93%8E%E6%94%80%E6%94%AF%E6%95%B8%E6%96%87%E6%96%97%E6%96%B9%E6%97%A5%E6%97%BA%E6%98%8C%E6%98%9F%E6%99%82%E6%9A%97%E6%9B%B2%E6%9C%83%E6%9C%88%E6%9C%A8%E6%9C%AA%E6%9C%AC%E6%9D%B1%E6%9E%90%E6%9F%B1%E6%A0%B8%E6%A0%BC%E6%A1%83%E6%A2%81%E6%A9%9F%E6%AA%A2%E6%AC%8A%E6%AD%A3%E6%AD%A6%E6%AD%B2%E6%AD%BB%E6%AE%BA%E6%AF%8D%E6%AF%94%E6%B0%A3%E6%B0%B4%E6%B2%83%E6%B2%90%E6%B2%96%E6%B4%A9%E6%B5%81%E6%B5%AA%E6%B5%B4%E6%B7%AB%E6%B7%B8%E6%B9%AF%E6%BA%90%E6%BB%85%E6%BB%AF%E6%BB%BE%E7%81%AB%E7%81%BD%E7%84%A1%E7%84%A6%E7%85%9E%E7%88%AD%E7%88%B6%E7%8B%BC%E7%8D%A8%E7%8E%84%E7%8E%8B%E7%90%86%E7%94%9F%E7%94%A8%E7%94%B0%E7%94%B2%E7%94%B3%E7%96%BE%E7%97%85%E7%99%B8%E7%99%BD%E7%9B%B8%E7%9F%A5%E7%A0%B4%E7%A5%9E%E7%A5%BF%E7%A6%8F%E7%A6%AE%E7%A7%91%E7%A7%BB%E7%A9%BA%E7%AB%A0%E7%B4%85%E7%B4%AB%E7%B5%83%E7%B5%95%E7%B5%B6%E7%B7%A3%E7%BD%A1%E7%BE%85%E7%BE%8A%E7%BE%A9%E8%82%A9%E8%83%8E%E8%87%AA%E8%88%87%E8%88%8C%E8%89%B6%E8%8A%B1%E8%8F%AF%E8%90%BD%E8%93%8B%E8%97%A5%E8%99%8E%E8%A1%93%E8%A1%B0%E8%A5%BF%E8%A6%8B%E8%A6%AA%E8%A7%A3%E8%AB%96%E8%AD%98%E8%B2%9E%E8%B2%A1%E8%B2%AA%E8%B2%B4%E8%B7%9D%E8%BA%AB%E8%BB%8D%E8%BC%94%E8%BC%BF%E8%BD%89%E8%BE%9B%E8%BE%B0%E9%81%8B%E9%81%B2%E9%81%B7%E9%85%89%E9%87%8D%E9%87%91%E9%87%9D%E9%88%B4%E9%89%9E%E9%8C%84%E9%8C%98%E9%95%B7%E9%96%80%E9%96%91%E9%99%80%E9%99%90%E9%99%B0%E9%99%B7%E9%99%BD%E9%9B%9C%E9%9B%A2%E9%9D%88%E9%9D%9C%E9%9E%8D%E9%A3%9F%E9%A4%8A%E9%A6%AC%E9%A9%9B%E9%AC%BC%E9%AD%81&display=swap");
+/* 한자 295자만 받는 서브셋 — collect_hanja() 산출. 손으로 고치지 말 것. */
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600&text=%E4%B8%81%E4%B8%83%E4%B8%89%E4%B8%8D%E4%B8%91%E4%B8%99%E4%B8%AD%E4%B8%BB%E4%B9%8B%E4%B9%99%E4%B9%BE%E4%BA%82%E4%BA%8C%E4%BA%92%E4%BA%94%E4%BA%A1%E4%BA%A4%E4%BA%A5%E4%BA%BA%E4%BB%81%E4%BD%90%E5%80%9F%E5%81%8F%E5%82%B7%E5%85%83%E5%85%84%E5%85%8B%E5%85%A5%E5%85%A9%E5%85%AB%E5%85%AD%E5%86%A0%E5%87%8D%E5%88%83%E5%88%86%E5%88%91%E5%88%A9%E5%88%B6%E5%89%8B%E5%8A%88%E5%8A%AB%E5%8B%A2%E5%8C%96%E5%8D%81%E5%8D%88%E5%8D%8A%E5%8D%AF%E5%8D%B0%E5%8E%84%E5%8F%8B%E5%8F%A3%E5%8F%B3%E5%90%88%E5%90%8C%E5%91%BD%E5%92%8C%E5%97%94%E5%9B%9B%E5%9C%96%E5%9C%9F%E5%9C%A8%E5%9C%B0%E5%A0%82%E5%A2%93%E5%A3%93%E5%A3%AC%E5%A3%BD%E5%A4%9A%E5%A4%A7%E5%A4%A9%E5%A4%AA%E5%A4%AB%E5%A5%B3%E5%A6%BB%E5%A8%81%E5%AD%90%E5%AD%97%E5%AD%98%E5%AD%A4%E5%AD%B8%E5%AE%85%E5%AE%98%E5%AE%AE%E5%AE%B3%E5%AE%B6%E5%AF%85%E5%AF%92%E5%AF%B6%E5%B0%87%E5%B0%8D%E5%B1%80%E5%B7%A6%E5%B7%A8%E5%B7%B1%E5%B7%B3%E5%B8%9B%E5%B8%9D%E5%B8%B6%E5%B9%B2%E5%B9%B3%E5%B9%B4%E5%BA%9A%E5%BA%9C%E5%BA%A7%E5%BA%AB%E5%BB%89%E5%BB%9A%E5%BB%9F%E5%BB%BA%E5%BC%8F%E5%BC%95%E5%BC%9F%E5%BC%B1%E5%BC%BA%E5%BC%BC%E5%BD%B9%E5%BE%97%E5%BE%AE%E5%BE%B7%E5%BF%8C%E6%80%A7%E6%80%A8%E6%81%83%E6%81%A9%E6%83%85%E6%85%88%E6%87%B8%E6%88%8A%E6%88%8C%E6%88%90%E6%89%8B%E6%8C%81%E6%8F%9B%E6%93%8E%E6%94%80%E6%94%AF%E6%95%B8%E6%96%87%E6%96%97%E6%96%B9%E6%97%A5%E6%97%BA%E6%98%8C%E6%98%9F%E6%99%82%E6%9A%97%E6%9B%B2%E6%9C%83%E6%9C%88%E6%9C%A8%E6%9C%AA%E6%9C%AC%E6%9D%B1%E6%9E%90%E6%9F%B1%E6%A0%B8%E6%A0%BC%E6%A1%83%E6%A2%81%E6%A3%AE%E6%A5%B5%E6%A9%9F%E6%AA%A2%E6%AC%8A%E6%AD%A3%E6%AD%A6%E6%AD%B2%E6%AD%BB%E6%AE%BA%E6%AF%8D%E6%AF%94%E6%B0%A3%E6%B0%B4%E6%B2%83%E6%B2%90%E6%B2%96%E6%B4%A9%E6%B5%81%E6%B5%AA%E6%B5%B4%E6%B7%AB%E6%B7%B8%E6%B9%AF%E6%BA%90%E6%BB%85%E6%BB%AF%E6%BB%BE%E7%81%AB%E7%81%BD%E7%84%A1%E7%84%A6%E7%85%9E%E7%88%AD%E7%88%B6%E7%8B%BC%E7%8D%A8%E7%8E%84%E7%8E%8B%E7%90%86%E7%94%9F%E7%94%A8%E7%94%B0%E7%94%B2%E7%94%B3%E7%96%BE%E7%97%85%E7%99%B8%E7%99%BD%E7%9B%B8%E7%9F%A5%E7%A0%B4%E7%A5%9E%E7%A5%BF%E7%A6%8F%E7%A6%AE%E7%A7%91%E7%A7%BB%E7%A9%BA%E7%AB%A0%E7%B4%85%E7%B4%AB%E7%B5%83%E7%B5%95%E7%B5%B6%E7%B7%A3%E7%BD%A1%E7%BE%85%E7%BE%8A%E7%BE%A9%E8%82%A9%E8%83%8E%E8%87%AA%E8%88%87%E8%88%8C%E8%89%B6%E8%8A%B1%E8%8F%AF%E8%90%AC%E8%90%BD%E8%93%8B%E8%97%A5%E8%99%8E%E8%A1%8C%E8%A1%93%E8%A1%B0%E8%A5%BF%E8%A6%8B%E8%A6%AA%E8%A7%A3%E8%AB%96%E8%AD%98%E8%B1%A1%E8%B2%9E%E8%B2%A1%E8%B2%AA%E8%B2%B4%E8%B7%9D%E8%BA%AB%E8%BB%8D%E8%BC%94%E8%BC%BF%E8%BD%89%E8%BE%9B%E8%BE%B0%E9%81%8B%E9%81%B2%E9%81%B7%E9%85%89%E9%87%8D%E9%87%91%E9%87%9D%E9%88%B4%E9%89%9E%E9%8C%84%E9%8C%98%E9%95%B7%E9%96%80%E9%96%91%E9%99%80%E9%99%90%E9%99%B0%E9%99%B7%E9%99%BD%E9%9B%9C%E9%9B%A2%E9%9D%88%E9%9D%9C%E9%9E%8D%E9%A3%9F%E9%A4%8A%E9%A4%A8%E9%A6%AC%E9%A9%9B%E9%AC%BC%E9%AD%81&display=swap");
 @font-face{font-family:"MaruBuri";font-weight:400;font-display:swap;
   src:url(https://hangeul.pstatic.net/hangeul_static/webfont/MaruBuri/MaruBuri-Regular.woff2) format("woff2")}
 @font-face{font-family:"MaruBuri";font-weight:600;font-display:swap;
@@ -168,6 +168,82 @@ h2:first-child{margin-top:6px}
 h3{font-size:16px;margin:22px 0 8px;color:#F4F1FF;font-weight:700}
 p{margin:0 0 14px}
 .lead{font-size:17px}
+.hero h1{word-break:keep-all;overflow-wrap:anywhere;text-wrap:balance}
+
+/* 입문 글과 검색 유입 페이지의 읽기 순서. 장식보다 개념과 다음 행동을 앞에 둔다. */
+:where(h2,h3,section[id]){scroll-margin-top:86px}
+.reading-path{display:flex;flex-wrap:wrap;gap:6px 20px;margin:22px 0;padding:17px 20px;
+  border:1px solid rgba(167,139,250,.24);border-radius:16px;background:rgba(124,58,237,.08)}
+.reading-path span,.learn-meta{font-size:12px;font-weight:700;letter-spacing:.04em;color:#c4b5fd}
+.reading-path a{font-size:14px;font-weight:700;color:#e2d7ff}
+.concept-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:26px 0 34px}
+.concept-grid a{display:flex;flex-direction:column;gap:7px;padding:20px;border-radius:18px;
+  background:linear-gradient(145deg,rgba(139,92,246,.12),rgba(255,255,255,.025));border:1px solid rgba(167,139,250,.18)}
+.concept-grid a:hover{text-decoration:none;border-color:#a78bfa}
+.concept-grid span{font-size:12px;color:#c4b5fd}.concept-grid b{font-size:16px;color:#f4f1ff}
+.concept-grid small{font-size:13px;line-height:1.7;color:#bdb9cb}
+.learn-path{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:0;margin:24px 0;list-style:none}
+.learn-path li{min-width:0}
+.learn-path a{display:flex;align-items:flex-start;gap:14px;height:100%;padding:22px;border-radius:20px;
+  background:linear-gradient(145deg,rgba(139,92,246,.13),rgba(255,255,255,.025));border:1px solid rgba(167,139,250,.2)}
+.learn-path a:hover{text-decoration:none;border-color:#a78bfa}
+.learn-step{display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:50%;font-size:12px;
+  color:#e4d9ff;background:rgba(139,92,246,.18);border:1px solid rgba(167,139,250,.28)}
+.learn-card{display:flex;flex-direction:column;gap:7px;min-width:0}
+.learn-card b{font-family:"MaruBuri",serif;font-size:20px;color:#f4f1ff}
+.learn-card span{font-size:13px;color:#bdb9cb;line-height:1.7}
+.learn-toc{margin:24px 0 30px;padding:20px 22px;border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;background:rgba(255,255,255,.025);font-size:14px}
+.learn-toc b{font-size:12px;color:#bdb9cb}.learn-toc ul{margin:8px 0 0;padding-left:18px}
+.learn-toc li{padding:3px 0}
+.learn-example{margin:24px 0;padding:22px;border-radius:20px;border:1px solid rgba(167,139,250,.24);
+  background:radial-gradient(ellipse at top right,rgba(124,58,237,.12),transparent 70%),#101019}
+.learn-example h2{margin-top:0}.learn-example .note:last-child{margin-bottom:0}
+.learn-chart{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:18px 0}
+.learn-pillar{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 5px;min-width:0;
+  border:1px solid rgba(255,255,255,.09);border-radius:12px;background:rgba(255,255,255,.025);font-size:13px}
+.learn-pillar.is-day{border-color:#a78bfa;background:rgba(139,92,246,.12)}
+.learn-pillar b{font-size:13px;color:#d6d0e3}.learn-pillar small{font-size:11px;color:#bbb4ca;text-align:center}
+.learn-glyph{font-family:"Noto Serif KR",serif;font-size:30px;color:var(--el,#f4f1ff);line-height:1.4}
+.tablewrap .tbl caption{text-align:left;padding:0 0 10px;font-size:13px;color:#bdb9cb}
+.learn-flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));list-style:none;padding:0;gap:8px;margin:20px 0}
+.learn-flow li{position:relative;padding:16px 7px;text-align:center;border-radius:14px;background:rgba(255,255,255,.03);
+  border:1px solid color-mix(in srgb,var(--el,#a78bfa) 45%,transparent)}
+.learn-flow b{display:block;font-size:20px;color:var(--el,#c4b5fd)}
+.learn-flow small{display:block;font-size:11px;color:#bdb9cb;line-height:1.6}
+.learn-flow li:not(:last-child)::after{content:"→";position:absolute;right:-8px;top:35%;z-index:1;font-size:12px;color:#bbb4ca}
+.learn-faq{margin:30px 0}.learn-faq details{padding:16px 0;border-bottom:1px solid rgba(255,255,255,.1)}
+.learn-faq summary{cursor:pointer;font-size:15px;font-weight:700;color:#ded8ec;line-height:1.7}
+.learn-faq details p{margin:12px 0 0;color:#bdb9cb;font-size:14px}
+.learn-next{display:flex;justify-content:space-between;gap:14px;margin:26px 0;padding:0;list-style:none}
+.learn-next li{flex:1}.learn-next a{display:block;padding:16px;border:1px solid rgba(167,139,250,.2);border-radius:14px;font-size:14px}
+.learn-next li:last-child{text-align:right}
+.celeb-search-label{display:block;margin-bottom:7px;font-size:13px;font-weight:700;color:#d9d2e8}
+.celeb-search-row{display:flex;align-items:center;gap:8px}.celeb-search-row .cfind{min-width:0;flex:1}
+.celeb-reset{flex:none;min-height:44px;padding:8px 13px;color:#e4d9ff;font-size:13px;border-radius:12px;
+  border:1px solid rgba(167,139,250,.3);background:rgba(124,58,237,.1);cursor:pointer}
+.celeb-results{margin:10px 0 0;color:#c9c2d9;font-size:13px}
+.celeb-quicklinks{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0}
+.celeb-quicklinks a{font-size:12px;padding:6px 10px;border:1px solid rgba(255,255,255,.12);border-radius:999px;color:#d4c6f6}
+.celeb-profile{margin:0 0 26px;padding:20px;border:1px solid rgba(167,139,250,.22);border-radius:20px;
+  background:linear-gradient(135deg,rgba(139,92,246,.1),rgba(255,255,255,.025))}
+.celeb-profile h2{margin-top:0}.celeb-profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:0}
+.celeb-profile-grid div{min-width:0}.celeb-profile-grid dt{font-size:12px;color:#ada5c0}
+.celeb-profile-grid dd{margin:3px 0 0;font-size:14px;color:#eee8f8;overflow-wrap:anywhere}
+.celeb-scope{margin:16px 0 0;font-size:13px;color:#bdb9cb;line-height:1.8}
+.celeb-scope summary{cursor:pointer;color:#d4c6f6}.celeb-scope p{margin:10px 0 0}
+.celeb-read-next{margin:30px 0 0;padding-top:6px;border-top:1px solid rgba(255,255,255,.1);font-size:14px}
+.celeb-read-next li{margin:10px 0}.celeb-read-next .celeb-meta{display:block;font-size:12px;color:#bdb9cb}
+.artgrid.celebs .cap{padding-top:40px;background:linear-gradient(180deg,transparent,rgba(8,8,13,.95) 42%)}
+.artgrid.celebs .cap .celeb-meta,.artgrid.celebs .cap .celeb-birth{display:block;font-size:11px;line-height:1.55;color:#ddd5e9}
+.artgrid.celebs .cap .celeb-meta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:600px){
+  .topbar nav a[href="/ilju/"]{display:none}
+  .concept-grid,.learn-path{grid-template-columns:1fr;gap:10px}
+  .concept-grid a{padding:17px}.learn-path a{padding:18px}
+  .learn-example{padding:16px}.learn-flow{gap:6px}.learn-flow li{padding:12px 3px}
+  .learn-flow b{font-size:clamp(12px,3.5vw,18px);white-space:nowrap}.learn-flow small{font-size:10px}
+}
 
 .chips{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 16px;padding:0;list-style:none}
 .chips li{font-size:13.5px;padding:5px 12px;border-radius:8px;background:rgba(139,92,246,.16);color:rgba(255,255,255,.65)}
@@ -284,12 +360,11 @@ a.cta:hover{text-decoration:none}
 .foot .fine{max-width:620px;margin:10px auto 0;font-size:12px;line-height:1.65;color:rgba(255,255,255,.55)}
 .foot .hubs{margin:0 0 10px;font-size:12.5px;line-height:1.9}.foot .hubs span{color:rgba(255,255,255,.55);margin-right:6px}.foot .hubs a{white-space:nowrap}
 
-/* 아주 좁은 화면(≤380px)에서는 '연예인'을 접어 계산기 버튼 자리를 지킨다 — 계산기가 1차 행동. */
+/* 모바일에서도 기초·연예인 검색 진입과 계산기 버튼을 함께 유지한다. */
 @media (max-width:380px){
   .topbar{padding:9px 8px}
   .topbar nav{gap:0}
   .topbar nav a{font-size:13px;padding:10px 6px}
-  .topbar nav a[href="/celeb/"]{display:none}
 }
 @media (min-width:640px){
   .topbar{padding:10px 18px}
