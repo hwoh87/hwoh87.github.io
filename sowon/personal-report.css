@@ -89,7 +89,7 @@
 .xp-personal-dialog .report-offer-tabs button { min-height: 44px; padding: 11px 0; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: transparent; color: #6b7766; font-size: 13px; line-height: 1.6; }
 .xp-personal-dialog .report-offer-tabs button[aria-pressed=true] { color: #3c5a40; border-bottom-color: #738a68; font-weight: 600; }
 .xp-personal-dialog .report-offer-detail { min-width: 0; padding: 0; background: transparent; }
-.xp-personal-dialog .report-offer-title { margin: 0 0 12px; color: var(--report-ink); font-family: inherit; font-size: 20px; font-weight: 600; letter-spacing: -.025em; line-height: 1.65; word-break: keep-all; }
+.xp-personal-dialog .report-offer-detail>.report-offer-title { margin: 0 0 12px; color: var(--report-ink); font-family: inherit; font-size: 20px; font-weight: 600; letter-spacing: -.025em; line-height: 1.65; word-break: keep-all; }
 .xp-personal-dialog .report-offer-detail>p { margin: 0 0 14px; color: #56634f; font-size: 14px; line-height: 1.9; word-break: keep-all; }
 .xp-personal-dialog .report-offer-facts { display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 16px 0; padding: 12px 0; border-top: 1px solid #e0e4da; border-bottom: 1px solid #e0e4da; color: #586951; font-size: 13px; line-height: 1.9; }
 .xp-personal-dialog .report-offer-facts :is(p,span,dt,dd) { margin: 0; font-size: inherit; line-height: inherit; }

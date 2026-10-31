@@ -2,12 +2,12 @@ import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
 import { createWorld } from './world.js?v=20261031-life1';
 import { createAvatar } from './avatar.js?v=20261031-social1';
+import { getOwnProfile } from './profile.js?v=20261101-editorial1';
 import { createLocomotion, isWalkable } from './locomotion.js?v=20261031-life1';
 import { readJourney } from './hub-core.js';
 import { readSettings, normalizeSettings, effectiveQuality, nearestInteraction, pickedInteraction, interactionDistance } from './experience-core.js';
 import { createWayfinder } from './wayfinder.js?v=20261031-life1';
 import { HALLS, getFeature } from './hub-core.js';
-import { getOwnProfile } from './profile.js?v=20261101-editorial1';
 import { createVisitors } from './visitors.js?v=20261031-social1';
 
 const host = document.getElementById('worldViewport');
@@ -369,7 +369,7 @@ function setup() {
   function walkToAction(action) {
     if (body.classList.contains('world-failed') || !world.destinations[action] || document.querySelector('dialog[open]')) return;
     const personalHost=(world.interactions||[]).find(item=>item.type==='npc'&&item.hall===action);
-    if(getOwnProfile()&&personalHost){approachInteraction(personalHost);return;}
+    if(personalHost){approachInteraction(personalHost);return;}
     enter();
     // A map can close and request travel before the next animation frame has
     // resumed movement. Re-enable here instead of treating that pause as no path.

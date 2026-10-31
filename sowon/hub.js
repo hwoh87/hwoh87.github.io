@@ -169,7 +169,7 @@ function hide() {
   hideReference();
   clearView();currentView=null;
   if(dialog.open)dialog.close();
-  document.body.classList.remove('dialog-open');
+  if(!document.querySelector('dialog[open]'))document.body.classList.remove('dialog-open');
   document.dispatchEvent(new CustomEvent('sowon:panel',{detail:{open:false}}));
   if(opener?.isConnected)opener.focus({preventScroll:true});
   capture();
@@ -241,6 +241,18 @@ document.addEventListener('sowon:open',event=>{if(getHall(event.detail?.action))
 document.addEventListener('sowon:feature',event=>{if(getFeature(event.detail?.id))open({type:'feature',id:event.detail.id});});
 document.addEventListener('sowon:hall',event=>{if(getHall(event.detail?.id))open({type:'hall',id:event.detail.id});});
 document.addEventListener('sowon:navigate',event=>{if(event.detail?.url)navigate(event.detail.url);});
+document.addEventListener('sowon:profile-change',()=>{
+  // Calculator carry may contain an explicitly opened person's birth query.
+  // It must not outlive an edit/deletion of the owner's profile, even while
+  // this hub is closed or a calculator/reference mount is still loading.
+  readingOptions.clear();
+  if(currentView?.type!=='feature'||getFeature(currentView.id)?.kind!=='reading')return;
+  afterClose=null;
+  // Native close/history traversal can finish later. Remove private DOM and
+  // abort its mounts synchronously before asking history to return to the hub.
+  hide();
+  close();
+});
 dialog.querySelector('.hub-close').onclick=close;
 dialog.querySelector('.hub-back').onclick=()=>history.back();
 dialog.addEventListener('cancel',event=>{event.preventDefault();close();});

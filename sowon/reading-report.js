@@ -15,7 +15,7 @@ export function mountReadingReport(container, npc, profile, options = {}) {
   const document = container.ownerDocument, lifetime = new AbortController(), id = `personal-report-${++reportSequence}`;
   const loadEngine = options.loadEngine || loadReadingEngine, interpret = options.buildInsight || buildReadingInsight;
   const mountCalculator = options.mountCalculator || mountReading, mountOffers = options.mountOffers || mountReadingOffers;
-  let disposed = false, version = 0, kind = HOSTS[npc].kind, currentBirth, location, trueSolarTime;
+  let disposed = false, version = 0, kind = KINDS.some(item => item[0] === options.initialKind) ? options.initialKind : HOSTS[npc].kind, currentBirth, location, trueSolarTime;
   let raw, rawAbort, offerCleanup, enginePromise, viewAbort, outlineAbort;
   const make = (tag, className, text) => { const node = document.createElement(tag); if (className) node.className = className; if (text != null) node.textContent = text; return node; };
   const listen = (node, event, callback, signal = lifetime.signal) => node.addEventListener(event, callback, { signal });
@@ -30,7 +30,7 @@ export function mountReadingReport(container, npc, profile, options = {}) {
   const header = make('header', 'report-header'), brand = make('div', 'report-brand');
   brand.append(make('strong', '', '소원당'), make('span', '', '/ 나의 해석'));
   const utilities = make('nav', 'report-utilities'); utilities.setAttribute('aria-label', '신당에서 함께하기');
-  utilities.append(button('', '공간 안내', () => options.onGuide?.()), button('', '궁합 요청', () => options.onSocial?.()));
+  utilities.append(button('', options.guideLabel || '공간 안내', () => options.onGuide?.()), button('', '궁합 요청', () => options.onSocial?.()));
   const close = button('report-close', '×', () => options.onClose?.()); close.setAttribute('aria-label', '해석을 닫고 신당으로 돌아가기');
   header.append(brand, utilities, close);
   const tabs = make('div', 'report-tabs'); tabs.setAttribute('role', 'tablist'); tabs.setAttribute('aria-label', '해석의 관점');

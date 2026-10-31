@@ -1,0 +1,281 @@
+/* Night stays in the world; controls use a small, legible paper surface. */
+.interface-active { --ui-paper:#f7f6f2; --ui-ink:#242b29; --ui-muted:#626c65; --ui-green:#526b55; --ui-line:#d9ddd4; }
+.interface-shell { height:100svh; min-height:560px; max-height:none; }
+.interface-shell :is(.shrine-nav button,.dock-action,.interface-host,.interface-help-toggle,.nearby-card,.experience-tools button,.return-gate,.traveler-greet,.wf-toggle,.wf-cancel):focus-visible { outline:2px solid #526b55; outline-offset:3px; }
+.interface-shell .shrine-header { position:absolute; top:22px; left:24px; right:24px; z-index:7; display:flex; align-items:center; gap:22px; width:auto; max-width:none; height:66px; padding:10px 17px; margin:0; border:1px solid var(--ui-line); border-radius:8px; background:var(--ui-paper); color:var(--ui-ink); box-shadow:none; }
+.interface-shell .shrine-brand { gap:9px; color:var(--ui-ink); flex-shrink:0; }
+.interface-shell .brand-moon { width:24px; height:29px; stroke:#62765b; }
+.interface-shell .brand-name { font-size:21px; letter-spacing:.08em; line-height:1.4; }
+.interface-shell .brand-by { color:#75806f; font-size:7px; letter-spacing:.12em; margin:1px 0 0; }
+.interface-shell .shrine-nav { display:flex; align-items:center; justify-content:flex-end; gap:7px; margin:0 0 0 auto; min-width:0; }
+.interface-shell .shrine-nav :is(.hub-nav-button,.sound-control) { display:flex; align-items:center; justify-content:center; gap:7px; min-width:44px; min-height:44px; padding:8px 10px; border:0; border-radius:5px; background:transparent; color:#4b5d4e; font-size:12px; line-height:1.5; backdrop-filter:none; }
+.interface-shell .shrine-nav :is(.hub-nav-button,.sound-control):hover { background:#e9ede3; color:#304b37; }
+.interface-shell .shrine-nav .hub-library { background:transparent; color:#4b5d4e; border:0; }
+.interface-shell .shrine-nav .icon { width:18px; height:18px; color:#5c7155; }
+.interface-shell .shrine-nav .hub-nav-text { display:none; }
+.interface-shell .interface-menu-label { display:block; white-space:nowrap; color:inherit; font-size:12px; font-weight:500; }
+.interface-shell .shrine-nav .social-launcher-badge { top:0; right:0; border-color:var(--ui-paper); background:#526b55; color:#fff; }
+.interface-shell .shrine-nav .has-profile:after { right:5px; top:3px; width:5px; height:5px; border:1px solid var(--ui-paper); background:#6d8762; }
+.interface-shell .interface-hosts { position:absolute; z-index:5; top:105px; left:24px; display:flex; align-items:center; gap:5px; padding:5px 8px; border:1px solid var(--ui-line); border-radius:7px; background:var(--ui-paper); color:var(--ui-ink); }
+.interface-shell .interface-hosts-label { padding:0 8px 0 3px; color:var(--ui-muted); font-size:11px; white-space:nowrap; }
+.interface-shell .interface-host { min-width:47px; min-height:44px; padding:9px 10px; border:0; border-radius:4px; background:transparent; color:#3e5842; font-size:13px; line-height:1.6; font-weight:500; }
+.interface-shell .interface-host:hover { background:#e8ede1; }
+.world-modal-open .interface-shell .interface-hosts { visibility:hidden; }
+.interface-shell .ritual-dock.hub-dock { width:min(760px,calc(100% - 280px)); max-width:none; min-height:72px; bottom:24px; gap:0; justify-content:space-between; padding:7px 10px; border:1px solid var(--ui-line); border-radius:8px; background:var(--ui-paper); color:var(--ui-ink); box-shadow:none; backdrop-filter:none; }
+.interface-shell .hub-dock .dock-action { min-width:0; min-height:56px; flex:1; gap:10px; padding:8px 11px; border-radius:5px; color:#3c5140; }
+.interface-shell .hub-dock .dock-action:hover { background:#e9ede3; color:#304b37; }
+.interface-shell .hub-dock .dock-action>span { color:inherit; font-size:13px; font-weight:500; line-height:1.5; }
+.interface-shell .hub-dock .dock-action small { color:#737e6d; font-size:10px; font-weight:400; margin-top:3px; }
+.interface-shell .hub-dock .dock-icon { width:23px; height:26px; stroke:#657b5d; stroke-width:1.3; }
+.interface-shell .hub-dock .dock-divider { flex:0 0 1px; height:29px; background:#dce1d5; }
+.interface-shell .hub-dock .dock-action:hover:after { content:none; }
+.interface-shell .hub-world-rituals { left:50%; bottom:107px; z-index:5; display:flex; gap:0; align-items:center; width:max-content; max-width:calc(100% - 280px); min-height:44px; padding:0 7px; transform:translateX(-50%); border:1px solid var(--ui-line); border-radius:7px; background:var(--ui-paper); }
+.interface-shell .hub-world-rituals button { min-height:44px; padding:8px 13px; gap:6px; color:#5a6d52; font-size:11px; line-height:1.5; white-space:nowrap; }
+.interface-shell .hub-world-rituals button:hover { color:#2f4c35; }
+.interface-shell .hub-world-rituals>span { height:14px; width:1px; background:#dce1d5; }
+.interface-shell .hub-world-rituals .icon { width:14px; height:16px; }
+.interface-shell .move-controls { left:24px; bottom:24px; }
+.interface-shell .move-stick { width:80px; height:80px; border-color:#c2cbb9; background:#f7f6f2e8; box-shadow:none; backdrop-filter:none; }
+.interface-shell .move-stick:before,.interface-shell .move-stick:after { background:#cbd4c1; }
+.interface-shell #moveThumb { width:32px; height:32px; border:1px solid #8c9f81; background:#d5dfc9; box-shadow:none; }
+.interface-shell .move-caption { display:none; }
+.interface-shell .interface-help-toggle { display:block; width:100%; min-height:44px; padding:10px 0 0; border:0; background:transparent; color:#d9e0d4; font:11px var(--sans,system-ui,sans-serif); line-height:1.5; text-shadow:none; }
+.interface-shell .move-pad { width:132px; height:132px; left:-4px; top:-21px; background:var(--ui-paper); border:1px solid #cbd4c1; border-radius:7px; z-index:2; }
+.interface-shell .move-pad button { min-width:44px; min-height:44px; background:#eef1e8; border-color:#cbd4c1; border-radius:4px; color:#3f5841; }
+.interface-shell .world-help { top:105px; left:50%; z-index:9; width:max-content; max-width:calc(100% - 80px); transform:translateX(-50%); padding:13px 17px; border:1px solid var(--ui-line); border-radius:7px; background:var(--ui-paper); color:#4d6150; font-size:12px; line-height:1.9; text-shadow:none; box-shadow:none; backdrop-filter:none; visibility:hidden; pointer-events:none; }
+.interface-shell.interface-help-open .world-help { visibility:visible; pointer-events:auto; }
+.interface-shell .help-desktop>span { margin:0 7px; color:#a7b39c; }
+.interface-shell .return-gate,.interface-shell .traveler-greet,.interface-shell .experience-tools button { width:48px; min-width:48px; height:54px; min-height:54px; padding:6px 2px; justify-content:center; align-items:center; flex-direction:column; gap:3px; border:1px solid var(--ui-line); border-radius:6px; background:var(--ui-paper); color:#4f664b; box-shadow:none; backdrop-filter:none; }
+.interface-shell .return-gate { right:24px; bottom:24px; }
+.interface-shell .traveler-greet { right:24px; bottom:84px; font-size:0; }
+.interface-shell .experience-tools { right:24px; bottom:144px; flex-direction:column; gap:6px; }
+.interface-shell :is(.return-gate,.traveler-greet,.experience-tools button):hover { background:#e8ede1; color:#354f39; }
+.interface-shell .experience-tools button[aria-pressed=true] { background:#dfe8d7; color:#334d37; border-color:#9db38d; }
+.interface-shell .return-gate .icon,.interface-shell .experience-tools .icon,.interface-shell .interface-greet-icon { width:18px; height:18px; }
+.interface-shell .traveler-greet>span:not(.interface-tool-label),.interface-shell .return-gate>span:not(.interface-tool-label),.interface-shell .experience-tools button>span:not(.interface-tool-label) { display:none; }
+.interface-shell .interface-tool-label,.interface-shell .traveler-greet>.interface-tool-label,.interface-shell .experience-tools .interface-tool-label,.is-exploring .interface-shell .return-gate>.interface-tool-label { display:block; color:inherit; font-size:9px; font-weight:400; line-height:1.4; white-space:nowrap; }
+.interface-shell .world-wayfinder { top:105px; right:24px; z-index:6; }
+.interface-shell .wf-root { width:168px; border:1px solid var(--ui-line); border-radius:7px; background:var(--ui-paper); color:#405641; box-shadow:none; backdrop-filter:none; }
+.interface-shell .wf-root.wf-expanded { width:250px; }
+.interface-shell .wf-toggle { min-height:54px; padding:9px 11px; gap:9px; }
+.interface-shell .wf-toggle-emblem { color:#637a59; font-size:23px; }
+.interface-shell .wf-toggle-copy strong { font-size:12px; color:#405641; }
+.interface-shell .wf-toggle-copy small,.interface-shell .wf-chevron { color:#718269; }
+.interface-shell .wf-panel { border-color:#e0e5d9; }
+.interface-shell :is(.wf-help,.wf-legend,.wf-journey-top) { color:#687a61; }
+.interface-shell .wf-map-field { fill:#f0f2ea; stroke:#d2dcc7; }
+.interface-shell .wf-boundary { fill:#edf0e5; stroke:#a7b79b; }
+.interface-shell .wf-pathways { stroke:#c6d3ba; }
+.interface-shell .wf-pond { fill:#c0d6d6; stroke:#88aeb0; }
+.interface-shell .wf-shrine { fill:#ddd6bd; stroke:#b8b18e; }
+.interface-shell .wf-route { stroke:#7c7150; }
+.interface-shell .wf-stop-dot { fill:#7d9870; stroke:#edf2e6; }
+.interface-shell .wf-stop--ritual .wf-stop-dot { fill:#a38a56; stroke:#f6f3e7; }
+.interface-shell .wf-stop-label { fill:#4c6345; stroke:#f0f2ea; font-size:11px; }
+.interface-shell .wf-stop--active .wf-stop-dot { fill:#4f6b43; stroke:#c5d4b9; }
+.interface-shell .wf-stop--active .wf-stop-label { fill:#34512e; }
+.interface-shell .wf-stop:hover .wf-stop-dot,.interface-shell .wf-stop:focus-visible .wf-stop-dot { fill:#48673e; stroke:#d3e0c8; }
+.interface-shell .wf-stop:focus-visible .wf-stop-hit { stroke:#526b55; }
+.interface-shell .wf-player-halo { fill:#4e725622; stroke:#6c8f6860; }
+.interface-shell .wf-heading,.interface-shell .wf-player-core { fill:#2c5038; stroke:#f7f6f2; }
+.interface-shell .wf-legend-dot,.interface-shell .wf-percent { color:#506b43; }
+.interface-shell .wf-journey { padding:10px 11px 7px; border-color:#dce3d4; }
+.interface-shell .wf-progress { background:#dce5d3; }
+.interface-shell .wf-progress>span { background:#778f69; }
+.interface-shell .wf-cancel { min-height:44px; padding-top:7px; color:#5d7452; font-size:11px; }
+.interface-shell .nearby-card { bottom:167px; width:max-content; max-width:calc(100% - 340px); min-height:64px; padding:11px 15px; gap:12px; border:1px solid #a7b79a; border-radius:7px; background:var(--ui-paper); color:var(--ui-ink); box-shadow:none; backdrop-filter:none; }
+.interface-shell .nearby-card:hover { background:#edf1e7; }
+.interface-shell .nearby-card>img { width:40px; height:40px; border:0; border-radius:5px; }
+.interface-shell .nearby-copy { gap:4px; }
+.interface-shell .nearby-copy small { color:#718169; font-size:10px; letter-spacing:0; }
+.interface-shell .nearby-copy strong { color:#354b3a; font-size:14px; line-height:1.5; }
+.interface-shell .nearby-card>span:last-child { border:0; padding:5px 0 5px 12px; color:#4e6b48; font-size:12px; }
+.interface-shell .nearby-action { font-weight:500; }
+.interface-shell .nearby-key { border-color:#cad6c0; border-radius:3px; background:#e9eee2; color:#607654; }
+.interface-shell :is(.npc-name,.visitor-name,.world-place) { min-height:44px; padding:10px 13px; border:1px solid #bdcbb1; border-radius:6px; background:#f7f6f2f5; color:#486041; font-size:11px; backdrop-filter:none; box-shadow:none; }
+.interface-shell .npc-name:before { content:none; }
+.interface-shell :is(.npc-name,.visitor-name,.world-place):hover { background:#e5edde; color:#304b37; }
+.interface-shell .world-place small { color:#73856b; font-size:9px; }
+.interface-shell .world-place span { color:#718d60; }
+.interface-shell .world-places .world-place.is-nearby { border-color:#8fa67f; background:#edf2e6; }
+.interface-shell .traveler-name { padding:5px 9px; border:1px solid #c4d1b8; border-radius:5px; background:#f7f6f2e8; color:#506446; font-size:9px; box-shadow:none; }
+.interface-shell .traveler-name>span { border-radius:3px; background:#e1e8d8; color:#577149; }
+.interface-shell .place-caption { top:180px; left:24px; padding:0; border:0; border-radius:0; background:transparent; backdrop-filter:none; }
+.interface-shell .place-caption small { color:#b9c8b7; font-size:9px; letter-spacing:.02em; }
+.interface-shell .place-caption strong { color:#eef0e5; font-size:17px; letter-spacing:.03em; text-shadow:none; }
+.interface-shell .place-caption p { color:#b9c8b7; font-size:11px; line-height:1.7; }
+.interface-shell .travel-status { top:auto; bottom:167px; max-width:calc(100% - 340px); padding:11px 15px; border:1px solid #d6decf; border-radius:6px; background:var(--ui-paper); color:#4d6647; font-size:12px; line-height:1.8; backdrop-filter:none; }
+.interface-shell .world-loading { border-color:#d6decf; border-radius:7px; background:var(--ui-paper); color:#52694a; box-shadow:none; backdrop-filter:none; }
+.interface-shell .world-loading>span { border-color:#c9d5bf; border-top-color:#657e58; }
+.interface-shell .world-fallback { bottom:158px; left:20%; right:20%; font-size:11px; color:#d4decf; }
+.interface-shell .storage-notice { bottom:160px; }
+.interface-shell .invitation { top:24%; animation:none; }
+.interface-shell .invitation h1 { font-size:clamp(40px,4.5vw,58px); }
+.interface-shell .entrance-button { border-color:#d8decf; border-radius:6px; background:var(--ui-paper); color:#3e5640; box-shadow:none; }
+.interface-shell .entrance-button:hover { background:#e8ede1; transform:none; }
+.interface-shell .hub-intro-link { color:#d1dcce; font-size:12px; min-height:44px; }
+.interface-shell .luna-greeting { bottom:180px; }
+.interface-shell .season-note { top:185px; }
+
+/* Portal forms share the same paper, ink and compact fields. NPC conversation and the report are separate owners. */
+.interface-active :is(.profile-dialog,.social-dialog,.hub-dialog,#travelerDialog,.paper-dialog:not(.breath-dialog)) { border-color:#d9ddd4; border-radius:10px; background:#f7f6f2; color:#242b29; color-scheme:light; box-shadow:0 18px 70px #07121b38; }
+.interface-active :is(.profile-dialog,.social-dialog,.hub-dialog,#travelerDialog)::backdrop { background:#0d1c27a8; backdrop-filter:none; }
+.interface-active :is(.profile-header,.social-header,.hub-dialog .hub-header,#travelerDialog .xp-dialog-header) { border-color:#d9ddd4; background:#f7f6f2; backdrop-filter:none; padding-top:18px; padding-bottom:18px; }
+.interface-active :is(.profile-header h2,.social-header h2,.hub-header h2,#travelerDialog .xp-dialog-header h2) { color:#293a2e; font-size:24px; font-weight:500; line-height:1.6; }
+.interface-active :is(.profile-header p,.social-header p,.hub-header p,#travelerDialog .xp-dialog-header p) { color:#697663; letter-spacing:.08em; font-size:9px; }
+.interface-active :is(.profile-close,.social-close,.hub-close,.hub-back,#travelerDialog .xp-close) { min-width:44px; min-height:44px; width:44px; height:44px; border:0; border-radius:5px; background:transparent; color:#607158; }
+.interface-active :is(.profile-field,.profile-form legend,.profile-check) { color:#52634c; font-size:13px; }
+.interface-active :is(.profile-lead,.profile-help,.profile-check small,.profile-privacy) { color:#68755f; font-size:12px; line-height:1.9; }
+.interface-active :is(.profile-field input,.profile-field select) { min-height:44px; border-color:#c8d2c0; border-radius:6px; background:#fcfbf8; color:#263b2a; font-size:16px; }
+.interface-active .profile-remember { padding:14px 0; border:0; border-top:1px solid #d9ddd4; border-radius:0; background:transparent; }
+.interface-active .profile-gender span { border-color:#cbd4c3; border-radius:6px; background:transparent; color:#586e50; }
+.interface-active .profile-gender input:checked+span { border-color:#8da47e; background:#e7edde; color:#3c5939; }
+.interface-active .profile-save { min-height:44px; border-radius:6px; background:#526b55; color:#fff; font-size:14px!important; }
+.interface-active .profile-delete { min-height:44px; font-size:12px!important; color:#796859; }
+.interface-active :is(.social-dialog .social-primary,.hub-primary,#travelerDialog .xp-done) { min-height:44px; border-color:#526b55; border-radius:6px; background:#526b55; color:#fff; font-size:14px; }
+.interface-active .social-welcome>p:not(.social-eyebrow) { color:#64725a; font-size:14px; line-height:1.9; }
+.interface-active .social-welcome ol { padding:16px 0 16px 22px; border:0; border-top:1px solid #d9ddd4; border-bottom:1px solid #d9ddd4; border-radius:0; background:transparent; font-size:12px; line-height:1.9; color:#65735a; }
+.interface-active .social-consent { color:#4f6648; font-size:13px; }
+.interface-active :is(.social-person,.social-request) { padding:18px 0; border:0; border-bottom:1px solid #d9ddd4; border-radius:0; background:transparent; }
+.interface-active :is(.social-person h3,.social-request h3) { color:#2c412f; }
+.interface-active :is(.social-lead,.social-person p,.social-request p,.social-request-compose p) { color:#65755a; font-size:12px; line-height:1.9; }
+.interface-active .social-empty { border:1px solid #d7dfcf; border-radius:6px; background:#eef1e7; color:#65775b; font-size:13px; }
+.interface-active .social-dialog button { min-height:44px; border-radius:6px; }
+.interface-active .social-tabs button { border:0; border-bottom:2px solid transparent; border-radius:0; background:transparent; }
+.interface-active .social-tabs button[aria-pressed=true] { border-bottom-color:#6d8861; background:transparent; color:#45603c; }
+.interface-active .social-footer { background:#edf0e6; color:#697961; font-size:11px; }
+.interface-active .hub-footer { background:#eef1e7; border-color:#d9ddd4; }
+.interface-active .hub-feature { border:0; border-bottom:1px solid #d9ddd4; border-radius:0; background:transparent; min-height:138px; }
+.interface-active .hub-feature:hover { background:#eaf0e1; border-color:#a7b99a; }
+.interface-active .hub-feature>span:not(.hub-feature-tag) { color:#68785e; font-size:12px; line-height:1.9; }
+.interface-active .hub-feature strong { font-size:18px; color:#324b35; }
+.interface-active .hub-dialog .hub-footer button { min-height:44px; }
+.interface-active #travelerDialog :is(.xp-lead,.xp-setting-note,.xp-preference-status) { color:#68785e; font-size:12px; line-height:1.9; }
+.interface-active #travelerDialog :is(.xp-moods button,.xp-outfits button,.xp-quality button) { border-color:#ccd5c3; border-radius:6px; background:#fafaf6; color:#5c7153; }
+.interface-active #travelerDialog :is(.xp-moods button,.xp-outfits button,.xp-quality button)[aria-pressed=true] { border-color:#8ba27b; background:#e5edde; color:#3e5d39; box-shadow:none; }
+.interface-active #travelerDialog .xp-quality button { min-height:44px; }
+.interface-active #travelerDialog legend { color:#536a49; font-size:13px; }
+
+@media (max-width:1100px) and (min-width:761px) {
+  .interface-shell .shrine-header { left:20px; right:20px; padding-left:14px; padding-right:12px; gap:10px; }
+  .interface-shell .shrine-nav { gap:1px; }
+  .interface-shell .shrine-nav :is(.hub-nav-button,.sound-control) { gap:5px; padding:8px; }
+  .interface-shell .interface-menu-label { font-size:11px; }
+  .interface-shell .hub-dock .dock-action { flex-direction:column; gap:4px; padding:6px 5px; }
+  .interface-shell .hub-dock .dock-action small { display:none; }
+  .interface-shell .hub-dock .dock-icon { width:20px; height:23px; }
+}
+@media (max-width:760px) {
+  .interface-shell { min-height:560px; height:100svh; }
+  .interface-shell .shrine-header { top:12px; left:12px; right:12px; height:106px; display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:28px 52px; gap:5px; padding:9px 8px; border-radius:7px; }
+  .interface-shell .shrine-brand { gap:7px; padding-left:6px; width:fit-content; }
+  .interface-shell .brand-moon { width:19px; height:22px; }
+  .interface-shell .brand-name { display:inline; font-size:18px; letter-spacing:.04em; }
+  .interface-shell .brand-by { display:inline; margin-left:8px; font-size:7px; }
+  .interface-shell .shrine-nav { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:1px; margin:0; width:100%; }
+  .interface-shell .shrine-nav :is(.hub-nav-button,.sound-control) { display:flex!important; flex-direction:column; gap:3px; width:100%; min-width:44px; min-height:52px; height:52px; padding:4px 0; border-radius:4px; }
+  .interface-shell .shrine-nav .icon { width:18px; height:18px; }
+  .interface-shell .interface-menu-label { font-size:10px; line-height:1.5; letter-spacing:-.025em; }
+  .interface-shell .shrine-nav .hub-library .hub-nav-text { display:none; }
+  .interface-shell .interface-hosts { top:130px; left:12px; gap:1px; padding:4px; width:calc(100% - 82px); min-height:52px; }
+  .interface-shell .interface-hosts-label { flex:0 0 31px; padding:0 3px; font-size:10px; line-height:1.6; white-space:nowrap; }
+  .interface-shell .interface-host { min-width:44px; min-height:44px; flex:1; padding:8px 2px; font-size:12px; }
+  .interface-shell .ritual-dock.hub-dock { bottom:max(12px,env(safe-area-inset-bottom)); width:calc(100% - 24px); min-height:64px; padding:5px 6px; gap:0; }
+  .interface-shell .hub-dock .dock-action { flex-direction:column; min-width:44px; min-height:52px; padding:5px 1px; gap:4px; }
+  .interface-shell .hub-dock .dock-action>span { font-size:11px; line-height:1.5; }
+  .interface-shell .hub-dock .dock-action small { display:none; }
+  .interface-shell .hub-dock .dock-icon { width:19px; height:21px; }
+  .interface-shell .hub-dock .dock-divider { height:24px; }
+  .interface-shell .hub-world-rituals { bottom:calc(max(12px,env(safe-area-inset-bottom)) + 74px); left:12px; right:12px; max-width:none; width:auto; transform:none; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); padding:0 3px; min-height:44px; }
+  .interface-shell .hub-world-rituals button { min-width:0; min-height:44px; justify-content:center; gap:4px; padding:7px 1px; font-size:10px; }
+  .interface-shell .hub-world-rituals>span { display:none; }
+  .interface-shell .hub-world-rituals .icon { width:12px; height:14px; }
+  .interface-shell .move-controls { bottom:calc(max(12px,env(safe-area-inset-bottom)) + 130px); left:12px; }
+  .interface-shell .move-stick { width:76px; height:76px; }
+  .interface-shell .interface-help-toggle { font-size:10px; }
+  .interface-shell .return-gate { right:12px; bottom:calc(max(12px,env(safe-area-inset-bottom)) + 134px); }
+  .interface-shell .traveler-greet { right:66px; bottom:calc(max(12px,env(safe-area-inset-bottom)) + 134px); }
+  .interface-shell .experience-tools { right:12px; bottom:calc(max(12px,env(safe-area-inset-bottom)) + 194px); flex-direction:row; gap:6px; }
+  .is-exploring .interface-shell .experience-tools { display:flex!important; }
+  .interface-shell .return-gate,.interface-shell .traveler-greet,.interface-shell .experience-tools button { width:48px; min-width:48px; height:54px; min-height:54px; }
+  .interface-shell .interface-tool-label { font-size:9px; }
+  .interface-shell .world-wayfinder { top:130px; right:12px; }
+  .interface-shell .wf-root { width:54px; border-radius:6px; }
+  .interface-shell .wf-root.wf-expanded { width:min(260px,calc(100vw - 24px)); }
+  .interface-shell .wf-toggle { min-height:52px; gap:7px; padding:8px 10px; }
+  .interface-shell .wf-root:not(.wf-expanded) .wf-toggle { padding:8px; }
+  .interface-shell .wf-map { max-height:calc(100svh - 348px); }
+  .interface-shell .wf-toggle-copy strong { font-size:11px; }
+  .interface-shell .wf-toggle-copy small { font-size:9px; }
+  .interface-shell .wf-help { font-size:10px; }
+  .interface-shell .wf-legend { font-size:9px; }
+  .interface-shell .nearby-card { bottom:calc(max(12px,env(safe-area-inset-bottom)) + 266px); width:calc(100% - 24px); max-width:none; min-height:64px; padding:10px 12px; gap:10px; }
+  .interface-shell .nearby-card>img { width:36px; height:36px; }
+  .interface-shell .nearby-copy strong { font-size:13px; }
+  .interface-shell .nearby-copy small { font-size:9px; }
+  .interface-shell .nearby-card>span:last-child { margin-left:auto; padding-left:5px; font-size:11px; white-space:nowrap; }
+  .interface-shell .nearby-key { display:none; }
+  .interface-shell .travel-status { bottom:calc(max(12px,env(safe-area-inset-bottom)) + 266px); max-width:calc(100% - 24px); width:max-content; font-size:11px; }
+  .interface-shell .place-caption { top:194px; left:14px; max-width:calc(100% - 28px); }
+  .interface-shell .place-caption :is(small,p) { display:none; }
+  .interface-shell .place-caption strong { font-family:var(--sans,system-ui,sans-serif); font-size:13px; letter-spacing:.01em; }
+  .interface-shell .world-help { top:130px; left:12px; right:12px; transform:none; width:auto; max-width:none; font-size:12px; padding:15px; }
+  .wayfinder-expanded .interface-shell .interface-hosts { visibility:hidden; }
+  .interface-shell .world-fallback { bottom:145px; left:18px; right:18px; font-size:10px; }
+  .interface-shell .storage-notice { bottom:142px; }
+  .interface-shell .invitation,.world-ready .interface-shell .invitation { top:205px; left:22px; max-width:calc(100% - 44px); }
+  .interface-shell .invitation h1 { font-size:35px; line-height:1.5; }
+  .interface-shell .invitation-copy { margin:16px 0 20px; font-size:12px; }
+  .interface-shell .eyebrow { font-size:10px; margin-bottom:12px; }
+  .interface-shell .entrance-note { font-size:10px; }
+  .interface-shell .hub-intro-link { font-size:11px; margin-top:9px; }
+  .interface-shell .luna-greeting { bottom:159px; }
+  .interface-shell .season-note { top:194px; }
+  .interface-active :is(.profile-dialog,.social-dialog,.hub-dialog,#travelerDialog) { width:calc(100vw - 20px); max-height:calc(100svh - 20px); border-radius:8px; }
+  .interface-active :is(.profile-header,.social-header,.hub-dialog .hub-header,#travelerDialog .xp-dialog-header) { padding:15px 17px; }
+  .interface-active :is(.profile-header h2,.social-header h2,.hub-header h2,#travelerDialog .xp-dialog-header h2) { font-size:22px; }
+  .interface-active .social-body { padding:22px 18px; }
+  .interface-active .hub-footer { padding:9px 16px; gap:12px; }
+}
+@media (max-width:360px) {
+  .interface-shell .shrine-header { left:10px; right:10px; padding-left:7px; padding-right:7px; }
+  .interface-shell .interface-menu-label { font-size:10px; }
+  .interface-shell .hub-world-rituals button { font-size:10px; }
+  .interface-shell .hub-world-rituals .icon { display:none; }
+  .interface-shell .interface-hosts-label { flex-basis:29px; font-size:10px; white-space:nowrap; }
+  .interface-shell .interface-host { font-size:11px; }
+  .interface-shell .nearby-card { gap:8px; }
+  .interface-shell .nearby-card>span:last-child { font-size:10px; }
+}
+
+/* The roster replaces the static guide quotation; the same actions remain in the toolbar. */
+.interface-shell :is(.luna-greeting,.season-note,.my-light-note) { display:none; }
+.interface-shell .world-fallback { position:static; width:auto; max-width:440px; padding:0; margin:11px 0 0; color:#c9d7c5; font-size:11px; line-height:1.8; text-align:left; }
+.world-failed .interface-shell .invitation { left:50%; top:21%; width:min(500px,calc(100% - 48px)); max-width:500px; transform:translateX(-50%); text-align:center; }
+.world-failed .interface-shell .invitation .eyebrow { justify-content:center; }
+.world-failed .interface-shell .invitation-copy { display:none; }
+.world-failed .interface-shell .world-fallback { margin-left:auto; margin-right:auto; text-align:center; }
+.world-failed .interface-shell .hub-intro-link { text-align:center; }
+@media (min-width:761px) and (max-height:800px) {
+  .interface-shell .invitation { top:23%; }
+  .interface-shell .invitation h1 { font-size:46px; line-height:1.4; }
+  .interface-shell .invitation-copy { margin:16px 0 20px; line-height:1.8; }
+  .interface-shell .eyebrow { margin-bottom:17px; }
+}
+@media (max-width:760px) {
+  .world-failed .interface-shell .invitation { top:198px; left:22px; width:calc(100% - 44px); max-width:none; transform:none; text-align:left; }
+  .world-failed .interface-shell .invitation .eyebrow { justify-content:flex-start; }
+  .world-failed .interface-shell .world-fallback,.world-failed .interface-shell .hub-intro-link { text-align:left; }
+  .interface-shell .world-fallback { font-size:10px; line-height:1.8; }
+}
+@media (max-width:760px) and (max-height:650px) {
+  .interface-shell .invitation,.world-ready .interface-shell .invitation,.world-failed .interface-shell .invitation { top:184px; }
+  .interface-shell .invitation .eyebrow { display:none; }
+  .interface-shell .invitation h1 { font-size:28px; line-height:1.35; }
+  .interface-shell .invitation-copy { margin:10px 0 14px; font-size:11px; line-height:1.7; }
+  .interface-shell .entrance-button { min-height:44px; padding:10px 14px; }
+  .interface-shell .entrance-note { margin-top:8px; font-size:9px; line-height:1.6; }
+  .interface-shell .hub-intro-link { min-height:44px; margin-top:3px; }
+}
+
+.world-modal-open .interface-shell .world-help { visibility:hidden; }

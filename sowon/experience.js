@@ -17,6 +17,7 @@ encounterDialog.id = 'encounterDialog';
 encounterDialog.setAttribute('aria-label', '술사와 이야기 나누기');
 document.body.appendChild(encounterDialog);
 let settingsOpener, encounterOpener, encounterCleanup, encounterVersion = 0;
+const dialogueSessions = new Map();
 
 function announceSettings() {
   document.dispatchEvent(new CustomEvent('sowon:preferences', { detail: { ...settings } }));
@@ -35,37 +36,50 @@ function openSettings() {
   renderSettings(); settingsDialog.showModal(); body.classList.add('dialog-open');
 }
 function closeEncounter() { if (encounterDialog.open) encounterDialog.close(); }
-async function openEncounter(npc, {guide=false}={}) {
+async function openEncounter(npc, {reading=false, kind}={}) {
   if (!['tojeong','seol','luna'].includes(npc) || document.querySelector('dialog[open]')) return;
   const version = ++encounterVersion;
-  encounterOpener = document.activeElement;
+  const active = document.activeElement;
+  if (active && active !== document.body && !active.closest?.('dialog')) encounterOpener = active;
   encounterCleanup?.(); encounterCleanup = null;
   encounterDialog.textContent = '술사가 당신을 맞이하고 있어요…';
   encounterDialog.showModal(); body.classList.add('dialog-open');
+  const profile = getOwnProfile();
+  const shared = {
+    onClose: closeEncounter,
+    onProfile: () => { closeEncounter(); document.dispatchEvent(new CustomEvent('sowon:profile-open',{detail:{returnToNpc:npc}})); },
+    onSocial: () => { closeEncounter(); document.dispatchEvent(new CustomEvent('sowon:social-open')); },
+    onFeature: id => { closeEncounter(); document.dispatchEvent(new CustomEvent('sowon:feature',{detail:{id}})); },
+    onHall: id => { closeEncounter(); document.dispatchEvent(new CustomEvent('sowon:hall',{detail:{id}})); },
+  };
   try {
-    if(getOwnProfile()&&!guide){
-      const module=await import('./personal-encounter.js?v=20261101-editorial1');
-      if(version!==encounterVersion||!encounterDialog.open)return;
-      const result=await module.mountPersonalEncounter(encounterDialog,npc,{
-        onClose:closeEncounter,
-        onGuide:()=>{closeEncounter();queueMicrotask(()=>openEncounter(npc,{guide:true}));},
-        onProfile:()=>{closeEncounter();document.dispatchEvent(new CustomEvent('sowon:profile-open',{detail:{returnToNpc:npc}}));},
-        onSocial:()=>{closeEncounter();document.dispatchEvent(new CustomEvent('sowon:social-open'));},
+    let result;
+    if (profile && reading) {
+      const module = await import('./personal-encounter.js?v=20261101-dialogue1');
+      if (version !== encounterVersion || !encounterDialog.open) return;
+      result = module.mountPersonalEncounter(encounterDialog,npc,{
+        ...shared, initialKind:kind, guideLabel:'대화 이어가기',
+        onGuide: () => { closeEncounter(); queueMicrotask(() => openEncounter(npc)); },
       });
-      if(version!==encounterVersion||!encounterDialog.open){result?.();return;}
-      encounterCleanup=result;return;
+    } else {
+      const module = await import('./npc-dialog.js?v=20261101-dialogue1');
+      if (version !== encounterVersion || !encounterDialog.open) return;
+      result = module.mountNpcDialogue(encounterDialog,npc,{
+        ...shared, profile, session:dialogueSessions.get(npc),
+        onReading: nextKind => {
+          if (!['saju','jami','star'].includes(nextKind)) return;
+          if (!profile) { shared.onFeature(nextKind); return; }
+          closeEncounter(); queueMicrotask(() => openEncounter(npc,{reading:true,kind:nextKind}));
+        },
+      });
+      dialogueSessions.set(npc,result.session);
     }
-    const module = await import('./encounters.js?v=20261031-social1');
-    if (version !== encounterVersion || !encounterDialog.open) return;
-    encounterCleanup = module.mountEncounter(encounterDialog,npc,{
-      onClose: closeEncounter,
-      onPersonal:()=>{closeEncounter();document.dispatchEvent(new CustomEvent('sowon:profile-open',{detail:{returnToNpc:npc}}));},
-      onFeature: id => { closeEncounter(); document.dispatchEvent(new CustomEvent('sowon:feature',{detail:{id}})); },
-      onHall: id => { closeEncounter(); document.dispatchEvent(new CustomEvent('sowon:hall',{detail:{id}})); },
-    });
+    if (version !== encounterVersion || !encounterDialog.open) { result?.(); return; }
+    encounterCleanup = result;
   } catch (_) {
     if (version !== encounterVersion || !encounterDialog.open) return;
-    encounterDialog.innerHTML = '<div class="xp-failed"><h2>안내를 잠시 불러오지 못했어요.</h2><p>전체 기능에서 같은 이야기를 바로 열 수 있어요.</p><button type="button">풍경으로 돌아가기</button></div>';
+    encounterDialog.classList.remove('npc-dialog','xp-personal-dialog');
+    encounterDialog.innerHTML = '<div class="xp-failed"><h2>이야기를 잠시 불러오지 못했어요.</h2><p>전체 기능에서 같은 해석과 안내를 열 수 있어요.</p><button type="button">풍경으로 돌아가기</button></div>';
     encounterDialog.querySelector('button').onclick=closeEncounter;
   }
 }
@@ -90,10 +104,10 @@ settingsDialog.addEventListener('close',()=>{
 encounterDialog.addEventListener('close',()=>{
   if(encounterDialog.open)return;
   encounterVersion++;encounterCleanup?.();encounterCleanup=null;encounterDialog.replaceChildren();
-  encounterDialog.classList.remove('xp-personal-dialog');
+  encounterDialog.classList.remove('xp-personal-dialog','npc-dialog');
   if(!document.querySelector('dialog[open]')){body.classList.remove('dialog-open');if(encounterOpener?.isConnected)encounterOpener.focus({preventScroll:true});}
 });
 document.addEventListener('sowon:encounter',event=>openEncounter(event.detail?.npc));
-document.addEventListener('sowon:profile-change',()=>{if(encounterDialog.open&&encounterDialog.classList.contains('xp-personal-dialog'))closeEncounter();});
+document.addEventListener('sowon:profile-change',()=>{dialogueSessions.clear();if(encounterDialog.open)closeEncounter();});
 document.addEventListener('sowon:preferences-request',announceSettings);
 announceSettings();
