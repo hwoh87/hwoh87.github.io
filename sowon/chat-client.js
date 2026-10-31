@@ -1,4 +1,4 @@
-import { getNpcPersona, prepareDialogueQuestion, normalizeDialogueAnswer, projectDialogueHistory, projectDialogueReading } from './dialogue-core.js?v=20261101-flashlite1';
+import { getNpcPersona, prepareDialogueQuestion, normalizeDialogueAnswer, projectDialogueHistory, projectDialogueReading } from './dialogue-core.js?v=20261101-sanctuary2';
 
 export const SHRINE_CHAT_ENDPOINT = 'https://sidxbzpbesbaiokxrqsf.supabase.co/functions/v1/shrine-chat';
 export const SHRINE_CHAT_MODEL = 'gemini-3.5-flash-lite';

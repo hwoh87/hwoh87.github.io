@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { createCampus } from './campus.js?v=20261031-life1';
-import { createAtmosphere, makeHangulGeometry } from './atmosphere.js';
+import { createCampus } from './campus.js?v=20261101-sanctuary2';
+import { createAtmosphere, makeHangulGeometry } from './atmosphere.js?v=20261101-sanctuary2';
 
 /** A walkable Korean courtyard with five adjoining gardens and halls. */
 export function createWorld() {
@@ -688,5 +688,5 @@ export function createWorld() {
     group.clear();
   }
 
-  return { group, groundMeshes, colliders, bounds, heightAt, destinations, places, interactions, atmosphere, npcs: campus.npcs, update, setWishCount, setAtmosphere, setQuality, dispose };
+  return { group, groundMeshes, colliders, bounds, heightAt, destinations, places, interactions, atmosphere, npcs: campus.npcs, setRoomIdentity:campus.setRoomIdentity, update, setWishCount, setAtmosphere, setQuality, dispose };
 }

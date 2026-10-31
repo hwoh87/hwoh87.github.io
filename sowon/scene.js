@@ -1,15 +1,17 @@
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
-import { createWorld } from './world.js?v=20261031-life1';
-import { createAvatar } from './avatar.js?v=20261031-social1';
-import { getOwnProfile } from './profile.js?v=20261101-editorial1';
-import { createLocomotion, isWalkable } from './locomotion.js?v=20261031-life1';
-import { readJourney } from './hub-core.js';
-import { readSettings, normalizeSettings, effectiveQuality, nearestInteraction, pickedInteraction, interactionDistance } from './experience-core.js';
-import { createWayfinder } from './wayfinder.js?v=20261031-life1';
-import { HALLS, getFeature } from './hub-core.js';
-import { createVisitors } from './visitors.js?v=20261031-social1';
-import { createConversationFocus } from './conversation-focus.js?v=20261101-conversation2';
+import { createWorld } from './world.js?v=20261101-sanctuary2';
+import { createAvatar } from './avatar.js?v=20261101-sanctuary2';
+import { getSocialRoomState } from './social.js?v=20261101-sanctuary2';
+import { getOwnIdentity } from './identity.js?v=20261101-sanctuary2';
+import { getOwnProfile } from './profile.js?v=20261101-sanctuary2';
+import { createLocomotion, isWalkable } from './locomotion.js?v=20261101-sanctuary2';
+import { readJourney } from './hub-core.js?v=20261101-sanctuary2';
+import { readSettings, normalizeSettings, effectiveQuality, nearestInteraction, pickedInteraction, interactionDistance } from './experience-core.js?v=20261101-sanctuary2';
+import { createWayfinder } from './wayfinder.js?v=20261101-sanctuary2';
+import { HALLS, getFeature } from './hub-core.js?v=20261101-sanctuary2';
+import { createVisitors } from './visitors.js?v=20261101-sanctuary2';
+import { createConversationFocus } from './conversation-focus.js?v=20261101-sanctuary2';
 
 const host = document.getElementById('worldViewport');
 const body = document.body;
@@ -165,14 +167,34 @@ function setup() {
     document.dispatchEvent(new CustomEvent('sowon:social-open',{detail:{visitorId}}));
   }
   const visitors=createVisitors({scene,world,camera,host:document.getElementById('visitorNames'),onSelect:selectVisitor});
+  let ownIdentity=getOwnIdentity();
   function applyProfile(){
     const profile=getOwnProfile();
     avatar.setGender?.(profile?.solar.g||null);
-    const badge=document.createElement('span');badge.textContent='나';
-    name.replaceChildren(badge,document.createTextNode(profile?.nickname||'달빛 나그네'));
+    name.classList.toggle('has-day-pillar',ownIdentity.hasIdentity===true);
+    const badge=document.createElement('span');badge.className='traveler-day-pillar';
+    badge.textContent=ownIdentity.hasIdentity?`${ownIdentity.ilju}일주 · ${ownIdentity.ganzi}`:'나';
+    const nickname=document.createElement('small');nickname.className='traveler-nickname';nickname.textContent=profile?.nickname||'달빛 나그네';
+    name.replaceChildren(badge,nickname);
   }
   applyProfile();
-  listen(document,'sowon:profile-change',applyProfile);
+  listen(document,'sowon:profile-change',()=>{ownIdentity={hasIdentity:false};applyProfile();});
+  listen(document,'sowon:identity-change',event=>{ownIdentity=event.detail||{hasIdentity:false};applyProfile();});
+  function applyRoom(detail={}){
+    const room=detail.roomKey || 'courtyard';
+    world.setRoomIdentity?.(room);
+    host.dataset.room=room;
+    if(detail.previousRoomKey===room)return;
+    const point=room==='courtyard'?{x:0,z:14}:{x:-11,z:14};
+    if(!isWalkable(point,world))return;
+    activeJourney=null;cameraTransition=null;movement.cancel();
+    avatar.group.position.set(point.x,world.heightAt(point.x,point.z),point.z);
+    avatar.group.rotation.y=Math.PI;
+    enter();setCameraMode('walk');
+    camera.position.copy(avatar.group.position).add(cameraOffset);
+    orbit.target.copy(avatar.group.position).add(targetOffset);orbit.update();
+  }
+  listen(document,'sowon:room-change',event=>applyRoom(event.detail));
   listen(document,'sowon:social-presence',event=>visitors.sync(event.detail?.visitors,event.detail?.selfId));
   listen(document,'sowon:capture-social',event=>{
     event.detail.snapshot={x:avatar.group.position.x,z:avatar.group.position.z,heading:avatar.group.rotation.y,outfit:preferences.outfit};
@@ -422,6 +444,9 @@ function setup() {
     event.preventDefault(); event.stopPropagation(); walkToAction(action);
   });
   listen(document, 'sowon:walk', event => walkToAction(event.detail?.action));
+  const initialRoom=getSocialRoomState();
+  if(initialRoom.joined && initialRoom.roomKey!=='courtyard')applyRoom(initialRoom);
+  else {host.dataset.room='courtyard';world.setRoomIdentity?.('courtyard');}
   placeButtons.forEach(button => listen(button, 'click', () => walkToAction(button.dataset.worldPlace)));
   listen(document.getElementById('greetTraveler'), 'click', () => {
     avatar.setGesture('greet');

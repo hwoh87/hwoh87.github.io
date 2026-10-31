@@ -1,12 +1,13 @@
 import * as THREE from 'three';
-import { getAvatarPalette } from './avatar-palettes.js';
+import { getAvatarPalette } from './avatar-palettes.js?v=20261101-sanctuary2';
+import { safeIlju } from './ilju-room-core.js?v=20261101-sanctuary2';
 
 // Only the public presence projection is accepted here; birth data never enters a model or label.
 export function publicVisitor(raw) {
   if (!raw || typeof raw.id !== 'string' || !/^[a-zA-Z0-9-]{8,80}$/.test(raw.id)) return null;
   if (!Number.isFinite(raw.x) || !Number.isFinite(raw.z) || Math.abs(raw.x)>23 || raw.z < -25 || raw.z >22) return null;
   const nickname=typeof raw.nickname==='string'?raw.nickname.replace(/[\u0000-\u001f\u007f]/g,'').trim().slice(0,20):'';
-  return {id:raw.id,nickname:nickname||'이웃 나그네',x:raw.x,z:raw.z,heading:Number.isFinite(raw.heading)?raw.heading%(Math.PI*2):0,outfit:getAvatarPalette(raw.outfit)?.id||'sage'};
+  return {id:raw.id,nickname:nickname||'이웃 나그네',x:raw.x,z:raw.z,heading:Number.isFinite(raw.heading)?raw.heading%(Math.PI*2):0,outfit:getAvatarPalette(raw.outfit)?.id||'sage',...(safeIlju(raw.ilju)?{ilju:safeIlju(raw.ilju)}:{})};
 }
 
 export function createVisitors({scene,world,camera,host,onSelect}) {
@@ -36,7 +37,7 @@ export function createVisitors({scene,world,camera,host,onSelect}) {
     const safe=(Array.isArray(visitors)?visitors:[]).map(publicVisitor).filter(value=>value&&value.id!==selfId).slice(0,24);
     const ids=new Set(safe.map(value=>value.id));
     for(const[id,peer]of peers)if(!ids.has(id)){remove(peer);peers.delete(id);}
-    for(const data of safe){let peer=peers.get(data.id);if(!peer){peer=make(data);peers.set(data.id,peer);}peer.data=data;peer.label.textContent=data.nickname+' · 궁합';peer.label.setAttribute('aria-label',data.nickname+'님에게 궁합 요청하기');const palette=getAvatarPalette(data.outfit);peer.materials.cloth.color.set(palette.colors.cream);peer.materials.pants.color.set(palette.colors.sage);}
+    for(const data of safe){let peer=peers.get(data.id);if(!peer){peer=make(data);peers.set(data.id,peer);}peer.data=data;peer.label.textContent=data.ilju?data.ilju+' 일주\n'+data.nickname:data.nickname+' · 궁합';peer.label.setAttribute('aria-label',data.nickname+(data.ilju?' · '+data.ilju+' 일주':'')+'님에게 궁합 요청하기');const palette=getAvatarPalette(data.outfit);peer.materials.cloth.color.set(palette.colors.cream);peer.materials.pants.color.set(palette.colors.sage);}
   }
   function update(delta,{exploring,modalOpen,position}){
     if(disposed)return;

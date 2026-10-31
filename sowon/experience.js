@@ -1,5 +1,5 @@
-import { readSettings, writeSettings, normalizeSettings } from './experience-core.js';
-import { getOwnProfile } from './profile.js?v=20261101-editorial1';
+import { readSettings, writeSettings, normalizeSettings } from './experience-core.js?v=20261101-sanctuary2';
+import { getOwnProfile } from './profile.js?v=20261101-sanctuary2';
 
 let storage;
 try { storage = localStorage; } catch (_) {}
@@ -56,14 +56,14 @@ async function openEncounter(npc, {reading=false, kind}={}) {
   try {
     let result;
     if (profile && reading) {
-      const module = await import('./personal-encounter.js?v=20261101-dialogue1');
+      const module = await import('./personal-encounter.js?v=20261101-sanctuary2');
       if (version !== encounterVersion || !encounterDialog.open) return;
       result = module.mountPersonalEncounter(encounterDialog,npc,{
         ...shared, initialKind:kind, guideLabel:'대화 이어가기',
         onGuide: () => { closeEncounter(); queueMicrotask(() => openEncounter(npc)); },
       });
     } else {
-      const module = await import('./npc-dialog.js?v=20261101-flashlite1');
+      const module = await import('./npc-dialog.js?v=20261101-sanctuary2');
       if (version !== encounterVersion || !encounterDialog.open) return;
       result = module.mountNpcDialogue(encounterDialog,npc,{
         ...shared, profile, session:dialogueSessions.get(npc),
@@ -111,6 +111,7 @@ encounterDialog.addEventListener('close',()=>{
   if(!document.querySelector('dialog[open]')){body.classList.remove('dialog-open');if(encounterOpener?.isConnected)encounterOpener.focus({preventScroll:true});}
 });
 document.addEventListener('sowon:encounter',event=>openEncounter(event.detail?.npc));
+document.addEventListener('sowon:personal-reading',event=>openEncounter(event.detail?.npc || 'tojeong',{reading:true,kind:event.detail?.kind || 'saju'}));
 document.addEventListener('sowon:profile-change',()=>{dialogueSessions.clear();if(encounterDialog.open)closeEncounter();});
 document.addEventListener('sowon:preferences-request',announceSettings);
 announceSettings();

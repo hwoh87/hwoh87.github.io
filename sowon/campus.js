@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { makeHangulGeometry } from './atmosphere.js';
+import { makeHangulGeometry } from './atmosphere.js?v=20261101-sanctuary2';
 
 /** Five quiet side gardens. Repeated architectural detail is batched by material. */
 export function createCampus() {
@@ -9,6 +9,8 @@ export function createCampus() {
   const colliders = [];
   const interactions = [];
   const destinations = {
+    rooms:{x:-14,z:15.8},
+    celeb:{x:15,z:16},
     myeongri: { x: -17, z: -4.9 },
     inyeon: { x: 17, z: 6.7 },
     stars: { x: 0, z: -20 },
@@ -16,6 +18,8 @@ export function createCampus() {
     archive: { x: 17, z: -6.7 },
   };
   const places = {
+    rooms:{label:'일주마당',...destinations.rooms,height:1.8},
+    celeb:{label:'연예인 사주관',...destinations.celeb,height:1.8},
     myeongri: { label: '명리전', ...destinations.myeongri, height: 1.7 },
     inyeon: { label: '인연정', ...destinations.inyeon, height: 1.7 },
     stars: { label: '별마루', ...destinations.stars, height: 1.7 },
@@ -436,6 +440,40 @@ export function createCampus() {
     if (i) beam('gold', stars[i - 1], stars[i], 0.008, 4);
   }
 
+  // Two new open-air destinations on the southern promenade.
+  const roomDeck=new THREE.Mesh(new THREE.CylinderGeometry(3.2,3.3,.08,48),materials.stoneLight);
+  roomDeck.position.set(-15,-.02,18);roomDeck.receiveShadow=true;group.add(roomDeck);groundMeshes.push(roomDeck);
+  for(const r of [1.4,2.7])addGeometry('gold',new THREE.TorusGeometry(r,.018,4,48),[-15,.032,18],[Math.PI/2,0,0]);
+  for(const [x,z,angle] of [[-17.1,18.3,.5],[-15,20.2,0],[-12.9,18.3,-.5]]){
+    box('woodLight',1.65,.12,.48,x,.52,z,[0,angle,0]);
+    for(const dx of [-.57,.57])box('wood',.1,.43,.3,x+dx,.27,z);
+    collider(x-.87,x+.87,z-.28,z+.28);
+  }
+  for(const x of [-18.1,-11.9]){
+    cylinder('woodDark',.07,.09,2.8,x,1.4,19,10);hangingLantern('paperRose',x,2.6,19);
+    collider(x-.12,x+.12,18.88,19.12);
+  }
+  plaque('일주마당',-15,2.45,20.6,2.6);
+  objectInteraction({id:'object-ilju-garden',hall:'rooms',feature:'ilju-rooms',label:'내 일주방 찾아가기',point:destinations.rooms,anchor3d:{x:-15,y:1.6,z:19.6},size:[3,2.3,1.2]});
+  const roomInscription=new THREE.Mesh(makeHangulGeometry('공용마당',.28),materials.paperRose);
+  roomInscription.position.set(-15,1.85,20.71);group.add(roomInscription);
+  function setRoomIdentity(roomKey){
+    const label=/^ilju:[가-힣]{2}$/.test(roomKey)?roomKey.slice(5)+'일주방':'공용마당';
+    roomInscription.geometry.dispose();roomInscription.geometry=makeHangulGeometry(label,.28);
+  }
+  box('woodDark',5.8,.13,2.3,15,.12,19.5);
+  for(const [index,x] of [13,15,17].entries()){
+    box('woodLight',1.65,2.6,.18,x,1.52,20.25);
+    box(['bookSage','bookBlue','bookRose'][index],1.42,2.32,.035,x,1.52,20.36);
+    sphere('paper',.27,x,1.98,20.44,[1,1.18,.3]);
+    sphere('darkPaper',.55,x,1.18,20.44,[1.05,1,.2]);
+    box('paper',1.2,.055,.025,x,.6,20.46);
+  }
+  collider(12,18,20.05,20.45);
+  plaque('사주관',15,3.24,20.25,2.6);
+  for(const x of [11.7,18.3])hangingLantern('paperBlue',x,2.4,20.15);
+  objectInteraction({id:'object-celebrity-gallery',hall:'celeb',feature:'celeb',label:'연예인의 사주 이야기',point:destinations.celeb,anchor3d:{x:15,y:1.8,z:20.2},size:[3.2,2.7,.6]});
+
   // Shrubs and small boundary pines frame the new places without blocking paths.
   for (const [x, z, scale] of [[-21.5, -13, 0.95], [21.5, -14.3, 1.1], [-21.4, 11.8, 0.9], [21.4, 10.4, 1.05], [-10.5, -22.3, 0.9], [10.5, -22.3, 0.95]]) {
     beam('woodDark', [x, 0, z], [x + 0.15, 3.8 * scale, z], 0.16 * scale);
@@ -487,5 +525,5 @@ export function createCampus() {
     materials.gold.emissiveIntensity = mood === 'dawn' ? 0.04 : 0.18;
   }
   interactions.forEach((interaction) => { interaction.group.userData.interactionId = interaction.id; });
-  return { group, colliders, groundMeshes, destinations, places, interactions, heightAt, update, setAtmosphere, npcs: npcEntries.map(({ id, host }) => ({ id, group: host })) };
+  return { group, colliders, groundMeshes, destinations, places, interactions, heightAt, update, setAtmosphere, setRoomIdentity, npcs: npcEntries.map(({ id, host }) => ({ id, group: host })) };
 }

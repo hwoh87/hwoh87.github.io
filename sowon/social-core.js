@@ -1,3 +1,5 @@
+import { safeIlju, roomForKey, safeRoomCounts } from './ilju-room-core.js?v=20261101-sanctuary2';
+export { safeIlju, roomForKey, safeRoomCounts };
 export const SOCIAL_ENDPOINT = 'https://sidxbzpbesbaiokxrqsf.supabase.co/functions/v1/shrine-social';
 export const SOCIAL_SESSION_KEY = 'samra.sowon.social.session.v1';
 export const RELATION_KINDS = Object.freeze({ COUPLE: '연인·부부', FRIEND: '친구', FAMILY: '가족', BUSINESS: '동업·동료' });
@@ -25,7 +27,7 @@ export function sameServerProfile(a, b) {
 export function safeVisitors(raw, selfId) {
   if (!Array.isArray(raw)) return [];
   const seen = new Set();
-  return raw.slice(0, 60).filter(item => item && validId(item.id) && item.id !== selfId && !seen.has(item.id) && seen.add(item.id) && Number.isFinite(item.x) && Number.isFinite(item.z)).map(item => ({ id: item.id, nickname: cleanText(item.nickname, 12) || '나그네', ...safePosition(item) }));
+  return raw.slice(0, 60).filter(item => item && validId(item.id) && item.id !== selfId && !seen.has(item.id) && seen.add(item.id) && Number.isFinite(item.x) && Number.isFinite(item.z)).map(item => ({ id: item.id, nickname: cleanText(item.nickname, 12) || '나그네', ...safePosition(item), ...(safeIlju(item.ilju) ? { ilju: safeIlju(item.ilju) } : {}) }));
 }
 export function safeRequests(raw) {
   if (!Array.isArray(raw)) return [];
@@ -70,7 +72,7 @@ export function safeResult(raw) {
 }
 export function socialError(error) {
   const code = error?.code || error?.message;
-  const messages = { peer_not_nearby: '서로 조금 더 가까이 다가간 뒤 요청해 주세요.', profile_changed: '내 정보가 바뀌었어요. 다시 참여해 주세요.', decision_forbidden: '이 선택은 해당 궁합의 참여자만 할 수 있어요.', consent_required: '아직 두 사람의 승인이 모이지 않았어요.', request_limit: '궁합 요청이 잠시 몰렸어요. 조금 뒤에 다시 청해 주세요.', not_found: '이 궁합 소식을 찾을 수 없어요. 만료되었거나 공유가 지워졌을 수 있어요.', relation_unavailable: '이 관계로는 궁합을 볼 수 없어요. 친구·가족 관계로 만나 주세요.', unavailable: '만남 연결을 잠시 준비하고 있어요. 조금 뒤에 다시 참여해 주세요.', profile_required: '내 출생 정보를 먼저 준비해 주세요.', target_unavailable: '그 나그네가 잠시 자리를 비웠어요. 새로고침 후 다시 만나 주세요.', target_offline: '그 나그네가 잠시 자리를 비웠어요.', too_far: '서로 조금 더 가까이 다가간 뒤 요청해 주세요.', target_too_far: '서로 조금 더 가까이 다가간 뒤 요청해 주세요.', request_exists: '이미 같은 나그네와 나누고 있는 궁합 소식이 있어요.', duplicate_request: '이미 보낸 요청이 있어요. 궁합 소식을 확인해 주세요.', request_expired: '요청의 유효 시간이 지났어요. 다시 만나 새로 요청해 주세요.', session_expired: '만남 시간이 끝났어요. 다시 참여하면 새롭게 만날 수 있어요.', invalid_session: '만남 시간이 끝났어요. 다시 참여해 주세요.', not_approved: '아직 두 사람의 승인이 모이지 않았어요.', forbidden: '이 궁합은 두 참여자만 열 수 있어요.', result_revoked: '한 참여자가 공유를 철회했어요.', minor_blocked: '미성년자가 포함된 연인·부부 궁합은 제공하지 않아요. 친구·가족 관계를 골라 주세요.', rate_limited: '요청이 잠시 몰렸어요. 조금 뒤에 다시 시도해 주세요.', bad_inputs: '입력한 정보를 다시 확인해 주세요.', service_unavailable: '만남 연결을 아직 준비하고 있어요. 내 술사 해석은 계속 이용할 수 있어요.' };
+  const messages = { presence_changed: '만남 상태가 바뀌었어요. 공개 범위를 확인하고 다시 참여해 주세요.', invalid_room: '이 일주방을 찾을 수 없어요. 방 목록에서 다시 골라 주세요.', room_unavailable: '일주방 연결을 아직 준비하고 있어요. 현재 공간에 계속 머물러요.', peer_not_nearby: '같은 공간에서 서로 조금 더 가까이 다가간 뒤 다시 시도해 주세요.', profile_changed: '내 정보가 바뀌었어요. 다시 참여해 주세요.', decision_forbidden: '이 선택은 해당 궁합의 참여자만 할 수 있어요.', consent_required: '아직 두 사람의 승인이 모이지 않았어요.', request_limit: '궁합 요청이 잠시 몰렸어요. 조금 뒤에 다시 청해 주세요.', not_found: '이 궁합 소식을 찾을 수 없어요. 만료되었거나 공유가 지워졌을 수 있어요.', relation_unavailable: '이 관계로는 궁합을 볼 수 없어요. 친구·가족 관계로 만나 주세요.', unavailable: '만남 연결을 잠시 준비하고 있어요. 조금 뒤에 다시 참여해 주세요.', profile_required: '내 출생 정보를 먼저 준비해 주세요.', target_unavailable: '그 나그네가 잠시 자리를 비웠어요. 새로고침 후 다시 만나 주세요.', target_offline: '그 나그네가 잠시 자리를 비웠어요.', too_far: '서로 조금 더 가까이 다가간 뒤 요청해 주세요.', target_too_far: '서로 조금 더 가까이 다가간 뒤 요청해 주세요.', request_exists: '이미 같은 나그네와 나누고 있는 궁합 소식이 있어요.', duplicate_request: '이미 보낸 요청이 있어요. 궁합 소식을 확인해 주세요.', request_expired: '요청의 유효 시간이 지났어요. 다시 만나 새로 요청해 주세요.', session_expired: '만남 시간이 끝났어요. 다시 참여하면 새롭게 만날 수 있어요.', invalid_session: '만남 시간이 끝났어요. 다시 참여해 주세요.', not_approved: '아직 두 사람의 승인이 모이지 않았어요.', forbidden: '이 궁합은 두 참여자만 열 수 있어요.', result_revoked: '한 참여자가 공유를 철회했어요.', minor_blocked: '미성년자가 포함된 연인·부부 궁합은 제공하지 않아요. 친구·가족 관계를 골라 주세요.', rate_limited: '요청이 잠시 몰렸어요. 조금 뒤에 다시 시도해 주세요.', bad_inputs: '입력한 정보를 다시 확인해 주세요.', service_unavailable: '만남 연결을 아직 준비하고 있어요. 내 술사 해석은 계속 이용할 수 있어요.' };
   return messages[code] || '만남 연결이 잠시 고르지 않아요. 잠시 후 새로고침해 주세요.';
 }
 export function createSocialClient({ endpoint = SOCIAL_ENDPOINT, fetcher = globalThis.fetch, storage, now = () => Date.now() } = {}) {

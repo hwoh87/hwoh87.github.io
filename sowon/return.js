@@ -1,4 +1,4 @@
-import { readJourney } from './hub-core.js';
+import { readJourney } from './hub-core.js?v=20261101-sanctuary2';
 
 // This explicit return link carries no report, birthday or return URL. It only
 // appears after a visitor leaves the sanctuary from this browser tab.

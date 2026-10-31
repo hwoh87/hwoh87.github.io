@@ -20,7 +20,7 @@ function currentCatalog() {
 
 async function ensureStoreCatalog() {
   if (currentCatalog()) return currentCatalog();
-  const { loadCatalog } = await import('./readings.js?v=20261101-editorial1');
+  const { loadCatalog } = await import('./readings.js?v=20261101-sanctuary2');
   if (typeof loadCatalog !== 'function') throw new Error('catalog_unavailable');
   await loadCatalog();
   return currentCatalog();

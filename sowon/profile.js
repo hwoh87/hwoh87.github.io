@@ -1,5 +1,5 @@
-import { PROFILE_KEY, createProfile, readProfile, writeProfile, clearStoredProfile, setActiveProfile, getActiveProfile, getActiveBirth, profileSearch } from './profile-core.js';
-import { loadReadingEngine, clearOwnPersonMemory } from './readings.js?v=20261101-editorial1';
+import { PROFILE_KEY, createProfile, readProfile, writeProfile, clearStoredProfile, setActiveProfile, getActiveProfile, getActiveBirth, profileSearch } from './profile-core.js?v=20261101-sanctuary2';
+import { loadReadingEngine, clearOwnPersonMemory } from './readings.js?v=20261101-sanctuary2';
 
 export { profileSearch };
 export const getOwnProfile = getActiveProfile;

@@ -1,5 +1,5 @@
-import { getOwnProfile } from './profile.js?v=20261101-editorial1';
-import { RELATION_KINDS, safePosition, serverProfile, sameServerProfile, safeVisitors, safeRequests, availableActions, safeResult, socialError, cleanText, createSocialClient } from './social-core.js';
+import { getOwnProfile } from './profile.js?v=20261101-sanctuary2';
+import { RELATION_KINDS, safePosition, serverProfile, safeVisitors, safeRequests, availableActions, safeResult, socialError, cleanText, createSocialClient, safeIlju, roomForKey, safeRoomCounts } from './social-core.js?v=20261101-sanctuary2';
 
 let storage;
 try { storage = sessionStorage; } catch (_) {}
@@ -7,9 +7,10 @@ const client = createSocialClient({ storage });
 const dialog = document.createElement('dialog');
 dialog.id = 'socialDialog'; dialog.className = 'social-dialog'; dialog.setAttribute('aria-labelledby', 'socialTitle');
 document.body.appendChild(dialog);
-const state = { joined: false, joining: false, busy: false, stale: false, selfId: '', visitors: [], requests: [], tab: 'visitors', selected: null, kind: 'FRIEND', deleteArmed: false, confirm: null, result: null, resultId: null, error: '', status: '' };
+const state = { joined: false, joining: false, busy: false, stale: false, selfId: '', visitors: [], requests: [], tab: 'visitors', selected: null, kind: 'FRIEND', deleteArmed: false, confirm: null, result: null, resultId: null, error: '', status: '', roomKey: 'courtyard', ownIlju: null, presenceEpoch: null, roomCounts: {}, switchingRoom: false, deletionPending: false };
 let opener, timer, refreshPromise, operation = 0, resultVersion = 0, visibilityVersion = 0, lastProfile = '';
-let config = {};
+let config = {}, pendingRoom = null, leavePromise = null, leaveRemoves = false;
+export function getSocialRoomState() { return { joined: state.joined, connected: state.joined && !state.stale, busy: state.busy || state.switchingRoom || state.joining || state.deletionPending || Boolean(leavePromise), roomKey: state.roomKey, ownIlju: state.ownIlju, roomCounts: { ...state.roomCounts } }; }
 const controllers = new Set();
 const announcedRequests = new Set();
 const liveAnnouncement = document.createElement('p');
@@ -23,6 +24,9 @@ function snapshot() {
   if (config.getPosition) return safePosition(config.getPosition());
   const capture = { snapshot: null }; document.dispatchEvent(new CustomEvent('sowon:capture-social', { detail: capture }));
   return safePosition(capture.snapshot || {});
+}
+function presencePayload(position, roomKey = state.roomKey) {
+  return { ...position, room_key: roomKey, ...(Number.isInteger(state.presenceEpoch) ? { presence_epoch: state.presenceEpoch } : {}) };
 }
 function updateLauncher() {
   const pending = state.requests.filter(request => request.direction === 'incoming' && request.status === 'pending');
@@ -43,9 +47,9 @@ function updateLauncher() {
 }
 function emitPresence() {
   updateLauncher();
-  document.dispatchEvent(new CustomEvent('sowon:social-presence', { detail: { selfId: state.selfId, visitors: state.joined && !state.stale ? state.visitors.map(v => ({ ...v })) : [] } }));
+  document.dispatchEvent(new CustomEvent('sowon:social-presence', { detail: { selfId: state.selfId, roomKey: state.roomKey, ownIlju: state.ownIlju, visitors: state.joined && !state.stale ? state.visitors.map(v => ({ ...v })) : [] } }));
   const incoming = state.requests.filter(r => r.direction === 'incoming' && r.status === 'pending').length;
-  document.dispatchEvent(new CustomEvent('sowon:social-state', { detail: { joined: state.joined, connected: state.joined && !state.stale, count: state.visitors.length, incoming } }));
+  document.dispatchEvent(new CustomEvent('sowon:social-state', { detail: { ...getSocialRoomState(), count: state.visitors.length, incoming } }));
 }
 function resetTransient() { ++resultVersion; state.result = null; state.resultId = null; state.confirm = null; state.selected = null; state.deleteArmed = false; }
 function statusText(status) { return ({ pending: '승인을 기다려요', approved: '함께 볼 수 있어요', declined: '이번에는 사양했어요', cancelled: '요청을 취소했어요', revoked: '공유가 철회됐어요', expired: '시간이 지났어요' })[status] || ''; }
@@ -57,7 +61,7 @@ function visitorCard(visitor) {
   const active = state.requests.find(r => r.peer.id === visitor.id && ['pending', 'approved'].includes(r.status));
   const selected = state.selected === visitor.id;
   const here = snapshot(), distance = Math.hypot(here.x - visitor.x, here.z - visitor.z), nearby = distance <= 8;
-  return `<article class="social-person"><div class="social-avatar social-cloth-${visitor.outfit}" aria-hidden="true">人</div><div class="social-person-main"><h3>${esc(visitor.nickname)}</h3><p>${active ? statusText(active.status) : (nearby ? '가까이에 머무는 나그네' : '마당을 산책하는 나그네')}</p></div>${button('choose', selected ? '접기' : '궁합 나누기', `data-visitor-id="${visitor.id}" aria-expanded="${selected}"`)}${selected ? `<div class="social-request-compose"><label>어떤 인연으로 만날까요?<select data-social-kind>${Object.entries(RELATION_KINDS).map(([key, label]) => `<option value="${key}" ${key === state.kind ? 'selected' : ''}>${label}</option>`).join('')}</select></label><p>요청을 보내는 것은 내 결과 공유에 동의하는 뜻이에요. 상대도 승인해야 두 사람이 같은 결과를 볼 수 있어요.</p>${!nearby ? `<p>서로 가까이 있어야 인연을 청할 수 있어요.</p>${button('approach', '이 나그네에게 다가가기', `class="social-primary" data-visitor-id="${visitor.id}"`)}` : active ? `<p>이미 나누고 있는 소식이 있어요. ‘궁합 소식’에서 이어 보세요.</p>${button('news', '궁합 소식 열기')}` : button('request', '이 관계로 궁합 요청', `class="social-primary" data-visitor-id="${visitor.id}"`)}</div>` : ''}</article>`;
+  return `<article class="social-person"><div class="social-avatar social-cloth-${visitor.outfit}" aria-hidden="true">人</div><div class="social-person-main"><h3>${esc(visitor.nickname)}${visitor.ilju ? ` <span class="social-ilju-tag">${esc(visitor.ilju)} 일주</span>` : ''}</h3><p>${active ? statusText(active.status) : (nearby ? '가까이에 머무는 나그네' : '마당을 산책하는 나그네')}</p></div>${button('choose', selected ? '접기' : '궁합 나누기', `data-visitor-id="${visitor.id}" aria-expanded="${selected}"`)}${selected ? `<div class="social-request-compose"><label>어떤 인연으로 만날까요?<select data-social-kind>${Object.entries(RELATION_KINDS).map(([key, label]) => `<option value="${key}" ${key === state.kind ? 'selected' : ''}>${label}</option>`).join('')}</select></label><p>요청을 보내는 것은 내 결과 공유에 동의하는 뜻이에요. 상대도 승인해야 두 사람이 같은 결과를 볼 수 있어요.</p>${!nearby ? `<p>서로 가까이 있어야 인연을 청할 수 있어요.</p>${button('approach', '이 나그네에게 다가가기', `class="social-primary" data-visitor-id="${visitor.id}"`)}` : active ? `<p>이미 나누고 있는 소식이 있어요. ‘궁합 소식’에서 이어 보세요.</p>${button('news', '궁합 소식 열기')}` : button('request', '이 관계로 궁합 요청', `class="social-primary" data-visitor-id="${visitor.id}"`)}</div>` : ''}</article>`;
 }
 function requestCard(request) {
   return `<article class="social-request"><div class="social-request-label"><span>${request.direction === 'incoming' ? '받은 요청' : '보낸 요청'}</span><small>${esc(RELATION_KINDS[request.kind])}</small></div><h3>${esc(request.peer.nickname)}${request.direction === 'incoming' ? '에게서 온 궁합 초대' : '에게 보낸 궁합 초대'}</h3><p>${statusText(request.status)}</p><div class="social-request-actions">${requestActions(request)}</div></article>`;
@@ -72,8 +76,8 @@ function resultMarkup() {
 }
 function deleteButton() { return button('delete', state.deleteArmed ? '한 번 더 눌러 내 정보와 모든 공유 지우기' : '서버의 내 정보와 공유 지우기', state.deleteArmed ? 'class="social-delete-confirm"' : ''); }
 function consentMarkup() {
-  const own = profile();
-  return `<div class="social-welcome"><span class="social-knot" aria-hidden="true">∞</span><p class="social-eyebrow">AN ENCOUNTER IN THE GARDEN</p><h3>같은 마당에서,<br>서로의 결을 알아가요.</h3><p>이곳에 실제로 머무는 사람에게 궁합을 청하고, 두 사람의 승인이 모이면 같은 해석을 함께 볼 수 있어요.</p><ol><li>내 출생 정보를 먼저 준비해요.</li><li>닉네임과 캐릭터 모습·현재 위치가 마당에 보여요.</li><li>출생 정보는 계산을 위해 서버에 보관하며 상대에게 원문을 보여주지 않아요.</li><li>보낸 사람의 동의와 받은 사람의 승인이 모이면 두 참여자만 사주 특성이 담긴 궁합 해석을 열 수 있어요. 언제든 공유를 철회할 수 있어요.</li></ol><p class="social-retention">만남 연결과 서버의 정보는 최대 24시간 동안 유효해요. 이 탭에서 다시 참여해 승인한 궁합을 이어 볼 수 있고, ‘서버의 내 정보와 공유 지우기’로 먼저 지울 수도 있어요. 내 캐릭터의 기기 기억 설정은 별도로 유지돼요.</p>${own ? `<p class="social-own-name">오늘 만날 이름 <strong>${esc(own.nickname || '나그네')}</strong> ${button('profile', '내 정보 수정')}</p><label class="social-consent"><input type="checkbox" data-social-consent>위 공개·보관 범위를 확인했고, 만남에 참여할게요.</label>${button('join', state.joining ? '만남을 준비하고 있어요…' : '동의하고 마당에서 만나기', `class="social-primary" ${state.joining ? 'disabled' : ''}`)}` : `<p class="social-empty">태어난 날짜·시간과 성별을 저장하면 준비가 끝나요.</p>${button('profile', '내 캐릭터 정보 준비하기', 'class="social-primary"')}`}</div>`;
+  const own = profile(), destination = roomForKey(pendingRoom)?.label || roomForKey(state.roomKey)?.label || '신당 마당';
+  return `<div class="social-welcome"><span class="social-knot" aria-hidden="true">∞</span><p class="social-eyebrow">AN ENCOUNTER IN THE GARDEN</p><h3>같은 마당에서,<br>서로의 결을 알아가요.</h3><p>이곳에 실제로 머무는 사람에게 궁합을 청하고, 두 사람의 승인이 모이면 같은 해석을 함께 볼 수 있어요.</p><ol><li>내 출생 정보를 먼저 준비해요.</li><li>닉네임·캐릭터·현재 위치와 계산한 일주가 같은 공간의 나그네에게 보여요. 생년월일·시간·성별 원문은 공개하지 않아요.</li><li>출생 정보는 계산을 위해 서버에 보관하며 상대에게 원문을 보여주지 않아요.</li><li>보낸 사람의 동의와 받은 사람의 승인이 모이면 두 참여자만 사주 특성이 담긴 궁합 해석을 열 수 있어요. 언제든 공유를 철회할 수 있어요.</li></ol><p class="social-retention">만남 연결과 서버의 정보는 최대 24시간 동안 유효해요. 이 탭에서 다시 참여해 승인한 궁합을 이어 볼 수 있고, ‘서버의 내 정보와 공유 지우기’로 먼저 지울 수도 있어요. 내 캐릭터의 기기 기억 설정은 별도로 유지돼요.</p>${own ? `<p class="social-own-name">오늘 만날 이름 <strong>${esc(own.nickname || '나그네')}</strong> ${button('profile', '내 정보 수정')}</p><p class="social-destination">참여할 공간 <strong>${esc(destination)}</strong></p><label class="social-consent"><input type="checkbox" data-social-consent>위 공개·보관 범위를 확인했고, 만남에 참여할게요.</label>${button('join', state.deletionPending ? '이전 서버 정보 삭제를 먼저 확인해 주세요' : state.joining ? '만남을 준비하고 있어요…' : `동의하고 ${destination}에 들어가기`, `class="social-primary" ${state.joining ? 'disabled' : ''}`)}` : `<p class="social-empty">태어난 날짜·시간과 성별을 저장하면 준비가 끝나요.</p>${button('profile', '내 캐릭터 정보 준비하기', 'class="social-primary"')}`}</div>`;
 }
 function confirmMarkup() {
   const confirmation = state.confirm;
@@ -88,8 +92,8 @@ function render() {
   const focusAction = document.activeElement?.dataset?.socialAction;
   const focusRequest = document.activeElement?.dataset?.requestId;
   const count = state.requests.filter(r => r.direction === 'incoming' && r.status === 'pending').length;
-  dialog.innerHTML = `<header class="social-header"><div><p>MEET A FELLOW TRAVELER</p><h2 id="socialTitle">마당의 인연</h2></div>${button('close', '×', 'class="social-close" aria-label="마당의 인연 닫기"')}</header><div class="social-body">${state.error ? `<p class="social-error" role="alert">${esc(state.error)}</p>` : ''}${state.status ? `<p class="social-status" role="status">${esc(state.status)}</p>` : ''}${state.joined ? `<div class="social-connected"><span class="social-live-dot ${state.stale ? 'social-disconnected' : ''}" aria-hidden="true"></span><span>${state.stale ? '다시 연결하고 있어요' : '실제 나그네와 연결되어 있어요'}</span>${button('refresh', '새로고침', state.busy ? 'disabled' : '')}</div><nav class="social-tabs" aria-label="만남과 궁합"><button type="button" data-social-action="visitors" aria-pressed="${state.tab === 'visitors'}">만난 나그네 <span>${state.visitors.length}</span></button><button type="button" data-social-action="news" aria-pressed="${state.tab === 'news'}">궁합 소식 ${count ? `<span class="social-count">${count}</span>` : ''}</button></nav>${state.confirm ? confirmMarkup() : state.result ? resultMarkup() : state.tab === 'visitors' ? `<p class="social-lead">${state.stale ? '연결이 회복되면 다시 현재 나그네를 보여드려요.' : '캐릭터를 누르거나 이 목록에서 인연을 청해 보세요.'}</p><div class="social-people">${!state.stale && state.visitors.length ? state.visitors.map(visitorCard).join('') : `<p class="social-empty">${state.stale ? '아직 만남 정보를 확인하지 못했어요.' : '아직 다른 나그네가 없어요. 마당을 산책하며 기다려 보세요.'}</p>`}</div>` : `<p class="social-lead">승인 전에는 결과가 열리지 않아요. 서로의 동의는 언제든 거둘 수 있어요.</p><div class="social-requests">${state.requests.length ? state.requests.map(requestCard).join('') : '<p class="social-empty">아직 주고받은 궁합 요청이 없어요.</p>'}</div>`}<footer class="social-session-actions">${button('leave', '마당의 만남 잠시 끄기')}${deleteButton()}</footer>` : `${consentMarkup()}${client.hasSession() ? `<footer class="social-session-actions">${deleteButton()}</footer>` : ''}`}</div><footer class="social-footer">닉네임·캐릭터·위치만 공개 · 출생 원문은 나만 확인</footer>`;
-  dialog.querySelectorAll('button').forEach(node => { if (state.busy && !['close'].includes(node.dataset.socialAction)) node.disabled = true; });
+  dialog.innerHTML = `<header class="social-header"><div><p>MEET A FELLOW TRAVELER</p><h2 id="socialTitle">마당의 인연</h2></div>${button('close', '×', 'class="social-close" aria-label="마당의 인연 닫기"')}</header><div class="social-body">${state.error ? `<p class="social-error" role="alert">${esc(state.error)}</p>` : ''}${state.status ? `<p class="social-status" role="status">${esc(state.status)}</p>` : ''}${state.joined ? `<div class="social-connected"><span class="social-live-dot ${state.stale ? 'social-disconnected' : ''}" aria-hidden="true"></span><span>${state.stale ? '다시 연결하고 있어요' : '실제 나그네와 연결되어 있어요'}</span>${button('refresh', '새로고침', state.busy ? 'disabled' : '')}</div><div class="social-current-room"><strong>${esc(roomForKey(state.roomKey)?.label || '신당 마당')}</strong>${state.ownIlju ? `<span>내 일주 ${esc(state.ownIlju)}</span>` : ''}${button('rooms', '일주방 둘러보기')}</div><nav class="social-tabs" aria-label="만남과 궁합"><button type="button" data-social-action="visitors" aria-pressed="${state.tab === 'visitors'}">만난 나그네 <span>${state.visitors.length}</span></button><button type="button" data-social-action="news" aria-pressed="${state.tab === 'news'}">궁합 소식 ${count ? `<span class="social-count">${count}</span>` : ''}</button></nav>${state.confirm ? confirmMarkup() : state.result ? resultMarkup() : state.tab === 'visitors' ? `<p class="social-lead">${state.stale ? '연결이 회복되면 다시 현재 나그네를 보여드려요.' : '캐릭터를 누르거나 이 목록에서 인연을 청해 보세요.'}</p><div class="social-people">${!state.stale && state.visitors.length ? state.visitors.map(visitorCard).join('') : `<p class="social-empty">${state.stale ? '아직 만남 정보를 확인하지 못했어요.' : '아직 다른 나그네가 없어요. 마당을 산책하며 기다려 보세요.'}</p>`}</div>` : `<p class="social-lead">승인 전에는 결과가 열리지 않아요. 서로의 동의는 언제든 거둘 수 있어요.</p><div class="social-requests">${state.requests.length ? state.requests.map(requestCard).join('') : '<p class="social-empty">아직 주고받은 궁합 요청이 없어요.</p>'}</div>`}<footer class="social-session-actions">${button('leave', '마당의 만남 잠시 끄기')}${deleteButton()}</footer>` : `${consentMarkup()}${client.hasSession() ? `<footer class="social-session-actions">${deleteButton()}</footer>` : ''}`}</div><footer class="social-footer">닉네임·캐릭터·위치·일주 공개 · 출생 원문은 비공개</footer>`;
+  dialog.querySelectorAll('button').forEach(node => { if ((state.busy && !['close'].includes(node.dataset.socialAction)) || (state.deletionPending && node.dataset.socialAction === 'join')) node.disabled = true; });
   if (focusAction) {
     const match = [...dialog.querySelectorAll('[data-social-action]')].find(node => node.dataset.socialAction === focusAction && (!focusRequest || node.dataset.requestId === focusRequest));
     match?.focus({ preventScroll: true });
@@ -104,6 +108,10 @@ async function api(action, params = {}) {
   finally { clearTimeout(timeout); controllers.delete(abort); }
 }
 function adopt(data) {
+  const previousRoom = state.roomKey;
+  state.roomKey = roomForKey(data.room_key)?.key || 'courtyard';
+  state.ownIlju = safeIlju(data.own_ilju) || state.ownIlju;
+  state.roomCounts = safeRoomCounts(data.room_counts);
   state.selfId = cleanText(data.self_id, 80) || state.selfId;
   state.visitors = safeVisitors(data.visitors, state.selfId);
   state.requests = safeRequests(data.requests);
@@ -112,36 +120,51 @@ function adopt(data) {
     resetResult(); state.status = '공유 상태가 바뀌었어요. 궁합 소식에서 확인해 주세요.';
   }
   if (state.confirm && !state.requests.some(item => item.id === state.confirm.id && availableActions(item).includes(state.confirm.action))) state.confirm = null;
+  if (previousRoom !== state.roomKey) document.dispatchEvent(new CustomEvent('sowon:room-change', { detail: { roomKey: state.roomKey, previousRoom, previousRoomKey: previousRoom, room: roomForKey(state.roomKey), joined: state.joined, ownIlju: state.ownIlju } }));
   emitPresence(); render();
 }
 async function refresh() {
-  if (!state.joined || refreshPromise) return refreshPromise;
+  if (!state.joined || state.joining || state.switchingRoom || refreshPromise) return refreshPromise;
   const version = operation;
   const task = (async () => {
-    try { const data = await api('presence', snapshot()); if (state.joined && version === operation && !document.hidden) adopt(data); }
+    try { const data = await api('presence', presencePayload(snapshot())); if (state.joined && version === operation && !document.hidden) adopt(data); }
     catch (error) {
       if (!state.joined || version !== operation) return;
       state.stale = true; state.visitors = []; resetResult(); state.error = socialError(error); emitPresence(); render();
       if (['invalid_session', 'session_expired'].includes(error?.code)) { state.joined = false; stopPolling(); client.clear(); emitPresence(); render(); }
+      if (error?.code === 'presence_changed') { state.joined = false; state.presenceEpoch = null; stopPolling(); emitPresence(); render(); }
     } finally { if (refreshPromise === task) refreshPromise = null; if (version === operation) schedule(); }
   })(); refreshPromise = task; return task;
 }
 async function join() {
+  if (state.busy || leavePromise || state.deletionPending) return false;
   if (state.joining || !dialog.querySelector('[data-social-consent]')?.checked) { state.error = '공개·보관 범위를 확인하고 참여 동의를 체크해 주세요.'; render(); return; }
   const own = serverProfile(profile());
   if (!own) { state.error = '내 출생 정보를 먼저 준비해 주세요.'; render(); return; }
-  const version = ++operation; state.joining = true; state.error = ''; state.status = ''; render();
+  const version = ++operation, visibleVersion = visibilityVersion; let visibilityInterrupted = false; state.joining = true; state.error = ''; state.status = ''; render();
   const abort = new AbortController(), timeout = setTimeout(() => abort.abort(), 18000); controllers.add(abort);
   try {
     await client.start(abort.signal);
     if (version !== operation) return;
-    const existing = await api('profile_get');
+    // Idempotent save also hydrates the canonical public ilju for sessions created before rooms.
+    const saved = await api('profile_save', { ...own, share_ilju: true });
     if (version !== operation) return;
-    if (!sameServerProfile(existing.profile, own)) await api('profile_save', own);
-    if (version !== operation) return;
-    state.joined = true; lastProfile = JSON.stringify(own); if (document.hidden) { state.stale = true; emitPresence(); } else await refresh();
+    state.ownIlju = safeIlju(saved.profile?.ilju);
+    state.presenceEpoch = Number.isInteger(saved.profile?.presence_epoch) && saved.profile.presence_epoch >= 0 ? saved.profile.presence_epoch : null;
+    state.joined = true; lastProfile = JSON.stringify(own); if (document.hidden) { state.stale = true; emitPresence(); } else {
+      const wanted = roomForKey(pendingRoom)?.key || state.roomKey;
+      const position = pendingRoom && config.getRoomPosition ? safePosition({ ...snapshot(), ...config.getRoomPosition(wanted) }) : snapshot();
+      const data = await api('presence', presencePayload(position, wanted));
+      if (version !== operation) return;
+      if (document.hidden || visibleVersion !== visibilityVersion) {
+        visibilityInterrupted = true; state.stale = true; state.visitors = [];
+        await client.call('leave', { temporary: true }).catch(() => {}); emitPresence(); return;
+      }
+      if (wanted !== 'courtyard' && data.room_key !== wanted) throw Object.assign(new Error('room_unavailable'), { code: 'room_unavailable' });
+      pendingRoom = null; adopt(data); schedule();
+    }
   } catch (error) { if (version === operation) { state.joined = false; if (['invalid_session', 'session_expired'].includes(error?.code)) client.clear(); state.error = socialError(error); } }
-  finally { clearTimeout(timeout); controllers.delete(abort); if (version === operation) { state.joining = false; render(); } }
+  finally { clearTimeout(timeout); controllers.delete(abort); if (version === operation) { state.joining = false; render(); if (visibilityInterrupted && state.joined && !document.hidden) refresh(); } }
 }
 async function mutate(action, params, message) {
   if (state.busy || !state.joined) return;
@@ -168,12 +191,72 @@ async function showResult(id) {
   } catch (error) { if (version === operation) { state.error = socialError(error); state.result = null; state.resultId = null; await refresh(); render(); } }
 }
 async function leave({ remove = false } = {}) {
-  ++operation; ++resultVersion; stopPolling(); for (const abort of controllers) abort.abort(); refreshPromise = null; state.joined = false; state.joining = false; state.busy = false; state.visitors = []; state.requests = []; state.selfId = ''; resetTransient(); emitPresence();
-  state.error = '';
+  // Keep every caller on the same departure. A profile change during an ordinary
+  // leave upgrades it to deletion after the first request finishes.
+  if (leavePromise) {
+    const pending = leavePromise;
+    if (remove && !leaveRemoves) { await pending; return leave({ remove: true }); }
+    return pending;
+  }
+  remove = remove || state.deletionPending;
+  const version = ++operation; ++resultVersion; stopPolling(); for (const abort of controllers) abort.abort(); refreshPromise = null;
+  state.joined = false; state.joining = false; state.busy = true; state.visitors = []; state.requests = []; state.selfId = ''; state.ownIlju = null; state.presenceEpoch = null; state.roomCounts = {}; state.switchingRoom = false; pendingRoom = null;
+  if (remove) state.deletionPending = true;
+  resetTransient(); emitPresence(); state.error = '';
   state.status = remove ? '서버의 내 정보와 공유를 지우고 있어요…' : '마당의 만남을 잠시 껐어요. 이미 승인한 궁합은 다음 참여 때 이어 볼 수 있어요.'; render();
-  try { if (client.hasSession()) await api(remove ? 'profile_delete' : 'leave'); if (remove) { client.clear(); state.status = '서버의 내 출생 정보와 공유를 지웠어요.'; } }
-  catch (error) { state.error = remove ? '서버 삭제를 확인하지 못했어요. 연결을 확인하고 다시 지워 주세요.' : socialError(error); }
-  render();
+  const task = (async () => {
+    try {
+      if (client.hasSession()) await api(remove ? 'profile_delete' : 'leave');
+      if (version !== operation) return;
+      if (remove) { client.clear(); state.deletionPending = false; state.status = '서버의 내 출생 정보와 공유를 지웠어요.'; }
+    } catch (error) {
+      if (version !== operation) return;
+      if (remove && ['session_expired', 'invalid_session'].includes(error?.code)) {
+        client.clear(); state.deletionPending = false; state.status = '이전 만남 세션이 끝났어요. 새롭게 참여할 수 있어요.';
+      } else {
+        // An uncertain deletion may still commit later. Keep its capability for
+        // retry, and do not save a new profile into that same session meanwhile.
+        state.error = remove ? '서버 삭제를 확인하지 못했어요. 연결을 확인하고 다시 지워 주세요. 삭제를 확인한 뒤 새로 참여할 수 있어요.' : socialError(error);
+      }
+    }
+  })();
+  leavePromise = task; leaveRemoves = remove;
+  try { await task; }
+  finally {
+    if (leavePromise === task) { leavePromise = null; leaveRemoves = false; }
+    if (version === operation) { state.busy = false; emitPresence(); render(); }
+  }
+}
+/** Select a public room only after an acknowledged presence update. No local ghost members. */
+export async function enterSocialRoom(key) {
+  const room = roomForKey(key);
+  if (!room || state.busy || leavePromise || state.deletionPending || state.switchingRoom || state.joining || document.hidden) return false;
+  if (!state.joined) { pendingRoom = room.key; open(); return false; }
+  if (room.key === state.roomKey && !state.stale) return true;
+  const version = ++operation, visibleVersion = visibilityVersion;
+  let visibilityInterrupted = false;
+  state.switchingRoom = true; state.busy = true; state.error = ''; stopPolling(); emitPresence(); render();
+  try {
+    // The old heartbeat must finish writing before the new room can be committed.
+    if (refreshPromise) await refreshPromise;
+    if (version !== operation || !state.joined) return false;
+    const position = config.getRoomPosition ? safePosition({ ...snapshot(), ...config.getRoomPosition(room.key) }) : snapshot();
+    const data = await api('presence', presencePayload(position, room.key));
+    if (version !== operation || !state.joined) return false;
+    if (document.hidden || visibleVersion !== visibilityVersion) {
+      // A background leave may have raced this write. Clear it after acknowledgment,
+      // then the visible heartbeat can safely restore the previous space.
+      visibilityInterrupted = true; state.stale = true; state.visitors = [];
+      await client.call('leave', { temporary: true }).catch(() => {}); return false;
+    }
+    if (data.room_key !== room.key) throw Object.assign(new Error('room_unavailable'), { code: 'room_unavailable' });
+    resetTransient(); state.status = `${room.label}에 들어왔어요.`; adopt(data); return true;
+  } catch (error) {
+    if (version === operation) { state.error = socialError(error); document.dispatchEvent(new CustomEvent('sowon:room-error', { detail: { message: state.error } })); }
+    return false;
+  } finally {
+    if (version === operation) { state.switchingRoom = false; state.busy = false; emitPresence(); render(); schedule(); if (visibilityInterrupted && !document.hidden) refresh(); }
+  }
 }
 function open(visitorId) {
   if (dialog.open) { if (visitorId) { state.tab = 'visitors'; state.selected = visitorId; resetResult(); render(); } return; }
@@ -189,6 +272,7 @@ dialog.addEventListener('click', async event => {
   const action = target.dataset.socialAction, id = target.dataset.requestId;
   if (!['delete', 'refresh'].includes(action)) state.deleteArmed = false;
   if (action === 'close') return close();
+  if (action === 'rooms') { close(); document.dispatchEvent(new CustomEvent('sowon:rooms-open')); return; }
   if (action === 'profile') { close(); document.dispatchEvent(new CustomEvent('sowon:profile-open')); return; }
   if (state.busy) return;
   if (action === 'join') return join();
@@ -219,7 +303,8 @@ dialog.addEventListener('click', async event => {
 });
 dialog.addEventListener('change', event => { if (event.target.matches('[data-social-kind]') && Object.hasOwn(RELATION_KINDS, event.target.value)) state.kind = event.target.value; });
 dialog.addEventListener('close', () => { state.deleteArmed = false; resetResult(); if (!document.querySelector('dialog[open]')) { document.body.classList.remove('dialog-open'); if (opener?.isConnected) opener.focus({ preventScroll: true }); } });
-document.addEventListener('click', event => { if (event.target.closest?.('[data-open-social]')) { event.preventDefault(); open(); } });
+document.addEventListener('click', event => { if (event.target.closest?.('[data-open-social]')) { event.preventDefault(); pendingRoom = null; open(); } });
+document.addEventListener('sowon:social-state-request', emitPresence);
 document.addEventListener('sowon:social-open', event => open(event.detail?.visitorId));
 document.addEventListener('sowon:profile-change', async () => {
   if (!state.joined && !state.joining && !client.hasSession()) { if (dialog.open) render(); return; }
@@ -232,14 +317,14 @@ document.addEventListener('visibilitychange', async () => {
   if (document.hidden) {
     stopPolling(); state.deleteArmed = false; resetResult(); state.visitors = []; state.stale = true; emitPresence(); render();
     if (refreshPromise) await refreshPromise;
-    if (state.joined && document.hidden && version === visibilityVersion) client.call('leave').catch(() => {});
+    if (state.joined && document.hidden && version === visibilityVersion) client.call('leave', { temporary: true }).catch(() => {});
   } else {
     state.error = '';
     if (refreshPromise) await refreshPromise;
     if (state.joined && !document.hidden && version === visibilityVersion) refresh();
   }
 });
-window.addEventListener('pagehide', () => { stopPolling(); if (state.joined) client.call('leave', {}, { keepalive: true }).catch(() => {}); });
+window.addEventListener('pagehide', () => { stopPolling(); if (state.joined) client.call('leave', { temporary: true }, { keepalive: true }).catch(() => {}); });
 
 window.addEventListener('pageshow', event => { if (event.persisted && state.joined && !document.hidden) refresh(); });
 

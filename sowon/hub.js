@@ -1,4 +1,5 @@
-import { FEATURES, HALLS, getFeature, getHall, parseView, viewHash, internalDestination, readJourney, writeJourney } from './hub-core.js';
+import { getOwnIdentity } from './identity.js?v=20261101-sanctuary2';
+import { FEATURES, HALLS, getFeature, getHall, parseView, viewHash, internalDestination, readJourney, writeJourney } from './hub-core.js?v=20261101-sanctuary2';
 
 const dialog = document.createElement('dialog');
 dialog.className = 'hub-dialog';
@@ -90,11 +91,11 @@ function renderMap() {
   const lead = el('div', 'hub-map-lead'); lead.append(el('h3', '', '오늘은 어디에 머물까요?'), el('p', '', '장소를 고르면 나그네가 천천히 걸어가요. 바로 열기로 곧장 이용할 수도 있어요.'));
   const map = el('div', 'hub-map');
   map.innerHTML = `<svg class="hub-map-lines" viewBox="0 0 700 430" aria-hidden="true"><path d="M350 386V226M350 226H116V128M350 226H584V128M116 226V338M584 226V338M350 226V52"/><ellipse cx="350" cy="226" rx="62" ry="42"/><path class="hub-map-water" d="M440 282q58-38 72 5t-48 31-24-36Z"/></svg><span class="hub-map-moon" aria-hidden="true">☾</span><span class="hub-map-gate">지금, 이곳에서</span>`;
-  const positions = { stars: [50, 12], myeongri: [17, 31], archive: [83, 31], readers: [17, 78], inyeon: [83, 78] };
+  const positions = { stars: [50, 12], myeongri: [17, 31], archive: [83, 31], readers: [13, 65], inyeon: [87, 65], rooms:[27,88], celeb:[73,88] };
   for (const [id, hall] of Object.entries(HALLS)) {
     const button = el('button', 'hub-map-place'); button.type = 'button'; button.dataset.hubWalk = id;
     button.style.setProperty('--mx', positions[id][0] + '%'); button.style.setProperty('--my', positions[id][1] + '%');
-    button.innerHTML = `${icon(hall.icon)}<strong>${hall.name}</strong><small>${{myeongri:'사주 · 시간 비교',inyeon:'궁합 · 인연',stars:'자미두수 · 별자리',readers:'술사 · 리포트',archive:'배움 · 도감'}[id]}</small>`;
+    button.innerHTML = `${icon(hall.icon)}<strong>${hall.name}</strong><small>${{myeongri:'사주 · 시간 비교',inyeon:'궁합 · 인연',stars:'자미두수 · 별자리',readers:'술사 · 리포트',archive:'매거진 · 도감',rooms:'60일주 모임',celeb:'인물 · 사주'}[id]}</small>`;
     map.appendChild(button);
   }
   const center = el('button', 'hub-map-center'); center.type='button'; center.dataset.hubRitual='wish'; center.innerHTML=icon('lantern')+'<strong>소원마당</strong><small>바람이 빛이 되는 자리</small>'; map.append(center);
@@ -126,6 +127,7 @@ function renderAll() {
 async function render(view) {
   clearView(); const version=generation; currentView=view;
   viewAbort=new AbortController();
+  dialog.classList.toggle('hub-is-culture',view.type==='feature'&&getFeature(view.id)?.kind==='culture');
   dialog.classList.toggle('hub-is-reading',view.type==='feature'&&getFeature(view.id)?.kind==='reading');
   title.textContent=view.type==='hall'?getHall(view.id).name:view.type==='feature'?getFeature(view.id).title:view.id==='map'?'신당 지도':'삼라의 모든 길';
   eyebrow.textContent=view.type==='hall'?getHall(view.id).english:'SAMRA SANCTUARY';
@@ -148,10 +150,13 @@ async function render(view) {
   try {
     let result;
     if(item.kind==='reading') {
-      const module=await import('./readings.js?v=20261101-editorial1'); if(version!==generation)return;
+      const module=await import('./readings.js?v=20261101-sanctuary2'); if(version!==generation)return;
       result=await module.mountReading(mount,item.value,{navigate,signal:viewAbort.signal,...readingOptions.get(item.value)});
+    } else if(item.kind==='culture') {
+      const module=await import('./culture.js?v=20261101-sanctuary2');if(version!==generation)return;
+      result=await module.mountCulture(mount,item.value,{navigate,signal:viewAbort.signal,dayPillar:getOwnIdentity().ilju});
     } else {
-      const module=await import('./collection.js');if(version!==generation)return;
+      const module=await import('./collection.js?v=20261101-sanctuary2');if(version!==generation)return;
       result=await module.mountCollection(mount,item.value,{navigate,onView:()=>{},signal:viewAbort.signal});
     }
     if(version!==generation){if(typeof result==='function')result();else result?.dispose?.();return;}
@@ -161,7 +166,7 @@ async function render(view) {
     if(version!==generation)return;
     loading.remove();mount.replaceChildren(el('h3','','화면을 불러오지 못했어요.'),el('p','','연결을 확인한 뒤 다시 열어주세요.'));
     const retry=el('button','hub-primary','다시 열기');retry.type='button';retry.onclick=()=>render(view);mount.append(retry);
-    const routes={saju:'/calc/',gunghap:'/calc/gunghap/',jami:'/calc/jami/',star:'/calc/star/',catalog:'/',readers:'/#readers',archive:'/learn/',library:'/store/library.html'};
+    const routes={saju:'/calc/',gunghap:'/calc/gunghap/',jami:'/calc/jami/',star:'/calc/star/',catalog:'/',readers:'/#readers',archive:'/learn/',library:'/store/library.html',celeb:'/celeb/',magazine:'/m/'};
     const route=routes[item.value];if(route){const link=el('a','hub-fallback-link','기존 삼라 화면에서 열기 ↗');link.href=route;link.onclick=event=>{event.preventDefault();navigate(route,{canonical:true});};mount.append(link);}
   }
 }
@@ -186,7 +191,7 @@ async function showReference(path) {
   referenceDialog.querySelector('#referenceTitle').textContent='함께 읽기';
   referenceDialog.showModal();
   try {
-    const module=await import('./reference.js');if(version!==referenceVersion)return;
+    const module=await import('./reference.js?v=20261101-sanctuary2');if(version!==referenceVersion)return;
     const result=await module.mountReference(host,path,{navigate,signal:referenceAbort.signal});
     if(version!==referenceVersion){result?.();return;}referenceCleanup=result;
   }catch(_){if(version!==referenceVersion)return;host.textContent='글을 불러오지 못했어요. ';const link=el('a','hub-fallback-link','기존 삼라 화면에서 열기 ↗');link.href=path;link.onclick=event=>{event.preventDefault();navigate(path,{canonical:true});};host.append(link);}
@@ -207,6 +212,7 @@ function close(callback) {
 }
 function open(view) {
   if(!viewHash(view))return;
+  if(view.type==='feature'&&getFeature(view.id).kind==='rooms'){const show=()=>document.dispatchEvent(new CustomEvent('sowon:rooms-open'));if(dialog.open)close(show);else show();return;}
   if(view.type==='feature'&&getFeature(view.id).kind==='link'){navigate(getFeature(view.id).url);return;}
   const hadReference=referenceDialog.open;
   if(hadReference)hideReference();

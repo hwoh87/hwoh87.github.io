@@ -1,5 +1,5 @@
-import { getEncounter } from './encounter-core.js';
-import { getFeature } from './hub-core.js';
+import { getEncounter } from './encounter-core.js?v=20261101-sanctuary2';
+import { getFeature } from './hub-core.js?v=20261101-sanctuary2';
 
 export const MAX_DIALOGUE_MESSAGES = 20;
 export const MAX_DIALOGUE_QUESTION_LENGTH = 160;
@@ -7,7 +7,7 @@ export const MAX_DIALOGUE_ANSWER_LENGTH = 1600;
 const MAX_BACK_STEPS = 12;
 const FEATURES = new Set(['saju','time','learn','terms','gunghap','zodiac','readers','catalog','library','jami','star']);
 const READING_KINDS = new Set(['saju','jami','star']);
-const PERSONAL_IDS = { saju:['nature','balance','direction','flow'], star:['nature','emotion','balance','relationship','practice'] };
+const PERSONAL_IDS = { saju:['nature','balance','direction','work','relationship','flow','practice'], star:['nature','emotion','balance','relationship','expression','life','structure','practice'] };
 const clean = (value,limit=1200) => typeof value === 'string' ? value.normalize('NFC').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f\u200b-\u200f\u202a-\u202e\u2060-\u2069]/g,'').replace(/\bhttps?:\/\/\S+|\b(?:javascript|data):\S+/gi,'').trim().slice(0,limit) : '';
 const copy = value => JSON.parse(JSON.stringify(value));
 const sentence = value => clean(value).split(/(?<=[.!?])\s+/).find(Boolean) || '';
@@ -85,11 +85,11 @@ const GUIDES = freeze({
 });
 
 const QUESTIONS = freeze({
-  tojeong:{nature:'나는 어떤 기본 결을 지녔나요?',balance:'힘을 쓰고 회복하는 방식이 궁금해요.',direction:'어떤 방향으로 균형을 잡으면 좋을까요?',flow:'지금의 큰 흐름을 짚어주세요.'},
-  seol:{relationship:'나는 관계에서 어떻게 반응하나요?',nature:'관계에서 드러나는 내 기본 기질은요?',emotion:'마음이 다쳤을 때 무엇을 살펴볼까요?',balance:'내게 두드러지는 기질은 무엇인가요?',practice:'관계에서 작게 연습할 방향이 있나요?'},
-  luna:{nature:'태어난 하늘은 내 기질을 어떻게 읽나요?',emotion:'내 마음이 쉬는 방식이 궁금해요.',balance:'내게 두드러지는 기질이 궁금해요.',relationship:'관계와 표현에서는 어떤 결이 보이나요?',practice:'일상에서 살려 볼 방향을 골라주세요.'},
+  tojeong:{nature:'나는 어떤 기본 결을 지녔나요?',balance:'힘을 쓰고 회복하는 방식이 궁금해요.',direction:'어떤 방향으로 균형을 잡으면 좋을까요?',work:'내가 일하고 보상을 만드는 방식은요?',relationship:'가까운 관계에서 무엇을 나누나요?',flow:'지금의 큰 흐름을 짚어주세요.',practice:'오늘 가져갈 작은 실천을 골라주세요.'},
+  seol:{relationship:'나는 관계에서 어떻게 반응하나요?',nature:'관계에서 드러나는 내 기본 기질은요?',emotion:'마음이 다쳤을 때 무엇을 살펴볼까요?',balance:'내게 두드러지는 기질은 무엇인가요?',expression:'내 생각은 어떤 방식으로 전달되나요?',life:'관심과 에너지는 어떤 영역에 모이나요?',structure:'내 차트에서 반복되는 주제는요?',practice:'관계에서 작게 연습할 방향이 있나요?'},
+  luna:{nature:'태어난 하늘은 내 기질을 어떻게 읽나요?',emotion:'내 마음이 쉬는 방식이 궁금해요.',balance:'내게 두드러지는 기질이 궁금해요.',relationship:'관계와 표현에서는 어떤 결이 보이나요?',expression:'생각과 재능을 꺼내는 방식은요?',life:'어떤 생활의 무대에 에너지가 모이나요?',structure:'차트에 반복되는 주제가 있나요?',practice:'일상에서 살려 볼 방향을 골라주세요.'},
 });
-const ORDER = {tojeong:['nature','balance','direction','flow'],seol:['relationship','nature','emotion','balance','practice'],luna:['nature','emotion','balance','relationship','practice']};
+const ORDER = {tojeong:['nature','balance','direction','flow','work','relationship','practice'],seol:['relationship','nature','emotion','balance','expression','life','structure','practice'],luna:['nature','emotion','balance','relationship','expression','life','structure','practice']};
 const FOLLOWUPS = freeze({short:'핵심만 짧게 말해 주세요.',practice:'일상에서는 어떻게 살펴볼까요?',basis:'어떤 근거를 보고 한 이야기인가요?',next:'다음 이야기도 들려주세요.'});
 const CLOSINGS = freeze({
   tojeong:{nature:'평소 모습과 닮은 대목이 있는지 천천히 떠올려보지요.',balance:'힘을 쓸 때와 쉴 때를 함께 떠올려보죠.',direction:'지금 내게 필요한 균형을 생각하며 읽어보지요.',flow:'요즘 반복되는 선택과 나란히 놓고 살펴보죠.'},
@@ -193,7 +193,7 @@ export function createDialogueSession(npcId,options={}){
     messages.push(row);messages=messages.slice(-MAX_DIALOGUE_MESSAGES);return row;
   }
   function greeting(){return(nickname?nickname+'님, ':'')+npc.greeting;}
-  function orderedSections(){return ORDER[npcId].map(id=>insight?.sections.find(row=>row.id===id)).filter(Boolean).slice(0,4);}
+  function orderedSections(){return ORDER[npcId].map(id=>insight?.sections.find(row=>row.id===id)).filter(Boolean);}
   function readyText(){const focus=npcId==='seol'?insight.sections.find(row=>row.id==='relationship'):null;return [npc.ready,insight.headline,sentence(focus?.paragraphs[0]||insight.summary)].filter(Boolean).join('\n\n');}
   function snapshot(){return copy({stage,activeSection,guideTopic,guideReply,guideSource,clarifying,asked,messages});}
   function remember(){history.push(snapshot());history=history.slice(-MAX_BACK_STEPS);}
@@ -218,7 +218,9 @@ export function createDialogueSession(npcId,options={}){
       if(insight)rows.push({id:'topics',label:'내 이야기로 돌아갈게요.'});
       else if(!hasProfile&&!reply)rows.push(actionChoice(profileAction()));
     }else if(insight){
-      for(const row of orderedSections())rows.push({id:'section:'+row.id,label:QUESTIONS[npcId][row.id]||row.title});
+      // Keep the opening choice set short. 'Next' walks the complete reading,
+      // including the deeper work, expression, life-area and structure chapters.
+      for(const row of orderedSections().slice(0,4))rows.push({id:'section:'+row.id,label:QUESTIONS[npcId][row.id]||row.title});
       rows.push({id:'guide',label:'이곳을 이용하는 방법도 물어볼게요.'});
       if(npcId==='seol')rows.push(actionChoice(social()));
     }else{

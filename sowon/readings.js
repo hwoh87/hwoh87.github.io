@@ -1,6 +1,6 @@
 import { ENGINE_URL } from '../calc/panels/manifest.js';
 import { mountBirth, mountTimeCompare, mountJourney } from '../calc/panels/helpers.js';
-import { profileSearch } from './profile-core.js';
+import { profileSearch } from './profile-core.js?v=20261101-sanctuary2';
 
 const modules = {
   saju: () => import('../calc/panels/saju.js'),
@@ -298,8 +298,8 @@ export async function mountReading(container, kind, options = {}) {
       link.rel = 'stylesheet'; link.href = href; root.appendChild(link);
     }
     const style = document.createElement('style'); style.textContent = view.styles; root.appendChild(style);
-    const polish = document.createElement('link'); polish.rel = 'stylesheet'; polish.href = '/sowon/readings.css'; root.appendChild(polish);
-    const theme = document.createElement('link'); theme.rel='stylesheet';theme.href='/sowon/reading-theme.css?v=20261101-editorial1';root.appendChild(theme);
+    const polish = document.createElement('link'); polish.rel = 'stylesheet'; polish.href = '/sowon/readings.css?v=20261101-sanctuary2'; root.appendChild(polish);
+    const theme = document.createElement('link'); theme.rel='stylesheet';theme.href='/sowon/reading-theme.css?v=20261101-sanctuary2';root.appendChild(theme);
     const template = document.createElement('template');
     template.innerHTML = view.markup;
     root.appendChild(template.content.cloneNode(true));

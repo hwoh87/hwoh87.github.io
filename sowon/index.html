@@ -26,30 +26,34 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600&display=swap">
   <link rel="preload" as="image" href="art/moon-shrine.webp" fetchpriority="high">
-  <link rel="stylesheet" href="sowon.css">
-  <link rel="stylesheet" href="world.css">
-  <link rel="stylesheet" href="hub.css">
-  <link rel="stylesheet" href="collection.css">
-  <link rel="stylesheet" href="readings.css">
-  <link rel="stylesheet" href="reference.css">
-  <link rel="stylesheet" href="experience.css?v=20261031-life1">
-  <link rel="stylesheet" href="wayfinder.css?v=20261031-life1">
-  <script src="core.js" defer></script>
-  <script src="app.js?v=20261031-life1" defer></script>
-  <script type="module" src="hub.js?v=20261101-dialogue1"></script>
-  <script type="module" src="experience.js?v=20261101-flashlite1"></script>
-  <script type="module" src="profile.js?v=20261101-editorial1"></script>
-  <script type="module" src="social.js?v=20261101-editorial1"></script>
-  <link rel="stylesheet" href="profile.css?v=20261031-social1">
-  <link rel="stylesheet" href="social.css?v=20261031-social1">
-  <link rel="stylesheet" href="visitors.css?v=20261031-social1">
-  <link rel="stylesheet" href="personal-report.css?v=20261101-dialogue1">
-  <link rel="stylesheet" href="interface.css?v=20261101-conversation2">
-  <link rel="stylesheet" href="npc-dialog.css?v=20261101-flashlite1">
-  <script type="module" src="interface.js?v=20261101-conversation2"></script>
+  <link rel="stylesheet" href="sowon.css?v=20261101-sanctuary2">
+  <link rel="stylesheet" href="world.css?v=20261101-sanctuary2">
+  <link rel="stylesheet" href="hub.css?v=20261101-sanctuary2">
+  <link rel="stylesheet" href="collection.css?v=20261101-sanctuary2">
+  <link rel="stylesheet" href="readings.css?v=20261101-sanctuary2">
+  <link rel="stylesheet" href="reference.css?v=20261101-sanctuary2">
+  <link rel="stylesheet" href="experience.css?v=20261101-sanctuary2">
+  <link rel="stylesheet" href="wayfinder.css?v=20261101-sanctuary2">
+  <script src="core.js?v=20261101-sanctuary2" defer></script>
+  <script src="app.js?v=20261101-sanctuary2" defer></script>
+  <script type="module" src="hub.js?v=20261101-sanctuary2"></script>
+  <script type="module" src="experience.js?v=20261101-sanctuary2"></script>
+  <script type="module" src="profile.js?v=20261101-sanctuary2"></script>
+  <script type="module" src="social.js?v=20261101-sanctuary2"></script>
+  <link rel="stylesheet" href="profile.css?v=20261101-sanctuary2">
+  <link rel="stylesheet" href="social.css?v=20261101-sanctuary2">
+  <link rel="stylesheet" href="visitors.css?v=20261101-sanctuary2">
+  <link rel="stylesheet" href="personal-report.css?v=20261101-sanctuary2">
+  <link rel="stylesheet" href="interface.css?v=20261101-sanctuary2">
+  <link rel="stylesheet" href="npc-dialog.css?v=20261101-sanctuary2">
+  <script type="module" src="interface.js?v=20261101-sanctuary2"></script>
+  <link rel="stylesheet" href="ilju-rooms.css?v=20261101-sanctuary2">
+  <link rel="stylesheet" href="culture.css?v=20261101-sanctuary2">
+  <link rel="stylesheet" href="refinement.css?v=20261101-sanctuary2">
+  <script type="module" src="sanctuary-shell.js?v=20261101-sanctuary2"></script>
   <script src="/assets/track.js" defer></script>
   <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
-  <script type="module">import('./scene.js?v=20261101-conversation2').catch(function(){document.body.classList.add('world-failed');document.getElementById('worldLoading').hidden=true;document.getElementById('worldFallback').hidden=false;document.getElementById('enterWorld').disabled=false;document.getElementById('enterWorld').setAttribute('aria-busy','false');document.getElementById('enterWorldLabel').textContent='소원 등불 밝히기';document.getElementById('entranceNote').textContent='가입 없이 무료로 · 나만 볼 수 있는 소원';});</script>
+  <script type="module">import('./scene.js?v=20261101-sanctuary2').catch(function(){document.body.classList.add('world-failed');document.getElementById('worldLoading').hidden=true;document.getElementById('worldFallback').hidden=false;document.getElementById('enterWorld').disabled=false;document.getElementById('enterWorld').setAttribute('aria-busy','false');document.getElementById('enterWorldLabel').textContent='소원 등불 밝히기';document.getElementById('entranceNote').textContent='가입 없이 무료로 · 나만 볼 수 있는 소원';});</script>
 </head>
 <body>
   <a class="skip-link" href="#entrance">소원당으로 바로 가기</a>
@@ -104,12 +108,12 @@
     </header>
 
     <section class="invitation" aria-labelledby="shrineTitle">
-      <p class="eyebrow"><span></span> 나를 알아가는, 다섯 갈래의 길</p>
+      <p class="eyebrow"><span></span> 나를 읽고, 서로를 만나는 신당</p>
       <h1 id="shrineTitle">달빛을 따라,<br>나에게 이르는 길.</h1>
-      <p class="invitation-copy">사주를 펼치고, 인연을 만나고,<br>말하지 못한 소원도 잠시 놓아두세요.</p>
+      <p class="invitation-copy">내 사주를 깊이 읽고, 같은 일주를 만나고.<br>새로운 이야기가 있는 밤의 마당.</p>
       <button class="gold-button entrance-button" id="enterWorld" type="button" data-open-wish data-cta="sowon-enter" disabled aria-busy="true"><svg class="icon" aria-hidden="true"><use href="#i-lantern"/></svg><span id="enterWorldLabel">신당을 여는 중</span><svg class="icon button-arrow" aria-hidden="true"><use href="#i-arrow"/></svg></button>
       <p class="entrance-note" id="entranceNote">캐릭터로 거닐며 만나는 삼라의 이야기</p>
-      <button class="hub-intro-link" type="button" data-hub-view="all">바로 사주 보러 가기 · 전체 기능 ↗</button>
+      <button class="hub-intro-link" type="button" data-hub-view="all">해석부터 바로 보기 · 전체 기능 ↗</button>
     </section>
 
     <aside class="season-note" aria-label="소원당의 계절">
@@ -129,7 +133,7 @@
       <div><p class="luna-name">달빛지기 루나<span>소원당의 안내자</span></p><p id="lunaGreeting">“바라는 마음이 있다는 건,<br>아직 내일을 믿고 있다는 뜻이니까요.”</p></div>
     </aside>
 
-    <nav class="ritual-dock hub-dock" aria-label="삼라의 다섯 장소로 찾아가기">
+    <nav class="ritual-dock hub-dock" aria-label="삼라의 공간으로 찾아가기">
       <button class="dock-action" type="button" data-hub-walk="myeongri"><svg class="dock-icon" aria-hidden="true"><use href="#i-scroll"/></svg><span>명리전<small>나를 읽는 사주</small></span></button>
       <span class="dock-divider" aria-hidden="true"></span>
       <button class="dock-action" type="button" data-hub-walk="inyeon"><svg class="dock-icon" aria-hidden="true"><use href="#i-heart"/></svg><span>인연정<small>사이의 결, 궁합</small></span></button>
@@ -138,7 +142,7 @@
       <span class="dock-divider" aria-hidden="true"></span>
       <button class="dock-action" type="button" data-hub-walk="readers"><svg class="dock-icon" aria-hidden="true"><use href="#i-moon"/></svg><span>술사각<small>질문을 맡기는 곳</small></span></button>
       <span class="dock-divider" aria-hidden="true"></span>
-      <button class="dock-action" type="button" data-hub-walk="archive"><svg class="dock-icon" aria-hidden="true"><use href="#i-book"/></svg><span>서고<small>배움과 이야기</small></span></button>
+      <button class="dock-action" type="button" data-hub-walk="archive"><svg class="dock-icon" aria-hidden="true"><use href="#i-book"/></svg><span>서고<small>매거진과 이야기</small></span></button>
     </nav>
     <div class="hub-world-rituals" aria-label="소원마당"><button type="button" data-open-wish><svg class="icon" aria-hidden="true"><use href="#i-lantern"/></svg>소원 등불</button><span></span><button type="button" data-open-breath>마음 고르기</button><span></span><button type="button" data-open-blessing>응원 보내기</button><span></span><button type="button" data-open-journal>내 등불 <b id="journalCount">0</b></button></div>
 
@@ -146,7 +150,7 @@
     <div class="world-help" id="worldHelp"><span class="help-desktop">바닥 클릭으로 걷기<span>·</span>W A S D 이동<span>·</span>드래그로 둘러보기<span>·</span>휠로 확대</span><span class="help-mobile">바닥을 눌러 걷기 · 드래그로 둘러보기 · 두 손가락으로 확대</span></div>
     <div class="traveler-name" id="travelerName" aria-hidden="true"><span>나</span>달빛 나그네</div>
     <div id="visitorNames" aria-label="함께 걷는 나그네"></div>
-    <div class="world-places" aria-label="신당 안의 장소"><button class="world-place" type="button" data-world-place="wish" hidden>소원 등불 <span>↗</span></button><button class="world-place" type="button" data-world-place="breath" hidden>명상터 <span>↗</span></button><button class="world-place" type="button" data-world-place="blessing" hidden>소원나무 <span>↗</span></button><button class="world-place" type="button" data-world-place="myeongri" hidden>명리전 <span>↗</span><small>토정의 사주 이야기</small></button><button class="world-place" type="button" data-world-place="inyeon" hidden>인연정 <span>↗</span><small>설월과 인연을 읽어요</small></button><button class="world-place" type="button" data-world-place="stars" hidden>별마루 <span>↗</span><small>태어난 순간의 하늘</small></button><button class="world-place" type="button" data-world-place="readers" hidden>술사각 <span>↗</span><small>루나와 술사들을 만나요</small></button><button class="world-place" type="button" data-world-place="archive" hidden>서고 <span>↗</span><small>처음부터 천천히 배워요</small></button></div>
+    <div class="world-places" aria-label="신당 안의 장소"><button class="world-place" type="button" data-world-place="rooms" hidden>일주마당 <span>↗</span><small>같은 일주를 만나요</small></button><button class="world-place" type="button" data-world-place="celeb" hidden>연예인 사주관 <span>↗</span><small>익숙한 얼굴의 이야기</small></button><button class="world-place" type="button" data-world-place="wish" hidden>소원 등불 <span>↗</span></button><button class="world-place" type="button" data-world-place="breath" hidden>명상터 <span>↗</span></button><button class="world-place" type="button" data-world-place="blessing" hidden>소원나무 <span>↗</span></button><button class="world-place" type="button" data-world-place="myeongri" hidden>명리전 <span>↗</span><small>토정의 사주 이야기</small></button><button class="world-place" type="button" data-world-place="inyeon" hidden>인연정 <span>↗</span><small>설월과 인연을 읽어요</small></button><button class="world-place" type="button" data-world-place="stars" hidden>별마루 <span>↗</span><small>태어난 순간의 하늘</small></button><button class="world-place" type="button" data-world-place="readers" hidden>술사각 <span>↗</span><small>루나와 술사들을 만나요</small></button><button class="world-place" type="button" data-world-place="archive" hidden>서고 <span>↗</span><small>처음부터 천천히 배워요</small></button></div>
     <div class="travel-status" id="travelStatus" role="status" hidden></div>
     <div class="move-controls" id="moveControls" aria-label="캐릭터 이동 조작">
       <div class="move-stick" id="moveStick" role="group" aria-label="터치로 캐릭터 이동"><span id="moveThumb"></span></div>

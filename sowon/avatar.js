@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { getAvatarPalette } from './avatar-palettes.js';
+import { getAvatarPalette } from './avatar-palettes.js?v=20261101-sanctuary2';
 
 /** A small, original hanbok traveller. Its face points toward local +Z. */
 export function createAvatar() {

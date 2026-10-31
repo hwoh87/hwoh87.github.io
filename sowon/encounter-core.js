@@ -1,4 +1,4 @@
-import { getFeature, getHall } from './hub-core.js';
+import { getFeature, getHall } from './hub-core.js?v=20261101-sanctuary2';
 
 export const ENCOUNTER_FEATURE_IDS = Object.freeze(['saju', 'time', 'learn', 'terms', 'gunghap', 'relations', 'zodiac', 'readers', 'catalog', 'library', 'jami', 'star']);
 export const ENCOUNTER_HALL_IDS = Object.freeze(['myeongri', 'inyeon', 'stars', 'readers', 'archive']);

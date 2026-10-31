@@ -3,13 +3,17 @@
 export const JOURNEY_KEY = 'samra.sowon.journey.v1';
 export const JOURNEY_TTL = 4 * 60 * 60 * 1000;
 export const HALLS = Object.freeze({
+  rooms: {name:'일주마당',english:'THE SIXTY GARDENS',icon:'heart',reader:'seol',guide:'설월',line:'같은 일주, 서로 다른 이야기',description:'내 일주방에서 나그네를 만나고 다른 일주방에도 잠시 들러보세요.',features:['ilju-rooms']},
+  celeb: {name:'연예인 사주관',english:'THE PORTRAIT GALLERY',icon:'stars',reader:'luna',guide:'루나',line:'익숙한 얼굴에서 발견하는 새로운 결',description:'공개된 생일로 살펴보는 명식과 일주. 나와 같은 일주의 인물도 찾아보세요.',features:['celeb']},
   myeongri: { name: '명리전', english: 'THE FOUR PILLARS', icon: 'scroll', reader: 'tojeong', guide: '토정', line: '여덟 글자에서 나의 결을 읽는 곳', description: '타고난 기운부터 지금의 흐름까지, 하나씩 펼쳐보세요.', features: ['saju', 'time', 'ilju', 'terms'] },
   inyeon: { name: '인연정', english: 'THE GARDEN OF RELATIONS', icon: 'heart', reader: 'seol', guide: '설월', line: '나와 당신, 사이의 온도를 읽는 곳', description: '두 사람이 만날 때 생기는 결을 차분하게 살펴봐요.', features: ['gunghap', 'relations', 'zodiac'] },
   stars: { name: '별마루', english: 'THE CELESTIAL PAVILION', icon: 'stars', reader: 'vera', guide: '베라', line: '태어난 순간의 하늘을 펼치는 곳', description: '자미두수의 열두 궁과 서양 점성술의 출생 차트를 함께 만나요.', features: ['jami', 'star', 'jami-guide', 'star-guide'] },
   readers: { name: '술사각', english: 'THE HOUSE OF READERS', icon: 'moon', reader: 'luna', guide: '루나', line: '오늘의 질문을 맡길 술사를 만나는 곳', description: '서로 다른 목소리의 술사들과, 고민 하나를 깊이 읽는 리포트.', features: ['readers', 'catalog'] },
-  archive: { name: '서고', english: 'THE QUIET ARCHIVE', icon: 'book', reader: 'seon', guide: '일묵', line: '낯선 말들이 내 이야기가 되는 곳', description: '처음 배우는 사주부터 일주 도감, 유명인 명식까지 천천히 둘러보세요.', features: ['archive', 'learn', 'celeb', 'stems', 'branches', 'years'] },
+  archive: { name: '매거진 서고', english: 'THE QUIET ARCHIVE', icon: 'book', reader: 'seon', guide: '일묵', line: '낯선 말들이 내 이야기가 되는 곳', description: '처음 배우는 사주부터 일주 도감, 삼라 매거진과 명리 도감을 천천히 둘러보세요.', features: ['magazine', 'archive', 'learn', 'stems', 'branches', 'years'] },
 });
 export const FEATURES = Object.freeze({
+  'ilju-rooms': {title:'60일주방',text:'내 일주방에서 만나고, 다른 일주방에도 들러요',kind:'rooms',hall:'rooms',badge:'나그네 모임'},
+  magazine: {title:'삼라 매거진',text:'성향·관계·일과 삶을 읽는 깊이 있는 이야기',kind:'culture',value:'magazine',hall:'archive',badge:'무료 읽기'},
   saju: { title: '나의 사주', text: '원국 · 오행 · 용신 · 대운과 세운', kind: 'reading', value: 'saju', hall: 'myeongri', badge: '무료 계산' },
   time: { title: '태어난 시간 비교', text: '시간이 모호할 때, 분 단위로 비교', kind: 'reading', value: 'saju', anchor: 'timeCompare', hall: 'myeongri', badge: '무료 계산' },
   gunghap: { title: '우리의 궁합', text: '두 사람의 관계를 여러 방향에서', kind: 'reading', value: 'gunghap', hall: 'inyeon', badge: '무료 계산' },
@@ -26,7 +30,7 @@ export const FEATURES = Object.freeze({
   zodiac: { title: '띠와 인연', text: '열두 띠의 성향과 띠별 궁합', kind: 'link', url: '/tti/', hall: 'inyeon', badge: '도감' },
   'jami-guide': { title: '자미두수 길잡이', text: '열두 궁과 별들의 의미', kind: 'link', url: '/jami/', hall: 'stars', badge: '무료 읽기' },
   'star-guide': { title: '점성술 길잡이', text: '행성 · 별자리 · 하우스 읽기', kind: 'link', url: '/star/', hall: 'stars', badge: '무료 읽기' },
-  celeb: { title: '유명인 사주 도감', text: '궁금한 인물을 검색하고 명식을 만나요', kind: 'link', url: '/celeb/', hall: 'archive', badge: '인물 검색' },
+  celeb: { title: '연예인 사주관', text: '익숙한 얼굴의 사주, 나와 같은 일주 찾기', kind: 'culture', value: 'celeb', hall: 'celeb', badge: '인물 검색' },
   stems: { title: '천간 도감', text: '갑목부터 계수까지 열 가지 기운', kind: 'link', url: '/cheongan/', hall: 'archive', badge: '도감' },
   branches: { title: '지지 도감', text: '자수부터 해수까지 열두 자리', kind: 'link', url: '/jiji/', hall: 'archive', badge: '도감' },
   years: { title: '태어난 해 살펴보기', text: '출생 연도로 찾는 기운과 띠', kind: 'link', url: '/year/', hall: 'archive', badge: '도감' },
