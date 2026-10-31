@@ -546,6 +546,10 @@
               hero += '<div class="sig">' + esc(d.one_liner) + '</div>';
               hero += glassChips('💞 1:1 궁합' + (d.relation_label ? ' · ' + esc(d.relation_label) : ''));
               if (d.card_url) paper += '<img class="cardimg" alt="궁합 카드" src="' + esc(d.card_url) + '" />';
+              if (d.scene_type === 'one-to-one' && typeof d.body_md === 'string' && d.body_md.trim()) {
+                paper += '<div class="report">' + mdToHtml(d.body_md.slice(0, 4000)) + '</div>';
+                paper += '<p class="meta"><a class="copybtn" href="/calc/gunghap/">다른 친구와도 비교하기</a></p>';
+              }
               paper += trustCard('사주 · 자미두수 · 별자리를 한 앱에서. 내 사주로 보면 관계의 흐름·시기까지 이어져요.');
               paper += shareRow();
               paper += '<p class="meta">공유한 사람이 공개한 결과예요. 삼라만상 앱에서 내 사주로 직접 궁합을 확인할 수 있어요.</p>';

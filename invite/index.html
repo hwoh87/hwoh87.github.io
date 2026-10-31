@@ -3,15 +3,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>궁합 초대 | 만세력</title>
+  <title>우리 관계 한 장 · 궁합 초대 | 삼라만상</title>
 
   <!-- 카톡/메신저 리치 미리보기 (개별 초대 OG는 정적 호스팅 한계 — 공통 문구) -->
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="만세력" />
-  <meta property="og:title" content="우리 궁합, 볼래요? | 만세력" />
-  <meta property="og:description" content="생년월일만 알려주면 사주 궁합을 풀어봐요. 앱 설치 없이 30초면 끝!" />
-  <meta property="og:image" content="https://hwoh87.github.io/og-share.png" />
-  <meta property="og:url" content="https://hwoh87.github.io/invite/" />
+  <meta property="og:site_name" content="삼라만상" />
+  <meta property="og:title" content="우리 관계를 한 장으로 읽어볼까요? | 삼라만상" />
+  <meta property="og:description" content="앱 설치 없이 출생정보를 전달하고, 초대한 분이 확인한 관계 요약을 같은 링크에서 읽어요." />
+  <meta property="og:image" content="https://samra.cc/og-share.png" />
+  <meta property="og:url" content="https://samra.cc/invite/" />
+  <meta name="referrer" content="no-referrer" />
   <meta name="twitter:card" content="summary_large_image" />
 
   <style>
@@ -40,7 +41,7 @@
     input[type=text]:focus { border-color: #7C5CFF; }
     .row { display: flex; gap: 8px; }
     select {
-      flex: 1; padding: 12px 8px; border-radius: 12px; border: 1px solid rgba(184, 178, 214, 0.35);
+      flex: 1; min-width: 0; width: 0; padding: 12px 8px; border-radius: 12px; border: 1px solid rgba(184, 178, 214, 0.35);
       background: rgba(10, 8, 32, 0.6); color: #EDEBF5; font-size: 15px; outline: none;
       -webkit-appearance: none; appearance: none; text-align: center;
     }
@@ -58,16 +59,29 @@
     }
     .submit:disabled { opacity: 0.5; }
     .err { color: #FF9DA3; font-size: 13px; margin-top: 12px; text-align: center; display: none; }
-    .privacy { font-size: 11.5px; color: #6E678F; line-height: 1.6; margin-top: 16px; text-align: center; }
+    .privacy { font-size: 12px; color: #AFA6CC; line-height: 1.7; margin-top: 16px; text-align: center; }
+    .consent { align-items: flex-start; font-size: 13px; line-height: 1.65; margin-top: 20px; }
+    .consent input { flex: 0 0 18px; margin-top: 3px; }
     /* 완료/상태 뷰 */
     .center { text-align: center; padding: 28px 0 0; }
     .center .big { font-size: 46px; }
     .center h2 { font-size: 19px; margin: 14px 0 8px; }
-    .center p { font-size: 14px; line-height: 1.7; color: #B8B2D6; margin: 0 auto; max-width: 300px; }
+    .center p { font-size: 14px; line-height: 1.7; color: #B8B2D6; margin: 0 auto; max-width: 300px; word-break: keep-all; overflow-wrap: anywhere; }
     a.cta {
       display: inline-block; margin-top: 22px; padding: 14px 30px; border-radius: 999px;
       background: #7C5CFF; color: #fff; font-weight: 700; text-decoration: none; font-size: 15px;
     }
+    button.cta { display: block; margin: 22px auto 0; border: 0; border-radius: 999px; padding: 14px 30px; background: #7C5CFF; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; }
+    button.cta:disabled { opacity: 0.55; }
+    .secondary { display: block; color: #C9B2FF; margin-top: 18px; font-size: 14px; line-height: 1.6; }
+    .status { min-height: 44px; margin-top: 14px !important; font-size: 12.5px !important; }
+    .summary { margin-top: 24px; text-align: left; }
+    .summary h3 { color: #C9B2FF; font-size: 16px; margin: 24px 0 8px; }
+    .summary h3:first-child { margin-top: 0; }
+    .summary p { max-width: none; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .score { margin: 16px 0; font-size: 26px; font-weight: 800; color: #C9B2FF; }
+    .score small { font-size: 12px; font-weight: 400; color: #B8B2D6; display: block; margin-top: 4px; }
+    :focus-visible { outline: 3px solid #D7CAFF; outline-offset: 3px; }
     .hide { display: none; }
   </style>
 <script src="/assets/track.js" defer></script>
@@ -75,7 +89,7 @@
 <body>
   <div class="wrap">
     <div class="logo">🔮</div>
-    <div class="brand">만세력 · 사주 궁합</div>
+    <div class="brand">삼라만상 · 우리 관계 한 장</div>
 
     <!-- 로딩/에러 -->
     <div id="vLoading" class="center"><p>초대장을 여는 중…</p></div>
@@ -88,82 +102,99 @@
 
     <!-- 입력 폼 -->
     <div id="vForm" class="hide">
-      <h1><span class="accent" id="inviterName"></span>님이<br/>궁합을 요청했어요 💫</h1>
-      <p class="sub">생년월일만 알려주면 두 사람의 사주 궁합을 풀어봐요.<br/>앱 설치 없이 30초면 끝나요.</p>
+      <h1><span class="accent" id="inviterName"></span>님과<br/>우리 관계를 읽어볼까요? 💫</h1>
+      <p class="sub">앱 설치 없이 출생정보를 전달해요.<br/>초대한 분이 앱에서 확인하면, 같은 링크에서 이름을 가린 관계 요약을 읽을 수 있어요.</p>
       <div class="card">
-        <label class="f">이름 (닉네임도 좋아요)</label>
-        <input type="text" id="name" maxlength="20" placeholder="이름" />
+        <label class="f" for="name">이름 (닉네임도 좋아요)</label>
+        <input type="text" id="name" maxlength="20" placeholder="이름" autocomplete="off" />
 
         <label class="f">성별</label>
-        <div class="seg" id="genderSeg">
-          <button type="button" data-v="M">남성</button>
-          <button type="button" data-v="F">여성</button>
+        <div class="seg" id="genderSeg" role="group" aria-label="성별">
+          <button type="button" data-v="M" aria-pressed="false">남성</button>
+          <button type="button" data-v="F" aria-pressed="false">여성</button>
         </div>
 
         <label class="f">생년월일</label>
-        <div class="seg" id="calSeg">
-          <button type="button" data-v="solar" class="on">양력</button>
-          <button type="button" data-v="lunar">음력</button>
+        <div class="seg" id="calSeg" role="group" aria-label="달력 종류">
+          <button type="button" data-v="solar" class="on" aria-pressed="true">양력</button>
+          <button type="button" data-v="lunar" aria-pressed="false">음력</button>
         </div>
         <div class="chk hide" id="leapWrap">
           <input type="checkbox" id="leap" /><label for="leap">윤달이에요</label>
         </div>
         <div class="row" style="margin-top:10px">
-          <select id="year"></select>
-          <select id="month"></select>
-          <select id="day"></select>
+          <select id="year" aria-label="태어난 연도"></select>
+          <select id="month" aria-label="태어난 월"></select>
+          <select id="day" aria-label="태어난 일"></select>
         </div>
 
         <label class="f">태어난 시간</label>
         <div class="row">
-          <select id="hour"></select>
-          <select id="minute"></select>
+          <select id="hour" aria-label="태어난 시"></select>
+          <select id="minute" aria-label="태어난 분"></select>
         </div>
         <div class="chk">
           <input type="checkbox" id="unknownTime" /><label for="unknownTime">태어난 시간을 몰라요</label>
         </div>
 
-        <button class="submit" id="submitBtn">궁합 보러 보내기</button>
-        <div class="err" id="err"></div>
-        <div class="privacy">입력한 정보는 초대한 분의 궁합 풀이에만 쓰이고, 초대는 14일 후 만료돼요.</div>
+        <label class="chk consent" for="consent">
+          <input type="checkbox" id="consent" aria-describedby="privacy" />
+          <span>입력한 이름·성별·생년월일·출생시간·달력 정보가 초대한 <span id="consentInviter">분</span>에게 전달되어 궁합 풀이에 쓰이는 데 동의해요.</span>
+        </label>
+        <button class="submit" id="submitBtn" type="button">동의하고 출생정보 전달하기</button>
+        <div class="err" id="err" role="alert"></div>
+        <div class="privacy" id="privacy">미입력 초대는 14일 후 만료돼요. 출생정보는 초대한 분의 궁합 풀이에 사용돼요. 초대한 분이 확인한 뒤 이 링크에 공개되는 요약에는 이름을 가리고, 생년월일과 출생시간을 담지 않아요. 링크를 아는 사람은 공유된 요약을 읽을 수 있어요.</div>
       </div>
     </div>
 
     <!-- 완료 -->
     <div id="vDone" class="center hide">
       <div class="big">💌</div>
-      <h2>전달 완료!</h2>
-      <p><span id="doneInviter"></span>님의 만세력 앱에서 두 사람의 궁합 결과가 열려요.<br/><br/>내 사주도 궁금하다면 — 만세력에서 사주·자미두수·별자리까지 무료로 볼 수 있어요.</p>
-      <a class="cta" id="ctaDone" href="#">내 사주 무료로 보기</a>
+      <h2 id="doneTitle">입력이 전달됐어요</h2>
+      <p id="doneDescription">초대한 분이 앱에서 확인하면 같은 요약을 읽을 수 있어요.</p>
+      <button class="cta" id="checkResult" type="button">결과 확인</button>
+      <p class="status" id="waitStatus" role="status" aria-live="polite">이 화면을 보는 동안 잠시 결과를 확인할게요.</p>
+      <a class="secondary" id="ctaDone" href="#">내 사주도 삼라만상에서 보기</a>
     </div>
 
-    <!-- 이미 제출됨 -->
-    <div id="vAlready" class="center hide">
-      <div class="big">✅</div>
-      <h2>이미 입력이 끝난 초대예요</h2>
-      <p>초대한 분의 앱에서 궁합 결과를 확인할 수 있어요.</p>
-      <a class="cta" id="ctaAlready" href="#">내 사주 보러 가기</a>
+    <!-- 공유된 요약: 이름·점수·세 문단만 표시하며 출생정보는 넣지 않는다. -->
+    <div id="vResult" class="center hide">
+      <h1>우리 관계 한 장</h1>
+      <p id="resultNames"></p>
+      <div class="score"><span id="resultScore"></span><small>사주 해석에 따른 참고 점수</small></div>
+      <p id="resultLine"></p>
+      <div class="card summary" id="resultBody"></div>
+      <p class="privacy hide" id="resultNote"></p>
+      <p class="privacy">전통 명리 해석을 바탕으로 살펴보는 관계 참고자료예요. 실제 관계와 미래를 단정하지 않아요.</p>
+      <a class="secondary" id="summaryLink" href="#">공유된 요약 링크 열기</a>
+      <a class="cta" href="/calc/gunghap/">다른 친구와도 비교하기</a>
     </div>
   </div>
 
   <script>
-    const API = "https://sidxbzpbesbaiokxrqsf.supabase.co/functions/v1/compat-invite";
+    const FUNCTIONS = "https://sidxbzpbesbaiokxrqsf.supabase.co/functions/v1/";
+    const API = FUNCTIONS + "compat-invite";
     const PKG = "com.samramanshang.manseryeok";
     const id = new URLSearchParams(location.search).get("id") || "";
     const store = (ref) =>
       `https://play.google.com/store/apps/details?id=${PKG}&referrer=${encodeURIComponent(ref)}`;
-
     const $ = (s) => document.getElementById(s);
     const show = (v) => {
-      ["vLoading", "vInvalid", "vForm", "vDone", "vAlready"].forEach((x) =>
+      ["vLoading", "vInvalid", "vForm", "vDone", "vResult"].forEach((x) =>
         $(x).classList.toggle("hide", x !== v));
     };
 
-    // 셀렉트 채우기
+    // Preserve the existing calendar, leap-month, gender, and unknown-time inputs.
     const fill = (el, from, to, unit, sel) => {
-      let h = "";
-      for (let i = from; i <= to; i++) h += `<option value="${i}" ${i === sel ? "selected" : ""}>${i}${unit}</option>`;
-      el.innerHTML = h;
+      const options = [];
+      for (let i = from; i <= to; i++) {
+        const option = document.createElement("option");
+        option.value = String(i);
+        option.textContent = `${i}${unit}`;
+        option.selected = i === sel;
+        options.push(option);
+      }
+      el.replaceChildren(...options);
     };
     fill($("year"), 1930, new Date().getFullYear(), "년", 1995);
     fill($("month"), 1, 12, "월", 1);
@@ -171,56 +202,226 @@
     fill($("hour"), 0, 23, "시", 12);
     fill($("minute"), 0, 59, "분", 0);
 
-    // 세그먼트 토글
+    const selectSegment = (host, selected) => host.querySelectorAll("button").forEach((button) => {
+      button.classList.toggle("on", button === selected);
+      button.setAttribute("aria-pressed", String(button === selected));
+    });
     let gender = "";
-    $("genderSeg").querySelectorAll("button").forEach((b) => b.onclick = () => {
-      gender = b.dataset.v;
-      $("genderSeg").querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
+    $("genderSeg").querySelectorAll("button").forEach((button) => button.onclick = () => {
+      gender = button.dataset.v;
+      selectSegment($("genderSeg"), button);
     });
     let cal = "solar";
-    $("calSeg").querySelectorAll("button").forEach((b) => b.onclick = () => {
-      cal = b.dataset.v;
-      $("calSeg").querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
+    $("calSeg").querySelectorAll("button").forEach((button) => button.onclick = () => {
+      cal = button.dataset.v;
+      selectSegment($("calSeg"), button);
       $("leapWrap").classList.toggle("hide", cal !== "lunar");
     });
     $("unknownTime").onchange = () => {
       const off = $("unknownTime").checked;
-      $("hour").disabled = off; $("minute").disabled = off;
+      $("hour").disabled = off;
+      $("minute").disabled = off;
+    };
+    const fail = (message) => {
+      $("err").textContent = message;
+      $("err").style.display = "block";
     };
 
-    const fail = (msg) => { const e = $("err"); e.textContent = msg; e.style.display = "block"; };
+    // A shared snapshot is a bearer link. Only its opaque id goes into a URL.
+    const validShareId = (value) => typeof value === "string" && /^[A-Za-z0-9_-]{22}$/.test(value);
+    const maskedName = (value, fallback) => {
+      const letters = Array.from(typeof value === "string" ? value.trim() : "").slice(0, 20);
+      return letters.length ? letters[0] + "*".repeat(Math.min(4, Math.max(1, letters.length - 1))) : fallback;
+    };
+    function renderSummary(data, sid) {
+      const labels = ["잘 통하는 점", "조율할 점", "대화 팁"];
+      const sections = labels.map(() => []);
+      const lines = data.body_md.split(/\r?\n/);
+      const notes = [];
+      let current = -1;
+      let readingNote = false;
+      const unsectioned = [];
+      lines.forEach((line) => {
+        const heading = line.match(/^##\s+(.+?)\s*$/);
+        const note = line.match(/^참고\s*[:：]\s*(.*)$/);
+        if (note) {
+          notes.push(note[1]);
+          current = -1;
+          readingNote = true;
+        } else if (heading) {
+          current = labels.indexOf(heading[1]);
+          readingNote = false;
+        } else if (!/^#\s+/.test(line)) {
+          if (readingNote) notes.push(line);
+          else if (current >= 0) sections[current].push(line);
+          else unsectioned.push(line);
+        }
+      });
+      if (!sections.some((section) => section.join("").trim())) sections[0] = unsectioned;
+      const nodes = [];
+      labels.forEach((label, index) => {
+        const heading = document.createElement("h3");
+        heading.textContent = label;
+        const paragraph = document.createElement("p");
+        paragraph.textContent = sections[index].join("\n").replace(/\*\*/g, "").trim()
+          || "이 항목에는 공유된 설명이 없어요.";
+        nodes.push(heading, paragraph);
+      });
+      $("resultBody").replaceChildren(...nodes);
+      const noteText = notes.join("\n").trim();
+      $("resultNote").textContent = noteText ? "참고: " + noteText : "";
+      $("resultNote").classList.toggle("hide", !noteText);
+      $("resultNames").textContent = `${maskedName(data.name_a, "초대한 분")} × ${maskedName(data.name_b, "나")}`;
+      const score = Number(data.score);
+      $("resultScore").textContent = data.score !== null && data.score !== "" && Number.isFinite(score)
+        ? `${Math.round(Math.max(0, Math.min(100, score)))} / 100` : "점수 정보 없음";
+      $("resultLine").textContent = typeof data.one_liner === "string" ? data.one_liner.slice(0, 240) : "";
+      $("summaryLink").href = "/s/?sid=" + encodeURIComponent(sid);
+      show("vResult");
+    }
+
+    let waiting = false;
+    let submissionConflict = false;
+    let pollTimer = null;
+    let pollUntil = 0;
+    let checking = false;
+    let checkController = null;
+    function stopPolling() {
+      if (pollTimer !== null) clearTimeout(pollTimer);
+      pollTimer = null;
+    }
+    function schedulePoll() {
+      stopPolling();
+      if (!waiting || document.hidden || checking) return;
+      if (Date.now() >= pollUntil) {
+        $("waitStatus").textContent = "자동 확인이 끝났어요. 나중에도 결과 확인을 눌러 다시 볼 수 있어요.";
+        return;
+      }
+      // Visible page only, once per eight seconds, for at most two minutes.
+      pollTimer = setTimeout(() => {
+        pollTimer = null;
+        if (!waiting || document.hidden) return;
+        if (Date.now() >= pollUntil) return schedulePoll();
+        checkInvite();
+      }, Math.min(8000, pollUntil - Date.now()));
+    }
+    function showSubmitted(alreadySubmitted = false) {
+      if (alreadySubmitted) submissionConflict = true;
+      $("doneTitle").textContent = submissionConflict ? "이미 입력이 전달된 초대예요" : "입력이 전달됐어요";
+      $("doneDescription").textContent = (submissionConflict ? "먼저 전달된 정보로 확인해요. " : "")
+        + "초대한 분이 앱에서 확인하면 같은 요약을 읽을 수 있어요.";
+      waiting = true;
+      if (!pollUntil) pollUntil = Date.now() + 120000;
+      $("ctaDone").href = store("invite_" + id);
+      show("vDone");
+    }
+    async function readJson(url, options) {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      return { response, data };
+    }
+    async function checkInvite(manual = false, initial = false) {
+      if (checking) return;
+      checking = true;
+      stopPolling();
+      $("checkResult").disabled = true;
+      if (manual) $("waitStatus").textContent = "결과를 확인하고 있어요…";
+      checkController = new AbortController();
+      const timeout = setTimeout(() => checkController?.abort(), 10000);
+      try {
+        const { response, data } = await readJson(`${API}?id=${encodeURIComponent(id)}`, {
+          cache: "no-store", signal: checkController.signal,
+        });
+        if (response.status === 404 || response.status === 410) {
+          waiting = false;
+          show("vInvalid");
+          return;
+        }
+        if (!response.ok) throw new Error("status unavailable");
+        if (data.status === "pending") {
+          waiting = false;
+          const inviter = typeof data.inviter_name === "string" ? data.inviter_name.slice(0, 20) : "친구";
+          $("inviterName").textContent = inviter;
+          $("consentInviter").textContent = inviter + "님";
+          show("vForm");
+        } else if (data.status === "submitted") {
+          showSubmitted();
+          if (validShareId(data.result_share_id)) {
+            const { response: shareResponse, data: shared } = await readJson(
+              FUNCTIONS + "s/" + encodeURIComponent(data.result_share_id),
+              { headers: { Accept: "application/json" }, cache: "no-store", signal: checkController.signal },
+            );
+            if (!shareResponse.ok || !shared || shared.expired || shared.scene_type !== "one-to-one"
+                || typeof shared.body_md !== "string" || !shared.body_md.trim() || shared.body_md.length > 4000) {
+              throw new Error("summary unavailable");
+            }
+            renderSummary(shared, data.result_share_id);
+            waiting = false;
+          } else {
+            $("waitStatus").textContent = "아직 공유된 요약이 없어요. 초대한 분이 앱에서 확인한 뒤 다시 눌러 주세요.";
+          }
+        } else {
+          waiting = false;
+          show("vInvalid");
+        }
+      } catch (_) {
+        if (initial && !waiting) show("vInvalid");
+        else if (!document.hidden) {
+          $("waitStatus").textContent = "결과를 불러오지 못했어요. 잠시 후 결과 확인을 다시 눌러 주세요.";
+        }
+      } finally {
+        clearTimeout(timeout);
+        checkController = null;
+        checking = false;
+        $("checkResult").disabled = false;
+        schedulePoll();
+      }
+    }
+    $("checkResult").onclick = () => checkInvite(true);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        stopPolling();
+        checkController?.abort();
+      } else schedulePoll();
+    });
+    window.addEventListener("pagehide", () => {
+      stopPolling();
+      checkController?.abort();
+    });
 
     $("submitBtn").onclick = async () => {
       $("err").style.display = "none";
       const name = $("name").value.trim();
       if (!name) return fail("이름을 적어 주세요.");
       if (!gender) return fail("성별을 골라 주세요.");
+      if (!$("consent").checked) {
+        fail("초대한 분에게 출생정보를 전달하는 데 동의해 주세요.");
+        $("consent").focus();
+        return;
+      }
+      const unknown = $("unknownTime").checked;
+      const birth = {
+        year: +$("year").value, month: +$("month").value, day: +$("day").value,
+        hour: unknown ? 12 : +$("hour").value, minute: unknown ? 0 : +$("minute").value,
+        unknown_time: unknown, is_lunar: cal === "lunar",
+        is_leap_month: cal === "lunar" && $("leap").checked, gender,
+      };
+      if (!birth.is_lunar && new Date(birth.year, birth.month - 1, birth.day).getMonth() !== birth.month - 1) {
+        return fail("생년월일을 다시 확인해 주세요.");
+      }
       $("submitBtn").disabled = true;
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
       try {
-        const r = await fetch(API, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "submit", id, name,
-            birth: {
-              year: +$("year").value, month: +$("month").value, day: +$("day").value,
-              hour: +$("hour").value, minute: +$("minute").value,
-              unknown_time: $("unknownTime").checked,
-              is_lunar: cal === "lunar",
-              is_leap_month: cal === "lunar" && $("leap").checked,
-              gender,
-            },
-          }),
+        const { response, data } = await readJson(API, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          signal: controller.signal,
+          body: JSON.stringify({ action: "submit", id, name, birth }),
         });
-        const j = await r.json();
-        if (r.ok && j.ok) {
-          $("doneInviter").textContent = j.inviter_name || "초대한";
-          $("ctaDone").href = store("invite_" + id);
-          show("vDone");
-        } else if (r.status === 409) {
-          $("ctaAlready").href = store("invite_" + id);
-          show("vAlready");
-        } else if (r.status === 410) {
+        if ((response.ok && data.ok) || response.status === 409) {
+          showSubmitted(response.status === 409);
+          await checkInvite(true);
+        } else if (response.status === 410) {
           fail("초대가 만료됐어요. 새 링크를 부탁해 보세요.");
           $("submitBtn").disabled = false;
         } else {
@@ -230,28 +431,14 @@
       } catch (_) {
         fail("네트워크 오류예요. 잠시 후 다시 시도해 주세요.");
         $("submitBtn").disabled = false;
+      } finally {
+        clearTimeout(timeout);
       }
     };
 
-    // 초기 로드
-    (async () => {
-      $("ctaInvalid").href = store("invite_landing");
-      if (!/^[0-9a-f]{12}$/.test(id)) return show("vInvalid");
-      try {
-        const r = await fetch(`${API}?id=${id}`);
-        if (!r.ok) return show("vInvalid");
-        const j = await r.json();
-        if (j.status === "pending") {
-          $("inviterName").textContent = j.inviter_name || "친구";
-          show("vForm");
-        } else if (j.status === "submitted") {
-          $("ctaAlready").href = store("invite_" + id);
-          show("vAlready");
-        } else {
-          show("vInvalid");
-        }
-      } catch (_) { show("vInvalid"); }
-    })();
+    $("ctaInvalid").href = store("invite_landing");
+    if (/^[0-9a-f]{12}$/.test(id)) checkInvite(false, true);
+    else show("vInvalid");
   </script>
 </body>
 </html>
