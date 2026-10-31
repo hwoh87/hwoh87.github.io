@@ -1,4 +1,4 @@
-import { createDialogueSession, getNpcPersona } from './dialogue-core.js?v=20261101-dialogue1';
+import { createDialogueSession, getNpcPersona } from './dialogue-core.js?v=20261101-conversation2';
 import { loadReadingEngine } from './readings.js?v=20261101-editorial1';
 import { buildReadingInsight } from './reading-insight-core.js';
 
@@ -6,7 +6,7 @@ const mounts = new WeakMap();
 let sequence = 0;
 const koreanYear = () => Number(new Intl.DateTimeFormat('en', { year: 'numeric', timeZone: 'Asia/Seoul' }).format(new Date()));
 
-/** A choice-driven conversation. Only the owner's existing local chart is read. */
+/** Local topic questions and choices read only the owner's existing chart. */
 export function mountNpcDialogue(container, npcId, options = {}) {
   const npc = getNpcPersona(npcId);
   if (!npc) throw new TypeError('이 술사와의 대화를 준비하지 못했어요.');
@@ -16,7 +16,9 @@ export function mountNpcDialogue(container, npcId, options = {}) {
   const withNpc = npc.name + (npcId === 'luna' ? '와' : '과');
   const session = options.session?.view?.().npc?.id === npcId ? options.session : createDialogueSession(npcId, { nickname: profile?.nickname, hasProfile });
   const loadEngine = options.loadEngine || loadReadingEngine, buildInsight = options.buildInsight || buildReadingInsight;
-  let disposed = false, choicesAbort, messageIds = [], messageNodes = new Map(), engineTicket = 0;
+  let disposed = false, choicesAbort, messageIds = [], messageNodes = new Map(), engineTicket = 0, composing = false;
+  const compactQuestions = document.defaultView?.matchMedia?.('(max-height: 500px)');
+  let expandedChoices = false, visibleChoiceCount = compactQuestions?.matches ? 0 : 2;
   const make = (tag, className, text) => { const element = document.createElement(tag); if (className) element.className = className; if (text != null) element.textContent = text; return element; };
   const listen = (node, type, callback, signal = lifetime.signal) => node.addEventListener(type, callback, { signal });
   const button = (text, className, callback, signal) => { const node = make('button', className, text); node.type = 'button'; listen(node, 'click', callback, signal); return node; };
@@ -38,11 +40,42 @@ export function mountNpcDialogue(container, npcId, options = {}) {
   const toolbar = make('nav', 'npc-toolbar'); toolbar.setAttribute('aria-label', '대화와 함께 보기');
   toolbar.append(button(hasProfile ? '전체 해석' : '내 정보 입력', '', () => hasProfile ? options.onReading?.(npc.readingKind) : options.onProfile?.()), button('나그네와 궁합', '', () => options.onSocial?.()), button('공간 둘러보기', '', () => options.onHall?.(npcId === 'tojeong' ? 'myeongri' : npcId === 'seol' ? 'inyeon' : 'readers')));
   const messages = make('ol', 'npc-messages'); messages.setAttribute('role', 'log'); messages.setAttribute('aria-label', `${withNpc} 나눈 이야기`); messages.setAttribute('aria-live', 'polite'); messages.setAttribute('aria-relevant', 'additions'); messages.tabIndex = 0;
-  const composer = make('div', 'npc-composer'), prompt = make('p', 'npc-prompt', '어떤 이야기를 이어볼까요?'), choices = make('div', 'npc-choices'); choices.setAttribute('role', 'group'); choices.setAttribute('aria-label', '이어서 물어볼 질문');
+  const composer = make('div', 'npc-composer'), prompt = make('p', 'npc-prompt', '이렇게 물어봐도 좋아요'), choices = make('div', 'npc-choices'); choices.id = `${id}-choices`; choices.setAttribute('role', 'group'); choices.setAttribute('aria-label', '이어서 물어볼 질문');
+  const more = button('질문 더 보기', 'npc-more-questions', () => { expandedChoices = !expandedChoices; showChoices(); }); more.setAttribute('aria-controls', choices.id); more.setAttribute('aria-expanded', 'false');
+  const form = make('form', 'npc-question-form'); form.setAttribute('aria-label', `${withNpc} 직접 이야기하기`);
+  const inputLabel = make('label', 'npc-input-label', '궁금한 주제를 직접 적어 주세요'); inputLabel.htmlFor = `${id}-input`;
+  const inputRow = make('div', 'npc-input-row'), input = make('input', 'npc-question-input'); input.id = `${id}-input`; input.type = 'text'; input.maxLength = 320; input.autocomplete = 'off'; input.enterKeyHint = 'send';
+  input.placeholder = npcId === 'tojeong' ? '예: 요즘 흐름은 어떤가요?' : npcId === 'seol' ? '예: 나는 관계에서 어떤 편인가요?' : '예: 내 마음은 어떻게 쉬나요?';
+  const send = make('button', 'npc-send', '보내기'); send.type = 'submit'; send.disabled = true;
+  const feedback = make('p', 'npc-input-feedback', '성향·관계·흐름처럼 궁금한 주제를 적어보세요.'); feedback.id = `${id}-feedback`; feedback.setAttribute('role', 'status'); input.setAttribute('aria-describedby', feedback.id);
+  inputRow.append(input, send); form.append(inputLabel, inputRow, feedback);
+  listen(input, 'compositionstart', () => { composing = true; }); listen(input, 'compositionend', () => { composing = false; updateDraft(); });
+  function updateDraft() {
+    const length = Array.from(input.value || '').length; send.disabled = !String(input.value || '').trim() || length > 160;
+    input.setAttribute('aria-invalid', String(length > 160));
+    const message = length > 160 ? '질문은 160자 안으로 적어 주세요.' : '성향·관계·흐름처럼 궁금한 주제를 적어보세요.';
+    if (feedback.textContent !== message) feedback.textContent = message;
+  }
+  listen(input, 'input', updateDraft);
+  listen(form, 'submit', event => {
+    event.preventDefault(); if (disposed || composing) return;
+    const text = String(input.value || '').trim();
+    if (!text || Array.from(text).length > 160) { updateDraft(); return; }
+    const result = session.ask(text); if (!result.accepted) return;
+    input.value = ''; updateDraft(); render(true); input.focus({ preventScroll: true });
+  });
   const footer = make('div', 'npc-dialog-footer'), back = button('이전 질문', 'npc-back', () => { if (session.back()) render(true); });
-  const restart = button('처음부터', 'npc-back', () => { session.reset(); render(true); });
-  footer.append(back, restart, make('small', 'npc-disclosure', '준비된 안내와 내 해석으로 대화해요. 이 페이지에서만 이어져요.'));
-  composer.append(prompt, choices, footer); conversation.append(header, toolbar, messages, composer); container.replaceChildren(stage, conversation);
+  const restart = button('처음부터', 'npc-back', () => { session.reset(); input.value = ''; updateDraft(); render(true); });
+  footer.append(back, restart, make('small', 'npc-disclosure', '주제에 맞는 준비된 안내와 내 계산 해석을 들려줘요. 이 페이지에서만 이어져요.'));
+  composer.append(prompt, choices, more, form, footer); conversation.append(header, toolbar, messages, composer); container.replaceChildren(stage, conversation);
+
+  function showChoices() {
+    Array.from(choices.children).forEach((node, index) => { node.hidden = !expandedChoices && index >= visibleChoiceCount; });
+    more.hidden = choices.children.length <= visibleChoiceCount;
+    more.textContent = expandedChoices ? '질문 접기' : visibleChoiceCount === 0 ? `추천 질문 ${choices.children.length}개 보기` : `다른 질문 ${Math.max(0, choices.children.length - visibleChoiceCount)}개`;
+    more.setAttribute('aria-expanded', String(expandedChoices));
+  }
+  if (compactQuestions) listen(compactQuestions,'change',()=>{ visibleChoiceCount = compactQuestions.matches ? 0 : 2; expandedChoices = false; showChoices(); });
 
   function route(action) {
     if (!action || disposed) return;
@@ -53,6 +86,7 @@ export function mountNpcDialogue(container, npcId, options = {}) {
   }
   function render(focus = false) {
     if (disposed) return;
+    const focusedChoice = Array.from(choices.children).find(node => node === document.activeElement)?.dataset.dialogueChoice;
     const view = session.view(), nextIds = view.messages.map(message => message.id);
     const prefix = messageIds.every((value, index) => nextIds[index] === value);
     const wasAtEnd = messages.scrollHeight - messages.scrollTop - messages.clientHeight < 100;
@@ -69,10 +103,14 @@ export function mountNpcDialogue(container, npcId, options = {}) {
     });
     messageIds = nextIds; choicesAbort?.abort(); choicesAbort = new AbortController(); choices.replaceChildren();
     view.choices.forEach(choice => { const item = button(choice.label, 'npc-choice', () => { const result = session.choose(choice.id); if (!result.accepted) return; render(true); route(result.action); }, choicesAbort.signal); item.dataset.dialogueChoice = choice.id; choices.append(item); });
-    back.hidden = !view.canBack; prompt.textContent = view.stage === 'reading' || view.stage === 'followup' ? '이 대목에서 더 궁금한 건 무엇인가요?' : '궁금한 이야기를 골라 주세요';
+    visibleChoiceCount = compactQuestions?.matches ? 0 : 2; expandedChoices = false; showChoices();
+    back.hidden = !view.canBack; prompt.textContent = view.stage === 'clarify' ? '어느 이야기에 가까운가요?' : view.stage === 'reading' || view.stage === 'followup' ? '이어서 이렇게 물어봐도 좋아요' : '이야기를 시작해 볼까요?';
     const latest = added.at(-1);
     if (focus && latest) { latest.focus({ preventScroll: true }); (added.find(node => node.classList.contains('npc-message--user')) || latest).scrollIntoView({ block: 'start', behavior: 'auto' }); }
-    else if (wasAtEnd && latest && messageIds.length > 1) latest.scrollIntoView({ block: 'nearest', behavior: 'auto' });
+    else {
+      if (focusedChoice) (Array.from(choices.children).find(node => !node.hidden && node.dataset.dialogueChoice === focusedChoice) || Array.from(choices.children).find(node => !node.hidden) || more).focus({ preventScroll: true });
+      if (wasAtEnd && latest && messageIds.length > 1) latest.scrollIntoView({ block: 'nearest', behavior: 'auto' });
+    }
   }
   async function prepareInsight() {
     if (!hasProfile || disposed) return;

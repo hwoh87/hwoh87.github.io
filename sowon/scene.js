@@ -9,6 +9,7 @@ import { readSettings, normalizeSettings, effectiveQuality, nearestInteraction, 
 import { createWayfinder } from './wayfinder.js?v=20261031-life1';
 import { HALLS, getFeature } from './hub-core.js';
 import { createVisitors } from './visitors.js?v=20261031-social1';
+import { createConversationFocus } from './conversation-focus.js?v=20261101-conversation2';
 
 const host = document.getElementById('worldViewport');
 const body = document.body;
@@ -117,6 +118,32 @@ function setup() {
   orbit.rotateSpeed = .6;
   orbit.zoomSpeed = .8;
   orbit.update();
+
+  const conversationFocus = createConversationFocus({ camera, orbit, world, avatar });
+  let conversationNpc = null, conversationOverview = false;
+  function releaseConversation() {
+    const restored = conversationFocus.restore();
+    conversationNpc = null;
+    body.classList.remove('npc-scene-focused');
+    if (restored) { setOverviewState(conversationOverview); renderer.render(scene,camera); }
+  }
+  function focusConversation(npc) {
+    const firstFocus = !conversationFocus.isActive();
+    const wasOverview = overview;
+    const width = window.innerWidth, height = window.innerHeight;
+    const pose = conversationFocus.focus(npc,{viewport:{width,height},panelWidth:width>=1000&&height>=600?600:0});
+    if (!pose) { releaseConversation(); return; }
+    if (firstFocus) conversationOverview = wasOverview;
+    conversationNpc = npc;
+    cameraTransition = null;
+    setOverviewState(false);
+    body.classList.add('npc-scene-focused');
+    renderer.render(scene,camera);
+  }
+  listen(document,'sowon:conversation-focus',event=>{
+    if (event.detail?.open && ['tojeong','seol','luna'].includes(event.detail.npc)) focusConversation(event.detail.npc);
+    else releaseConversation();
+  });
 
   movement = createLocomotion({
     camera, domElement: renderer.domElement, avatar, world, orbitControls: orbit,
@@ -266,6 +293,7 @@ function setup() {
     camera.aspect = width / height;
     camera.fov = width < 760 ? 60 : exploring ? 54 : 48;
     camera.updateProjectionMatrix();
+    if (conversationNpc) focusConversation(conversationNpc);
   }
   resizeObserver = new ResizeObserver(resize);
   resizeObserver.observe(host);
@@ -295,7 +323,8 @@ function setup() {
     setOverviewState(camera.position.distanceTo(orbit.target)>25);
   }
   listen(document, 'sowon:capture', event => {
-    event.detail.snapshot = { position: avatar.group.position.toArray(), rotation: avatar.group.rotation.y, camera: camera.position.toArray(), target: orbit.target.toArray(), entered: exploring };
+    const beforeConversation = conversationFocus.getRestoreState();
+    event.detail.snapshot = { position: avatar.group.position.toArray(), rotation: avatar.group.rotation.y, camera: beforeConversation?.position || camera.position.toArray(), target: beforeConversation?.target || orbit.target.toArray(), entered: exploring };
   });
 
   function render(time) {
@@ -430,7 +459,7 @@ function setup() {
     if (event.persisted) return;
     cleanups.forEach(cleanup => cleanup());
     resizeObserver.disconnect();
-    visitors.dispose();wayfinder.dispose();npcButtons.forEach(({button})=>button.remove());movement.dispose(); orbit.dispose(); avatar.dispose(); world.dispose(); renderer.dispose();
+    conversationFocus.dispose();visitors.dispose();wayfinder.dispose();npcButtons.forEach(({button})=>button.remove());movement.dispose(); orbit.dispose(); avatar.dispose(); world.dispose(); renderer.dispose();
   });
   listen(window, 'pageshow', event => {
     if (event.persisted) resume();

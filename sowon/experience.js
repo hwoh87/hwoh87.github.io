@@ -44,6 +44,7 @@ async function openEncounter(npc, {reading=false, kind}={}) {
   encounterCleanup?.(); encounterCleanup = null;
   encounterDialog.textContent = '술사가 당신을 맞이하고 있어요…';
   encounterDialog.showModal(); body.classList.add('dialog-open');
+  document.dispatchEvent(new CustomEvent('sowon:conversation-focus',{detail:{npc,open:true}}));
   const profile = getOwnProfile();
   const shared = {
     onClose: closeEncounter,
@@ -62,7 +63,7 @@ async function openEncounter(npc, {reading=false, kind}={}) {
         onGuide: () => { closeEncounter(); queueMicrotask(() => openEncounter(npc)); },
       });
     } else {
-      const module = await import('./npc-dialog.js?v=20261101-dialogue1');
+      const module = await import('./npc-dialog.js?v=20261101-conversation2');
       if (version !== encounterVersion || !encounterDialog.open) return;
       result = module.mountNpcDialogue(encounterDialog,npc,{
         ...shared, profile, session:dialogueSessions.get(npc),
@@ -79,6 +80,7 @@ async function openEncounter(npc, {reading=false, kind}={}) {
   } catch (_) {
     if (version !== encounterVersion || !encounterDialog.open) return;
     encounterDialog.classList.remove('npc-dialog','xp-personal-dialog');
+    document.dispatchEvent(new CustomEvent('sowon:conversation-focus',{detail:{open:false}}));
     encounterDialog.innerHTML = '<div class="xp-failed"><h2>이야기를 잠시 불러오지 못했어요.</h2><p>전체 기능에서 같은 해석과 안내를 열 수 있어요.</p><button type="button">풍경으로 돌아가기</button></div>';
     encounterDialog.querySelector('button').onclick=closeEncounter;
   }
@@ -105,6 +107,7 @@ encounterDialog.addEventListener('close',()=>{
   if(encounterDialog.open)return;
   encounterVersion++;encounterCleanup?.();encounterCleanup=null;encounterDialog.replaceChildren();
   encounterDialog.classList.remove('xp-personal-dialog','npc-dialog');
+  document.dispatchEvent(new CustomEvent('sowon:conversation-focus',{detail:{open:false}}));
   if(!document.querySelector('dialog[open]')){body.classList.remove('dialog-open');if(encounterOpener?.isConnected)encounterOpener.focus({preventScroll:true});}
 });
 document.addEventListener('sowon:encounter',event=>openEncounter(event.detail?.npc));

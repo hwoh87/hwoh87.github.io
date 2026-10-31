@@ -333,6 +333,36 @@ dialog.xp-dialog.npc-dialog::backdrop {
 .npc-dialog .npc-loading { margin: 0; padding: 13px 0; color: #5d7056; font-size: 14px; line-height: 1.85; }
 .npc-dialog .npc-error { margin: 10px 0 0; padding: 13px 15px; border: 1px solid #e3c9be; border-radius: 7px; background: #f8eee9; color: #813e32; font-size: 13px; line-height: 1.85; word-break: keep-all; overflow-wrap: anywhere; }
 
+.npc-dialog .npc-more-questions { display: flex; align-items: center; min-height: 44px; margin: 0 0 0 auto; padding: 6px 0; border: 0; border-radius: 0; background: transparent; color: #526b55; font-size: 12px; text-decoration: underline; text-underline-offset: 4px; }
+.npc-dialog .npc-question-form { margin: 4px 0 0; }
+.npc-dialog .npc-input-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.npc-dialog .npc-input-row { display: flex; align-items: stretch; gap: 7px; min-width: 0; }
+.npc-dialog .npc-question-input { width: 100%; min-width: 0; min-height: 46px; padding: 11px 13px; border: 1px solid #b9c8b0; border-radius: 7px; background: #fffefa; color: #242b29; font: inherit; font-size: 16px; line-height: 1.5; box-shadow: none; }
+.npc-dialog .npc-question-input::placeholder { color: #778072; font-size: 13px; }
+.npc-dialog .npc-question-input:focus { outline: 2px solid #6d8863; outline-offset: 1px; }
+.npc-dialog .npc-question-input[aria-invalid=true] { border-color: #914d40; }
+.npc-dialog .npc-send { flex: 0 0 68px; min-width: 60px; min-height: 46px; padding: 9px 10px; border: 1px solid #526b55; border-radius: 7px; background: #526b55; color: #fff; font-size: 13px; }
+.npc-dialog .npc-send:disabled { border-color: #d0d7c9; background: #e7ebe1; color: #687460; cursor: default; opacity: 1; }
+.npc-dialog .npc-input-feedback { margin: 6px 0 0; color: #66725f; font-size: 10px; line-height: 1.6; }
+
+/* The person stays in the world while the conversation sits beside them. */
+@media (min-width: 1000px) and (min-height: 600px) {
+  .npc-scene-focused dialog.xp-dialog.npc-dialog { inset: 0 24px 0 auto; width: 600px; max-width: calc(100vw - 48px); height: min(840px,92dvh); margin: auto 0; border-radius: 12px; box-shadow: 0 15px 55px #07120e26; }
+  .npc-scene-focused dialog.xp-dialog.npc-dialog[open] { grid-template-columns: minmax(0,1fr); grid-template-rows: auto minmax(0,1fr); }
+  .npc-scene-focused dialog.xp-dialog.npc-dialog::backdrop { background: #0b192520; backdrop-filter: none; }
+  .npc-scene-focused .npc-dialog .npc-stage { display: grid; grid-template-columns: 52px minmax(0,1fr) auto; gap: 13px; align-items: center; padding: 14px 24px; border-right: 0; border-bottom: 1px solid var(--npc-line); }
+  .npc-scene-focused .npc-dialog .npc-stage :is(.npc-stage-brand,.npc-stage-line,.npc-stage-meta) { display: none; }
+  .npc-scene-focused .npc-dialog .npc-portrait { width: 52px; height: 52px; margin: 0; border-width: 2px; box-shadow: none; }
+  .npc-scene-focused .npc-dialog .npc-name { font-size: 23px; }
+  .npc-scene-focused .npc-dialog .npc-role { margin-top: 2px; font-size: 11px; }
+  .npc-scene-focused .npc-dialog .npc-profile-action { padding: 8px 0; }
+  .npc-scene-focused .npc-dialog .npc-dialog-header { padding: 13px 23px 5px; }
+  .npc-scene-focused .npc-dialog .npc-dialog-title { font-size: 18px; }
+  .npc-scene-focused .npc-dialog .npc-toolbar { margin: 0 24px; }
+  .npc-scene-focused .npc-dialog .npc-messages { padding: 22px 24px; }
+  .npc-scene-focused .npc-dialog .npc-composer { padding: 12px 24px 8px; }
+}
+
 @media (min-width: 760px) {
   .npc-dialog .npc-dialog-header { padding: 16px 25px 7px 28px; }
   .npc-dialog .npc-eyebrow { display: none; }
@@ -456,6 +486,15 @@ dialog.xp-dialog.npc-dialog::backdrop {
   .npc-dialog .npc-dialog-footer { margin-top: 2px; }
   .npc-dialog .npc-back { min-height: 32px; font-size: 10px; }
   .npc-dialog .npc-disclosure { font-size: 9px; }
+}
+
+/* A short visual viewport leaves room for the keyboard and the last reply. */
+@media (max-height: 500px) {
+  .npc-dialog .npc-composer { min-height: 0; padding-top: 4px; padding-bottom: 4px; }
+  .npc-dialog .npc-prompt { display: none; }
+  .npc-dialog .npc-more-questions { min-height: 44px; padding-top: 3px; padding-bottom: 3px; }
+  .npc-dialog .npc-dialog-footer { margin-top: 0; }
+  .npc-dialog .npc-composer:has(.npc-more-questions[aria-expanded=true]) { max-height: 65%; overflow-y: auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {

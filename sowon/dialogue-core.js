@@ -2,6 +2,7 @@ import { getEncounter } from './encounter-core.js';
 import { getFeature } from './hub-core.js';
 
 export const MAX_DIALOGUE_MESSAGES = 20;
+export const MAX_DIALOGUE_QUESTION_LENGTH = 160;
 const MAX_BACK_STEPS = 12;
 const FEATURES = new Set(['saju','time','learn','terms','gunghap','zodiac','readers','catalog','library','jami','star']);
 const READING_KINDS = new Set(['saju','jami','star']);
@@ -95,6 +96,44 @@ const CLOSINGS = freeze({
   luna:{nature:'내 경험과 닮은 대목이 있는지 편하게 떠올려봐요.',emotion:'마음이 쉬었던 순간과 나란히 읽어봐요.',balance:'내가 편하게 쓰는 기질부터 알아봐도 좋아요.',relationship:'가까운 사람과 이야기할 때의 모습을 떠올려봐요.',practice:'부담 없이 해볼 수 있는 것부터 골라봐요.'},
 });
 
+// A written question only selects one of these prepared subjects. It never
+// supplies a new interpretation, a command, a URL or an action to execute.
+const ASK_TOPICS = freeze({nature:'내 기본 성향이 궁금해요.',relationship:'관계와 표현을 살펴볼게요.',flow:'큰 흐름을 어떻게 읽나요?',recovery:'마음과 회복을 살펴볼게요.',practice:'일상에서 해볼 방향이 궁금해요.'});
+const ASK_DEFAULTS = freeze({tojeong:['nature','recovery','practice','flow'],seol:['relationship','nature','recovery','practice'],luna:['nature','recovery','relationship','practice']});
+const ASK_CLARIFY = freeze({tojeong:'어느 대목이 궁금한지 한 가지만 더 짚어보죠. 아래 이야기 중 가까운 것을 골라주세요.',seol:'궁금한 장면에 맞춰 이야기하고 싶어요. 어느 쪽부터 살펴볼까요?',luna:'조금만 좁혀서 이야기해 봐요. 지금 궁금한 쪽을 골라줘요.'});
+const ASK_LIMIT = freeze({tojeong:'결혼 날짜나 당첨, 특정 결과를 이 계산으로 확정할 수는 없지요. 지금 읽을 수 있는 범위에서 살펴보죠.',seol:'결혼 날짜나 상대의 선택, 당첨 같은 결과를 확정하는 풀이는 아니에요. 준비된 기본 풀이의 범위에서 이야기할게요.',luna:'특정 날짜나 당첨, 앞으로의 결과를 확정해 주는 계산은 아니에요. 지금 준비된 기본 이야기로 살펴봐요.'});
+const PRIVATE_QUESTION = /(?:(?<!\d)(?:18|19|20)\d{2}\s*(?:[-./]|\s)\s*\d{1,2}\s*(?:[-./]|\s)\s*\d{1,2}(?!\d)|(?:18|19|20)\d{2}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일|(?<!\d)(?:18|19|20)\d{6}(?!\d)|\b(?:access[_-]?token|refresh[_-]?token|token|paymentKey|authorization|password|secret|rid)["']?\s*[=:]\s*\S+|(?:토큰|비밀번호|복구\s*키)\s*[=:]\s*\S+|\bBearer\s+\S+)/i;
+const CERTAIN_QUESTION = /언제.{0,16}(?:결혼|취업|이직|합격|만나)|(?:결혼|취업|이직|합격).{0,16}언제|복권|로또|당첨|무조건|확정|확답|100\s*%|정확한\s*(?:날짜|시점)/;
+function questionTopics(text){
+  const topics=[];
+  if(/성격|성향|기질|본질|장단점|어떤\s*사람|나\s*자신/.test(text))topics.push('nature');
+  if(/연애|사랑|친구|관계|갈등|궁합|결혼|배우자|이별|호감|상대|소통/.test(text))topics.push('relationship');
+  if(/직장|직업|회사|커리어|이직|취업|업무|재물|돈|금전|미래|대운|세운|올해|내년|흐름|진로|운세|행운|일운|복권|로또|당첨/.test(text)||/(?:^|[\s,?!])일(?:은|이|을|도|에서|과|에|로)?(?=$|[\s,?!.]|안|잘|힘들|어렵|궁금)/.test(text)||/(?:^|[\s,?!])운(?:은|이|을|도|에|의)?(?=$|[\s,?!.]|좋|나쁘|궁금|어떻)/.test(text))topics.push('flow');
+  if(/지침|지쳤|지쳐|피곤|회복|휴식|마음|불안|감정|스트레스|쉬고/.test(text))topics.push('recovery');
+  if(/실천|방향|습관|행동|연습|일상|해볼\s*일|할\s*일/.test(text))topics.push('practice');
+  // Single syllables are words here, not substrings of 만나요/생일/내일/운동.
+  if(!topics.length&&/(?:^|\s)(?:나|저)(?:는|를|의|에\s*대해)?(?=$|[\s,?!.])/.test(text))topics.push('nature');
+  return topics;
+}
+function questionGuide(text,npcId){
+  if(/철회|(?:공유|승인|요청|만남).{0,12}(?:취소|삭제|지우|중단)/.test(text))return {source:'seol',topic:'revoke'};
+  if(/궁합.{0,12}(?:요청|승인|동의|공개)|(?:요청|승인|동의).{0,12}궁합|출생정보.{0,12}(?:공개|상대|서버)/.test(text))return {source:'seol',topic:'consent'};
+  if(/궁합.{0,8}점수|점수.{0,8}궁합/.test(text))return {source:'seol',topic:'score'};
+  if(/태어난\s*시간|출생\s*시간|시간.{0,8}(?:모르|몰라|모름|정확)/.test(text))return {source:'tojeong',topic:'time'};
+  if(/자미두수|명반|명궁|열두\s*궁/.test(text))return {source:'luna',topic:'jami'};
+  if(/서재|리포트.{0,10}(?:가격|목차|구매|상세)|유료|무료.{0,10}(?:범위|어디까지|어디)/.test(text))return {source:npcId==='tojeong'?'tojeong':'luna',topic:npcId==='tojeong'?'depth':'reading'};
+  return null;
+}
+function prepareQuestion(value){
+  if(typeof value!=='string')return null;
+  const trimmed=value.trim();
+  if(!trimmed||Array.from(trimmed).length>MAX_DIALOGUE_QUESTION_LENGTH)return null;
+  const normalized=trimmed.normalize('NFC');
+  if(PRIVATE_QUESTION.test(normalized)||PRIVATE_QUESTION.test(normalized.replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u202a-\u202e\u2060-\u2069]/g,'')))return {private:true};
+  const text=Array.from(clean(normalized,640)).filter(c=>{const n=c.codePointAt(0);return n<0xd800||n>0xdfff;}).join('').replace(/\s+/g,' ').trim();
+  return text?{text}:null;
+}
+
 function normalizeInsight(raw,kind){
   if(!raw||raw.source!=='samra-engine'||raw.kind!==kind||raw.requiresTime===true||!Array.isArray(raw.sections))return null;
   const seen=new Set(),sections=[];
@@ -117,28 +156,30 @@ export function isDialogueAction(value){
 }
 function actionChoice(value){return {id:'action:'+value.type+(value.id?':'+value.id:''),label:value.label,action:{type:value.type,...(value.id?{id:value.id}:{})}};}
 
-/** Prepared choices + actual local insight only. This session accepts no free text. */
+/** Prepared dialogue + local topic routing. Written text cannot execute actions. */
 export function createDialogueSession(npcId,options={}){
   const npc=getNpcPersona(npcId);if(!npc)throw new TypeError('이 술사의 대화는 아직 준비되지 않았어요.');
   const nickname=Array.from(clean(options.nickname,80).replace(/\s+/g,' ')).slice(0,12).join('');
   let insight=normalizeInsight(options.insight,npc.readingKind);
   let hasProfile=options.hasProfile===true || options.hasProfile===undefined&&Boolean(insight);
   if(!hasProfile)insight=null;
-  let stage='welcome',activeSection=null,guideTopic=null,guideReply=null,asked=[],messages=[],history=[],serial=0;
+  let stage='welcome',activeSection=null,guideTopic=null,guideReply=null,guideSource=npcId,clarifying=[],asked=[],messages=[],history=[],serial=0;
   function add(role,value,extras={}){messages.push({id:npcId+'-'+(++serial),role,text:clean(value,3000),...extras});messages=messages.slice(-MAX_DIALOGUE_MESSAGES);}
   function greeting(){return(nickname?nickname+'님, ':'')+npc.greeting;}
   function orderedSections(){return ORDER[npcId].map(id=>insight?.sections.find(row=>row.id===id)).filter(Boolean).slice(0,4);}
   function readyText(){const focus=npcId==='seol'?insight.sections.find(row=>row.id==='relationship'):null;return [npc.ready,insight.headline,sentence(focus?.paragraphs[0]||insight.summary)].filter(Boolean).join('\n\n');}
-  function snapshot(){return copy({stage,activeSection,guideTopic,guideReply,asked,messages});}
+  function snapshot(){return copy({stage,activeSection,guideTopic,guideReply,guideSource,clarifying,asked,messages});}
   function remember(){history.push(snapshot());history=history.slice(-MAX_BACK_STEPS);}
   function choiceRows(){
     const rows=[];
-    if(stage==='reading'||stage==='followup'){
+    if(stage==='clarify'){
+      for(const id of clarifying)rows.push({id:'ask-topic:'+id,label:ASK_TOPICS[id]});
+    }else if(stage==='reading'||stage==='followup'){
       for(const id of ['short','practice','basis','next'])if(!asked.includes(id))rows.push({id:'followup:'+id,label:FOLLOWUPS[id]});
       rows.push({id:'topics',label:'다른 주제로 물어볼게요.'});
       rows.push(actionChoice(reading(npc.readingKind)));
     }else if(stage==='guide'){
-      const topic=GUIDES[npcId].find(row=>row.id===guideTopic),reply=topic?.replies.find(row=>row.id===guideReply);
+      const topic=GUIDES[guideSource].find(row=>row.id===guideTopic),reply=topic?.replies.find(row=>row.id===guideReply);
       if(reply){for(const a of reply.actions.filter(isDialogueAction))rows.push(actionChoice(a));rows.push({id:'guide',label:'다른 안내도 궁금해요.'});}
       else if(topic){for(const reply of topic.replies)rows.push({id:'guide-reply:'+reply.id,label:reply.label});rows.push({id:'guide',label:'다른 안내부터 볼게요.'});}
       else for(const topic of GUIDES[npcId])rows.push({id:'guide-topic:'+topic.id,label:topic.label});
@@ -156,11 +197,40 @@ export function createDialogueSession(npcId,options={}){
     return rows.slice(0,6);
   }
   function view(){return {npc:copy(npc),stage,hasProfile,insightReady:Boolean(insight),prepared:true,messages:copy(messages),choices:choiceRows().map(({action,...value})=>copy(value)),canBack:history.length>0,activeSection};}
-  function start(){stage=insight?'topic':'welcome';activeSection=guideTopic=guideReply=null;asked=[];messages=[];history=[];add('npc',greeting());if(insight)add('npc',readyText());return view();}
-  function answerSection(id){
+  function start(){stage=insight?'topic':'welcome';activeSection=guideTopic=guideReply=null;guideSource=npcId;clarifying=[];asked=[];messages=[];history=[];add('npc',greeting());if(insight)add('npc',readyText());return view();}
+  function answerSection(id,prefix=''){
     const row=insight?.sections.find(row=>row.id===id);if(!row)return false;
-    activeSection=id;asked=[];stage='reading';
-    add('npc',row.paragraphs.join('\n\n')+'\n\n'+(CLOSINGS[npcId][row.id]||npc.after),{chapter:row.title,signals:copy(row.signals)});return true;
+    activeSection=id;guideTopic=guideReply=null;guideSource=npcId;clarifying=[];asked=[];stage='reading';
+    add('npc',[prefix,...row.paragraphs,CLOSINGS[npcId][row.id]||npc.after].filter(Boolean).join('\n\n'),{chapter:row.title,signals:copy(row.signals)});return true;
+  }
+  function answerGuide(source,topic,prefix=''){
+    const row=GUIDES[source]?.find(row=>row.id===topic);if(!row)return false;
+    stage='guide';activeSection=guideReply=null;guideSource=source;guideTopic=topic;clarifying=[];asked=[];
+    const invite=!insight?'아직 개인 풀이가 준비되지 않아 이용 안내부터 드릴게요. 내 정보를 준비하면 계산된 기본 풀이로 이야기할 수 있어요.':'';
+    add('npc',[prefix,invite,row.answer].filter(Boolean).join('\n\n'));return true;
+  }
+  function clarify(topics,prefix=''){
+    stage='clarify';activeSection=guideTopic=guideReply=null;guideSource=npcId;asked=[];
+    clarifying=[...new Set(topics.length?topics:ASK_DEFAULTS[npcId])].filter(id=>Object.hasOwn(ASK_TOPICS,id)).slice(0,4);
+    const invite=!insight?'아직 내 기본 풀이가 없으니, 지금은 이용 방법을 이야기할게요. 내 정보에서 출생정보를 준비할 수 있어요.':'';
+    add('npc',[prefix,ASK_CLARIFY[npcId],invite].filter(Boolean).join('\n\n'));
+  }
+  function answerTopic(category,text='',prefix=''){
+    const ids={nature:['nature'],relationship:['relationship'],flow:['flow'],recovery:['emotion','balance'],practice:npc.readingKind==='saju'?['direction']:['practice']}[category]||[];
+    const row=ids.map(id=>insight?.sections.find(s=>s.id===id)).find(Boolean);
+    if(row){
+      let scope='';
+      if(category==='relationship')scope='상대의 마음이나 두 사람의 점수 대신, 내 쪽의 관계 반응을 살펴볼게요.';
+      else if(category==='recovery'&&row.id==='balance'&&npc.readingKind==='star')scope='준비된 풀이에는 정확한 달의 반응 해석이 없어, 대신 계산된 기질의 균형을 살펴볼게요.';
+      else if(category==='flow'&&/(?:\d{4}\s*년|올해|내년|직장|직업|이직|취업|돈|금전|재물|복권|로또|당첨)/.test(text))scope='아래는 현재 준비된 대운의 큰 흐름이에요. 질문하신 해의 사건이나 직장·수입의 결과를 따로 예측한 답은 아니에요.';
+      return answerSection(row.id,[prefix,scope].filter(Boolean).join('\n\n'));
+    }
+    let source=npcId,topic='',scope='';
+    if(category==='relationship'){source='seol';topic='self';if(insight)scope='지금 준비된 사주에는 관계 반응을 따로 읽은 항목이 없어요. 두 사람의 궁합을 추측하지 않고, 관계 풀이를 시작하는 방법부터 안내할게요.';}
+    else if(category==='flow'){source='tojeong';topic='flow';if(insight)scope='현재 별자리 기본 풀이는 기질과 관계를 읽는 범위예요. 특정 해의 흐름을 따로 계산한 답이 없어, 흐름 풀이를 읽는 방법부터 안내할게요.';}
+    else if(category==='nature'){source=npcId;topic=npcId==='tojeong'?'first':npcId==='seol'?'self':'sky';}
+    else {source='luna';topic='practice';if(insight)scope='이 주제의 개인 해석 항목은 아직 없어요. 내 성향을 덧붙여 추측하지 않고, 풀이를 일상에 대조하는 방법부터 이야기할게요.';}
+    return answerGuide(source,topic,[prefix,scope].filter(Boolean).join('\n\n'));
   }
   function followup(id){
     const row=insight?.sections.find(row=>row.id===activeSection);if(!row)return false;
@@ -183,6 +253,21 @@ export function createDialogueSession(npcId,options={}){
   start();
   return {
     view,
+    ask(value){
+      const question=prepareQuestion(value);if(!question)return {accepted:false,view:view()};
+      remember();
+      if(question.private){
+        add('user','[개인정보가 포함된 질문]');
+        clarify([],'개인정보 원문은 대화에 남기지 않을게요. 출생정보는 내 정보에서 준비하고, 여기에는 궁금한 주제만 적어주세요.');
+      }else{
+        const text=question.text;add('user',text);
+        const prefix=CERTAIN_QUESTION.test(text)?ASK_LIMIT[npcId]:'',guide=questionGuide(text,npcId),topics=questionTopics(text);
+        if(guide)answerGuide(guide.source,guide.topic,prefix);
+        else if(topics.length===1)answerTopic(topics[0],text,prefix);
+        else clarify(topics,prefix);
+      }
+      return {accepted:true,view:view()};
+    },
     choose(id){
       if(typeof id!=='string')return {accepted:false,view:view()};
       const choice=choiceRows().find(row=>row.id===id);if(!choice)return {accepted:false,view:view()};
@@ -191,12 +276,13 @@ export function createDialogueSession(npcId,options={}){
         if(!isDialogueAction(choice.action))return {accepted:false,view:view()};
         return {accepted:true,action:copy(choice.action),view:view()};
       }
-      if(id==='guide'){stage='guide';guideTopic=guideReply=null;add('npc',npc.guidePrompt);}
-      else if(id==='topics'){stage=insight?'topic':'welcome';activeSection=guideTopic=guideReply=null;asked=[];add('npc',insight?npc.topicPrompt:npc.guidePrompt);}
+      if(id==='guide'){stage='guide';guideTopic=guideReply=null;guideSource=npcId;clarifying=[];add('npc',npc.guidePrompt);}
+      else if(id==='topics'){stage=insight?'topic':'welcome';activeSection=guideTopic=guideReply=null;guideSource=npcId;clarifying=[];asked=[];add('npc',insight?npc.topicPrompt:npc.guidePrompt);}
+      else if(id.startsWith('ask-topic:'))answerTopic(id.slice(10));
       else if(id.startsWith('section:'))answerSection(id.slice(8));
       else if(id.startsWith('followup:'))followup(id.slice(9));
-      else if(id.startsWith('guide-topic:')){guideTopic=id.slice(12);guideReply=null;stage='guide';add('npc',GUIDES[npcId].find(row=>row.id===guideTopic).answer);}
-      else if(id.startsWith('guide-reply:')){guideReply=id.slice(12);const row=GUIDES[npcId].find(row=>row.id===guideTopic).replies.find(row=>row.id===guideReply);add('npc',row.text);}
+      else if(id.startsWith('guide-topic:')){guideTopic=id.slice(12);guideReply=null;guideSource=npcId;clarifying=[];stage='guide';add('npc',GUIDES[npcId].find(row=>row.id===guideTopic).answer);}
+      else if(id.startsWith('guide-reply:')){guideReply=id.slice(12);const row=GUIDES[guideSource].find(row=>row.id===guideTopic).replies.find(row=>row.id===guideReply);add('npc',row.text);}
       return {accepted:true,view:view()};
     },
     setInsight(value){
@@ -209,6 +295,6 @@ export function createDialogueSession(npcId,options={}){
       if(stage==='welcome')stage='topic';add('npc',readyText());return view();
     },
     reset(){return start();},
-    back(){const prior=history.pop();if(!prior)return false;({stage,activeSection,guideTopic,guideReply,asked,messages}=prior);return true;},
+    back(){const prior=history.pop();if(!prior)return false;({stage,activeSection,guideTopic,guideReply,guideSource,clarifying,asked,messages}=prior);return true;},
   };
 }

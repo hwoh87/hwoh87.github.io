@@ -279,3 +279,73 @@
 }
 
 .world-modal-open .interface-shell .world-help { visibility:hidden; }
+
+/* Focused shell: three everyday actions, a real secondary tools disclosure, and one spatial tool group. */
+.interface-shell .shrine-header { height:56px; padding:0; border:0; border-radius:0; background:transparent; gap:24px; }
+.interface-shell .shrine-brand { color:#f4f1e7; }
+.interface-shell .brand-moon { stroke:#d7e2ca; }
+.interface-shell .brand-name { font-size:23px; }
+.interface-shell .brand-by { color:#bbcbb4; }
+.interface-shell .shrine-nav { position:relative; gap:3px; padding:4px; border:1px solid #d9ddd4; border-radius:7px; background:var(--ui-paper); }
+.interface-shell .interface-primary { display:flex; align-items:center; gap:2px; }
+.interface-shell .shrine-nav :is(.hub-nav-button,.sound-control,.interface-more) { min-height:44px; padding:9px 12px; font-size:13px; }
+.interface-shell .interface-menu-label { font-size:13px; }
+.interface-shell .interface-more { display:flex; align-items:center; justify-content:center; gap:6px; border:0; border-left:1px solid #dce2d6; border-radius:0 4px 4px 0; background:transparent; color:#5c7055; }
+.interface-shell .interface-more:hover,.interface-shell .interface-more[aria-expanded=true] { background:#e8eee1; color:#355039; }
+.interface-shell .interface-secondary { position:absolute; top:calc(100% + 9px); right:0; z-index:10; display:flex; flex-direction:column; gap:2px; width:196px; padding:6px; border:1px solid #cfd9c6; border-radius:7px; background:var(--ui-paper); box-shadow:0 8px 24px #07121b20; }
+.interface-shell .shrine-nav .interface-secondary :is(.hub-nav-button,.sound-control) { width:100%; min-height:46px; justify-content:flex-start; flex-direction:row; gap:10px; padding:10px; }
+.interface-shell .interface-secondary .interface-menu-label { font-size:13px; }
+.interface-shell .interface-hosts { top:92px; gap:4px; padding:3px 8px; border:0; background:#f7f6f2ed; }
+.interface-shell .interface-host { display:flex; align-items:baseline; gap:7px; min-width:73px; padding:10px; }
+.interface-shell .interface-host-hint { color:#7a8970; font-size:11px; line-height:1.5; font-weight:400; }
+.interface-shell .place-caption { top:163px; }
+.interface-shell .world-wayfinder { top:92px; }
+.interface-shell .wf-root:not(.wf-expanded) { width:56px; }
+.interface-shell .wf-root:not(.wf-expanded) .wf-toggle { flex-direction:column; justify-content:center; gap:0; padding:4px; min-height:54px; }
+.interface-shell .wf-root:not(.wf-expanded) :is(.wf-toggle-copy,.wf-chevron) { display:none; }
+.interface-shell .wf-root:not(.wf-expanded) .wf-toggle::after { content:'지도'; display:block; font-size:10px; line-height:1.5; color:#5c7253; }
+.interface-shell .wf-root:not(.wf-expanded) .wf-toggle-emblem { font-size:22px; }
+.interface-shell .experience-tools { display:none; right:24px; bottom:24px; grid-template-columns:repeat(2,52px); gap:2px; padding:4px; border:1px solid var(--ui-line); border-radius:7px; background:var(--ui-paper); }
+.is-exploring .interface-shell .experience-tools { display:grid; }
+.interface-shell .experience-tools :is(button,.return-gate,.traveler-greet) { position:static; display:flex; width:52px; min-width:52px; height:52px; min-height:52px; padding:5px 1px; border:0; border-radius:4px; background:transparent; }
+.interface-shell .experience-tools .interface-tool-label { font-size:10px; }
+.interface-shell .experience-tools :is(button,.return-gate,.traveler-greet):hover { background:#e7edde; }
+.interface-shell .world-place { min-height:44px; padding:9px 12px; border:0; border-radius:0; background:transparent; box-shadow:none; color:#45613b; font-size:11px; transition:opacity .16s ease; }
+.interface-shell .world-place::before { content:''; position:absolute; inset:7px 3px; z-index:-1; border:1px solid #d1dcc7; border-radius:4px; background:#f7f6f2e8; pointer-events:none; }
+.interface-shell .world-place :is(small,span) { display:none; }
+.interface-shell .world-places .world-place.is-nearby { border:0; background:transparent; }
+.interface-shell .world-places .world-place.is-nearby::before { background:#edf3e6; border-color:#93aa83; }
+.interface-shell:not(.interface-overview) .world-place:not(.is-nearby):not(:focus-visible) { opacity:0; pointer-events:none; }
+.interface-shell .world-place:hover { background:transparent; }
+.interface-shell .world-place:hover::before { background:#e3edd9; border-color:#8ea77e; }
+.interface-shell.interface-overview .world-place { opacity:1; pointer-events:auto; font-size:11px; }
+.world-modal-open .interface-shell :is(.shrine-header,.interface-hosts,.world-places,.npc-names,.traveler-name,.visitor-name,.hub-world-rituals,.ritual-dock,.experience-tools) { visibility:hidden; }
+@media (max-width:1100px) and (min-width:761px) {
+  .interface-shell .shrine-header { padding:0; }
+  .interface-shell .shrine-nav :is(.hub-nav-button,.sound-control,.interface-more) { padding:9px 10px; }
+  .interface-shell .interface-menu-label { font-size:12px; }
+}
+@media (max-width:760px) {
+  .interface-shell .shrine-header { height:94px; padding:0; grid-template-rows:28px 56px; gap:6px; border:0; background:transparent; }
+  .interface-shell .brand-name { font-size:20px; }
+  .interface-shell .shrine-brand { padding-left:4px; }
+  .interface-shell .shrine-nav { display:flex; justify-content:space-between; width:100%; height:56px; padding:3px; margin:0; gap:2px; }
+  .interface-shell .interface-primary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px; flex:1; min-width:0; }
+  .interface-shell .shrine-nav :is(.hub-nav-button,.sound-control,.interface-more) { flex-direction:column; min-width:44px; width:100%; min-height:48px; height:48px; padding:3px 1px; gap:2px; }
+  .interface-shell .interface-more { flex:0 0 54px; width:54px; padding-left:3px; padding-right:3px; }
+  .interface-shell .interface-menu-label { font-size:11px; line-height:1.5; }
+  .interface-shell .shrine-nav .icon { width:18px; height:18px; }
+  .interface-shell .shrine-nav .interface-secondary :is(.hub-nav-button,.sound-control) { flex-direction:row; height:46px; min-height:46px; justify-content:flex-start; padding:10px; }
+  .interface-shell .interface-secondary .interface-menu-label { font-size:13px; }
+  .interface-shell .interface-hosts { top:118px; width:calc(100% - 82px); }
+  .interface-shell .interface-host { display:flex; justify-content:center; min-width:44px; padding:8px 2px; }
+  .interface-shell .interface-host-hint { display:none; }
+  .interface-shell .world-wayfinder { top:118px; }
+  .interface-shell .place-caption { top:183px; }
+  .interface-shell .world-help { top:118px; }
+  .interface-shell .experience-tools { right:12px; bottom:calc(max(12px,env(safe-area-inset-bottom)) + 134px); padding:3px; grid-template-columns:repeat(2,48px); gap:2px; }
+  .is-exploring .interface-shell .experience-tools { display:grid!important; }
+  .interface-shell .experience-tools :is(button,.return-gate,.traveler-greet) { position:static; width:48px; min-width:48px; min-height:50px; height:50px; }
+  .interface-shell .experience-tools .interface-tool-label { font-size:9px; }
+  .interface-shell.interface-overview .world-place { font-size:10px; }
+}
