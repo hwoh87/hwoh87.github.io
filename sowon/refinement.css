@@ -32,7 +32,7 @@
 .interface-shell .hub-dock .dock-action small { font-size:11px; color:#5e6b5c; }
 .interface-shell .hub-world-rituals { border-radius:9px; }
 .interface-shell .hub-world-rituals button { color:#415b49; font-size:12px; }
-.interface-shell .traveler-name { min-width:78px; border-radius:9px; padding:7px 11px; background:#faf9f5f5; border:1px solid #d5dfd0; box-shadow:0 3px 14px #071b1933; text-shadow:none; color:#31483c; transform:translate(-50%,-115%); text-align:center; }
+.interface-shell .traveler-name { display:flex; flex-direction:column; align-items:center; gap:0; min-width:78px; border-radius:9px; padding:7px 11px; background:#faf9f5f5; border:1px solid #d5dfd0; box-shadow:0 3px 14px #071b1933; text-shadow:none; color:#31483c; transform:translate(-50%,-115%); text-align:center; }
 .interface-shell .traveler-name .traveler-day-pillar { display:block; width:auto; height:auto; margin:0; padding:0; border:0; border-radius:0; background:none; color:#3c5f4c; font-size:13px; font-weight:700; line-height:1.5; letter-spacing:-.02em; }
 .interface-shell .traveler-name .traveler-nickname { display:block; margin-top:2px; color:#59695c; font-size:11px; line-height:1.5; }
 .interface-shell .traveler-name:not(.has-day-pillar) .traveler-day-pillar { display:none; }
@@ -159,3 +159,14 @@ dialog.npc-dialog .npc-message--user .npc-message-text { font-size:15px; }
 @media(prefers-reduced-motion:reduce) {
   .sanctuary-destinations *, .hub-dialog .hub-feature { transition:none; }
 }
+
+/* Keep a useful reading surface while a cold network loads the guide module. */
+dialog.xp-dialog.xp-loading-dialog { width:min(620px,calc(100vw - 32px)); min-height:290px; padding:0; border:1px solid #dce1d8; border-radius:16px; background:var(--shrine-paper); color:var(--shrine-ink); }
+.xp-loading-content { display:flex; align-items:center; flex-direction:column; gap:13px; padding:38px 24px; text-align:center; font:15px/1.8 var(--sans,system-ui,sans-serif); }
+.xp-loading-content p { margin:0; color:#62745e; font-size:12px; }
+.xp-loading-content h2 { margin:0; color:#2a4332; font-size:24px; font-weight:600; line-height:1.5; }
+.xp-loading-content>span:not(.xp-loading-mark) { color:#5d6f54; font-size:14px; }
+.xp-loading-content button { min-height:44px; margin-top:8px; padding:9px 18px; border:1px solid #bacbb2; border-radius:8px; background:#eef2e8; color:#405b39; font:inherit; cursor:pointer; }
+.xp-loading-mark { display:block; width:28px; height:28px; border:2px solid #d9e1d2; border-top-color:#496c48; border-radius:50%; animation:shrine-loading-spin 1s linear infinite; }
+@keyframes shrine-loading-spin { to { transform:rotate(360deg); } }
+@media(prefers-reduced-motion:reduce) { .xp-loading-mark { animation:none; } }
