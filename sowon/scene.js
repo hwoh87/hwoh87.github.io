@@ -1,12 +1,14 @@
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
 import { createWorld } from './world.js?v=20261031-life1';
-import { createAvatar } from './avatar.js?v=20261031-life1';
+import { createAvatar } from './avatar.js?v=20261031-social1';
 import { createLocomotion, isWalkable } from './locomotion.js?v=20261031-life1';
 import { readJourney } from './hub-core.js';
 import { readSettings, normalizeSettings, effectiveQuality, nearestInteraction, pickedInteraction, interactionDistance } from './experience-core.js';
 import { createWayfinder } from './wayfinder.js?v=20261031-life1';
 import { HALLS, getFeature } from './hub-core.js';
+import { getOwnProfile } from './profile.js?v=20261031-social1';
+import { createVisitors } from './visitors.js?v=20261031-social1';
 
 const host = document.getElementById('worldViewport');
 const body = document.body;
@@ -121,13 +123,45 @@ function setup() {
     onMove: source => { enter(); if (activeJourney && source !== 'path') { activeJourney = null; status('마음이 가는 곳으로 천천히 걸어보세요.', 2500); } },
     onArrival: () => {},
     onPick: raycaster => {
-      const item=pickedInteraction(raycaster.intersectObjects(world.group.children,true),world.interactions||[]);
+      const hits=raycaster.intersectObjects([...world.group.children,...visitors.group.children],true);
+      const first=hits.find(hit=>hit.object?.isMesh&&Number.isFinite(hit.distance));
+      for(let node=first?.object;node;node=node.parent)if(node.userData.visitorId){selectVisitor(node.userData.visitorId);return true;}
+      const item=pickedInteraction(hits,world.interactions||[]);
       if(!item)return false;
       approachInteraction(item);return true;
     },
   });
 
   const name = document.getElementById('travelerName');
+  function selectVisitor(visitorId){
+    activeJourney=null;movement.cancel();status('',0);
+    document.dispatchEvent(new CustomEvent('sowon:social-open',{detail:{visitorId}}));
+  }
+  const visitors=createVisitors({scene,world,camera,host:document.getElementById('visitorNames'),onSelect:selectVisitor});
+  function applyProfile(){
+    const profile=getOwnProfile();
+    avatar.setGender?.(profile?.solar.g||null);
+    const badge=document.createElement('span');badge.textContent='나';
+    name.replaceChildren(badge,document.createTextNode(profile?.nickname||'달빛 나그네'));
+  }
+  applyProfile();
+  listen(document,'sowon:profile-change',applyProfile);
+  listen(document,'sowon:social-presence',event=>visitors.sync(event.detail?.visitors,event.detail?.selfId));
+  listen(document,'sowon:capture-social',event=>{
+    event.detail.snapshot={x:avatar.group.position.x,z:avatar.group.position.z,heading:avatar.group.rotation.y,outfit:preferences.outfit};
+  });
+  listen(document,'sowon:social-walk',event=>{
+    const id=event.detail?.visitorId,point=visitors.getPoint(id);
+    if(!point){status('그 나그네가 지금은 자리를 옮겼어요. 함께 걷기에서 다시 확인해 주세요.',3500);return;}
+    if(document.querySelector('dialog[open]'))return;
+    enter();movement.setEnabled(true);activeJourney='visitor:'+id;setCameraMode('walk');
+    const dx=avatar.group.position.x-point.x,dz=avatar.group.position.z-point.z,length=Math.hypot(dx,dz)||1;
+    const approach={x:point.x+dx/length*1.8,z:point.z+dz/length*1.8};
+    const target=isWalkable(approach,world)?approach:point;
+    status('나그네에게 다가가고 있어요.',0);
+    const accepted=movement.goTo(target,()=>{if(activeJourney==='visitor:'+id)selectVisitor(id);});
+    if(!accepted){activeJourney=null;status('가까운 바닥을 눌러 나그네에게 다가가 주세요.',3000);}
+  });
   const projected = new THREE.Vector3();
   const placeButtons = Array.from(document.querySelectorAll('[data-world-place]'));
   const placePosition = new THREE.Vector3();
@@ -274,6 +308,7 @@ function setup() {
     movement.setEnabled(!modalOpen);
     if (modalOpen) {
       name.hidden = true;
+      visitors.hideLabels();
       nearCard.hidden=true;caption.hidden=true;npcButtons.forEach(({button})=>{button.hidden=true;});
       placeButtons.forEach(button => { button.hidden = true; });
       // Keep checking modal visibility without drawing the 3D world while reading.
@@ -298,6 +333,7 @@ function setup() {
     world.update(reducedMotion.matches ? 0 : time / 1000, delta);
     orbit.update();
     updateHud(time,modalOpen);
+    visitors.update(delta,{exploring,modalOpen,position:avatar.group.position});
     projected.copy(avatar.group.position).add(nameOffset).project(camera);
     const visible = projected.z < 1 && Math.abs(projected.x) < .95 && Math.abs(projected.y) < .95;
     name.hidden = !visible || modalOpen;
@@ -332,6 +368,8 @@ function setup() {
   const actionLabels = { wish: '소원 등불이 있는 신당', breath: '바람이 머무는 명상터', blessing: '마음을 전하는 소원나무', myeongri: '토정이 기다리는 명리전', inyeon: '설월이 기다리는 인연정', stars: '태어난 하늘을 펼치는 별마루', readers: '루나와 술사들이 있는 술사각', archive: '이야기가 쌓이는 서고' };
   function walkToAction(action) {
     if (body.classList.contains('world-failed') || !world.destinations[action] || document.querySelector('dialog[open]')) return;
+    const personalHost=(world.interactions||[]).find(item=>item.type==='npc'&&item.hall===action);
+    if(getOwnProfile()&&personalHost){approachInteraction(personalHost);return;}
     enter();
     // A map can close and request travel before the next animation frame has
     // resumed movement. Re-enable here instead of treating that pause as no path.
@@ -392,7 +430,7 @@ function setup() {
     if (event.persisted) return;
     cleanups.forEach(cleanup => cleanup());
     resizeObserver.disconnect();
-    wayfinder.dispose();npcButtons.forEach(({button})=>button.remove());movement.dispose(); orbit.dispose(); avatar.dispose(); world.dispose(); renderer.dispose();
+    visitors.dispose();wayfinder.dispose();npcButtons.forEach(({button})=>button.remove());movement.dispose(); orbit.dispose(); avatar.dispose(); world.dispose(); renderer.dispose();
   });
   listen(window, 'pageshow', event => {
     if (event.persisted) resume();

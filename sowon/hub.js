@@ -140,7 +140,7 @@ async function render(view) {
   if(view.type==='view') {view.id==='map'?renderMap():renderAll();return;}
   const item=getFeature(view.id);
   if(item.kind==='invite') {
-    content.innerHTML='<section class="hub-explanation"><span class="hub-large-symbol">♡</span><h3>서로의 정보를 각자의 손으로</h3><p>삼라 앱에서 인연 초대를 만들면, 상대방은 받은 웹 초대에서 자신의 생년월일을 직접 입력할 수 있어요. 공개 동의를 거쳐 관계 요약을 함께 확인해요.</p><p>초대를 만들고 관리하는 기능은 현재 삼라 앱에서 제공해요. 지금 두 사람의 정보를 알고 있다면 무료 궁합을 바로 볼 수 있어요.</p><button class="hub-primary" type="button" data-hub-feature="gunghap">무료 궁합 보기 ↗</button></section>';
+    content.innerHTML='<section class="hub-explanation"><span class="hub-large-symbol">♡</span><h3>마당에서 만나, 함께 읽는 인연</h3><p>각자 내 출생정보를 준비한 뒤 함께 걷기에 참여해요. 가까이 있는 나그네에게 연인·친구·가족·동료 궁합을 요청할 수 있어요.</p><p>상대가 승인하면 같은 결과를 두 사람만 볼 수 있어요. 생년월일 원문은 서로에게 공개하지 않으며, 어느 쪽이든 공유를 철회할 수 있어요.</p><button class="hub-primary" type="button" data-hub-social>함께 있는 나그네 만나기 ↗</button><button class="hub-primary" type="button" data-hub-feature="gunghap">정보를 직접 입력해 궁합 보기 ↗</button></section>';
     return;
   }
   const loading=el('p','hub-loading','잠시만요. 이야기를 펼치고 있어요.');loading.setAttribute('role','status');content.append(loading);
@@ -148,7 +148,7 @@ async function render(view) {
   try {
     let result;
     if(item.kind==='reading') {
-      const module=await import('./readings.js'); if(version!==generation)return;
+      const module=await import('./readings.js?v=20261031-social1'); if(version!==generation)return;
       result=await module.mountReading(mount,item.value,{navigate,signal:viewAbort.signal,...readingOptions.get(item.value)});
     } else {
       const module=await import('./collection.js');if(version!==generation)return;
@@ -224,6 +224,7 @@ function walk(id) {
   if(dialog.open)close(begin);else begin();
 }
 document.addEventListener('click',event=>{
+  if(event.target.closest?.('[data-hub-social]')){event.preventDefault();close(()=>document.dispatchEvent(new CustomEvent('sowon:social-open')));return;}
   const button=event.target.closest?.('[data-hub-view],[data-hub-feature],[data-hub-hall],[data-hub-walk],[data-hub-ritual]');
   if(!button)return;
   event.preventDefault();

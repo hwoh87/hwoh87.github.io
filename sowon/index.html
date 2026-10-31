@@ -36,11 +36,16 @@
   <link rel="stylesheet" href="wayfinder.css?v=20261031-life1">
   <script src="core.js" defer></script>
   <script src="app.js?v=20261031-life1" defer></script>
-  <script type="module" src="hub.js?v=20261031-life1"></script>
-  <script type="module" src="experience.js?v=20261031-life1"></script>
+  <script type="module" src="hub.js?v=20261031-social1"></script>
+  <script type="module" src="experience.js?v=20261031-social1"></script>
+  <script type="module" src="profile.js?v=20261031-social1"></script>
+  <script type="module" src="social.js?v=20261031-social1"></script>
+  <link rel="stylesheet" href="profile.css?v=20261031-social1">
+  <link rel="stylesheet" href="social.css?v=20261031-social1">
+  <link rel="stylesheet" href="visitors.css?v=20261031-social1">
   <script src="/assets/track.js" defer></script>
   <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
-  <script type="module">import('./scene.js?v=20261031-life1').catch(function(){document.body.classList.add('world-failed');document.getElementById('worldLoading').hidden=true;document.getElementById('worldFallback').hidden=false;document.getElementById('enterWorld').disabled=false;document.getElementById('enterWorld').setAttribute('aria-busy','false');document.getElementById('enterWorldLabel').textContent='소원 등불 밝히기';document.getElementById('entranceNote').textContent='가입 없이 무료로 · 나만 볼 수 있는 소원';});</script>
+  <script type="module">import('./scene.js?v=20261031-social1').catch(function(){document.body.classList.add('world-failed');document.getElementById('worldLoading').hidden=true;document.getElementById('worldFallback').hidden=false;document.getElementById('enterWorld').disabled=false;document.getElementById('enterWorld').setAttribute('aria-busy','false');document.getElementById('enterWorldLabel').textContent='소원 등불 밝히기';document.getElementById('entranceNote').textContent='가입 없이 무료로 · 나만 볼 수 있는 소원';});</script>
 </head>
 <body>
   <a class="skip-link" href="#entrance">소원당으로 바로 가기</a>
@@ -89,6 +94,8 @@
         <button class="hub-nav-button" type="button" data-hub-view="map" aria-label="신당 지도"><svg class="icon" aria-hidden="true"><use href="#i-compass"/></svg><span class="hub-nav-text">공간 지도</span></button>
         <button class="hub-nav-button" type="button" data-hub-view="all" aria-label="삼라 전체 기능"><svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg><span class="hub-nav-text">전체 기능</span></button>
         <button class="hub-nav-button hub-library" type="button" data-hub-feature="library"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg><span class="hub-nav-text">내 서재</span></button>
+        <button class="hub-nav-button" type="button" data-open-profile aria-label="내 캐릭터와 출생 정보"><svg class="icon" aria-hidden="true"><use href="#i-outfit"/></svg><span class="hub-nav-text">내 정보</span></button>
+        <button class="hub-nav-button" type="button" data-open-social aria-label="함께 있는 나그네와 궁합"><svg class="icon" aria-hidden="true"><use href="#i-heart"/></svg><span class="hub-nav-text">함께 걷기</span></button>
       </nav>
     </header>
 
@@ -134,6 +141,7 @@
     <p class="my-light-note"><span class="tiny-flame" aria-hidden="true"></span>내가 밝힌 등불 <b id="lanternCount">0</b><span class="note-separator">·</span><span id="visitCount">오늘의 첫 걸음</span></p>
     <div class="world-help" id="worldHelp"><span class="help-desktop">바닥 클릭으로 걷기<span>·</span>W A S D 이동<span>·</span>드래그로 둘러보기<span>·</span>휠로 확대</span><span class="help-mobile">바닥을 눌러 걷기 · 드래그로 둘러보기 · 두 손가락으로 확대</span></div>
     <div class="traveler-name" id="travelerName" aria-hidden="true"><span>나</span>달빛 나그네</div>
+    <div id="visitorNames" aria-label="함께 걷는 나그네"></div>
     <div class="world-places" aria-label="신당 안의 장소"><button class="world-place" type="button" data-world-place="wish" hidden>소원 등불 <span>↗</span></button><button class="world-place" type="button" data-world-place="breath" hidden>명상터 <span>↗</span></button><button class="world-place" type="button" data-world-place="blessing" hidden>소원나무 <span>↗</span></button><button class="world-place" type="button" data-world-place="myeongri" hidden>명리전 <span>↗</span><small>토정의 사주 이야기</small></button><button class="world-place" type="button" data-world-place="inyeon" hidden>인연정 <span>↗</span><small>설월과 인연을 읽어요</small></button><button class="world-place" type="button" data-world-place="stars" hidden>별마루 <span>↗</span><small>태어난 순간의 하늘</small></button><button class="world-place" type="button" data-world-place="readers" hidden>술사각 <span>↗</span><small>루나와 술사들을 만나요</small></button><button class="world-place" type="button" data-world-place="archive" hidden>서고 <span>↗</span><small>처음부터 천천히 배워요</small></button></div>
     <div class="travel-status" id="travelStatus" role="status" hidden></div>
     <div class="move-controls" id="moveControls" aria-label="캐릭터 이동 조작">

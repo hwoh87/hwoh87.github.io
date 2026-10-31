@@ -1,5 +1,6 @@
 import { ENGINE_URL } from '../calc/panels/manifest.js';
 import { mountBirth, mountTimeCompare, mountJourney } from '../calc/panels/helpers.js';
+import { profileSearch } from './profile-core.js';
 
 const modules = {
   saju: () => import('../calc/panels/saju.js'),
@@ -14,10 +15,10 @@ let enginePromise;
 
 /** Tab-visit memory only: never persists a profile or adopts a shared person's data. */
 export function createOwnPersonMemory() {
-  let person = null;
+  let person = null, revision = 0;
   return {
-    remember(kind, input, { userEdited = false, ownsBirth = false } = {}) {
-      if (!userEdited || !ownsBirth || !Object.prototype.hasOwnProperty.call(paths, kind)) return false;
+    remember(kind, input, { userEdited = false, ownsBirth = false, expectedRevision = revision } = {}) {
+      if (expectedRevision !== revision || !userEdited || !ownsBirth || !Object.prototype.hasOwnProperty.call(paths, kind)) return false;
       const candidate = kind === 'gunghap' ? input?.a : input;
       if (!candidate) return false;
       const { y, mo, d, g } = candidate;
@@ -41,17 +42,31 @@ export function createOwnPersonMemory() {
       return '?' + search.toString();
     },
     get() { return person && { ...person }; },
+    revision() { return revision; },
+    clear() { person = null; revision++; },
   };
 }
 
 const ownPersonMemory = createOwnPersonMemory();
+export function clearOwnPersonMemory() { ownPersonMemory.clear(); }
 
 function explicitFormOptions(options) {
   return Object.prototype.hasOwnProperty.call(options, 'search') || Object.prototype.hasOwnProperty.call(options, 'url');
 }
 
 export function readingFormOptions(options = {}, kind, memory = ownPersonMemory) {
-  return explicitFormOptions(options) ? options : { ...options, search: memory.searchFor(kind) };
+  return explicitFormOptions(options) ? options : { ...options, search: profileSearch(kind) || memory.searchFor(kind) };
+}
+
+/** Canonical helper birth carry stays inside its mount, with no hidden save. */
+export function createReadingStorage(backing) {
+  const personal = new Map();
+  return {
+    getItem(key) { if (key === 'samra.birth.v1') return personal.get(key) ?? null; try { return backing?.getItem(key) ?? null; } catch (_) { return null; } },
+    setItem(key, value) { if (key === 'samra.birth.v1') personal.set(key, String(value)); else { try { backing?.setItem(key, value); } catch (_) {} } },
+    removeItem(key) { if (key === 'samra.birth.v1') personal.delete(key); else { try { backing?.removeItem(key); } catch (_) {} } },
+    clearPersonal() { personal.clear(); },
+  };
 }
 
 function loadScript(url, ready) {
@@ -181,11 +196,9 @@ function createEnvironment(root, kind, options) {
       return typeof value === 'function' ? value.bind(realDocument) : value;
     },
   });
-  const storage = {
-    getItem: key => realWindow.sessionStorage.getItem(key),
-    setItem: (key, value) => realWindow.sessionStorage.setItem(key, value),
-    removeItem: key => realWindow.sessionStorage.removeItem(key),
-  };
+  let backingStorage;
+  try { backingStorage = realWindow.sessionStorage; } catch (_) {}
+  const storage = createReadingStorage(backingStorage);
   class ScopedURL extends URL {
     static createObjectURL(blob) { const url = URL.createObjectURL(blob); objectUrls.add(url); return url; }
     static revokeObjectURL(url) { objectUrls.delete(url); URL.revokeObjectURL(url); }
@@ -196,6 +209,7 @@ function createEnvironment(root, kind, options) {
       if (key === 'document') return scopedDocument;
       if (key === 'location') return virtualLocation;
       if (key === 'history') return virtualHistory;
+      if (key === 'sessionStorage') return storage;
       if (key === 'setTimeout') return timeout;
       if (key === 'clearTimeout') return clearTimer;
       if (key === 'requestAnimationFrame') return animationFrame;
@@ -225,6 +239,7 @@ function createEnvironment(root, kind, options) {
       observers.forEach(observer => observer.disconnect()); observers.clear();
       listeners.splice(0).forEach(remove => remove());
       objectUrls.forEach(url => URL.revokeObjectURL(url)); objectUrls.clear();
+      storage.clearPersonal();
       local.clear();
     },
   };
@@ -254,6 +269,7 @@ export async function mountReading(container, kind, options = {}) {
   let removeLinks = () => {};
   let removePersonTracking = () => {};
   let captureOwnPerson = () => {};
+  const personRevision = ownPersonMemory.revision();
   const abort = () => dispose();
   function dispose() {
     if (disposed) return;
@@ -316,7 +332,7 @@ export async function mountReading(container, kind, options = {}) {
       if (disposed || !ownsBirth || !userEdited || !window['engine-core']) return;
       // A missing Ziwei time is an explicit unresolved state, not midnight.
       if (kind === 'jami' && root.getElementById('h')?.value === '') return;
-      try { ownPersonMemory.remember(kind, runtime.readForm(), { userEdited, ownsBirth }); }
+      try { ownPersonMemory.remember(kind, runtime.readForm(), { userEdited, ownsBirth, expectedRevision: personRevision }); }
       catch (_) { /* An incomplete or unconverted date never replaces the last confirmed person. */ }
     };
     const trackPersonInput = event => {

@@ -15,7 +15,7 @@ function ensureStyles(document, root) {
  * Prepared, two-choice-stage guidance. Parent owns modal presentation/proximity.
  * Returns a cleanup function; cleanup.dispose is an alias for standard mounts.
  */
-export function mountEncounter(container, npcId, { onFeature, onHall, onClose } = {}) {
+export function mountEncounter(container, npcId, { onFeature, onHall, onClose, onPersonal } = {}) {
   if (!container || typeof container.replaceChildren !== 'function') throw new TypeError('술사와 만날 공간이 없어요.');
   const session = createEncounterSession(npcId);
   mounts.get(container)?.();
@@ -72,6 +72,11 @@ export function mountEncounter(container, npcId, { onFeature, onHall, onClose } 
     const identity = element('div', 'encounter-identity');
     identity.append(element('span', 'encounter-eyebrow', '소원당 길잡이'), element('h3', 'encounter-name', npc.name), element('p', 'encounter-role', npc.title));
     header.append(portrait, identity); wrapper.appendChild(header);
+    if(typeof onPersonal==='function'){
+      const personal=element('div','encounter-personal-cta');
+      personal.append(element('p','','성별과 생년월일시를 한 번 입력하면, 술사를 만날 때 나의 무료 해석이 바로 펼쳐져요.'),button('내 정보로 해석 받기','',onPersonal));
+      wrapper.append(personal);
+    }
 
     const progress = element('ol', 'encounter-progress');
     progress.setAttribute('aria-label', '대화 순서');

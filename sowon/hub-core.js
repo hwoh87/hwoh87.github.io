@@ -13,7 +13,7 @@ export const FEATURES = Object.freeze({
   saju: { title: '나의 사주', text: '원국 · 오행 · 용신 · 대운과 세운', kind: 'reading', value: 'saju', hall: 'myeongri', badge: '무료 계산' },
   time: { title: '태어난 시간 비교', text: '시간이 모호할 때, 분 단위로 비교', kind: 'reading', value: 'saju', anchor: 'timeCompare', hall: 'myeongri', badge: '무료 계산' },
   gunghap: { title: '우리의 궁합', text: '두 사람의 관계를 여러 방향에서', kind: 'reading', value: 'gunghap', hall: 'inyeon', badge: '무료 계산' },
-  relations: { title: '인연 초대 안내', text: '앱에서 보낸 초대로 각자 정보를 입력해요', kind: 'invite', hall: 'inyeon', badge: '앱에서 초대' },
+  relations: { title: '나그네와 함께 보는 궁합', text: '가까이 있는 사람에게 요청하고 승인 후 함께 읽어요', kind: 'invite', hall: 'inyeon', badge: '서로 승인' },
   jami: { title: '자미두수', text: '열두 궁 · 주성 · 사화 · 대한', kind: 'reading', value: 'jami', hall: 'stars', badge: '무료 계산' },
   star: { title: '별자리 출생 차트', text: '태양 · 달 · 상승궁 · 행성과 하우스', kind: 'reading', value: 'star', hall: 'stars', badge: '무료 계산' },
   readers: { title: '열두 술사 만나기', text: '나에게 맞는 목소리를 찾아보세요', kind: 'collection', value: 'readers', hall: 'readers', badge: '술사 소개' },

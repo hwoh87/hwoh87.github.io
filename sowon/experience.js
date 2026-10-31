@@ -1,4 +1,5 @@
 import { readSettings, writeSettings, normalizeSettings } from './experience-core.js';
+import { getOwnProfile } from './profile.js?v=20261031-social1';
 
 let storage;
 try { storage = localStorage; } catch (_) {}
@@ -34,7 +35,7 @@ function openSettings() {
   renderSettings(); settingsDialog.showModal(); body.classList.add('dialog-open');
 }
 function closeEncounter() { if (encounterDialog.open) encounterDialog.close(); }
-async function openEncounter(npc) {
+async function openEncounter(npc, {guide=false}={}) {
   if (!['tojeong','seol','luna'].includes(npc) || document.querySelector('dialog[open]')) return;
   const version = ++encounterVersion;
   encounterOpener = document.activeElement;
@@ -42,10 +43,23 @@ async function openEncounter(npc) {
   encounterDialog.textContent = '술사가 당신을 맞이하고 있어요…';
   encounterDialog.showModal(); body.classList.add('dialog-open');
   try {
-    const module = await import('./encounters.js?v=20261031-life1');
+    if(getOwnProfile()&&!guide){
+      const module=await import('./personal-encounter.js?v=20261031-social1');
+      if(version!==encounterVersion||!encounterDialog.open)return;
+      const result=await module.mountPersonalEncounter(encounterDialog,npc,{
+        onClose:closeEncounter,
+        onGuide:()=>{closeEncounter();queueMicrotask(()=>openEncounter(npc,{guide:true}));},
+        onProfile:()=>{closeEncounter();document.dispatchEvent(new CustomEvent('sowon:profile-open',{detail:{returnToNpc:npc}}));},
+        onSocial:()=>{closeEncounter();document.dispatchEvent(new CustomEvent('sowon:social-open'));},
+      });
+      if(version!==encounterVersion||!encounterDialog.open){result?.();return;}
+      encounterCleanup=result;return;
+    }
+    const module = await import('./encounters.js?v=20261031-social1');
     if (version !== encounterVersion || !encounterDialog.open) return;
     encounterCleanup = module.mountEncounter(encounterDialog,npc,{
       onClose: closeEncounter,
+      onPersonal:()=>{closeEncounter();document.dispatchEvent(new CustomEvent('sowon:profile-open',{detail:{returnToNpc:npc}}));},
       onFeature: id => { closeEncounter(); document.dispatchEvent(new CustomEvent('sowon:feature',{detail:{id}})); },
       onHall: id => { closeEncounter(); document.dispatchEvent(new CustomEvent('sowon:hall',{detail:{id}})); },
     });
@@ -76,8 +90,10 @@ settingsDialog.addEventListener('close',()=>{
 encounterDialog.addEventListener('close',()=>{
   if(encounterDialog.open)return;
   encounterVersion++;encounterCleanup?.();encounterCleanup=null;encounterDialog.replaceChildren();
+  encounterDialog.classList.remove('xp-personal-dialog');
   if(!document.querySelector('dialog[open]')){body.classList.remove('dialog-open');if(encounterOpener?.isConnected)encounterOpener.focus({preventScroll:true});}
 });
 document.addEventListener('sowon:encounter',event=>openEncounter(event.detail?.npc));
+document.addEventListener('sowon:profile-change',()=>{if(encounterDialog.open&&encounterDialog.classList.contains('xp-personal-dialog'))closeEncounter();});
 document.addEventListener('sowon:preferences-request',announceSettings);
 announceSettings();

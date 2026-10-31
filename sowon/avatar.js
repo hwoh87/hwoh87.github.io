@@ -7,6 +7,7 @@ export function createAvatar() {
   group.name = 'SamraTraveller';
   let disposed = false;
   let appearance = 'sage';
+  let gender = null;
   group.userData.appearance = appearance;
   const figure = new THREE.Group();
   group.add(figure);
@@ -62,6 +63,8 @@ export function createAvatar() {
 
   const waist = mesh(new THREE.CylinderGeometry(0.205, 0.245, 0.19, 24), materials.sage, figure, [0, 0.535, -0.012]);
   waist.scale.z = 0.78;
+  const skirt=mesh(new THREE.CylinderGeometry(.215,.37,.44,24),materials.sage,figure,[0,.43,0]);
+  skirt.scale.z=.86;skirt.visible=false;
   const leftLeg = new THREE.Group();
   const rightLeg = new THREE.Group();
   [leftLeg, rightLeg].forEach((leg, index) => {
@@ -99,12 +102,12 @@ export function createAvatar() {
     fringe.rotation.z = side * 0.24;
     sphere(0.073, materials.hair, head, [side * 0.237, 0.03, 0.08], [0.53, 1.5, 0.60]);
   });
-  sphere(0.12, materials.hair, head, [0, 0.282, -0.09], [1, 0.86, 0.97]);
+  const hairBun=sphere(0.12, materials.hair, head, [0, 0.282, -0.09], [1, 0.86, 0.97]);
   const bunTie = mesh(new THREE.TorusGeometry(0.092, 0.012, 8, 24), materials.sage, head, [0, 0.26, -0.09]);
   bunTie.rotation.x = Math.PI / 2;
   const hairpin = capsule(0.012, 0.29, materials.ribbon, head, [0, 0.29, -0.098]);
   hairpin.rotation.z = Math.PI / 2 + 0.08;
-  sphere(0.031, materials.sage, head, [0.17, 0.275, -0.098], [1, 0.8, 1]);
+  const hairpinEnd=sphere(0.031, materials.sage, head, [0.17, 0.275, -0.098], [1, 0.8, 1]);
 
   const eyes = [];
   [-1, 1].forEach(side => {
@@ -151,6 +154,13 @@ export function createAvatar() {
     appearance = palette.id;
     group.userData.appearance = appearance;
     return true;
+  }
+  function setGender(value){
+    if(disposed||!['M','F',null].includes(value))return false;
+    gender=value;skirt.visible=value==='F';
+    hairBun.scale.set(1,value==='M'?.63:.86,.97);
+    hairpin.visible=value!=='M';hairpinEnd.visible=value!=='M';bunTie.visible=value!=='M';
+    group.userData.gender=gender;return true;
   }
 
   function update(delta, moving = false) {
@@ -216,5 +226,5 @@ export function createAvatar() {
     group.removeFromParent();
   }
 
-  return { group, update, setGesture, setAppearance, getAppearance: () => appearance, dispose };
+  return { group, update, setGesture, setAppearance, setGender, getGender:()=>gender, getAppearance: () => appearance, dispose };
 }
