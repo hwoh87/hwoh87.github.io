@@ -343,7 +343,10 @@ const genders = { me: "F", pt: "F" };
 function err(msg) {
   const el = $("#err");
   el.textContent = msg || ""; el.style.display = msg ? "block" : "none";
-  if (msg) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  if (msg) {
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    el.scrollIntoView({ behavior: reduce ? "instant" : "smooth", block: "center" });
+  }
 }
 
 function readPerson(prefix, label, nameRequired) {
