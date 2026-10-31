@@ -63,7 +63,7 @@ async function openEncounter(npc, {reading=false, kind}={}) {
         onGuide: () => { closeEncounter(); queueMicrotask(() => openEncounter(npc)); },
       });
     } else {
-      const module = await import('./npc-dialog.js?v=20261101-conversation2');
+      const module = await import('./npc-dialog.js?v=20261101-flashlite1');
       if (version !== encounterVersion || !encounterDialog.open) return;
       result = module.mountNpcDialogue(encounterDialog,npc,{
         ...shared, profile, session:dialogueSessions.get(npc),

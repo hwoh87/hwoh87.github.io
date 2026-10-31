@@ -3,6 +3,7 @@ import { getFeature } from './hub-core.js';
 
 export const MAX_DIALOGUE_MESSAGES = 20;
 export const MAX_DIALOGUE_QUESTION_LENGTH = 160;
+export const MAX_DIALOGUE_ANSWER_LENGTH = 1600;
 const MAX_BACK_STEPS = 12;
 const FEATURES = new Set(['saju','time','learn','terms','gunghap','zodiac','readers','catalog','library','jami','star']);
 const READING_KINDS = new Set(['saju','jami','star']);
@@ -102,7 +103,8 @@ const ASK_TOPICS = freeze({nature:'내 기본 성향이 궁금해요.',relations
 const ASK_DEFAULTS = freeze({tojeong:['nature','recovery','practice','flow'],seol:['relationship','nature','recovery','practice'],luna:['nature','recovery','relationship','practice']});
 const ASK_CLARIFY = freeze({tojeong:'어느 대목이 궁금한지 한 가지만 더 짚어보죠. 아래 이야기 중 가까운 것을 골라주세요.',seol:'궁금한 장면에 맞춰 이야기하고 싶어요. 어느 쪽부터 살펴볼까요?',luna:'조금만 좁혀서 이야기해 봐요. 지금 궁금한 쪽을 골라줘요.'});
 const ASK_LIMIT = freeze({tojeong:'결혼 날짜나 당첨, 특정 결과를 이 계산으로 확정할 수는 없지요. 지금 읽을 수 있는 범위에서 살펴보죠.',seol:'결혼 날짜나 상대의 선택, 당첨 같은 결과를 확정하는 풀이는 아니에요. 준비된 기본 풀이의 범위에서 이야기할게요.',luna:'특정 날짜나 당첨, 앞으로의 결과를 확정해 주는 계산은 아니에요. 지금 준비된 기본 이야기로 살펴봐요.'});
-const PRIVATE_QUESTION = /(?:(?<!\d)(?:18|19|20)\d{2}\s*(?:[-./]|\s)\s*\d{1,2}\s*(?:[-./]|\s)\s*\d{1,2}(?!\d)|(?:18|19|20)\d{2}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일|(?<!\d)(?:18|19|20)\d{6}(?!\d)|\b(?:access[_-]?token|refresh[_-]?token|token|paymentKey|authorization|password|secret|rid)["']?\s*[=:]\s*\S+|(?:토큰|비밀번호|복구\s*키)\s*[=:]\s*\S+|\bBearer\s+\S+)/i;
+const PRIVATE_QUESTION = /(?:(?<!\d)(?:18|19|20)\d{2}\s*(?:[-./]|\s)\s*\d{1,2}\s*(?:[-./]|\s)\s*\d{1,2}(?!\d)|(?:18|19|20)\d{2}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일|(?<!\d)(?:18|19|20)\d{6}(?!\d)|\b(?:access[_-]?token|refresh[_-]?token|token|paymentKey|authorization|password|secret|rid)["']?\s*[=:]\s*\S+|(?:토큰|비밀번호|복구\s*키)\s*[=:]\s*\S+|\bBearer\s+\S+|\bAIza[\w-]{20,}|\bsb_secret_[\w-]+|\beyJ[\w-]{10,}\.[\w-]{10,}\.[\w-]{8,}|\b[0-9a-f]{64}\b)/i;
+function privateText(value){const text=value.normalize('NFKC');return PRIVATE_QUESTION.test(text)||PRIVATE_QUESTION.test(text.replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u202a-\u202e\u2060-\u2069]/g,''));}
 const CERTAIN_QUESTION = /언제.{0,16}(?:결혼|취업|이직|합격|만나)|(?:결혼|취업|이직|합격).{0,16}언제|복권|로또|당첨|무조건|확정|확답|100\s*%|정확한\s*(?:날짜|시점)/;
 function questionTopics(text){
   const topics=[];
@@ -129,9 +131,16 @@ function prepareQuestion(value){
   const trimmed=value.trim();
   if(!trimmed||Array.from(trimmed).length>MAX_DIALOGUE_QUESTION_LENGTH)return null;
   const normalized=trimmed.normalize('NFC');
-  if(PRIVATE_QUESTION.test(normalized)||PRIVATE_QUESTION.test(normalized.replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u202a-\u202e\u2060-\u2069]/g,'')))return {private:true};
+  if(privateText(normalized))return {private:true};
   const text=Array.from(clean(normalized,640)).filter(c=>{const n=c.codePointAt(0);return n<0xd800||n>0xdfff;}).join('').replace(/\s+/g,' ').trim();
   return text?{text}:null;
+}
+export function prepareDialogueQuestion(value){return prepareQuestion(value);}
+export function normalizeDialogueAnswer(value){
+  if(typeof value!=='string'||!value.trim()||Array.from(value.trim()).length>MAX_DIALOGUE_ANSWER_LENGTH)return null;
+  const text=Array.from(clean(value,6400)).filter(c=>{const n=c.codePointAt(0);return n<0xd800||n>0xdfff;}).join('').trim();
+  if(!text||privateText(text))return null;
+  return text;
 }
 
 function normalizeInsight(raw,kind){
@@ -145,6 +154,20 @@ function normalizeInsight(raw,kind){
   }
   if(!sections.length)return null;
   return {kind,headline:clean(raw.headline,180),summary:clean(raw.summary,700),sections,notes:(Array.isArray(raw.notes)?raw.notes:[]).map(value=>clean(value,700)).filter(Boolean).slice(0,4)};
+}
+/** Only this projection may leave the page; raw chart/profile fields are absent. */
+export function projectDialogueReading(raw,kind){
+  const value=normalizeInsight(raw,kind);if(!value)return null;
+  const texts=[value.headline,value.summary,...value.notes,...value.sections.flatMap(s=>[s.title,...s.paragraphs,...s.signals.flatMap(row=>[row.label,row.value])])];
+  if(texts.some(privateText))return null;
+  return {source:'samra-engine',...value,requiresTime:false};
+}
+export function projectDialogueHistory(rows){
+  if(!Array.isArray(rows))return [];
+  return rows.slice(-6).flatMap(row=>{
+    const question=prepareQuestion(row?.question),answer=normalizeDialogueAnswer(row?.answer);
+    return question?.text&&answer?[{question:question.text,answer}]:[];
+  });
 }
 export function getNpcPersona(id){return typeof id==='string'&&Object.hasOwn(PERSONAS,id)?copy(PERSONAS[id]):null;}
 export function isDialogueAction(value){
@@ -163,16 +186,25 @@ export function createDialogueSession(npcId,options={}){
   let insight=normalizeInsight(options.insight,npc.readingKind);
   let hasProfile=options.hasProfile===true || options.hasProfile===undefined&&Boolean(insight);
   if(!hasProfile)insight=null;
-  let stage='welcome',activeSection=null,guideTopic=null,guideReply=null,guideSource=npcId,clarifying=[],asked=[],messages=[],history=[],serial=0;
-  function add(role,value,extras={}){messages.push({id:npcId+'-'+(++serial),role,text:clean(value,3000),...extras});messages=messages.slice(-MAX_DIALOGUE_MESSAGES);}
+  let stage='welcome',activeSection=null,guideTopic=null,guideReply=null,guideSource=npcId,clarifying=[],asked=[],messages=[],history=[],serial=0,pending=null,aiSerial=0;
+  function add(role,value,extras={}){
+    const {context=false,...rest}=extras,previous=messages.at(-1),replyTo=role==='npc'&&!context&&previous?.role==='user'?previous.id:null;
+    const row={id:npcId+'-'+(++serial),role,text:clean(value,6400),...(replyTo?{replyTo}:{}),...rest};
+    messages.push(row);messages=messages.slice(-MAX_DIALOGUE_MESSAGES);return row;
+  }
   function greeting(){return(nickname?nickname+'님, ':'')+npc.greeting;}
   function orderedSections(){return ORDER[npcId].map(id=>insight?.sections.find(row=>row.id===id)).filter(Boolean).slice(0,4);}
   function readyText(){const focus=npcId==='seol'?insight.sections.find(row=>row.id==='relationship'):null;return [npc.ready,insight.headline,sentence(focus?.paragraphs[0]||insight.summary)].filter(Boolean).join('\n\n');}
   function snapshot(){return copy({stage,activeSection,guideTopic,guideReply,guideSource,clarifying,asked,messages});}
   function remember(){history.push(snapshot());history=history.slice(-MAX_BACK_STEPS);}
   function choiceRows(){
+    if(pending)return [];
     const rows=[];
-    if(stage==='clarify'){
+    if(stage==='ai'){
+      for(const id of ['short','practice','basis','next'])rows.push({id:'followup:'+id,label:FOLLOWUPS[id]});
+      rows.push({id:'topics',label:'다른 주제로 물어볼게요.'});
+      rows.push(actionChoice(insight?reading(npc.readingKind):profileAction()));
+    }else if(stage==='clarify'){
       for(const id of clarifying)rows.push({id:'ask-topic:'+id,label:ASK_TOPICS[id]});
     }else if(stage==='reading'||stage==='followup'){
       for(const id of ['short','practice','basis','next'])if(!asked.includes(id))rows.push({id:'followup:'+id,label:FOLLOWUPS[id]});
@@ -196,8 +228,10 @@ export function createDialogueSession(npcId,options={}){
     }
     return rows.slice(0,6);
   }
-  function view(){return {npc:copy(npc),stage,hasProfile,insightReady:Boolean(insight),prepared:true,messages:copy(messages),choices:choiceRows().map(({action,...value})=>copy(value)),canBack:history.length>0,activeSection};}
-  function start(){stage=insight?'topic':'welcome';activeSection=guideTopic=guideReply=null;guideSource=npcId;clarifying=[];asked=[];messages=[];history=[];add('npc',greeting());if(insight)add('npc',readyText());return view();}
+  function view(){return {npc:copy(npc),stage,hasProfile,insightReady:Boolean(insight),prepared:true,pending:Boolean(pending),messages:copy(messages),choices:choiceRows().map(({action,...value})=>copy(value)),canBack:history.length>0,activeSection};}
+  function restore(state){({stage,activeSection,guideTopic,guideReply,guideSource,clarifying,asked,messages}=copy(state));}
+  function cancelPending(){if(!pending)return false;const current=pending;pending=null;restore(current.prior);history=current.priorHistory;return true;}
+  function start(){pending=null;stage=insight?'topic':'welcome';activeSection=guideTopic=guideReply=null;guideSource=npcId;clarifying=[];asked=[];messages=[];history=[];add('npc',greeting());if(insight)add('npc',readyText(),{context:true});return view();}
   function answerSection(id,prefix=''){
     const row=insight?.sections.find(row=>row.id===id);if(!row)return false;
     activeSection=id;guideTopic=guideReply=null;guideSource=npcId;clarifying=[];asked=[];stage='reading';
@@ -253,7 +287,44 @@ export function createDialogueSession(npcId,options={}){
   start();
   return {
     view,
+    getAiContext(){
+      const answers=messages.filter(row=>row.role==='npc'&&row.replyTo),pairs=[];
+      for(const row of answers){
+        const user=messages.find(item=>item.id===row.replyTo&&item.role==='user');
+        if(!user||user.id===pending?.userId||user.text==='[개인정보가 포함된 질문]')continue;
+        const answer=Array.from(row.text).slice(0,MAX_DIALOGUE_ANSWER_LENGTH).join('');pairs.push({question:user.text,answer});
+      }
+      const reading=insight?projectDialogueReading({source:'samra-engine',...insight,requiresTime:false},npc.readingKind):null;
+      return {npc:npcId,history:projectDialogueHistory(pairs),reading};
+    },
+    beginAiQuestion(value,metadata={}){
+      if(pending)return {accepted:false,view:view()};
+      const question=prepareQuestion(value);if(!question)return {accepted:false,view:view()};
+      if(question.private){
+        remember();add('user','[개인정보가 포함된 질문]');
+        clarify([],'개인정보 원문은 대화에 남기지 않을게요. 출생정보는 내 정보에서 준비하고, 여기에는 궁금한 주제만 적어주세요.');
+        return {accepted:true,view:view()};
+      }
+      const prior=snapshot(),priorHistory=history.slice(),choice=choiceRows().find(row=>row.id===metadata?.choiceId&&!row.action&&row.label===question.text);
+      remember();const user=add('user',question.text),ticket=Object.freeze({id:npcId+'-ai-'+(++aiSerial)});
+      pending={ticket,question:question.text,userId:user.id,prior,priorHistory,choiceId:choice?.id};
+      return {accepted:true,question:question.text,ticket,view:view()};
+    },
+    resolveAiQuestion(ticket,value,metadata={}){
+      if(!pending||pending.ticket!==ticket)return {accepted:false,view:view()};
+      const answer=normalizeDialogueAnswer(value);if(!answer)return {accepted:false,view:view()};
+      const current=pending;pending=null;
+      stage='ai';guideTopic=guideReply=null;guideSource=npcId;clarifying=[];asked=[];
+      if(current.choiceId?.startsWith('section:'))activeSection=current.choiceId.slice(8);
+      add('npc',answer,{replyTo:current.userId,source:'gemini',...(metadata?.model==='gemini-3.5-flash-lite'?{model:metadata.model}:{})});
+      return {accepted:true,view:view()};
+    },
+    rejectAiQuestion(ticket){
+      if(!pending||pending.ticket!==ticket)return {accepted:false,view:view()};
+      cancelPending();return {accepted:true,view:view()};
+    },
     ask(value){
+      if(pending)return {accepted:false,view:view()};
       const question=prepareQuestion(value);if(!question)return {accepted:false,view:view()};
       remember();
       if(question.private){
@@ -269,7 +340,7 @@ export function createDialogueSession(npcId,options={}){
       return {accepted:true,view:view()};
     },
     choose(id){
-      if(typeof id!=='string')return {accepted:false,view:view()};
+      if(pending||typeof id!=='string')return {accepted:false,view:view()};
       const choice=choiceRows().find(row=>row.id===id);if(!choice)return {accepted:false,view:view()};
       remember();add('user',choice.label);
       if(choice.action){
@@ -280,7 +351,7 @@ export function createDialogueSession(npcId,options={}){
       else if(id==='topics'){stage=insight?'topic':'welcome';activeSection=guideTopic=guideReply=null;guideSource=npcId;clarifying=[];asked=[];add('npc',insight?npc.topicPrompt:npc.guidePrompt);}
       else if(id.startsWith('ask-topic:'))answerTopic(id.slice(10));
       else if(id.startsWith('section:'))answerSection(id.slice(8));
-      else if(id.startsWith('followup:'))followup(id.slice(9));
+      else if(id.startsWith('followup:')){if(!followup(id.slice(9)))clarify([],'내 기본 풀이가 준비되면 해당 내용을 더 짚어볼 수 있어요. 지금은 궁금한 주제부터 골라주세요.');}
       else if(id.startsWith('guide-topic:')){guideTopic=id.slice(12);guideReply=null;guideSource=npcId;clarifying=[];stage='guide';add('npc',GUIDES[npcId].find(row=>row.id===guideTopic).answer);}
       else if(id.startsWith('guide-reply:')){guideReply=id.slice(12);const row=GUIDES[guideSource].find(row=>row.id===guideTopic).replies.find(row=>row.id===guideReply);add('npc',row.text);}
       return {accepted:true,view:view()};
@@ -292,9 +363,15 @@ export function createDialogueSession(npcId,options={}){
       if(!next){start();return view();}
       hasProfile=true;
       if(replacing){start();return view();}
-      if(stage==='welcome')stage='topic';add('npc',readyText());return view();
+      if(stage==='welcome')stage='topic';const ready=add('npc',readyText(),{context:true});
+      if(pending){
+        if(pending.prior.stage==='welcome')pending.prior.stage='topic';
+        pending.prior.messages=[...pending.prior.messages,copy(ready)].slice(-MAX_DIALOGUE_MESSAGES);
+        history[history.length-1]=copy(pending.prior);
+      }
+      return view();
     },
     reset(){return start();},
-    back(){const prior=history.pop();if(!prior)return false;({stage,activeSection,guideTopic,guideReply,guideSource,clarifying,asked,messages}=prior);return true;},
+    back(){if(cancelPending())return true;const prior=history.pop();if(!prior)return false;restore(prior);return true;},
   };
 }
