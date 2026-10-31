@@ -40,6 +40,8 @@ function fail() {
   body.classList.remove('world-ready', 'is-exploring');
   movement?.setEnabled(false);
   if (loading) loading.hidden = true;
+  document.getElementById('enterWorld').disabled = false;
+  document.getElementById('enterWorld').setAttribute('aria-busy', 'false');
   document.getElementById('worldFallback').hidden = false;
   document.getElementById('enterWorldLabel').textContent = '소원 등불 밝히기';
   document.getElementById('entranceNote').textContent = '가입 없이 무료로 · 나만 볼 수 있는 소원';
@@ -230,6 +232,9 @@ function setup() {
 
   loading.hidden = true;
   body.classList.add('world-ready');
+  document.getElementById('enterWorld').disabled = false;
+  document.getElementById('enterWorld').setAttribute('aria-busy', 'false');
+  document.getElementById('enterWorldLabel').textContent = '신당에 들어가기';
   running = true;
   frame = requestAnimationFrame(render);
 }
