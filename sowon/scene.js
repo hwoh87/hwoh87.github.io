@@ -200,8 +200,11 @@ function setup() {
 
   const actionLabels = { wish: '소원 등불이 있는 신당', breath: '바람이 머무는 명상터', blessing: '마음을 전하는 소원나무', myeongri: '토정이 기다리는 명리전', inyeon: '설월이 기다리는 인연정', stars: '태어난 하늘을 펼치는 별마루', readers: '루나와 술사들이 있는 술사각', archive: '이야기가 쌓이는 서고' };
   function walkToAction(action) {
-    if (!world.destinations[action]) return;
+    if (!world.destinations[action] || document.querySelector('dialog[open]')) return;
     enter();
+    // A map can close and request travel before the next animation frame has
+    // resumed movement. Re-enable here instead of treating that pause as no path.
+    movement.setEnabled(true);
     activeJourney = action;
     status(`${actionLabels[action]}에 가고 있어요 · 바닥을 누르면 자유롭게 이동해요.`);
     const result = movement.goTo(world.destinations[action], () => {
@@ -211,7 +214,7 @@ function setup() {
       if (action === 'wish') avatar.setGesture('wish');
       document.dispatchEvent(new CustomEvent('sowon:open', { detail: { action } }));
     });
-    if (result === false) { activeJourney = null; status('이곳에서 마음을 남겨보세요.', 2500); document.dispatchEvent(new CustomEvent('sowon:open', { detail: { action } })); }
+    if (result === false) { activeJourney = null; status('이곳에서 이야기를 펼칠게요.', 2500); document.dispatchEvent(new CustomEvent('sowon:open', { detail: { action } })); }
   }
   listen(document.querySelector('.hub-world-rituals'), 'click', event => {
     const button = event.target.closest('button');

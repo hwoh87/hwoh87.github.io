@@ -241,7 +241,7 @@ document.addEventListener('sowon:navigate',event=>{if(event.detail?.url)navigate
 dialog.querySelector('.hub-close').onclick=close;
 dialog.querySelector('.hub-back').onclick=()=>history.back();
 dialog.addEventListener('cancel',event=>{event.preventDefault();close();});
-dialog.addEventListener('close',()=>{if(currentView)close();});
+dialog.addEventListener('close',()=>{if(currentView&&!dialog.open)close();});
 let outside=false;
 dialog.addEventListener('pointerdown',event=>{outside=event.target===dialog&&event.clientX<dialog.getBoundingClientRect().left;});
 dialog.addEventListener('pointerup',()=>{if(outside)close();outside=false;});
