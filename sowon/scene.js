@@ -2,7 +2,8 @@ import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
 import { createWorld } from './world.js';
 import { createAvatar } from './avatar.js';
-import { createLocomotion } from './locomotion.js';
+import { createLocomotion, isWalkable } from './locomotion.js';
+import { readJourney } from './hub-core.js';
 
 const host = document.getElementById('worldViewport');
 const body = document.body;
@@ -62,9 +63,9 @@ function setup() {
   host.appendChild(renderer.domElement);
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#111e32');
-  scene.fog = new THREE.FogExp2('#172b40', .016);
+  scene.fog = new THREE.FogExp2('#172b40', .011);
   camera = new THREE.PerspectiveCamera(48, 1, .1, 150);
-  camera.position.set(11.8, 8.5, 24);
+  camera.position.set(28, 25, 45);
 
   const sky = new THREE.HemisphereLight('#c3d6ee', '#73715d', 1.05);
   scene.add(sky, new THREE.AmbientLight('#b7c7dc', .22));
@@ -90,7 +91,7 @@ function setup() {
   orbit.dampingFactor = .065;
   orbit.enablePan = false;
   orbit.minDistance = 5;
-  orbit.maxDistance = 33;
+  orbit.maxDistance = 60;
   orbit.minPolarAngle = .22;
   orbit.maxPolarAngle = Math.PI * .465;
   orbit.rotateSpeed = .6;
@@ -125,6 +126,21 @@ function setup() {
   resizeObserver.observe(host);
   resize();
 
+  let saved;
+  try { saved = readJourney(sessionStorage); } catch (_) {}
+  if (saved && isWalkable({ x: saved.position[0], z: saved.position[2] }, world)) {
+    avatar.group.position.set(saved.position[0], world.heightAt(saved.position[0], saved.position[2]), saved.position[2]);
+    avatar.group.rotation.y = saved.rotation;
+    if (saved.entered) enter();
+    cameraTransition = null;
+    camera.position.fromArray(saved.camera);
+    orbit.target.fromArray(saved.target);
+    orbit.update(); resize();
+  }
+  listen(document, 'sowon:capture', event => {
+    event.detail.snapshot = { position: avatar.group.position.toArray(), rotation: avatar.group.rotation.y, camera: camera.position.toArray(), target: orbit.target.toArray(), entered: exploring };
+  });
+
   function render(time) {
     if (!running) return;
     const delta = previousTime ? Math.min((time - previousTime) / 1000, .05) : 0;
@@ -133,6 +149,14 @@ function setup() {
     body.classList.toggle('world-modal-open', modalOpen);
     if (modalOpen && activeJourney) { activeJourney = null; status('', 0); }
     movement.setEnabled(!modalOpen);
+    if (modalOpen) {
+      name.hidden = true;
+      placeButtons.forEach(button => { button.hidden = true; });
+      // Keep checking modal visibility without drawing the 3D world while reading.
+      previousTime = 0;
+      frame = requestAnimationFrame(render);
+      return;
+    }
     movement.update(delta);
     if (cameraTransition) {
       cameraTransition.elapsed += delta;
@@ -152,6 +176,7 @@ function setup() {
     if (visible) { name.style.left = ((projected.x + 1) / 2 * 100) + '%'; name.style.top = ((1 - projected.y) / 2 * 100) + '%'; }
     placeButtons.forEach(button => {
       const point = world.destinations[button.dataset.worldPlace];
+      if (!point) { button.hidden = true; return; }
       placePosition.set(point.x, world.heightAt(point.x, point.z) + 1.65, point.z).project(camera);
       const inFrame = placePosition.z < 1 && Math.abs(placePosition.x) < .88 && placePosition.y < .5 && placePosition.y > -.54;
       button.hidden = !exploring || !inFrame || modalOpen;
@@ -173,11 +198,12 @@ function setup() {
   });
   listen(renderer.domElement, 'pointerdown', () => { cameraTransition = null; });
 
-  const actionLabels = { wish: '소원 등불이 있는 신당', breath: '바람이 머무는 명상터', blessing: '마음을 전하는 소원나무' };
+  const actionLabels = { wish: '소원 등불이 있는 신당', breath: '바람이 머무는 명상터', blessing: '마음을 전하는 소원나무', myeongri: '토정이 기다리는 명리전', inyeon: '설월이 기다리는 인연정', stars: '태어난 하늘을 펼치는 별마루', readers: '루나와 술사들이 있는 술사각', archive: '이야기가 쌓이는 서고' };
   function walkToAction(action) {
+    if (!world.destinations[action]) return;
     enter();
     activeJourney = action;
-    status(`${actionLabels[action]}로 걸어가는 중 · 바닥을 누르면 자유롭게 이동해요.`);
+    status(`${actionLabels[action]}에 가고 있어요 · 바닥을 누르면 자유롭게 이동해요.`);
     const result = movement.goTo(world.destinations[action], () => {
       if (activeJourney !== action) return;
       activeJourney = null;
@@ -187,12 +213,13 @@ function setup() {
     });
     if (result === false) { activeJourney = null; status('이곳에서 마음을 남겨보세요.', 2500); document.dispatchEvent(new CustomEvent('sowon:open', { detail: { action } })); }
   }
-  listen(document.querySelector('.ritual-dock'), 'click', event => {
+  listen(document.querySelector('.hub-world-rituals'), 'click', event => {
     const button = event.target.closest('button');
-    if (!button) return;
+    if (!button || button.hasAttribute('data-open-journal')) return;
     const action = button.hasAttribute('data-open-wish') ? 'wish' : button.hasAttribute('data-open-breath') ? 'breath' : 'blessing';
     event.preventDefault(); event.stopPropagation(); walkToAction(action);
   });
+  listen(document, 'sowon:walk', event => walkToAction(event.detail?.action));
   placeButtons.forEach(button => listen(button, 'click', () => walkToAction(button.dataset.worldPlace)));
   listen(document.getElementById('greetTraveler'), 'click', () => {
     avatar.setGesture('greet');
@@ -202,6 +229,7 @@ function setup() {
   listen(document.getElementById('returnToGate'), 'click', () => {
     activeJourney = null;
     cameraTransition = null;
+    movement.reset();
     camera.position.copy(avatar.group.position).add(cameraOffset);
     orbit.target.copy(avatar.group.position).add(targetOffset);
     orbit.update();
@@ -214,9 +242,13 @@ function setup() {
   listen(renderer.domElement, 'webglcontextlost', event => {
     event.preventDefault(); running = false; cancelAnimationFrame(frame); fail();
   });
+  function resume() {
+    if (running || document.hidden || body.classList.contains('world-failed')) return;
+    running = true; previousTime = 0; frame = requestAnimationFrame(render);
+  }
   listen(document, 'visibilitychange', () => {
     if (document.hidden) { activeJourney = null; status('', 0); running = false; cancelAnimationFrame(frame); previousTime = 0; }
-    else if (!body.classList.contains('world-failed')) { running = true; previousTime = 0; frame = requestAnimationFrame(render); }
+    else resume();
   });
   listen(window, 'pagehide', event => {
     running = false;
@@ -227,7 +259,7 @@ function setup() {
     movement.dispose(); orbit.dispose(); avatar.dispose(); world.dispose(); renderer.dispose();
   });
   listen(window, 'pageshow', event => {
-    if (event.persisted && !body.classList.contains('world-failed')) { running = true; previousTime = 0; frame = requestAnimationFrame(render); }
+    if (event.persisted) resume();
   });
 
   loading.hidden = true;

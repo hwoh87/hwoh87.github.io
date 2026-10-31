@@ -4,14 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#111c29">
-  <meta name="description" content="달빛 아래 작은 바람을 놓아두는 삼라 소원당. 소원 등불을 밝히고, 잠깐 숨을 고르고, 소중한 사람에게 응원을 보내세요. 가입 없이 무료로 쉬어가는 온라인 신당입니다.">
+  <meta name="description" content="캐릭터로 거니는 삼라 소원당. 명리전의 사주, 인연정의 궁합, 별마루의 자미두수와 출생 차트, 열두 술사의 리포트와 서고를 달빛 아래에서 만나요.">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <title>삼라 소원당 — 작은 바람도 빛이 되는 밤</title>
+  <title>삼라 소원당 — 달빛을 따라, 나를 알아가는 곳</title>
   <link rel="canonical" href="https://samra.cc/sowon/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="삼라만상">
-  <meta property="og:title" content="삼라 소원당 — 작은 바람도 빛이 되는 밤">
-  <meta property="og:description" content="당신의 바람이 머물 자리. 등불 하나 밝히고, 소중한 사람에게 마음을 전해보세요.">
+  <meta property="og:title" content="삼라 소원당 — 달빛을 따라, 나를 알아가는 곳">
+  <meta property="og:description" content="사주를 펼치고, 인연을 만나고, 소원도 잠시 놓아두세요. 달빛 아래 삼라의 다섯 장소를 거닐어보세요.">
   <meta property="og:url" content="https://samra.cc/sowon/">
   <meta property="og:image" content="https://samra.cc/sowon/art/moon-shrine-og.jpg">
   <meta property="og:image:width" content="1200">
@@ -27,8 +27,13 @@
   <link rel="preload" as="image" href="art/moon-shrine.webp" fetchpriority="high">
   <link rel="stylesheet" href="sowon.css">
   <link rel="stylesheet" href="world.css">
+  <link rel="stylesheet" href="hub.css">
+  <link rel="stylesheet" href="collection.css">
+  <link rel="stylesheet" href="readings.css">
+  <link rel="stylesheet" href="reference.css">
   <script src="core.js" defer></script>
   <script src="app.js" defer></script>
+  <script type="module" src="hub.js"></script>
   <script src="/assets/track.js" defer></script>
   <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
   <script type="module">import('./scene.js').catch(function(){document.body.classList.add('world-failed');document.getElementById('worldLoading').hidden=true;document.getElementById('worldFallback').hidden=false;document.getElementById('enterWorld').disabled=false;document.getElementById('enterWorld').setAttribute('aria-busy','false');document.getElementById('enterWorldLabel').textContent='소원 등불 밝히기';document.getElementById('entranceNote').textContent='가입 없이 무료로 · 나만 볼 수 있는 소원';});</script>
@@ -47,6 +52,11 @@
     <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
     <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V6a4 4 0 0 1 8 0v4M12 14v3"/></symbol>
     <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V3H3v13h5"/></symbol>
+    <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m16 8-2.5 5.5L8 16l2.5-5.5L16 8Z"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+    <symbol id="i-scroll" viewBox="0 0 24 24"><path d="M7 3h12v15a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3h14M7 3a3 3 0 0 0-3 3v2h3V3ZM10 7h6M10 11h6M9 15h7"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20 4 12a5 5 0 0 1 8-6 5 5 0 0 1 8 6l-8 8Z"/></symbol>
+    <symbol id="i-stars" viewBox="0 0 24 24"><path d="m12 2 2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5L12 2ZM20 2v4M18 4h4"/></symbol>
   </svg>
 
   <main class="sanctuary" id="entrance">
@@ -67,20 +77,22 @@
         <span><span class="brand-name">소원당</span><span class="brand-by">by SAMRA</span></span>
       </a>
       <nav class="shrine-nav" aria-label="소원당 메뉴">
-        <button class="about-link" type="button" data-open-about aria-label="소원당 이야기와 이용 안내"><span class="about-text">소원당 이야기</span><span class="about-mobile" aria-hidden="true">?</span></button>
         <button class="sound-control" type="button" id="soundToggle" aria-pressed="false" aria-label="풍경 소리 켜기">
           <svg class="icon" aria-hidden="true"><use href="#i-sound"/></svg><span id="soundLabel">소리 끔</span>
         </button>
-        <button class="journal-control" type="button" data-open-journal><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg><span>내 등불</span><span class="count-badge" id="journalCount">0</span></button>
+        <button class="hub-nav-button" type="button" data-hub-view="map" aria-label="신당 지도"><svg class="icon" aria-hidden="true"><use href="#i-compass"/></svg><span class="hub-nav-text">공간 지도</span></button>
+        <button class="hub-nav-button" type="button" data-hub-view="all" aria-label="삼라 전체 기능"><svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg><span class="hub-nav-text">전체 기능</span></button>
+        <button class="hub-nav-button hub-library" type="button" data-hub-feature="library"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg><span class="hub-nav-text">내 서재</span></button>
       </nav>
     </header>
 
     <section class="invitation" aria-labelledby="shrineTitle">
-      <p class="eyebrow"><span></span> 달빛 아래, 당신만의 작은 신당</p>
-      <h1 id="shrineTitle">작은 바람도<br>빛이 되는 밤.</h1>
-      <p class="invitation-copy">말하지 못한 소원 하나,<br>이곳에 잠시 놓아두어도 괜찮아요.</p>
+      <p class="eyebrow"><span></span> 나를 알아가는, 다섯 갈래의 길</p>
+      <h1 id="shrineTitle">달빛을 따라,<br>나에게 이르는 길.</h1>
+      <p class="invitation-copy">사주를 펼치고, 인연을 만나고,<br>말하지 못한 소원도 잠시 놓아두세요.</p>
       <button class="gold-button entrance-button" id="enterWorld" type="button" data-open-wish data-cta="sowon-enter" disabled aria-busy="true"><svg class="icon" aria-hidden="true"><use href="#i-lantern"/></svg><span id="enterWorldLabel">신당을 여는 중</span><svg class="icon button-arrow" aria-hidden="true"><use href="#i-arrow"/></svg></button>
-      <p class="entrance-note" id="entranceNote">캐릭터로 거닐고, 나만의 소원을 남겨요.</p>
+      <p class="entrance-note" id="entranceNote">캐릭터로 거닐며 만나는 삼라의 이야기</p>
+      <button class="hub-intro-link" type="button" data-hub-view="all">바로 사주 보러 가기 · 전체 기능 ↗</button>
     </section>
 
     <aside class="season-note" aria-label="소원당의 계절">
@@ -100,18 +112,23 @@
       <div><p class="luna-name">달빛지기 루나<span>소원당의 안내자</span></p><p id="lunaGreeting">“바라는 마음이 있다는 건,<br>아직 내일을 믿고 있다는 뜻이니까요.”</p></div>
     </aside>
 
-    <nav class="ritual-dock" aria-label="소원당에서 할 수 있는 일">
-      <button class="dock-action" type="button" data-open-wish><svg class="dock-icon" aria-hidden="true"><use href="#i-lantern"/></svg><span>소원 등불<small>바람을 남기는 시간</small></span></button>
+    <nav class="ritual-dock hub-dock" aria-label="삼라의 다섯 장소로 찾아가기">
+      <button class="dock-action" type="button" data-hub-walk="myeongri"><svg class="dock-icon" aria-hidden="true"><use href="#i-scroll"/></svg><span>명리전<small>나를 읽는 사주</small></span></button>
       <span class="dock-divider" aria-hidden="true"></span>
-      <button class="dock-action" type="button" data-open-breath><svg class="dock-icon" aria-hidden="true"><use href="#i-breath"/></svg><span>마음 고르기<small>잠깐, 나를 위한 쉼</small></span></button>
+      <button class="dock-action" type="button" data-hub-walk="inyeon"><svg class="dock-icon" aria-hidden="true"><use href="#i-heart"/></svg><span>인연정<small>사이의 결, 궁합</small></span></button>
       <span class="dock-divider" aria-hidden="true"></span>
-      <button class="dock-action" type="button" data-open-blessing><svg class="dock-icon" aria-hidden="true"><use href="#i-gift"/></svg><span>응원 보내기<small>소중한 사람을 위해</small></span></button>
+      <button class="dock-action" type="button" data-hub-walk="stars"><svg class="dock-icon" aria-hidden="true"><use href="#i-stars"/></svg><span>별마루<small>내가 태어난 하늘</small></span></button>
+      <span class="dock-divider" aria-hidden="true"></span>
+      <button class="dock-action" type="button" data-hub-walk="readers"><svg class="dock-icon" aria-hidden="true"><use href="#i-moon"/></svg><span>술사각<small>질문을 맡기는 곳</small></span></button>
+      <span class="dock-divider" aria-hidden="true"></span>
+      <button class="dock-action" type="button" data-hub-walk="archive"><svg class="dock-icon" aria-hidden="true"><use href="#i-book"/></svg><span>서고<small>배움과 이야기</small></span></button>
     </nav>
+    <div class="hub-world-rituals" aria-label="소원마당"><button type="button" data-open-wish><svg class="icon" aria-hidden="true"><use href="#i-lantern"/></svg>소원 등불</button><span></span><button type="button" data-open-breath>마음 고르기</button><span></span><button type="button" data-open-blessing>응원 보내기</button><span></span><button type="button" data-open-journal>내 등불 <b id="journalCount">0</b></button></div>
 
     <p class="my-light-note"><span class="tiny-flame" aria-hidden="true"></span>내가 밝힌 등불 <b id="lanternCount">0</b><span class="note-separator">·</span><span id="visitCount">오늘의 첫 걸음</span></p>
     <div class="world-help" id="worldHelp"><span class="help-desktop">바닥 클릭으로 걷기<span>·</span>W A S D 이동<span>·</span>드래그로 둘러보기<span>·</span>휠로 확대</span><span class="help-mobile">바닥을 눌러 걷기 · 드래그로 둘러보기 · 두 손가락으로 확대</span></div>
     <div class="traveler-name" id="travelerName" aria-hidden="true"><span>나</span>달빛 나그네</div>
-    <div class="world-places" aria-label="신당 안의 장소"><button class="world-place" type="button" data-world-place="wish" hidden>소원 등불 <span>↗</span></button><button class="world-place" type="button" data-world-place="breath" hidden>명상터 <span>↗</span></button><button class="world-place" type="button" data-world-place="blessing" hidden>소원나무 <span>↗</span></button></div>
+    <div class="world-places" aria-label="신당 안의 장소"><button class="world-place" type="button" data-world-place="wish" hidden>소원 등불 <span>↗</span></button><button class="world-place" type="button" data-world-place="breath" hidden>명상터 <span>↗</span></button><button class="world-place" type="button" data-world-place="blessing" hidden>소원나무 <span>↗</span></button><button class="world-place" type="button" data-world-place="myeongri" hidden>명리전 <span>↗</span><small>토정의 사주 이야기</small></button><button class="world-place" type="button" data-world-place="inyeon" hidden>인연정 <span>↗</span><small>설월과 인연을 읽어요</small></button><button class="world-place" type="button" data-world-place="stars" hidden>별마루 <span>↗</span><small>태어난 순간의 하늘</small></button><button class="world-place" type="button" data-world-place="readers" hidden>술사각 <span>↗</span><small>루나와 술사들을 만나요</small></button><button class="world-place" type="button" data-world-place="archive" hidden>서고 <span>↗</span><small>처음부터 천천히 배워요</small></button></div>
     <div class="travel-status" id="travelStatus" role="status" hidden></div>
     <div class="move-controls" id="moveControls" aria-label="캐릭터 이동 조작">
       <div class="move-stick" id="moveStick" role="group" aria-label="터치로 캐릭터 이동"><span id="moveThumb"></span></div>
@@ -120,7 +137,7 @@
     </div>
     <button class="return-gate" id="returnToGate" type="button" aria-label="처음 자리로 돌아가기"><svg class="icon" aria-hidden="true"><use href="#i-moon"/></svg><span>처음 자리</span></button>
     <button class="traveler-greet" id="greetTraveler" type="button"><span aria-hidden="true">✧</span>인사하기</button>
-    <div class="world-fallback" id="worldFallback" role="status" hidden>이 브라우저에서는 3D 공간을 열 수 없어 달빛 풍경으로 안내해요. 소원과 기록은 그대로 이용할 수 있어요.</div>
+    <div class="world-fallback" id="worldFallback" role="status" hidden>이 브라우저에서는 달빛 풍경으로 안내해요. 전체 기능에서 계산기·리포트·서고와 소원을 그대로 이용할 수 있어요.</div>
     <p class="storage-notice" id="storageNotice" role="status" hidden>이 브라우저는 기록을 저장할 수 없어요. 지금 남긴 소원은 창을 닫으면 사라질 수 있어요.</p>
     <noscript><div class="noscript-note">소원 등불을 밝히려면 JavaScript를 켜주세요. 지금은 달빛 풍경을 바라보며 잠시 쉬어가셔도 좋아요.</div></noscript>
   </main>
@@ -202,8 +219,10 @@
   <dialog class="paper-dialog about-dialog" id="aboutDialog" aria-labelledby="aboutTitle">
     <button class="close-button" type="button" data-close aria-label="소원당 안내 닫기"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
     <p class="dialog-eyebrow">A HOME FOR YOUR HOPES</p><h2 id="aboutTitle">바라는 마음에도<br>머물 자리가 필요하니까.</h2>
-    <p class="about-lead">달빛 나그네가 되어 신당을 거닐어보세요. 삼라 소원당은 소원을 남기고, 잠시 숨을 고르고, 누군가의 내일을 응원하는 작은 온라인 신당이에요.</p>
-    <div class="about-section"><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg><div><h3>신당을 거니는 방법</h3><p>바닥을 누르면 그곳으로 걸어가요. 드래그로 둘러보고 휠이나 두 손가락으로 가까이 볼 수 있어요. 컴퓨터에서는 방향키와 W·A·S·D, 휴대폰에서는 왼쪽 아래 조이스틱으로 움직여요. 아래의 세 가지 행동을 누르면 해당 장소로 찾아가요.</p></div></div>
+    <p class="about-lead">달빛 나그네가 되어 신당을 거닐어보세요. 사주와 인연을 읽고, 배움을 쌓고, 소원을 남기는 삼라의 온라인 신당이에요.</p>
+    <div class="about-section"><svg class="icon" aria-hidden="true"><use href="#i-compass"/></svg><div><h3>다섯 장소, 삼라의 이야기</h3><p>명리전에서 사주를, 인연정에서 궁합을, 별마루에서 자미두수와 별자리 출생 차트를 펼쳐요. 술사각에는 술사 소개와 유료 리포트가, 서고에는 무료 입문 글과 도감이 있어요. 지도와 전체 기능 메뉴에서 바로 열 수도 있어요.</p></div></div>
+    <div class="about-section"><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg><div><h3>신당을 거니는 방법</h3><p>바닥을 누르면 그곳으로 걸어가요. 드래그로 둘러보고 휠이나 두 손가락으로 가까이 볼 수 있어요. 컴퓨터에서는 방향키와 W·A·S·D, 휴대폰에서는 왼쪽 아래 조이스틱으로 움직여요. 아래 장소를 누르면 길을 찾아 걸어간 뒤 이야기를 열어요.</p></div></div>
+    <div class="about-section"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg><div><h3>내 서재와 나만의 정보</h3><p>기본 계산은 무료이며 삼라 웹과 같은 엔진을 써요. 리포트는 내용과 가격을 확인한 뒤 별도로 구매해요. 내 서재에는 이 브라우저에서 주문한 리포트가 표시돼요. 계산 결과 공유 링크에는 출생정보가, 개인 복구 링크에는 리포트를 열 수 있는 권한이 담기니 확인한 뒤 공유해 주세요.</p></div></div>
     <div class="about-section"><svg class="icon" aria-hidden="true"><use href="#i-lantern"/></svg><div><h3>등불 하나, 나의 한 걸음</h3><p>바람을 적고 그 마음을 위해 할 수 있는 작은 행동을 골라보세요. 이루어진 바람에는 ‘이루었어요’ 표시를 남길 수 있어요.</p></div></div>
     <div class="about-section"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg><div><h3>조용히 간직하는 나만의 기록</h3><p>로그인 없이 무료로 이용해요. 소원은 서버에 보내지 않고 이 브라우저에 최대 50개 보관해요. 다른 사람에게 공개되지 않으며, 기기 간 동기화는 지원하지 않아요.</p></div></div>
     <div class="about-section"><svg class="icon" aria-hidden="true"><use href="#i-moon"/></svg><div><h3>달빛지기 루나와 함께</h3><p>루나의 한마디는 주제에 따라 준비된 응원 문장이에요. 등불은 바라는 마음을 담는 상징이며, 소원당은 특정 종교나 실제 의례를 대신하지 않아요.</p></div></div>

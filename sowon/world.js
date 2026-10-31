@@ -1,12 +1,13 @@
 import * as THREE from 'three';
+import { createCampus } from './campus.js';
 
-/** A small, walkable Korean courtyard. All artwork here is real scene geometry. */
+/** A walkable Korean courtyard with five adjoining gardens and halls. */
 export function createWorld() {
   const group = new THREE.Group();
   group.name = 'Samra — moonlit wish courtyard';
   const groundMeshes = [];
   const colliders = [];
-  const bounds = { minX: -13, maxX: 13, minZ: -15, maxZ: 15 };
+  const bounds = { minX: -23, maxX: 23, minZ: -25, maxZ: 22 };
   const destinations = {
     wish: { x: 0, z: -6 },
     breath: { x: -7, z: 1 },
@@ -125,9 +126,16 @@ export function createWorld() {
 
   // Boundary walls, capped with blue-grey traditional tiles.
   const walls = [
-    { x: -12.75, z: 0, sx: 0.5, sz: 29 },
-    { x: 12.75, z: 0, sx: 0.5, sz: 29 },
-    { x: 0, z: -14.5, sx: 25.5, sz: 0.5 },
+    // Gaps in the old precinct walls lead into the east and west halls.
+    ...[-12.75, 12.75].flatMap((x) => [
+      { x, z: -13, sx: 0.5, sz: 3 },
+      { x, z: -4.5, sx: 0.5, sz: 4 },
+      { x, z: 4, sx: 0.5, sz: 3 },
+      { x, z: 12.5, sx: 0.5, sz: 4 },
+    ]),
+    { x: -11.125, z: -14.5, sx: 3.25, sz: 0.5 },
+    { x: 0, z: -14.5, sx: 9, sz: 0.5 },
+    { x: 11.125, z: -14.5, sx: 3.25, sz: 0.5 },
     { x: -8.15, z: 14.5, sx: 9.2, sz: 0.5 },
     { x: 8.15, z: 14.5, sx: 9.2, sz: 0.5 },
   ];
@@ -136,9 +144,9 @@ export function createWorld() {
   walls.forEach((w) => collider(w.x - w.sx / 2, w.x + w.sx / 2, w.z - w.sz / 2, w.z + w.sz / 2));
   const wallPosts = [];
   [-12.75, 12.75].forEach((x) => {
-    [-13.8, -9.1, -4.5, 0, 4.5, 9.1, 13.8].forEach((z) => wallPosts.push({ x, y: 0.55, z, sx: 0.72, sy: 1.1, sz: 0.72 }));
+    [-13.8, -11.5, -6.5, -2.5, 2.5, 5.5, 10.5, 13.8].forEach((z) => wallPosts.push({ x, y: 0.55, z, sx: 0.72, sy: 1.1, sz: 0.72 }));
   });
-  [-8, -4, 0, 4, 8].forEach((x) => wallPosts.push({ x, y: 0.55, z: -14.5, sx: 0.72, sy: 1.1, sz: 0.72 }));
+  [-11.5, -9.5, -4.5, 0, 4.5, 9.5, 11.5].forEach((x) => wallPosts.push({ x, y: 0.55, z: -14.5, sx: 0.72, sy: 1.1, sz: 0.72 }));
   instances(new THREE.BoxGeometry(1, 1, 1), darkStone, wallPosts);
 
   // Main shrine: a raised wooden floor with an accessible central stone approach.
@@ -387,6 +395,7 @@ export function createWorld() {
   meditationRing.rotation.x = Math.PI / 2;
   const mat = mesh(new THREE.CylinderGeometry(0.82, 0.82, 0.045, 32), material('#87918a'), meditationX, 0.08, meditationZ, false);
   mat.name = 'Woven resting mat';
+  groundMeshes.push(mat);
   const matRings = [];
   [0.27, 0.49, 0.7].forEach((r) => {
     const geometry = new THREE.TorusGeometry(r, 0.008, 4, 40);
@@ -448,8 +457,8 @@ export function createWorld() {
   const pineSites = [
     [-10.8, -10.3, 1], [-8.3, -12.3, 0.88], [10.6, -10.7, 1.07], [8.2, -12.6, 0.92],
     [-11.25, 5.2, 0.84], [-10.8, 10.6, 1.05], [11, 7.1, 0.82], [10.7, 11.5, 1.1],
-    [-17, -16, 1.4], [17.4, -17, 1.5], [-18.5, 1.6, 1.4], [19, 3.6, 1.48],
-    [-18, 17, 1.35], [18, 19, 1.5],
+    [-17, -16, 1.4], [17.4, -17, 1.5], [-23.8, 0.3, 1.4], [23.8, 3.6, 1.35],
+    [-25.5, 17, 1.2], [25.5, 19, 1.25],
   ];
   pineSites.forEach(([x, z, scale], index) => {
     const lean = (index % 2 ? 1 : -1) * 0.3 * scale;
@@ -464,7 +473,7 @@ export function createWorld() {
       pineLeaves.push({ x: bx, y: by + 0.45, z: bz, sx: (1.1 - branch * 0.06) * scale, sy: 0.42 * scale, sz: 0.89 * scale, ry: index * 0.7 + branch, color: branch % 2 ? '#3b5b51' : '#304e47' });
     }
     pineLeaves.push({ x: x + lean, y: h + 0.03, z: z + 0.1, sx: 0.77 * scale, sy: 0.48 * scale, sz: 0.72 * scale, color: '#466356' });
-    if (x > -12 && x < 12 && z > -14 && z < 14) collider(x - 0.3, x + 0.3, z - 0.3, z + 0.3);
+    if (x > bounds.minX && x < bounds.maxX && z > bounds.minZ && z < bounds.maxZ) collider(x - 0.3, x + 0.3, z - 0.3, z + 0.3);
   });
   mesh(merged(pineTrunks), treeBark);
   instances(new THREE.IcosahedronGeometry(1, 1), material('#ffffff', { flatShading: true }), pineLeaves);
@@ -573,17 +582,31 @@ export function createWorld() {
   fireflies.frustumCulled = false;
   group.add(fireflies);
 
+  const campus = createCampus();
+  group.add(campus.group);
+  colliders.push(...campus.colliders);
+  groundMeshes.push(...campus.groundMeshes);
+  Object.assign(destinations, campus.destinations);
+  const places = {
+    wish: { label: '소원당', ...destinations.wish, height: 1.7 },
+    breath: { label: '숨고르기', ...destinations.breath, height: 1.7 },
+    blessing: { label: '기원나무', ...destinations.blessing, height: 1.7 },
+    ...campus.places,
+  };
+
   function heightAt(x, z) {
     if (x >= -4.55 && x <= 4.55 && z <= -6.5 && z >= -12.5) return 0.33;
     if (Math.abs(x) <= 1.65 && z < -4.7 && z > -6.5) return 0.02 + Math.min(1, (-z - 4.7) / 1.8) * 0.31;
     const meditationDistance = Math.hypot(x - meditationX, z - meditationZ);
     if (meditationDistance < 0.82) return 0.103;
     if (meditationDistance < 2.15) return 0.055;
+    if (x < -13 || x > 13 || z < -15 || z > 15) return campus.heightAt(x, z);
     return 0.02;
   }
 
   function update(time = 0, delta = 0) {
     const t = Number(time) || 0;
+    campus.update(t, delta);
     ribbonPivots.forEach(({ pivot, phase }) => {
       pivot.rotation.z = Math.sin(t * 0.7 + phase) * 0.1;
       pivot.rotation.x = Math.cos(t * 0.52 + phase) * 0.08;
@@ -637,5 +660,5 @@ export function createWorld() {
     group.clear();
   }
 
-  return { group, groundMeshes, colliders, bounds, heightAt, destinations, update, setWishCount, dispose };
+  return { group, groundMeshes, colliders, bounds, heightAt, destinations, places, npcs: campus.npcs, update, setWishCount, dispose };
 }

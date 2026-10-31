@@ -12,6 +12,7 @@
     var state = store.visit();
     var selectedCategory = 'peace';
     var selectedBlessing = 'courage';
+    var receivedBlessings = new Set();
     var pendingDelete = null;
     var toastTimer = null;
     var breathTimer = null;
@@ -560,7 +561,8 @@
 
     function receiveBlessing() {
       var blessing = core.parseBlessingHash(window.location.hash);
-      if (!blessing) return;
+      if (!blessing || receivedBlessings.has(blessing.id)) return;
+      receivedBlessings.add(blessing.id);
       selectedBlessing = blessing.id;
       renderBlessing();
       var receive = $('blessingReceive');
@@ -663,14 +665,15 @@
     window.addEventListener('hashchange', receiveBlessing);
     document.addEventListener('sowon:open', function (event) {
       var action = event.detail && event.detail.action;
-      var dialogId = { wish: 'wishDialog', breath: 'breathDialog', blessing: 'blessingDialog' }[action];
-      if (!dialogId || !['wish', 'breath', 'blessing'].includes(action)) return;
+      var dialogId = { wish: 'wishDialog', breath: 'breathDialog', blessing: 'blessingDialog', journal: 'journalDialog' }[action];
+      if (!dialogId || !['wish', 'breath', 'blessing', 'journal'].includes(action)) return;
       if (action === 'wish') prepareWish();
+      if (action === 'journal') renderJournal();
       if (action === 'blessing') {
         renderBlessing();
         if ($('blessingReceive')) $('blessingReceive').hidden = true;
       }
-      var selector = action === 'wish' ? '[data-open-wish]' : action === 'breath' ? '[data-open-breath]' : '[data-open-blessing]';
+      var selector = action === 'journal' ? '[data-open-journal]' : action === 'wish' ? '[data-open-wish]' : action === 'breath' ? '[data-open-breath]' : '[data-open-blessing]';
       openDialog($(dialogId), document.querySelector('.ritual-dock ' + selector) || document.querySelector(selector));
       track('open-' + action);
     });
