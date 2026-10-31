@@ -87,7 +87,7 @@ function loadEngine() {
   if (__engP) return __engP;
   __engP = new Promise((res, rej) => {
     const s = document.createElement("script");
-    s.src = "/calc/saju-engine.js?v=2026-10-07";
+    s.src = "/calc/saju-engine.js?v=4cadb1f5c1";
     s.onload = () => res(window["engine-core"]);
     s.onerror = () => { __engP = null; rej(new Error("engine")); };
     document.head.appendChild(s);
