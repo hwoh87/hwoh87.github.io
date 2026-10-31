@@ -103,7 +103,7 @@ export function loadReadingEngine() {
   return enginePromise;
 }
 
-function loadCatalog() {
+export function loadCatalog() {
   if (typeof PRODUCT_BY_SLUG !== 'undefined') return Promise.resolve();
   if (!window.__samraCatalogReady) {
     window.__samraCatalogReady = loadScript('/store/catalog.js', () => typeof PRODUCT_BY_SLUG !== 'undefined');
@@ -216,7 +216,15 @@ function createEnvironment(root, kind, options) {
       if (key === 'requestIdleCallback') return idle;
       if (key === 'IntersectionObserver') return realWindow.IntersectionObserver ? TrackedIntersectionObserver : undefined;
       if (key === 'addEventListener') return (name, callback, settings) => addListener(realWindow, name, callback, settings);
-      if (key === '__track') return (event, label) => { if (!disposed && typeof realWindow.__track === 'function') realWindow.__track(event, label); };
+      if (key === '__track') return (event, label) => {
+        if(disposed)return;
+        // An internal callback keeps the report summary in sync with a successful
+        // canonical calculation. Personal input is never put in a public event.
+        if(event==='calc_done'&&typeof options.onCalculated==='function'){
+          try{options.onCalculated(local.get('readForm')?.(),{root});}catch(_){}
+        }
+        if(typeof realWindow.__track==='function')realWindow.__track(event,label);
+      };
       const value = realWindow[key];
       return typeof value === 'function' ? value.bind(realWindow) : value;
     },
@@ -261,7 +269,7 @@ export async function mountReading(container, kind, options = {}) {
   const loading = document.createElement('p');
   loading.textContent = '계산 화면을 준비하고 있어요…';
   loading.setAttribute('role', 'status');
-  loading.style.cssText = 'padding:24px;color:#a8b7ad;font-size:13px';
+  loading.style.cssText = 'padding:24px;color:#69746b;font-size:14px';
   root.appendChild(loading);
   container.replaceChildren(host);
   let env;
@@ -291,9 +299,11 @@ export async function mountReading(container, kind, options = {}) {
     }
     const style = document.createElement('style'); style.textContent = view.styles; root.appendChild(style);
     const polish = document.createElement('link'); polish.rel = 'stylesheet'; polish.href = '/sowon/readings.css'; root.appendChild(polish);
+    const theme = document.createElement('link'); theme.rel='stylesheet';theme.href='/sowon/reading-theme.css?v=20261101-editorial1';root.appendChild(theme);
     const template = document.createElement('template');
     template.innerHTML = view.markup;
     root.appendChild(template.content.cloneNode(true));
+    if(options.autoScroll===false){const result=root.getElementById('result');if(result)result.scrollIntoView=()=>{};}
     root.querySelectorAll('form').forEach(form => form.addEventListener('submit', event => event.preventDefault()));
     env = createEnvironment(root, kind, readingFormOptions(options, kind));
     mountBirth(env);

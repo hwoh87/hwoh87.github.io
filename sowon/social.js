@@ -1,4 +1,4 @@
-import { getOwnProfile } from './profile.js?v=20261031-social1';
+import { getOwnProfile } from './profile.js?v=20261101-editorial1';
 import { RELATION_KINDS, safePosition, serverProfile, sameServerProfile, safeVisitors, safeRequests, availableActions, safeResult, socialError, cleanText, createSocialClient } from './social-core.js';
 
 let storage;

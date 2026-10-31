@@ -7,7 +7,7 @@ import { readJourney } from './hub-core.js';
 import { readSettings, normalizeSettings, effectiveQuality, nearestInteraction, pickedInteraction, interactionDistance } from './experience-core.js';
 import { createWayfinder } from './wayfinder.js?v=20261031-life1';
 import { HALLS, getFeature } from './hub-core.js';
-import { getOwnProfile } from './profile.js?v=20261031-social1';
+import { getOwnProfile } from './profile.js?v=20261101-editorial1';
 import { createVisitors } from './visitors.js?v=20261031-social1';
 
 const host = document.getElementById('worldViewport');

@@ -148,7 +148,7 @@ async function render(view) {
   try {
     let result;
     if(item.kind==='reading') {
-      const module=await import('./readings.js?v=20261031-social1'); if(version!==generation)return;
+      const module=await import('./readings.js?v=20261101-editorial1'); if(version!==generation)return;
       result=await module.mountReading(mount,item.value,{navigate,signal:viewAbort.signal,...readingOptions.get(item.value)});
     } else {
       const module=await import('./collection.js');if(version!==generation)return;

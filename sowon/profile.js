@@ -1,5 +1,5 @@
 import { PROFILE_KEY, createProfile, readProfile, writeProfile, clearStoredProfile, setActiveProfile, getActiveProfile, getActiveBirth, profileSearch } from './profile-core.js';
-import { loadReadingEngine, clearOwnPersonMemory } from './readings.js?v=20261031-social1';
+import { loadReadingEngine, clearOwnPersonMemory } from './readings.js?v=20261101-editorial1';
 
 export { profileSearch };
 export const getOwnProfile = getActiveProfile;

@@ -1,0 +1,138 @@
+/* The report owns the dialog's single scroll surface. Other shrine dialogs keep their own styles. */
+.xp-dialog.xp-personal-dialog {
+  --report-paper: #f7f6f2;
+  --report-ink: #242b29;
+  --report-muted: #626c65;
+  --report-green: #526b55;
+  --report-line: #d9ddd4;
+  width: min(980px,calc(100vw - 40px));
+  max-width: 980px;
+  height: 92dvh;
+  max-height: 92dvh;
+  padding: 0;
+  border: 1px solid #dce0d7;
+  border-radius: 10px;
+  background: var(--report-paper);
+  color: var(--report-ink);
+  color-scheme: light;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scrollbar-color: #c0c8ba var(--report-paper);
+  font-family: var(--sans,-apple-system,"Apple SD Gothic Neo",sans-serif);
+  font-size: 15px;
+  line-height: 1.9;
+  -webkit-text-size-adjust: 100%;
+}
+.xp-personal-dialog :is(button,a,summary) { -webkit-tap-highlight-color: transparent; }
+.xp-personal-dialog :is(button,a,summary):focus-visible { outline: 2px solid var(--report-green); outline-offset: 3px; }
+.xp-personal-dialog button { font-family: inherit; font-weight: 400; }
+.xp-personal-dialog :is(.report-content,.report-layout,.report-chapters,.report-technical-body) { min-width: 0; }
+.xp-personal-dialog .report-header { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 22px; min-height: 72px; padding: 12px 28px; border-bottom: 1px solid var(--report-line); background: var(--report-paper); }
+.xp-personal-dialog .report-brand { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; color: #4e5b50; font-size: 13px; line-height: 1.6; letter-spacing: -.015em; }
+.xp-personal-dialog .report-brand strong { color: var(--report-ink); font-size: 15px; font-weight: 600; }
+.xp-personal-dialog .report-brand span { color: var(--report-muted); }
+.xp-personal-dialog .report-utilities { display: flex; align-items: center; gap: 15px; margin-left: auto; }
+.xp-personal-dialog .report-utilities :is(button,a) { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 7px 2px; border: 0; border-radius: 0; background: transparent; color: #52624f; font-size: 13px; line-height: 1.6; text-decoration: none; white-space: nowrap; }
+.xp-personal-dialog .report-utilities :is(button,a):hover { color: #2e4733; text-decoration: underline; text-underline-offset: 4px; }
+.xp-personal-dialog .report-close { display: grid; place-items: center; flex: 0 0 44px; width: 44px; height: 44px; min-height: 44px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: #59675b; font-size: 25px; line-height: 1; }
+.xp-personal-dialog .report-close:hover { background: #e9ede3; color: var(--report-ink); }
+.xp-personal-dialog .report-tabs { display: flex; gap: 26px; padding: 0 36px; border-bottom: 1px solid var(--report-line); background: var(--report-paper); }
+.xp-personal-dialog .report-tabs button { position: relative; min-height: 52px; padding: 13px 1px; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: transparent; color: #758071; font-size: 14px; line-height: 1.7; }
+.xp-personal-dialog .report-tabs button[aria-selected=true] { border-bottom-color: var(--report-green); color: #304b37; font-weight: 600; }
+.xp-personal-dialog .report-tabs button:hover { color: var(--report-green); }
+.xp-personal-dialog .report-content { padding: 34px 36px 32px; background: var(--report-paper); }
+.xp-personal-dialog .report-intro { max-width: 710px; margin: 0 0 36px; }
+.xp-personal-dialog .report-kicker { margin: 0 0 13px; color: #64715e; font-size: 12px; line-height: 1.8; letter-spacing: .015em; }
+.xp-personal-dialog .report-title { margin: 0 0 17px; color: var(--report-ink); font-family: var(--serif,"Noto Serif KR",serif); font-size: clamp(30px,3.2vw,34px); font-weight: 500; letter-spacing: -.045em; line-height: 1.5; text-shadow: none; word-break: keep-all; overflow-wrap: anywhere; }
+.xp-personal-dialog .report-lead { margin: 0 0 18px; color: #405443; font-size: 19px; font-weight: 500; line-height: 1.85; letter-spacing: -.025em; word-break: keep-all; overflow-wrap: anywhere; }
+.xp-personal-dialog .report-profile { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 14px; margin: 0 0 20px; color: var(--report-muted); font-size: 12px; line-height: 1.9; }
+.xp-personal-dialog .report-profile p { margin: 0; }
+.xp-personal-dialog .report-profile button { min-height: 44px; padding: 8px 0; border: 0; border-radius: 0; background: transparent; color: var(--report-green); font-size: 12px; line-height: 1.7; text-decoration: underline; text-underline-offset: 3px; }
+.xp-personal-dialog .report-summary { margin: 0; color: #4b584d; font-size: 16px; line-height: 1.95; letter-spacing: -.015em; word-break: keep-all; overflow-wrap: anywhere; }
+.xp-personal-dialog .report-layout { display: grid; grid-template-columns: minmax(0,1fr) 160px; align-items: start; gap: 40px; }
+.xp-personal-dialog .report-layout[hidden] { display: none; }
+.xp-personal-dialog .report-outline { position: sticky; top: 110px; display: flex; flex-direction: column; gap: 1px; padding: 0 0 0 18px; border-left: 1px solid var(--report-line); }
+.xp-personal-dialog .report-outline :is(p,h2,h3,.report-outline-title) { margin: 0 0 10px; color: #6b7667; font-family: inherit; font-size: 12px; font-weight: 400; line-height: 1.7; letter-spacing: 0; }
+.xp-personal-dialog .report-outline :is(a,button) { display: flex; align-items: center; min-height: 44px; padding: 9px 0; border: 0; border-radius: 0; background: transparent; color: #687561; font-size: 12px; line-height: 1.7; text-align: left; text-decoration: none; word-break: keep-all; }
+.xp-personal-dialog .report-outline :is(a,button):hover { color: #36503b; }
+.xp-personal-dialog .report-outline :is([aria-current]:not([aria-current=false]),.is-active) { color: #304b37; font-weight: 600; }
+.xp-personal-dialog .report-chapter { padding: 31px 0 30px; border-top: 1px solid var(--report-line); scroll-margin-top: 104px; }
+.xp-personal-dialog .report-chapter:first-child { padding-top: 25px; }
+.xp-personal-dialog .report-chapter-number { display: block; margin: 0 0 11px; color: #6c7a65; font-size: 12px; font-variant-numeric: tabular-nums; line-height: 1.5; letter-spacing: .08em; }
+.xp-personal-dialog .report-chapter h2 { margin: 0 0 19px; color: var(--report-ink); font-family: var(--serif,"Noto Serif KR",serif); font-size: 24px; font-weight: 500; letter-spacing: -.035em; line-height: 1.6; word-break: keep-all; }
+.xp-personal-dialog .report-chapter>p { margin: 0 0 16px; color: #39453d; font-size: 16px; line-height: 1.95; letter-spacing: -.015em; word-break: keep-all; overflow-wrap: anywhere; }
+.xp-personal-dialog .report-chapter>p:last-child { margin-bottom: 0; }
+.xp-personal-dialog .report-signals { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px 20px; margin: 22px 0 0; padding: 0; }
+.xp-personal-dialog .report-signals>div { min-width: 0; padding: 11px 0 10px; border-top: 1px solid #e0e4da; }
+.xp-personal-dialog .report-signals dt { margin: 0 0 5px; color: #6b7667; font-size: 12px; line-height: 1.7; }
+.xp-personal-dialog .report-signals dd { margin: 0; color: #344c3a; font-size: 14px; font-weight: 500; line-height: 1.8; overflow-wrap: anywhere; }
+.xp-personal-dialog .report-notes { margin: 20px 0 0; padding: 0; color: var(--report-muted); font-size: 12px; line-height: 1.9; }
+.xp-personal-dialog .report-notes :is(p,li,small) { color: inherit; font-size: inherit; line-height: inherit; }
+.xp-personal-dialog .report-notes p { margin: 7px 0; }
+.xp-personal-dialog .report-notes ul { margin: 7px 0; padding-left: 18px; }
+.xp-personal-dialog .report-technical { margin: 30px 0 0; padding: 0; border-top: 1px solid var(--report-line); border-bottom: 1px solid var(--report-line); scroll-margin-top: 104px; }
+.xp-personal-dialog .report-technical>summary { min-height: 52px; padding: 14px 0; color: #425f46; font-size: 15px; font-weight: 500; line-height: 1.7; cursor: pointer; }
+.xp-personal-dialog .report-technical>summary::marker { color: #6d8266; font-size: 11px; }
+.xp-personal-dialog .report-technical-note { margin: 0 0 12px; color: var(--report-muted); font-size: 13px; line-height: 1.9; }
+.xp-personal-dialog .report-technical-body { background: var(--report-paper); }
+.xp-personal-dialog :is(.report-pending,.report-loading,.report-error) { margin: 0; padding: 28px 0; color: var(--report-muted); font-size: 15px; line-height: 1.9; }
+.xp-personal-dialog .report-error { color: #914e41; }
+.xp-personal-dialog .report-pending button { min-height: 44px; margin-top: 16px; padding: 10px 16px; border: 1px solid #b8c6af; border-radius: 6px; background: transparent; color: var(--report-green); font-size: 14px; line-height: 1.6; }
+.xp-personal-dialog .report-footnote { margin: 32px 0 0; padding: 21px 0 0; border-top: 1px solid var(--report-line); color: var(--report-muted); font-size: 12px; line-height: 1.9; }
+
+/* Related reading is a small catalogue, separate from the free interpretation. */
+.xp-personal-dialog .report-offers { margin: 34px 0 0; padding-top: 26px; border-top: 1px solid var(--report-line); scroll-margin-top: 104px; }
+.xp-personal-dialog .report-offers>h3 { margin: 0 0 10px; color: var(--report-ink); font-family: inherit; font-size: 20px; font-weight: 600; line-height: 1.7; letter-spacing: -.025em; }
+.xp-personal-dialog .report-offers>p { margin: 0 0 18px; color: var(--report-muted); font-size: 14px; line-height: 1.9; }
+.xp-personal-dialog .report-offer-tabs { display: flex; flex-wrap: wrap; gap: 0 20px; padding: 0; margin: 0 0 21px; border-bottom: 1px solid var(--report-line); }
+.xp-personal-dialog .report-offer-tabs button { min-height: 44px; padding: 11px 0; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: transparent; color: #6b7766; font-size: 13px; line-height: 1.6; }
+.xp-personal-dialog .report-offer-tabs button[aria-pressed=true] { color: #3c5a40; border-bottom-color: #738a68; font-weight: 600; }
+.xp-personal-dialog .report-offer-detail { min-width: 0; padding: 0; background: transparent; }
+.xp-personal-dialog .report-offer-title { margin: 0 0 12px; color: var(--report-ink); font-family: inherit; font-size: 20px; font-weight: 600; letter-spacing: -.025em; line-height: 1.65; word-break: keep-all; }
+.xp-personal-dialog .report-offer-detail>p { margin: 0 0 14px; color: #56634f; font-size: 14px; line-height: 1.9; word-break: keep-all; }
+.xp-personal-dialog .report-offer-facts { display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 16px 0; padding: 12px 0; border-top: 1px solid #e0e4da; border-bottom: 1px solid #e0e4da; color: #586951; font-size: 13px; line-height: 1.9; }
+.xp-personal-dialog .report-offer-facts :is(p,span,dt,dd) { margin: 0; font-size: inherit; line-height: inherit; }
+.xp-personal-dialog .report-offer-facts strong { color: #344c3a; font-weight: 500; }
+.xp-personal-dialog .report-offer-chapters { margin: 18px 0 22px; padding-left: 20px; color: #53614e; font-size: 14px; line-height: 1.9; }
+.xp-personal-dialog .report-offer-chapters li { padding: 3px 0 3px 3px; }
+.xp-personal-dialog .report-offer-link { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 11px 18px; border: 1px solid var(--report-green); border-radius: 6px; background: var(--report-green); color: #fff; font-size: 14px; font-weight: 500; line-height: 1.5; text-decoration: none; }
+.xp-personal-dialog .report-offer-link:hover { background: #405a44; border-color: #405a44; }
+.xp-personal-dialog .report-app-link { display: flex; align-items: center; width: fit-content; min-height: 44px; margin-top: 20px; padding: 16px 0 9px; border-top: 1px solid var(--report-line); color: var(--report-green); font-size: 14px; line-height: 1.7; text-decoration: underline; text-underline-offset: 4px; }
+.xp-personal-dialog :is(.report-offer-note,.report-app-note) { margin: 10px 0 0; color: var(--report-muted); font-size: 12px; line-height: 1.9; }
+
+@media (max-width: 759px) {
+  .xp-dialog.xp-personal-dialog { width: calc(100vw - 20px); max-width: calc(100vw - 20px); height: 92dvh; max-height: 92dvh; }
+  .xp-personal-dialog .report-header { display: grid; grid-template-columns: minmax(0,1fr) 44px; gap: 0 12px; min-height: 72px; padding: 11px 16px 9px; }
+  .xp-personal-dialog .report-brand { font-size: 12px; gap: 7px; }
+  .xp-personal-dialog .report-brand strong { font-size: 14px; }
+  .xp-personal-dialog .report-close { grid-column: 2; grid-row: 1; }
+  .xp-personal-dialog .report-utilities { grid-column: 1/-1; grid-row: 2; gap: 18px; margin: 0; }
+  .xp-personal-dialog .report-utilities :is(button,a) { min-height: 44px; font-size: 12px; padding: 8px 0; }
+  .xp-personal-dialog .report-tabs { gap: 24px; padding: 0 20px; }
+  .xp-personal-dialog .report-tabs button { min-height: 49px; font-size: 13px; }
+  .xp-personal-dialog .report-content { padding: 28px 20px; }
+  .xp-personal-dialog .report-intro { margin-bottom: 28px; }
+  .xp-personal-dialog .report-title { font-size: 30px; line-height: 1.55; }
+  .xp-personal-dialog .report-lead { font-size: 18px; line-height: 1.85; }
+  .xp-personal-dialog .report-summary { font-size: 16px; }
+  .xp-personal-dialog .report-profile { gap: 0 12px; font-size: 11px; margin-bottom: 17px; }
+  .xp-personal-dialog .report-layout { grid-template-columns: minmax(0,1fr); gap: 0; }
+  .xp-personal-dialog .report-outline { display: none; }
+  .xp-personal-dialog .report-chapter { padding: 27px 0; scroll-margin-top: 126px; }
+  .xp-personal-dialog .report-chapter h2 { font-size: 22px; margin-bottom: 17px; }
+  .xp-personal-dialog .report-chapter>p { font-size: 16px; line-height: 1.95; }
+  .xp-personal-dialog .report-signals { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px 17px; }
+  .xp-personal-dialog :is(.report-technical,.report-offers) { scroll-margin-top: 126px; }
+  .xp-personal-dialog .report-offer-tabs { column-gap: 18px; }
+  .xp-personal-dialog .report-offer-tabs button { font-size: 12px; }
+}
+@media (max-width: 360px) {
+  .xp-personal-dialog .report-content { padding: 25px 16px; }
+  .xp-personal-dialog .report-tabs { padding-left: 16px; padding-right: 16px; }
+  .xp-personal-dialog .report-profile { display: block; }
+  .xp-personal-dialog .report-profile button { display: block; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .xp-personal-dialog { scroll-behavior: auto; }
+}

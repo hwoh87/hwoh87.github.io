@@ -1,5 +1,5 @@
 import { readSettings, writeSettings, normalizeSettings } from './experience-core.js';
-import { getOwnProfile } from './profile.js?v=20261031-social1';
+import { getOwnProfile } from './profile.js?v=20261101-editorial1';
 
 let storage;
 try { storage = localStorage; } catch (_) {}
@@ -44,7 +44,7 @@ async function openEncounter(npc, {guide=false}={}) {
   encounterDialog.showModal(); body.classList.add('dialog-open');
   try {
     if(getOwnProfile()&&!guide){
-      const module=await import('./personal-encounter.js?v=20261031-social1');
+      const module=await import('./personal-encounter.js?v=20261101-editorial1');
       if(version!==encounterVersion||!encounterDialog.open)return;
       const result=await module.mountPersonalEncounter(encounterDialog,npc,{
         onClose:closeEncounter,
