@@ -1,0 +1,22 @@
+/* Completed chapters stay readable while the remaining chapters are written. */
+.rp-gen.partial { min-height: 0; padding: 34px 20px 26px; gap: 10px; }
+.rp-gen.partial .rp-mark, .rp-gen.partial .who, .rp-gen.partial .rp-hero, .rp-gen.partial .rp-steps { display: none; }
+.rp-gen.partial h1 { font-size: 16px; }
+.rp-gen.partial .line { max-width: 560px; min-height: 0; }
+.rp-gen.partial .err-box .alt { margin-top: 10px; }
+.rp-progress-note, .rp-supplement { margin: 26px 0; padding: 22px; border: 1px solid #ccb994; border-radius: 16px; background: #f6f0e3; color: #574a36; }
+.rp-progress-note p, .rp-supplement p { line-height: 1.8; }
+.rp-progress-note strong, .rp-supplement h2 { color: #4f3c22; }
+.rp-supplement h2 { margin: 0 0 12px; font-size: 20px; }
+.rp-supplement .rp-supplement-label { margin: 0 0 5px; font-size: 12px; font-weight: 800; letter-spacing: .08em; }
+.rp-supplement .rp-supplement-detail { font-size: 13px; }
+.rp-supplement button { margin-top: 10px; padding: 12px 18px; border-radius: 12px; background: #d5bd8c; color: #252525; font-weight: 700; }
+.rp-supplement button:disabled { opacity: .65; cursor: wait; }
+.rp-supplement [role="status"] { margin-top: 10px; font-size: 13px; }
+@media (max-width: 480px) {
+  .rp-gen.partial { padding: 25px 18px 20px; }
+  .rp-progress-note, .rp-supplement { padding: 18px; }
+  .rp-dock .in { flex-wrap: wrap; }
+  .rp-dock .hint { flex-basis: 100%; }
+  .rp-dock .pdf { margin-left: auto; }
+}

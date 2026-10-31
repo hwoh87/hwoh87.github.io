@@ -22,6 +22,7 @@
 </style>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="report-navigation.css">
+<link rel="stylesheet" href="report-progressive.css?v=annual-life-v1">
 <script src="/assets/track.js" defer></script>
 <link rel="stylesheet" href="premium.css">
 <script type="module" src="/sowon/return.js"></script>
@@ -71,7 +72,8 @@
 
 <script src="catalog.js"></script>
 <script src="store-api.js"></script>
-<script src="report-navigation.js"></script>
+<script src="report-navigation.js?v=annual-life-v1"></script>
+<script src="report-generation.js?v=annual-life-v1"></script>
 <script>
 const $ = s => document.querySelector(s);
 function toast(msg) {
@@ -95,6 +97,7 @@ try {
 } catch (_) {}
 let DATA = null;   // 서버 get 응답 — PDF 생성기도 이걸 쓴다
 let PROD = null, READER = null, CAT = null;
+let bootInFlight = false, supplementBusy = false, supplementError = "";
 
 function sprinkle(host, seedStr, n) {
   let seed = 0;
@@ -122,25 +125,13 @@ const GEN_LINES = [
 ];
 let lineTimer = null;
 function startLines(readerName) {
+  clearInterval(lineTimer);
   let i = 0;
   $("#genLine").textContent = readerName + " 술사가 " + GEN_LINES[0];
   lineTimer = setInterval(() => {
     i = (i + 1) % GEN_LINES.length;
-    $("#genLine").textContent = readerName + " 술사가 " + GEN_LINES[i];
+    $("#genLine").textContent = DATA?.chapters?.length ? "완성된 장부터 아래에서 읽을 수 있어요. 나머지 장은 계속 쓰고 있어요." : readerName + " 술사가 " + GEN_LINES[i];
   }, 3400);
-}
-
-// 청크당 챕터 수는 서버가 준 chunkSize 를 쓴다 — 상수로 박으면 서버가 분할을 바꾼 순간
-//   (v2 에서 4→3) '빠진 청크' 판정이 조용히 어긋난다. 구 응답이면 total/chunks 로 역산.
-function chunkSizeOf(data) {
-  if (data.chunkSize > 0) return data.chunkSize;
-  return Math.max(1, Math.ceil(data.total / Math.max(1, data.chunks)));
-}
-
-function chunkRanges(total, chunks, size) {
-  const out = [];
-  for (let i = 0; i < chunks; i++) out.push([i * size, Math.min(total, i * size + size)]);
-  return out;
 }
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -246,32 +237,24 @@ async function ensurePaid(data) {
 }
 
 async function ensureGenerated(data) {
-  const have = new Set(data.chapters.map(ch => ch.idx));
-  const size = chunkSizeOf(data);
-  const ranges = chunkRanges(data.total, data.chunks, size);
-  const missing = [];
-  ranges.forEach(([from, to], i) => {
-    for (let k = from; k < to; k++) if (!have.has(k)) { missing.push(i); break; }
-  });
-  if (!missing.length) return data;
-
-  // 생성 스테이지 전환
+  const ranges = StoreReportGeneration.rangesOf(data);
+  const have = new Set(StoreReportGeneration.chaptersOf(data).map(ch => ch.idx));
+  $("#gen").classList.remove("complete");
+  $("#genErr").style.display = "none";
+  $("#genRetry").textContent = "이어서 다시 쓰기";
+  $("#genRetry").dataset.resume = "";
   $("#genWho").style.display = "";
   $("#genWhoImg").src = "art/readers/" + PROD.reader + ".webp";
   $("#genTitle").textContent = READER.emoji + " " + READER.name + " 술사가 리포트를 쓰고 있어요";
   $("#genBar").style.display = "";
   $("#genBar").classList.add("live");
   startLines(READER.name);
-  const completedChapters = new Set(have);
   const baseTitle = document.title;
-
-  /* 장 목록 — 이미 받아 둔 장은 ✓, 이번에 쓰는 청크의 장은 "쓰는 중". 청크는 병렬로 쓰므로 여러 줄이
-     동시에 돈다. 줄이 ✓ 로 바뀌는 시점은 그 청크 응답이 실제로 도착한 때뿐이다(가짜 진행 없음). */
   const stepsEl = document.getElementById("genSteps");
   const titles = (PROD && PROD.chapters) || [];
   if (stepsEl && titles.length) {
     stepsEl.innerHTML = titles.slice(0, data.total).map((t, k) =>
-      `<li data-k="${k}" class="${have.has(k) ? "done" : "writing"}"><span class="dot" aria-hidden="true"></span>` +
+      `<li data-k="${k}" class="${have.has(k) ? "done" : ""}"><span class="dot" aria-hidden="true"></span>` +
       `<span>${String(k + 1).padStart(2, "0")} · ${escHtml(t)}</span></li>`).join("");
     stepsEl.hidden = false;
   }
@@ -280,62 +263,99 @@ async function ensureGenerated(data) {
     const [from, to] = ranges[i];
     for (let k = from; k < to; k++) {
       const li = stepsEl.querySelector(`li[data-k="${k}"]`);
-      if (li && li.className !== "done") li.className = cls;
+      if (li && li.className !== "done") li.className = cls === "waiting" ? "" : cls;
     }
   };
-
-  const paint = () => {
-    const doneCh = completedChapters.size;
-    const pct = Math.round((doneCh / data.total) * 100);
-    $("#genBarFill").style.width = pct + "%";
+  const paint = current => {
+    DATA = current;
+    const doneCh = current.chapters.length;
+    $("#genBarFill").style.width = Math.round((doneCh / data.total) * 100) + "%";
     $("#genPct").textContent = `${data.total}장 중 ${doneCh}장 완성`;
-    // 탭을 옮겨 둔 사람도 제목 표시줄에서 진행을 본다
     document.title = `(${doneCh}/${data.total}) ${READER.name} 술사가 쓰는 중 · 삼라만상`;
+    if (doneCh) renderView(current);
   };
-  paint();
-
-  const results = [];
-  for (const i of missing) {
-    try {
-      const r = await (async () => {
-      for (let attempt=0; ; attempt++) {
-        try { return await storeApi({ action: "generate", rid, chunk: i }); }
-        catch (e) { if (e.code !== "generation_in_progress" || attempt >= 60) throw e; await sleep(2000); }
+  try {
+    const full = await StoreReportGeneration.generate(data, async request => {
+      for (let attempt = 0; ; attempt++) {
+        try { return await storeApi({...request, rid}); }
+        catch (e) {
+          if (e.code !== "generation_in_progress" || attempt >= 60) throw e;
+          await sleep(Math.min(10000, Math.max(1000, (Number(e.retryAfterSec) || 2) * 1000)));
+        }
       }
-      })();
-      const [from, to] = ranges[i];
-      for (let k = from; k < to; k++) completedChapters.add(k);
-      markChunk(i, "done"); paint();
-      results.push({ status: "fulfilled", value: r });
-    } catch (reason) {
-      results.push({ status: "rejected", reason });
-      break;
-    }
-  }
-  const failed = results.filter(x => x.status === "rejected");
-  $("#genBar").classList.remove("live");
-  document.title = baseTitle;
-  if (failed.length) {
+    }, paint, markChunk);
+    $("#genTitle").textContent = "완성됐어요 — 펼쳐 볼게요";
+    return full;
+  } catch (error) {
+    // Keep every verified chapter on screen, including when another request failed.
     if (stepsEl) stepsEl.querySelectorAll("li.writing").forEach(li => { li.className = ""; });
-    clearInterval(lineTimer);
-    const e = failed[0].reason || {};
     $("#genTitle").textContent = "붓이 잠깐 멈췄어요";
-    $("#genLine").textContent = storeErrMsg(e) + (completedChapters.size > 0 ? " (일부 장은 이미 완성됐어요)" : "");
+    $("#genLine").textContent = storeErrMsg(error) + (DATA?.chapters?.length ? " 완성된 장은 아래에서 계속 읽을 수 있어요. 이어서 다시 쓰기를 누르면 남은 장만 작성해요." : "");
     $("#genErr").style.display = "block";
     if (typeof libAdd === "function") libAdd({rid,generationFailed:true});
     throw new Error("gen_failed");
+  } finally {
+    $("#genBar").classList.remove("live");
+    clearInterval(lineTimer);
+    document.title = baseTitle;
   }
-  clearInterval(lineTimer);
-  // 완성 순간을 한 박자 보여 준다 — 본문을 불러오는 동안이라 대기 시간을 늘리지 않는다(최소 0.65초).
-  $("#gen").classList.add("complete");
-  $("#genTitle").textContent = "완성됐어요 — 펼쳐 볼게요";
-  const calm = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const [full] = await Promise.all([storeApi({ action: "get", rid }), calm ? null : sleep(650)]);
-  return full;
 }
 
 // ── 렌더 ────────────────────────────────────────────────────
+function readingPoint() {
+  if ($("#view").style.display !== "block") return null;
+  const chapters = Array.from(document.querySelectorAll(".rp-ch"));
+  let chapter = null;
+  for (const item of chapters) if (item.getBoundingClientRect().top <= 160) chapter = item;
+  return {id:chapter?.id, top:chapter?.getBoundingClientRect().top, scroll:window.scrollY,
+    focus:document.activeElement?.id};
+}
+function restoreReadingPoint(point) {
+  if (!point) return;
+  const chapter = point.id && document.getElementById(point.id);
+  const top = chapter ? window.scrollY + chapter.getBoundingClientRect().top - point.top : point.scroll;
+  window.scrollTo({top, behavior:"instant"});
+  if (point.focus) document.getElementById(point.focus)?.focus({preventScroll:true});
+}
+function supplementHtml(data) {
+  if (!StoreReportGeneration.complete(data)) return "";
+  const saved = data.annualSupplement;
+  if (!saved?.body && !data.canGenerateAnnualSupplement) return "";
+  const text = saved?.body ? `<div class="rp-md">${mdToHtml(saved.body)}</div>` :
+    `<p>기존에 구매한 연간 리포트에 연애·재물·취업과 직장·생활관리의 실천 요약을 무료로 더해 드려요.</p>` +
+    `<button id="supplementBtn" type="button"${supplementBusy ? " disabled" : ""}>${supplementBusy ? "보강 요약을 쓰고 있어요…" : "무료 보강 요약 받기"}</button>` +
+    `<p role="status" aria-live="polite">${escHtml(supplementError || (supplementBusy ? "잠시 기다려 주세요. 완료되면 이 주문에 저장돼요." : ""))}</p>`;
+  return `<section class="rp-supplement" id="annualSupplement"><p class="rp-supplement-label">기존 구매자 무료 제공</p>` +
+    `<h2>2027 생활 속 실천 요약</h2><p class="rp-supplement-detail">구매 당시 본문은 그대로 보관됩니다. 보강 요약은 별도 제공하며, PDF에는 원래 리포트가 담겨요.</p>${text}</section>`;
+}
+function renderSupplement() {
+  const host = $("#supplementHost");
+  if (!host) return;
+  host.innerHTML = supplementHtml(DATA);
+  $("#supplementBtn")?.addEventListener("click", onSupplement);
+}
+async function onSupplement() {
+  if (supplementBusy || !StoreReportGeneration.complete(DATA) || !DATA.canGenerateAnnualSupplement) return;
+  supplementBusy = true; supplementError = ""; renderSupplement();
+  try {
+    let result;
+    for (let attempt = 0; ; attempt++) {
+      try { result = await storeApi({action:"supplement", rid}); break; }
+      catch (error) {
+        if (error.code !== "generation_in_progress" || attempt >= 60) throw error;
+        await sleep(Math.min(10000, Math.max(1000, (Number(error.retryAfterSec) || 2) * 1000)));
+      }
+    }
+    if (!result.annualSupplement?.body) throw new Error("incomplete_response");
+    DATA.annualSupplement = result.annualSupplement;
+    DATA.canGenerateAnnualSupplement = false;
+  } catch (error) { supplementError = storeErrMsg(error) + " 무료 보강 요약 받기를 눌러 다시 시도해 주세요."; }
+  finally { supplementBusy = false; renderSupplement(); }
+}
 function renderView(data) {
+  const point = readingPoint();
+  const complete = StoreReportGeneration.complete(data);
+  data = {...data, chapters:StoreReportGeneration.chaptersOf(data), done:complete};
   const inputs = data.inputs || {};
   const name = inputs.name || "당신";
 
@@ -352,7 +372,7 @@ function renderView(data) {
   hero += `<span class="rp-chip">${data.total}장 · ${new Date(data.created_at).toLocaleDateString("ko-KR")}</span>`;
   hero += `</div>`;
   $("#heroIn").innerHTML = hero;
-  sprinkle($("#stars"), rid, 46);
+  if (!$("#stars").childElementCount) sprinkle($("#stars"), rid, 46);
 
   // 지면 — 앱 결과 화면과 같은 구성: 명식 오프닝 → 챕터 사이에 분석지 시각 카드가 스민다.
   // 카테고리색을 지면 대비로 눌러 챕터 액센트로.
@@ -360,17 +380,18 @@ function renderView(data) {
   // 0.50 이면 7색 전부 5.6:1 이상이면서 색상(hue)은 그대로 남는다.
   const chAccent = darkenHex(CAT.color, 0.50);
   let paper = reportContentsHtml(data.chapters) + sheetOpeningHtml(data);
+  if (!complete) paper += `<aside class="rp-progress-note" role="status"><strong>완성된 ${data.chapters.length}장을 먼저 읽어 보세요.</strong><p>전체 ${data.total}장 중 나머지는 작성 중이에요. 완성되는 장이 이곳에 이어집니다. PDF 저장과 추가질문은 전체 완성 후 이용할 수 있어요.</p></aside>`;
   if (data.context?.fixedPeriod) paper += '<p class="recovery-help">2026년 9~12월의 흐름을 다루는 리포트예요. 이미 지난달은 회고로 읽어 주세요.</p>';
   const anchors = anchorSheetVisuals(data.chapters);
   data.chapters.forEach((ch, chapterIndex) => {
     if (ch.idx > 0) paper += `<div class="rp-divider" aria-hidden="true"><span>✦</span></div>`;
     const no = String(ch.idx + 1).padStart(2, "0");
-    paper += `<section class="rp-ch" id="report-chapter-${chapterIndex}" tabindex="-1" aria-labelledby="report-heading-${chapterIndex}" style="--chacc:${chAccent}">
+    paper += `<section class="rp-ch" id="report-chapter-${ch.idx}" tabindex="-1" aria-labelledby="report-heading-${ch.idx}" style="--chacc:${chAccent}">
       <div class="rp-ch-head">
         <span class="rp-ch-med">${no}</span>
         <div class="rp-ch-tt">
           <p class="rp-ch-ovl">CHAPTER ${no}</p>
-          <h2 class="rp-ch-title" id="report-heading-${chapterIndex}">${escHtml(ch.title)}</h2>
+          <h2 class="rp-ch-title" id="report-heading-${ch.idx}">${escHtml(ch.title)}</h2>
         </div>
       </div>
       ${anchors[ch.idx] ? `<div class="rp-ch-visual">${sheetVisualHtml(anchors[ch.idx], data)}</div>` : ""}
@@ -382,19 +403,19 @@ function renderView(data) {
   // 앵커를 못 찾은 분석지 카드는 말미에 모은다(약속한 분석지 누락 방지 — 앱과 동일).
   const leftover = ["elements", "sinsal", "months", "daewoon"]
     .filter(k => !Object.values(anchors).includes(k));
-  if (leftover.length) {
+  if (complete && leftover.length) {
     paper += `<div class="rp-divider"><span>✦</span></div>
       <div class="rp-sechead"><small>SHEET</small><b>명리 분석지</b></div>`;
     leftover.forEach(k => { paper += `<div class="rp-ch-visual">${sheetVisualHtml(k, data)}</div>`; });
   }
 
   // 관통 문구 에코 — 리딩을 닫는 서명(앱과 동일).
-  if (data.one_liner) {
+  if (complete && data.one_liner) {
     paper += `<p class="rp-sig-echo">“ ${escHtml(data.one_liner)} ”</p>`;
   }
 
   // 추가질문 (플러스 티어)
-  if (data.tier === "plus") {
+  if (complete && data.tier === "plus") {
     if (data.extra_q) {
       paper += `<div class="rp-ask"><p class="t">💬 추가질문</p>
         <p class="qa-q">Q. ${escHtml(data.extra_q.question)}</p>
@@ -407,6 +428,7 @@ function renderView(data) {
     }
   }
 
+  paper += `<div id="supplementHost"></div>`;
   paper += `<div class="rp-reader">
     <img src="art/readers/${PROD.reader}.webp" alt="">
     <div><p class="nm">${READER.emoji} ${escHtml(READER.name)}</p>
@@ -420,21 +442,28 @@ function renderView(data) {
 
   const askBtn = $("#askBtn");
   if (askBtn) askBtn.addEventListener("click", onAsk);
+  renderSupplement();
   $("#copyRecovery").addEventListener("click", async () => {
     try { await navigator.clipboard.writeText(recoveryUrl(rid)); $("#recoveryCopyStatus").textContent="복사했어요. 개인 메모 등 안전한 곳에 보관해 주세요."; }
     catch (_) { const field = document.createElement("input"); field.value=recoveryUrl(rid); field.readOnly=true; field.setAttribute("aria-label","개인 복구 링크"); $("#recoveryCopyStatus").replaceChildren(field); field.select(); }
   });
 
-  $("#gen").style.display = "none";
+  $("#gen").style.display = complete ? "none" : "flex";
+  $("#gen").classList.toggle("partial", !complete);
   $("#view").style.display = "block";
+  $("#pdfBtn").disabled = !complete;
+  $("#pdfBtn").textContent = complete ? "📕 PDF로 소장하기" : "전체 완성 후 PDF 저장";
+  $("#dockHint").innerHTML = complete ? "이 리포트는 결제일부터 12개월 동안 열 수 있어요.<br>기간 안에 PDF로 저장해 두세요!" : `${data.total}장 중 ${data.chapters.length}장 완성 · 읽는 동안 나머지를 작성해요.`;
   document.body.style.background = "#faf5ee";
 
   // 보관함 갱신(관통문구 포함)
   libAdd({ rid, slug: data.slug, title: PROD.title, name: inputs.name || "", at: Date.parse(data.created_at) || Date.now(), sig: data.one_liner || "", status:data.status,channel:data.channel,paymentPlatform:data.paymentPlatform,expires_at:data.expires_at,total:data.total,completed:data.chapters.length,done:data.done,generationFailed:false });
   if (!renderView.positionBound) { bindReadingPosition(rid); renderView.positionBound=true; }
+  restoreReadingPoint(point);
 }
 
 async function onAsk() {
+  if (!StoreReportGeneration.complete(DATA)) return;
   const q = $("#askInput").value.trim();
   if (q.length < 5) { toast("질문을 조금만 더 구체적으로 적어줘"); return; }
   const btn = $("#askBtn");
@@ -460,7 +489,7 @@ function loadScript(src) {
   });
 }
 $("#pdfBtn").addEventListener("click", async () => {
-  if (pdfLoading || !DATA) return;
+  if (pdfLoading || !StoreReportGeneration.complete(DATA)) return;
   pdfLoading = true;
   const btn = $("#pdfBtn");
   const orig = btn.textContent;
@@ -499,7 +528,9 @@ async function loadReportForView() {
   }
 }
 async function boot() {
+  if (bootInFlight) return;
   if (!rid) { $("#genTitle").textContent = "리포트 주소가 올바르지 않아요"; $("#genLine").textContent = "링크를 다시 확인해줘."; return; }
+  bootInFlight = true;
   try {
     let data = await loadReportForView();
     const identity = reportIdentity(data);
@@ -509,9 +540,9 @@ async function boot() {
     libAdd({rid,slug:data.slug,title:PROD.title,name:data.inputs?.name || "",status:data.status,channel:data.channel,paymentPlatform:data.paymentPlatform,expires_at:data.expires_at,total:data.total,completed:data.chapters.length,at:Date.parse(data.created_at)||Date.now()});
     if (data.status !== "paid") data = await ensurePaid(data);
     try { sessionStorage.removeItem("samra_pending_payment_"+rid); } catch (_) {}
-    if (!data.done) data = await repairFixedPeriod(data,rid);
-    if (!data.done) data = await ensureGenerated(data);
-    if (!data.done) throw new Error("incomplete");
+    if (!StoreReportGeneration.complete(data)) data = await repairFixedPeriod(data,rid);
+    if (!StoreReportGeneration.complete(data)) data = await ensureGenerated(data);
+    if (!StoreReportGeneration.complete(data)) throw new Error("incomplete");
     DATA = data;
     renderView(data);
   } catch (e) {
@@ -529,7 +560,7 @@ async function boot() {
     // 여기까지 왔으면 이 화면에서 할 수 있는 건 '다시 열기'와 '보관함에서 찾기'뿐이다.
     $("#genRetry").textContent = "다시 열어 보기";
     $("#genErr").style.display = "block";
-  }
+  } finally { bootInFlight = false; }
 }
 $("#genRetry").addEventListener("click", () => {
   if ($("#genRetry").dataset.resume === "true") { resumePayment(); return; }
