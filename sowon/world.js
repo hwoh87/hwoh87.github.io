@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { createCampus } from './campus.js';
+import { createCampus } from './campus.js?v=20261031-life1';
+import { createAtmosphere, makeHangulGeometry } from './atmosphere.js';
 
 /** A walkable Korean courtyard with five adjoining gardens and halls. */
 export function createWorld() {
@@ -317,10 +318,25 @@ export function createWorld() {
     brackets.push({ x, y: 3.66, z: -6.82, sx: 0.2, sy: 0.14, sz: 0.72 });
   });
   instances(new THREE.BoxGeometry(1, 1, 1), timber, brackets, false);
+  // Native gold Hangul strokes on a real wooden plaque, with no font or image.
+  box(2.25, 0.51, 0.12, timberDark, 0, 3.12, -6.57, false);
+  box(2.12, 0.4, 0.025, timberLight, 0, 3.12, -6.495, false);
+  box(2.04, 0.33, 0.018, timberDark, 0, 3.12, -6.475, false);
+  const signGold = material('#d4b77b', { metalness: 0.4, emissive: '#ad7c39', emissiveIntensity: 0.12 });
+  const signLetters = [makeHangulGeometry('소원당', 0.32).translate(0, 3.12, -6.455)];
+  const smallSigns = [{ text: '숨고르기', x: -9.5, z: 2.7 }, { text: '기원나무', x: 9.4, z: 2.05 }];
+  for (const sign of smallSigns) {
+    box(1.84, 0.42, 0.22, darkStone, sign.x, 0.64, sign.z, false);
+    box(1.93, 0.09, 0.3, stoneEdge, sign.x, 0.9, sign.z, false);
+    box(0.29, 0.43, 0.27, darkStone, sign.x, 0.26, sign.z, false);
+    signLetters.push(makeHangulGeometry(sign.text, 0.285).translate(sign.x, 0.65, sign.z + 0.125));
+    collider(sign.x - 0.97, sign.x + 0.97, sign.z - 0.17, sign.z + 0.17);
+  }
+  mesh(merged(signLetters), signGold, 0, 0, 0, false);
 
   // A modest altar, empty of religious figures, invites the user into the hall.
   box(3.8, 0.18, 1.25, timberDark, 0, 0.43, -10.72);
-  box(3.4, 0.17, 1.1, timberLight, 0, 1.12, -10.72);
+  const altarTable = box(3.4, 0.17, 1.1, timberLight, 0, 1.12, -10.72);
   const altarLegs = [];
   [-1.42, 1.42].forEach((x) => [-11.06, -10.38].forEach((z) => altarLegs.push({ x, y: 0.78, z, sx: 0.12, sy: 0.7, sz: 0.12 })));
   instances(new THREE.BoxGeometry(1, 1, 1), timber, altarLegs);
@@ -418,7 +434,7 @@ export function createWorld() {
     [[treeX - 0.7, 2.95, treeZ], [treeX - 1.6, 4, treeZ - 0.7], 0.09],
     [[treeX + 0.65, 3.13, treeZ], [treeX + 1.8, 3.95, treeZ + 0.65], 0.085],
   ];
-  mesh(merged(treeBranches.map(([a, b, r]) => beamGeometry(a, b, r))), treeBark);
+  const blessingTrunk = mesh(merged(treeBranches.map(([a, b, r]) => beamGeometry(a, b, r))), treeBark);
   collider(6.55, 7.4, -0.7, 0.13);
   const blessingLeaves = [
     { x: 5.5, y: 3.8, z: -0.4, sx: 1.18, sy: 0.58, sz: 0.97 },
@@ -428,7 +444,7 @@ export function createWorld() {
     { x: 8.15, y: 3.95, z: 0.6, sx: 1.07, sy: 0.6, sz: 0.91 },
     { x: 6.18, y: 3.63, z: 0.55, sx: 1.1, sy: 0.62, sz: 0.9 },
   ];
-  instances(new THREE.IcosahedronGeometry(1, 1), foliageLight, blessingLeaves);
+  const blessingCrown = instances(new THREE.IcosahedronGeometry(1, 1), foliageLight, blessingLeaves);
   const ribbonPivots = [];
   for (let i = 0; i < 16; i += 1) {
     const angle = i * 2.3999;
@@ -549,7 +565,7 @@ export function createWorld() {
   mountainRange([[-60, 4], [-49, 8], [-40, 6], [-33, 11], [-27, 14], [-19, 10], [-12, 12], [-6, 8], [2, 13], [8, 9], [17, 15], [25, 10], [33, 12], [41, 7], [51, 9], [60, 4]], -60, '#334a63', 5);
   mountainRange([[-50, 3], [-41, 7], [-35, 6], [-28, 11], [-20, 7], [-14, 9], [-6, 5], [2, 8], [10, 11], [17, 7], [25, 10], [32, 6], [42, 8], [50, 3]], -46, '#263e51', 4);
   mountainRange([[-41, 3], [-33, 7], [-25, 5], [-19, 9], [-11, 4], [-4, 6], [5, 4], [13, 7], [19, 10], [26, 6], [35, 7], [42, 3]], -34, '#1f3543', 4);
-  const moon = mesh(new THREE.SphereGeometry(3.15, 40, 24), new THREE.MeshBasicMaterial({ color: '#f1e6c2', fog: false }), -5, 16, -45, false);
+  const moon = mesh(new THREE.SphereGeometry(3.15, 40, 24), new THREE.MeshBasicMaterial({ color: '#f1e6c2', fog: false, transparent: true, opacity: 1, depthWrite: false }), -5, 16, -45, false);
   moon.name = 'Full moon';
   const moonHalo = mesh(new THREE.SphereGeometry(3.55, 32, 20), new THREE.MeshBasicMaterial({ color: '#b7d0df', transparent: true, opacity: 0.045, depthWrite: false, side: THREE.BackSide, fog: false }), -5, 16, -45, false);
   moonHalo.name = 'Soft moon halo';
@@ -562,25 +578,10 @@ export function createWorld() {
     const z = Math.sqrt(3.15 * 3.15 - x * x - y * y);
     moonCraters.push({ x: -5 + x, y: 16 + y, z: -45 + z + 0.015, sx: 0.23 + (i % 3) * 0.1, sy: 0.16 + (i % 2) * 0.06, sz: 0.025, rz: angle });
   }
-  instances(new THREE.SphereGeometry(1, 10, 8), new THREE.MeshBasicMaterial({ color: '#d7cfae', transparent: true, opacity: 0.28, fog: false }), moonCraters, false);
-  const starPositions = [];
-  for (let i = 0; i < 170; i += 1) {
-    const angle = random() * Math.PI * 2;
-    const distance = 50 + random() * 25;
-    starPositions.push(Math.cos(angle) * distance, 13 + random() * 30, Math.sin(angle) * distance);
-  }
-  const starsGeometry = new THREE.BufferGeometry();
-  starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
-  const stars = new THREE.Points(starsGeometry, new THREE.PointsMaterial({ color: '#c1d2df', size: 0.11, transparent: true, opacity: 0.76, sizeAttenuation: true, fog: false, depthWrite: false }));
-  group.add(stars);
-
-  const fireflyPositions = Array.from({ length: 20 }, () => ({ x: (random() - 0.5) * 21, y: 0.8 + random() * 2.5, z: (random() - 0.5) * 21, phase: random() * Math.PI * 2 }));
-  const fireflyGeometry = new THREE.BufferGeometry();
-  fireflyGeometry.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(fireflyPositions.length * 3), 3));
-  const fireflyMat = new THREE.PointsMaterial({ color: '#d5dc91', size: 0.055, transparent: true, opacity: 0.65, depthWrite: false });
-  const fireflies = new THREE.Points(fireflyGeometry, fireflyMat);
-  fireflies.frustumCulled = false;
-  group.add(fireflies);
+  const moonMarks = instances(new THREE.SphereGeometry(1, 10, 8), new THREE.MeshBasicMaterial({ color: '#d7cfae', transparent: true, opacity: 0.28, fog: false }), moonCraters, false);
+  const air = createAtmosphere();
+  group.add(air.group);
+  const atmosphere = air.state;
 
   const campus = createCampus();
   group.add(campus.group);
@@ -593,6 +594,33 @@ export function createWorld() {
     blessing: { label: '기원나무', ...destinations.blessing, height: 1.7 },
     ...campus.places,
   };
+  const interactions = [
+    { id: 'object-wish-altar', type: 'object', hall: 'wish', action: 'wish', label: '소원당에서 마음 밝히기', point: { x: 0, z: -9 }, radius: 2.2, anchor3d: { x: 0, y: 1.65, z: -10.72 }, group: altarTable, groups: [altarTable, altarBowl] },
+    { id: 'object-lantern-pool', type: 'object', hall: 'wish', action: 'wish', label: '연못에 소원등 띄우기', point: { x: -5.4, z: -0.6 }, radius: 2.2, anchor3d: { x: -8, y: 0.5, z: -3.9 }, group: water },
+    { id: 'object-breathing-mat', type: 'object', hall: 'breath', action: 'breath', label: '잠깐 숨 고르기', point: { x: -7, z: 1 }, radius: 2.2, anchor3d: { x: -7, y: 0.6, z: 1 }, group: mat },
+    { id: 'object-blessing-tree', type: 'object', hall: 'blessing', action: 'blessing', label: '누군가를 위한 기원', point: { x: 7, z: 1 }, radius: 2.2, anchor3d: { x: 7, y: 2.5, z: -0.3 }, group: blessingTrunk, groups: [blessingTrunk, blessingCrown] },
+    ...campus.interactions,
+  ];
+  interactions.forEach((interaction) => {
+    if (interaction.group) interaction.group.userData.interactionId = interaction.id;
+    interaction.groups?.forEach((object) => { object.userData.interactionId = interaction.id; });
+  });
+  let lightStrength = 1;
+  let paperStrength = 0.55;
+  function setAtmosphere(mood) {
+    if (!['moon', 'dawn'].includes(mood)) return atmosphere;
+    air.setMood(mood);
+    campus.setAtmosphere(mood);
+    const isMoon = mood === 'moon';
+    lightStrength = isMoon ? 1 : 0.32; paperStrength = isMoon ? 0.58 : 0.18;
+    treeLight.intensity = isMoon ? 3 : 0.55; pondLight.intensity = isMoon ? 2.5 : 0.4;
+    windowMat.emissiveIntensity = isMoon ? 0.62 : 0.15;
+    moon.material.opacity = isMoon ? 1 : 0.23;
+    moonHalo.material.opacity = isMoon ? 0.045 : 0.012;
+    moonMarks.material.opacity = isMoon ? 0.28 : 0.055;
+    return atmosphere;
+  }
+  function setQuality(quality) { return air.setQuality(quality); }
 
   function heightAt(x, z) {
     if (x >= -4.55 && x <= 4.55 && z <= -6.5 && z >= -12.5) return 0.33;
@@ -605,7 +633,9 @@ export function createWorld() {
   }
 
   function update(time = 0, delta = 0) {
-    const t = Number(time) || 0;
+    const numericTime = Number(time);
+    const t = Number.isFinite(numericTime) ? numericTime : 0;
+    air.update(t);
     campus.update(t, delta);
     ribbonPivots.forEach(({ pivot, phase }) => {
       pivot.rotation.z = Math.sin(t * 0.7 + phase) * 0.1;
@@ -635,14 +665,12 @@ export function createWorld() {
       const scale = 1 + Math.sin(t * 0.5 + i * 2) * 0.04;
       ripple.scale.set(scale, scale * 0.81, 1);
     });
-    const attribute = fireflyGeometry.getAttribute('position');
-    fireflyPositions.forEach((p, i) => attribute.setXYZ(i, p.x + Math.sin(t * 0.2 + p.phase) * 0.4, p.y + Math.sin(t * 0.48 + p.phase) * 0.2, p.z + Math.cos(t * 0.17 + p.phase) * 0.4));
-    attribute.needsUpdate = true;
-    shrineLight.intensity = 8 + Math.sin(t * 2.1) * 0.12;
-    paper.emissiveIntensity = 0.55 + Math.sin(t * 1.2) * 0.025;
+    shrineLight.intensity = (8 + Math.sin(t * 2.1) * 0.12) * lightStrength;
+    paper.emissiveIntensity = paperStrength + Math.sin(t * 1.2) * 0.025;
     // delta is intentionally accepted for the scene controller's shared contract.
     void delta;
   }
+  setAtmosphere('moon');
   update(0, 0);
 
   function dispose() {
@@ -660,5 +688,5 @@ export function createWorld() {
     group.clear();
   }
 
-  return { group, groundMeshes, colliders, bounds, heightAt, destinations, places, npcs: campus.npcs, update, setWishCount, dispose };
+  return { group, groundMeshes, colliders, bounds, heightAt, destinations, places, interactions, atmosphere, npcs: campus.npcs, update, setWishCount, setAtmosphere, setQuality, dispose };
 }

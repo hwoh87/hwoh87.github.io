@@ -182,7 +182,7 @@ export function findPath(start, target, world, options = {}) {
 }
 
 /** Navigation owns avatar animation. The avatar faces local +Z. */
-export function createLocomotion({ camera, domElement, avatar, world, orbitControls, onMove, onArrival }) {
+export function createLocomotion({ camera, domElement, avatar, world, orbitControls, onMove, onArrival, onPick }) {
   const player = avatar.group;
   const initialPosition = { x: player.position.x, z: player.position.z };
   const speed = 3.2;
@@ -391,6 +391,7 @@ export function createLocomotion({ camera, domElement, avatar, world, orbitContr
     if (!rect.width || !rect.height) return;
     pointer.set((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1);
     raycaster.setFromCamera(pointer, camera);
+    if (typeof onPick === 'function' && onPick(raycaster, event)) return;
     const hit = raycaster.intersectObjects(world.groundMeshes || [], true)[0];
     if (hit) planJourney({ x: hit.point.x, z: hit.point.z }, null, 'manual');
   });
@@ -449,5 +450,5 @@ export function createLocomotion({ camera, domElement, avatar, world, orbitContr
     marker.removeFromParent(); marker.geometry.dispose(); marker.material.dispose();
   }
 
-  return { update, goTo, setEnabled, reset, dispose, getState };
+  return { update, goTo, setEnabled, reset, cancel: stopInputs, dispose, getState };
 }

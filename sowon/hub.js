@@ -237,6 +237,8 @@ document.addEventListener('click',event=>{
   }
 });
 document.addEventListener('sowon:open',event=>{if(getHall(event.detail?.action))open({type:'hall',id:event.detail.action});});
+document.addEventListener('sowon:feature',event=>{if(getFeature(event.detail?.id))open({type:'feature',id:event.detail.id});});
+document.addEventListener('sowon:hall',event=>{if(getHall(event.detail?.id))open({type:'hall',id:event.detail.id});});
 document.addEventListener('sowon:navigate',event=>{if(event.detail?.url)navigate(event.detail.url);});
 dialog.querySelector('.hub-close').onclick=close;
 dialog.querySelector('.hub-back').onclick=()=>history.back();

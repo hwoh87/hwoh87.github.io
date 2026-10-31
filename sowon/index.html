@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
+  <script>if(location.protocol==='file:')location.replace('https://samra.cc/sowon/');</script>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#111c29">
   <meta name="description" content="캐릭터로 거니는 삼라 소원당. 명리전의 사주, 인연정의 궁합, 별마루의 자미두수와 출생 차트, 열두 술사의 리포트와 서고를 달빛 아래에서 만나요.">
@@ -31,12 +32,15 @@
   <link rel="stylesheet" href="collection.css">
   <link rel="stylesheet" href="readings.css">
   <link rel="stylesheet" href="reference.css">
+  <link rel="stylesheet" href="experience.css?v=20261031-life1">
+  <link rel="stylesheet" href="wayfinder.css?v=20261031-life1">
   <script src="core.js" defer></script>
-  <script src="app.js?v=20261031-home3" defer></script>
-  <script type="module" src="hub.js?v=20261031-home3"></script>
+  <script src="app.js?v=20261031-life1" defer></script>
+  <script type="module" src="hub.js?v=20261031-life1"></script>
+  <script type="module" src="experience.js?v=20261031-life1"></script>
   <script src="/assets/track.js" defer></script>
   <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
-  <script type="module">import('./scene.js?v=20261031-home3').catch(function(){document.body.classList.add('world-failed');document.getElementById('worldLoading').hidden=true;document.getElementById('worldFallback').hidden=false;document.getElementById('enterWorld').disabled=false;document.getElementById('enterWorld').setAttribute('aria-busy','false');document.getElementById('enterWorldLabel').textContent='소원 등불 밝히기';document.getElementById('entranceNote').textContent='가입 없이 무료로 · 나만 볼 수 있는 소원';});</script>
+  <script type="module">import('./scene.js?v=20261031-life1').catch(function(){document.body.classList.add('world-failed');document.getElementById('worldLoading').hidden=true;document.getElementById('worldFallback').hidden=false;document.getElementById('enterWorld').disabled=false;document.getElementById('enterWorld').setAttribute('aria-busy','false');document.getElementById('enterWorldLabel').textContent='소원 등불 밝히기';document.getElementById('entranceNote').textContent='가입 없이 무료로 · 나만 볼 수 있는 소원';});</script>
 </head>
 <body>
   <a class="skip-link" href="#entrance">소원당으로 바로 가기</a>
@@ -57,6 +61,8 @@
     <symbol id="i-scroll" viewBox="0 0 24 24"><path d="M7 3h12v15a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3h14M7 3a3 3 0 0 0-3 3v2h3V3ZM10 7h6M10 11h6M9 15h7"/></symbol>
     <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20 4 12a5 5 0 0 1 8-6 5 5 0 0 1 8 6l-8 8Z"/></symbol>
     <symbol id="i-stars" viewBox="0 0 24 24"><path d="m12 2 2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5L12 2ZM20 2v4M18 4h4"/></symbol>
+    <symbol id="i-outfit" viewBox="0 0 24 24"><path d="m8 3 4 3 4-3 5 5-3 4-2-1v10H8V11l-2 1-3-4 5-5ZM8 3l4 6 4-6M12 9v12M9 12h6"/></symbol>
+    <symbol id="i-overview" viewBox="0 0 24 24"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5M7 12l5-3 5 3-5 3-5-3Z"/></symbol>
   </svg>
 
   <main class="sanctuary" id="entrance">
@@ -137,6 +143,11 @@
     </div>
     <button class="return-gate" id="returnToGate" type="button" aria-label="처음 자리로 돌아가기"><svg class="icon" aria-hidden="true"><use href="#i-moon"/></svg><span>처음 자리</span></button>
     <button class="traveler-greet" id="greetTraveler" type="button"><span aria-hidden="true">✧</span>인사하기</button>
+    <div class="experience-tools" aria-label="풍경과 나그네"><button id="overviewWorld" type="button" aria-label="신당 전체 보기" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-overview"/></svg><span>전체 보기</span></button><button type="button" data-open-traveler aria-label="나그네의 취향과 풍경 설정"><svg class="icon" aria-hidden="true"><use href="#i-outfit"/></svg><span>나그네 설정</span></button></div>
+    <div class="place-caption" id="placeCaption" hidden><small>달빛을 따라 걷는 길</small><strong></strong><p></p></div>
+    <div class="world-wayfinder" id="worldWayfinder" aria-label="신당 산책 지도"></div>
+    <div class="npc-names" id="npcNames"></div>
+    <button class="nearby-card" id="nearbyCard" type="button" hidden><img alt="" width="42" height="42" hidden><span class="nearby-copy"><small></small><strong></strong></span><span><b class="nearby-action">이야기 나누기</b><kbd class="nearby-key">E</kbd></span></button>
     <div class="world-fallback" id="worldFallback" role="status" hidden>이 브라우저에서는 달빛 풍경으로 안내해요. 전체 기능에서 계산기·리포트·서고와 소원을 그대로 이용할 수 있어요.</div>
     <p class="storage-notice" id="storageNotice" role="status" hidden>이 브라우저는 기록을 저장할 수 없어요. 지금 남긴 소원은 창을 닫으면 사라질 수 있어요.</p>
     <noscript><div class="noscript-note">소원 등불을 밝히려면 JavaScript를 켜주세요. 지금은 달빛 풍경을 바라보며 잠시 쉬어가셔도 좋아요.</div></noscript>
@@ -227,7 +238,8 @@
     <div class="about-section"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg><div><h3>조용히 간직하는 나만의 기록</h3><p>로그인 없이 무료로 이용해요. 소원은 서버에 보내지 않고 이 브라우저에 최대 50개 보관해요. 다른 사람에게 공개되지 않으며, 기기 간 동기화는 지원하지 않아요.</p></div></div>
     <div class="about-section"><svg class="icon" aria-hidden="true"><use href="#i-moon"/></svg><div><h3>달빛지기 루나와 함께</h3><p>루나의 한마디는 주제에 따라 준비된 응원 문장이에요. 등불은 바라는 마음을 담는 상징이며, 소원당은 특정 종교나 실제 의례를 대신하지 않아요.</p></div></div>
     <div class="about-links"><a href="/calc/" data-cta="sowon-calc">내 사주 살펴보기<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a><a href="/" data-cta="sowon-reports">삼라 이야기 더 보기<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
-    <p class="about-credits">© SAMRA · 달빛 풍경은 삼라를 위해 제작한 AI 이미지예요.</p>
+    <div class="about-section"><svg class="icon" aria-hidden="true"><use href="#i-compass"/></svg><div><h3>머무는 자리에서, 한 가지 더</h3><p>술사나 책상·천문 기구를 직접 누르면 가까이 다가가 이야기를 열어요. 가까운 자리에서는 안내 버튼이나 키보드 E로도 살펴볼 수 있어요. 오른쪽 작은 지도에는 나의 위치와 걷는 길이 표시돼요. 옷 모양 버튼에서 한복과 달밤·새벽 풍경을 고르고, 전체 보기 버튼이나 V로 신당을 멀리 바라볼 수도 있어요.</p></div></div>
+    <p class="about-credits">© SAMRA · 그래픽을 사용할 수 없을 때 보이는 대체 풍경은 삼라를 위해 제작한 AI 이미지예요.</p>
   </dialog>
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 </body>

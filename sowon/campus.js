@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { makeHangulGeometry } from './atmosphere.js';
 
 /** Five quiet side gardens. Repeated architectural detail is batched by material. */
 export function createCampus() {
@@ -6,6 +7,7 @@ export function createCampus() {
   group.name = 'Samra — halls and moon garden';
   const groundMeshes = [];
   const colliders = [];
+  const interactions = [];
   const destinations = {
     myeongri: { x: -17, z: -4.9 },
     inyeon: { x: 17, z: 6.7 },
@@ -31,8 +33,10 @@ export function createCampus() {
     plaster: new THREE.MeshStandardMaterial({ color: '#a6a58d', roughness: 1 }),
     tile: new THREE.MeshStandardMaterial({ color: '#294858', roughness: 0.8, metalness: 0.06, side: THREE.DoubleSide }),
     tileRib: new THREE.MeshStandardMaterial({ color: '#54707a', roughness: 0.83 }),
-    gold: new THREE.MeshStandardMaterial({ color: '#c2a267', roughness: 0.5, metalness: 0.48 }),
+    gold: new THREE.MeshStandardMaterial({ color: '#c2a267', roughness: 0.5, metalness: 0.48, emissive: '#a87839', emissiveIntensity: 0.18 }),
     paper: new THREE.MeshStandardMaterial({ color: '#eadcba', roughness: 1, emissive: '#ffd08a', emissiveIntensity: 0.34 }),
+    paperRose: new THREE.MeshStandardMaterial({ color: '#d7bcad', roughness: 1, emissive: '#e9b394', emissiveIntensity: 0.32 }),
+    paperBlue: new THREE.MeshStandardMaterial({ color: '#bdced0', roughness: 1, emissive: '#b4cbd6', emissiveIntensity: 0.24 }),
     darkPaper: new THREE.MeshStandardMaterial({ color: '#a6b8b3', roughness: 1 }),
     sage: new THREE.MeshStandardMaterial({ color: '#547669', roughness: 1, flatShading: true }),
     sageLight: new THREE.MeshStandardMaterial({ color: '#729080', roughness: 1, flatShading: true }),
@@ -53,6 +57,13 @@ export function createCampus() {
   const cylinder = (key, r1, r2, h, x, y, z, sides = 12, rotation) => addGeometry(key, new THREE.CylinderGeometry(r1, r2, h, sides), [x, y, z], rotation);
   const sphere = (key, r, x, y, z, scale = [1, 1, 1]) => addGeometry(key, new THREE.IcosahedronGeometry(r, 1), [x, y, z], [0, 0, 0], scale);
   function collider(minX, maxX, minZ, maxZ) { colliders.push({ minX, maxX, minZ, maxZ }); }
+  const pickMaterial = new THREE.MeshBasicMaterial({ visible: false });
+  function objectInteraction({ id, hall, feature, action = feature, label, point, anchor3d, size = [1, 1, 1] }) {
+    const proxy = new THREE.Mesh(new THREE.BoxGeometry(...size), pickMaterial);
+    proxy.position.set(anchor3d.x, anchor3d.y, anchor3d.z); proxy.name = `Interaction volume — ${id}`;
+    proxy.userData.interactionId = id; proxy.userData.pickProxy = true; group.add(proxy);
+    interactions.push({ id, type: 'object', hall, action, feature, label, point, radius: 2.2, anchor3d, group: proxy });
+  }
   function merge(geometries) {
     const positions = [];
     for (const geometry of geometries) {
@@ -74,6 +85,28 @@ export function createCampus() {
     geometry.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize()));
     geometry.translate(...start.add(end).multiplyScalar(0.5).toArray());
     addGeometry(key, geometry);
+  }
+  function plaque(text, x, y, z, width = 2.12) {
+    box('woodDark', width, 0.5, 0.11, x, y, z);
+    box('woodLight', width - 0.1, 0.39, 0.025, x, y, z + 0.064);
+    box('woodDark', width - 0.18, 0.32, 0.025, x, y, z + 0.08);
+    for (const side of [-1, 1]) {
+      box('gold', width - 0.1, 0.012, 0.014, x, y + side * 0.198, z + 0.084);
+      box('gold', 0.012, 0.4, 0.014, x + side * (width / 2 - 0.05), y, z + 0.084);
+      cylinder('gold', 0.012, 0.012, 0.21, x + side * width * 0.34, y + 0.34, z, 5);
+    }
+    addGeometry('gold', makeHangulGeometry(text, 0.31), [x, y, z + 0.105]);
+  }
+  function hangingLantern(key, x, y, z, square = false) {
+    if (square) box(key, 0.31, 0.48, 0.28, x, y, z);
+    else cylinder(key, 0.19, 0.21, 0.44, x, y, z, 10);
+    cylinder('woodDark', 0.215, 0.22, 0.045, x, y + 0.245, z, 10);
+    cylinder('woodDark', 0.215, 0.22, 0.045, x, y - 0.245, z, 10);
+    cylinder('gold', 0.01, 0.01, 0.3, x, y + 0.41, z, 5);
+    for (let i = 0; i < 8; i += 1) {
+      const a = i / 8 * Math.PI * 2;
+      cylinder('wood', 0.007, 0.007, 0.44, x + Math.cos(a) * 0.19, y, z + Math.sin(a) * 0.19, 4);
+    }
   }
   const campusGround = new THREE.Mesh(new THREE.PlaneGeometry(46, 47), materials.stoneDark);
   campusGround.rotation.x = -Math.PI / 2;
@@ -158,7 +191,7 @@ export function createCampus() {
     addGeometry('tileRib', new THREE.TubeGeometry(new THREE.CatmullRomCurve3(ridge), 20, 0.085, 6, false));
   }
   const floors = [];
-  function pavilion({ id, x, z, width, depth, open = false, roofHeight = 4.5 }) {
+  function pavilion({ id, label, x, z, width, depth, open = false, roofHeight = 4.5 }) {
     const front = z + depth / 2, back = z - depth / 2, left = x - width / 2, right = x + width / 2;
     box('stoneDark', width + 0.3, 0.12, depth + 0.3, x, 0.025, z);
     const floor = new THREE.Mesh(new THREE.BoxGeometry(width, 0.065, depth), materials.woodLight);
@@ -196,11 +229,14 @@ export function createCampus() {
       collider(x + 1.2, right, front - 0.25, front + 0.04);
     }
     roof(x, z, width + 1.1, depth + 1.4, 3.22, roofHeight);
+    plaque(label, x, 2.77, front + 0.06, label.length === 2 ? 1.82 : 2.12);
+    const lanternKey = label === '인연정' ? 'paperRose' : label === '서고' ? 'paperBlue' : 'paper';
+    for (const side of [-1, 1]) hangingLantern(lanternKey, x + side * width * 0.34, 2.46, front - 0.24, label === '서고');
     return { x, z, front, back, left, right };
   }
 
   // 명리전: five material colours and a circular, astronomical reading desk.
-  const myeongri = pavilion({ id: 'Myeongri hall', x: -17, z: -8, width: 7.6, depth: 4.8, roofHeight: 4.7 });
+  const myeongri = pavilion({ id: 'Myeongri hall', label: '명리전', x: -17, z: -8, width: 7.6, depth: 4.8, roofHeight: 4.7 });
   cylinder('woodDark', 1.12, 1.22, 0.12, -17, 0.87, -8.4, 28);
   cylinder('wood', 0.21, 0.33, 0.68, -17, 0.47, -8.4, 12);
   addGeometry('gold', new THREE.TorusGeometry(0.84, 0.022, 5, 48), [-17, 0.94, -8.4], [Math.PI / 2, 0, 0]);
@@ -217,9 +253,22 @@ export function createCampus() {
     box('wood', 0.09, 0.78, 0.5, x, 0.49, -9.75);
     cylinder('paper', 0.15, 0.15, 0.68, x + 0.1, 1.1, -9.75, 12, [0, 0, Math.PI / 2]);
   }
+  collider(-19.6, -14.4, -10.15, -9.35);
+  box('paper', 1.7, 1.12, 0.026, -17, 1.89, -10.25);
+  for (let i = 0; i < 5; i += 1) {
+    const a = i / 5 * Math.PI * 2;
+    sphere(elementKeys[i], 0.075, -17 + Math.sin(a) * 0.48, 1.89 + Math.cos(a) * 0.43, -10.22, [1, 1, 0.2]);
+    const b = a + Math.PI * 0.8;
+    beam('gold', [-17 + Math.sin(a) * 0.48, 1.89 + Math.cos(a) * 0.43, -10.205], [-17 + Math.sin(b) * 0.48, 1.89 + Math.cos(b) * 0.43, -10.205], 0.008, 4);
+  }
+  cylinder('gold', 0.3, 0.3, 0.035, -14.85, 1.27, -9.75, 28);
+  addGeometry('gold', new THREE.TorusGeometry(0.29, 0.014, 5, 32), [-14.85, 1.34, -9.75], [Math.PI / 2, 0, 0]);
+  beam('gold', [-14.85, 1.28, -9.75], [-14.85, 1.59, -9.85], 0.018, 5);
+  objectInteraction({ id: 'object-saju-table', hall: 'myeongri', feature: 'saju', label: '내 사주 살펴보기', point: { x: -17, z: -6.5 }, anchor3d: { x: -17, y: 1.12, z: -8.4 }, size: [2.35, 1.4, 2.35] });
+  objectInteraction({ id: 'object-time-dial', hall: 'myeongri', feature: 'time', label: '나의 출생시간 알아보기', point: { x: -14.6, z: -8.6 }, anchor3d: { x: -14.85, y: 1.4, z: -9.75 }, size: [0.72, 0.7, 0.72] });
 
   // 인연정: an open pavilion with paired seats and two flowering courtyard trees.
-  pavilion({ id: 'Inyeon pavilion', x: 17, z: 3.6, width: 6.4, depth: 5, open: true, roofHeight: 4.4 });
+  pavilion({ id: 'Inyeon pavilion', label: '인연정', x: 17, z: 3.6, width: 6.4, depth: 5, open: true, roofHeight: 4.4 });
   for (const side of [-1, 1]) {
     const x = 17 + side * 1.46;
     box('woodLight', 0.78, 0.11, 1.8, x, 0.6, 3.7);
@@ -232,6 +281,9 @@ export function createCampus() {
   cylinder('wood', 0.17, 0.2, 0.45, 17, 0.31, 3.65, 12);
   for (const x of [16.8, 17.2]) cylinder('paper', 0.075, 0.06, 0.09, x, 0.68, 3.65, 12);
   collider(16.4, 17.6, 3.05, 4.25);
+  for (const x of [16.7, 17.3]) addGeometry('gold', new THREE.TorusGeometry(0.46, 0.024, 6, 40), [x, 2.12, 1.24]);
+  for (const x of [16.7, 17.3]) cylinder('gold', 0.01, 0.01, 0.43, x, 2.78, 1.24, 5);
+  objectInteraction({ id: 'object-inyeon-tea', hall: 'inyeon', feature: 'gunghap', label: '마주 앉아 인연 살펴보기', point: { x: 17, z: 5.25 }, anchor3d: { x: 17, y: 0.9, z: 3.65 }, size: [1.2, 0.95, 1.2] });
   for (const [x, z, direction] of [[13.9, -0.1, -1], [20.2, 0.2, 1]]) {
     beam('woodDark', [x, 0, z], [x + direction * 0.15, 2.5, z], 0.16);
     beam('woodDark', [x, 1.6, z], [x - direction * 0.8, 2.7, z + 0.1], 0.08);
@@ -243,7 +295,7 @@ export function createCampus() {
   }
 
   // 서고: shelves contain individual folded volumes and bound scrolls.
-  const archive = pavilion({ id: 'Archive', x: 17, z: -10, width: 7.4, depth: 5.4, roofHeight: 4.8 });
+  const archive = pavilion({ id: 'Archive', label: '서고', x: 17, z: -10, width: 7.4, depth: 5.4, roofHeight: 4.8 });
   for (const shelfX of [14.75, 19.25]) {
     box('woodDark', 1.46, 2.2, 0.48, shelfX, 1.28, -11.89);
     for (const y of [0.31, 0.94, 1.57, 2.2]) box('woodLight', 1.5, 0.07, 0.59, shelfX, y, -11.8);
@@ -259,9 +311,16 @@ export function createCampus() {
   box('paper', 0.73, 0.025, 0.55, 17, 0.88, -9.35, [0, 0.12, 0]);
   box('bookBlue', 0.59, 0.09, 0.47, 17.63, 0.91, -9.3, [0, -0.08, 0]);
   collider(15.78, 18.22, -9.94, -8.76);
+  box('paper', 0.82, 1.55, 0.025, 17, 1.7, -12.51);
+  for (const y of [0.88, 2.52]) cylinder('woodLight', 0.027, 0.027, 0.98, 17, y, -12.5, 7, [0, 0, Math.PI / 2]);
+  for (let i = 0; i < 7; i += 1) box('woodLight', 0.39 - i % 3 * 0.05, 0.014, 0.008, 17, 1.13 + i * 0.16, -12.48);
+  cylinder('woodDark', 0.12, 0.1, 0.05, 16.28, 0.9, -9.33, 16);
+  beam('woodDark', [16.28, 0.94, -9.33], [16.4, 1.21, -9.41], 0.011, 5);
+  objectInteraction({ id: 'object-archive-desk', hall: 'archive', feature: 'archive', label: '나의 사유 기록 열기', point: { x: 17, z: -8 }, anchor3d: { x: 17, y: 1.12, z: -9.35 }, size: [2.35, 1.2, 1.12] });
+  objectInteraction({ id: 'object-learning-books', hall: 'archive', feature: 'learn', label: '명리와 별 이야기 읽기', point: { x: 14.75, z: -10.7 }, anchor3d: { x: 14.75, y: 1.5, z: -11.78 }, size: [1.54, 2.25, 0.62] });
 
   // 술사각: three low-poly original hosts, merged by costume material per person.
-  pavilion({ id: 'Readers hall', x: -17, z: 4.9, width: 8.1, depth: 5.1, open: true, roofHeight: 4.6 });
+  pavilion({ id: 'Readers hall', label: '술사각', x: -17, z: 4.9, width: 8.1, depth: 5.1, open: true, roofHeight: 4.6 });
   const npcEntries = [];
   function npc(id, x, z, colors, kind) {
     const host = new THREE.Group(); host.name = `Host — ${id}`; host.position.set(x, 0.05, z);
@@ -321,9 +380,15 @@ export function createCampus() {
     collider(x - 0.4, x + 0.4, z - 0.37, z + 0.4);
     return host;
   }
-  npc('tojeong', -19.05, 5.1, { hair: '#4c4943', robe: '#6b7b67', sleeve: '#d7d1b6', trim: '#dedccb' }, 'sage');
-  npc('seol', -17, 5.05, { hair: '#d1d9d5', robe: '#789cac', sleeve: '#dbe3df', trim: '#b7d4d9' }, 'ice');
-  npc('luna', -14.95, 5.1, { hair: '#393643', robe: '#79758e', sleeve: '#d7d5d8', trim: '#d9c497' }, 'moon');
+  const tojeong = npc('tojeong', -19.3, -5.1, { hair: '#4c4943', robe: '#6b7b67', sleeve: '#d7d1b6', trim: '#dedccb' }, 'sage');
+  cylinder('stoneDark', 0.65, 0.73, 0.12, -19.3, 0.05, -5.1, 24);
+  const seol = npc('seol', 19, 5.15, { hair: '#d1d9d5', robe: '#789cac', sleeve: '#dbe3df', trim: '#b7d4d9' }, 'ice');
+  const luna = npc('luna', -17, 5.1, { hair: '#393643', robe: '#79758e', sleeve: '#d7d5d8', trim: '#d9c497' }, 'moon');
+  interactions.push(
+    { id: 'npc-tojeong', type: 'npc', hall: 'myeongri', action: 'readers', feature: 'saju', readerId: 'tojeong', label: '토정과 이야기하기', point: { x: -19.3, z: -3.7 }, radius: 2.2, anchor3d: { x: -19.3, y: 2.14, z: -5.1 }, group: tojeong },
+    { id: 'npc-seol', type: 'npc', hall: 'inyeon', action: 'readers', feature: 'gunghap', readerId: 'seol', label: '설월과 이야기하기', point: { x: 19, z: 6.65 }, radius: 2.2, anchor3d: { x: 19, y: 2.05, z: 5.15 }, group: seol },
+    { id: 'npc-luna', type: 'npc', hall: 'readers', action: 'readers', feature: 'readers', readerId: 'luna', label: '루나와 이야기하기', point: { x: -17, z: 7.2 }, radius: 2.2, anchor3d: { x: -17, y: 2.05, z: 5.1 }, group: luna },
+  );
   for (const x of [-19.05, -17, -14.95]) {
     cylinder('stoneDark', 0.72, 0.8, 0.06, x, 0.1, 5.1, 24);
     box('woodLight', 1.16, 0.1, 0.46, x, 0.56, 6.08);
@@ -331,6 +396,9 @@ export function createCampus() {
     cylinder('paper', 0.12, 0.12, 0.32, x + 0.25, 0.78, 6.08, 10, [0, 0, Math.PI / 2]);
     collider(x - 0.65, x + 0.65, 5.8, 6.37);
   }
+  for (let i = 0; i < 3; i += 1) box(['bookBlue', 'bookSage', 'bookRose'][i], 0.64, 0.07, 0.37, -19.15, 0.67 + i * 0.07, 6.06, [0, (i - 1) * 0.09, 0]);
+  for (let i = 0; i < 5; i += 1) box('paper', 0.26, 0.015, 0.4, -15.3 + i * 0.12, 0.64 + i * 0.006, 6.08, [0, (i - 2) * 0.07, 0]);
+  objectInteraction({ id: 'object-reader-catalog', hall: 'readers', feature: 'catalog', label: '술사들의 상담 둘러보기', point: { x: -19.05, z: 7.25 }, anchor3d: { x: -19.05, y: 0.95, z: 6.08 }, size: [1.2, 0.9, 0.55] });
 
   // 별마루: a broad stone observatory, not a fifth copy of a building.
   const terrace = new THREE.Mesh(new THREE.CylinderGeometry(4.8, 4.95, 0.1, 64), materials.stoneLight);
@@ -352,6 +420,16 @@ export function createCampus() {
   cylinder('stoneDark', 0.42, 0.56, 0.23, 0, 0.21, -22.2, 16);
   cylinder('gold', 0.055, 0.08, 1.1, 0, 0.85, -22.2, 10);
   collider(-1, 1, -23.15, -21.25);
+  box('stoneDark', 2.12, 0.75, 0.36, -3.55, 0.46, -18.35);
+  plaque('별마루', -3.55, 1.12, -18.35, 2.12);
+  collider(-4.65, -2.45, -18.62, -18.08);
+  cylinder('wood', 0.05, 0.08, 1.07, 2.8, 0.7, -22.2, 8);
+  cylinder('gold', 0.12, 0.12, 1.14, 2.8, 1.41, -22.2, 14, [0.86, 0, 0]);
+  cylinder('woodDark', 0.15, 0.15, 0.06, 2.8, 1.82, -22.63, 14, [0.86, 0, 0]);
+  for (const x of [2.45, 3.15]) beam('wood', [2.8, 0.71, -22.2], [x, 0.12, -21.94], 0.038, 6);
+  collider(2.3, 3.3, -22.8, -21.6);
+  objectInteraction({ id: 'object-celestial-instrument', hall: 'stars', feature: 'jami', label: '자미두수의 별자리 보기', point: { x: 0, z: -20 }, anchor3d: { x: 0, y: 1.7, z: -22.2 }, size: [2, 2.15, 2] });
+  objectInteraction({ id: 'object-star-telescope', hall: 'stars', feature: 'star', label: '별과 나의 흐름 살펴보기', point: { x: 2.7, z: -20.4 }, anchor3d: { x: 2.8, y: 1.5, z: -22.2 }, size: [0.9, 1.9, 1.25] });
   const stars = [[-2.6, 2.9, -22.5], [-1.9, 3.6, -22.4], [-0.8, 3.3, -22.4], [0.8, 3.9, -22.5], [1.8, 3.4, -22.5], [2.7, 4.1, -22.4]];
   for (let i = 0; i < stars.length; i += 1) {
     sphere('paper', i % 2 ? 0.06 : 0.08, ...stars[i]);
@@ -401,5 +479,13 @@ export function createCampus() {
       host.rotation.y = Math.sin(time * 0.35 + phase) * 0.035;
     });
   }
-  return { group, colliders, groundMeshes, destinations, places, heightAt, update, npcs: npcEntries.map(({ id, host }) => ({ id, group: host })) };
+  function setAtmosphere(mood) {
+    const intensity = mood === 'dawn' ? 0.105 : 0.53;
+    materials.paper.emissiveIntensity = intensity;
+    materials.paperRose.emissiveIntensity = intensity * 0.83;
+    materials.paperBlue.emissiveIntensity = intensity * 0.66;
+    materials.gold.emissiveIntensity = mood === 'dawn' ? 0.04 : 0.18;
+  }
+  interactions.forEach((interaction) => { interaction.group.userData.interactionId = interaction.id; });
+  return { group, colliders, groundMeshes, destinations, places, interactions, heightAt, update, setAtmosphere, npcs: npcEntries.map(({ id, host }) => ({ id, group: host })) };
 }

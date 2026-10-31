@@ -1,9 +1,12 @@
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
-import { createWorld } from './world.js?v=20261031-home3';
-import { createAvatar } from './avatar.js';
-import { createLocomotion, isWalkable } from './locomotion.js';
+import { createWorld } from './world.js?v=20261031-life1';
+import { createAvatar } from './avatar.js?v=20261031-life1';
+import { createLocomotion, isWalkable } from './locomotion.js?v=20261031-life1';
 import { readJourney } from './hub-core.js';
+import { readSettings, normalizeSettings, effectiveQuality, nearestInteraction, pickedInteraction, interactionDistance } from './experience-core.js';
+import { createWayfinder } from './wayfinder.js?v=20261031-life1';
+import { HALLS, getFeature } from './hub-core.js';
 
 const host = document.getElementById('worldViewport');
 const body = document.body;
@@ -13,7 +16,18 @@ let renderer, world, avatar, movement, orbit, resizeObserver;
 let frame = 0, previousTime = 0, running = false, exploring = false;
 let travelTimer, activeJourney = null;
 let cameraTransition = null;
+let nearest = null, overview = false, lastHudTime = 0;
+let preferences;
+try { preferences = readSettings(localStorage); } catch (_) { preferences = normalizeSettings(); }
 const cleanups = [];
+const npcName = item => ({tojeong:'토정',seol:'설월',luna:'루나'}[item.readerId] || item.label);
+function setOverviewState(value) {
+  overview=Boolean(value);
+  const button=document.getElementById('overviewWorld');
+  button?.setAttribute('aria-pressed',String(overview));
+  button?.setAttribute('aria-label',overview?'나그네 가까이 보기':'신당 전체 보기');
+  host.dataset.camera=overview?'overview':'walk';
+}
 
 function listen(target, name, callback, options) {
   target.addEventListener(name, callback, options);
@@ -30,6 +44,7 @@ function status(message, duration = 0) {
 function enter() {
   if (exploring) return;
   exploring = true;
+  setOverviewState(false);
   body.classList.add('is-exploring');
   movement?.setEnabled(true);
   cameraTransition = { elapsed: 0, camera: camera.position.clone(), target: orbit.target.clone() };
@@ -40,6 +55,8 @@ function fail() {
   body.classList.add('world-failed');
   body.classList.remove('world-ready', 'is-exploring');
   movement?.setEnabled(false);
+  activeJourney=null;status('',0);
+  document.querySelectorAll('[data-world-place],.npc-name,#nearbyCard,#placeCaption').forEach(element=>{element.hidden=true;});
   if (loading) loading.hidden = true;
   document.getElementById('enterWorld').disabled = false;
   document.getElementById('enterWorld').setAttribute('aria-busy', 'false');
@@ -68,7 +85,8 @@ function setup() {
   camera.position.set(28, 25, 45);
 
   const sky = new THREE.HemisphereLight('#c3d6ee', '#73715d', 1.05);
-  scene.add(sky, new THREE.AmbientLight('#b7c7dc', .22));
+  const ambient = new THREE.AmbientLight('#b7c7dc', .22);
+  scene.add(sky, ambient);
   const moonlight = new THREE.DirectionalLight('#c1d8f0', 1.5);
   moonlight.position.set(-12, 24, 12);
   moonlight.castShadow = true;
@@ -101,7 +119,12 @@ function setup() {
   movement = createLocomotion({
     camera, domElement: renderer.domElement, avatar, world, orbitControls: orbit,
     onMove: source => { enter(); if (activeJourney && source !== 'path') { activeJourney = null; status('마음이 가는 곳으로 천천히 걸어보세요.', 2500); } },
-    onArrival: () => {}
+    onArrival: () => {},
+    onPick: raycaster => {
+      const item=pickedInteraction(raycaster.intersectObjects(world.group.children,true),world.interactions||[]);
+      if(!item)return false;
+      approachInteraction(item);return true;
+    },
   });
 
   const name = document.getElementById('travelerName');
@@ -114,6 +137,94 @@ function setup() {
   const tweenCamera = new THREE.Vector3();
   const tweenTarget = new THREE.Vector3();
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const nearCard=document.getElementById('nearbyCard');
+  const caption=document.getElementById('placeCaption');
+  const npcNames=document.getElementById('npcNames');
+  const npcButtons=(world.interactions||[]).filter(item=>item.type==='npc').map(item=>{
+    const button=document.createElement('button');button.type='button';button.className='npc-name';button.textContent=npcName(item)+' · 이야기';button.hidden=true;
+    button.setAttribute('aria-label',npcName(item)+'에게 다가가 이야기 나누기');npcNames.append(button);
+    listen(button,'click',()=>approachInteraction(item));return{button,item};
+  });
+  const hudPoint=new THREE.Vector3();
+  const wayfinder=createWayfinder(document.getElementById('worldWayfinder'),{destinations:world.destinations,bounds:world.bounds,onTravel:walkToAction,onCancel:()=>{
+    activeJourney=null;movement.cancel();status('잠깐 멈춰 섰어요. 마음이 가는 곳으로 다시 걸어보세요.',2600);
+  }});
+  let activeQuality=null, qualitySamples=[], autoReduced=false;
+  function applyPreferences(value) {
+    preferences=normalizeSettings(value);
+    const atmosphere=world.setAtmosphere?.(preferences.mood)||world.atmosphere;
+    const palette=atmosphere?.palette;
+    if(palette){
+      scene.background.set(palette.background);scene.fog.color.set(palette.fog);
+      scene.fog.density=atmosphere.fogDensity;
+      sky.color.set(palette.sky);sky.groundColor.set(palette.ground);ambient.color.set(palette.ambient);moonlight.color.set(palette.key);
+      sky.intensity=atmosphere.hemisphereIntensity;ambient.intensity=atmosphere.ambientIntensity;moonlight.intensity=atmosphere.keyIntensity;
+      renderer.toneMappingExposure=atmosphere.exposure;
+      const point=atmosphere.keyPosition;moonlight.position.set(point.x,point.y,point.z);
+    }
+    avatar.setAppearance?.(preferences.outfit);
+    const quality=preferences.quality==='auto'&&autoReduced?'smooth':effectiveQuality(preferences.quality,{coarse:matchMedia('(pointer: coarse)').matches,memory:navigator.deviceMemory||8});
+    if(activeQuality!==quality){
+      activeQuality=quality;renderer.setPixelRatio(Math.min(devicePixelRatio||1,quality==='smooth'?1:innerWidth<760?1.5:1.8));
+      renderer.shadowMap.enabled=quality==='clear';world.setQuality?.(quality);
+      world.group.traverse(node=>{if(node.material)(Array.isArray(node.material)?node.material:[node.material]).forEach(material=>{material.needsUpdate=true;});});
+      resize();
+    }
+    body.dataset.mood=preferences.mood;host.dataset.quality=quality;host.dataset.outfit=preferences.outfit;
+    if(document.querySelector('dialog[open]'))renderer.render(scene,camera);
+  }
+  function setCameraMode(mode) {
+    setOverviewState(mode==='overview');
+    cameraTransition={elapsed:0,camera:camera.position.clone(),target:orbit.target.clone(),overview};
+  }
+  function activateInteraction(item) {
+    if(!item||document.querySelector('dialog[open]'))return;
+    activeJourney=null;movement.cancel();status('',0);
+    const point=item.anchor3d||{...item.point,y:1};
+    avatar.group.rotation.y=Math.atan2(point.x-avatar.group.position.x,point.z-avatar.group.position.z);
+    if(item.type==='npc'){
+      avatar.setGesture('bow');avatar.update(.15,false);renderer.render(scene,camera);
+      document.dispatchEvent(new CustomEvent('sowon:encounter',{detail:{npc:item.readerId||item.id.replace('npc-','')}}));
+    }else if(getFeature(item.feature))document.dispatchEvent(new CustomEvent('sowon:feature',{detail:{id:item.feature}}));
+    else if(['wish','breath','blessing'].includes(item.action))document.dispatchEvent(new CustomEvent('sowon:open',{detail:{action:item.action}}));
+    else if(HALLS[item.hall])document.dispatchEvent(new CustomEvent('sowon:hall',{detail:{id:item.hall}}));
+  }
+  function approachInteraction(item) {
+    if(document.querySelector('dialog[open]'))return;
+    enter();movement.setEnabled(true);
+    if(interactionDistance(item.point,avatar.group.position)<=item.radius){activateInteraction(item);return;}
+    activeJourney=item.id;setCameraMode('walk');status(item.type==='npc'?npcName(item)+'에게 다가가고 있어요.':'선택한 물건을 살펴보러 가고 있어요.',0);
+    const accepted=movement.goTo(item.point,()=>{if(activeJourney===item.id)activateInteraction(item);});
+    if(!accepted){activeJourney=null;status('조금 더 가까운 바닥을 눌러 다가가 보세요.',3000);}
+  }
+  function updateHud(time,modalOpen){
+    if(time-lastHudTime<120)return;lastHudTime=time;
+    const state=movement.getState();
+    const journeyHall=(world.interactions||[]).find(item=>item.id===activeJourney)?.hall||activeJourney;
+    wayfinder.update({position:state.position,rotation:avatar.group.rotation.y,path:state.path,target:state.target,action:journeyHall,exploring:exploring&&!modalOpen});
+    const item=!state.moving&&!activeJourney&&exploring&&!modalOpen?nearestInteraction(world.interactions||[],state.position,nearest?.id):null;
+    if(item?.id!==nearest?.id){
+      nearest=item;nearCard.hidden=!item;host.dataset.nearby=item?.id||'';
+      if(item){
+        nearCard.querySelector('strong').textContent=item.label;
+        nearCard.querySelector('small').textContent=item.type==='npc'?'이곳의 길잡이':'이야기가 놓인 자리';
+        nearCard.querySelector('.nearby-action').textContent=item.type==='npc'?'이야기 나누기':'살펴보기';
+        const image=nearCard.querySelector('img');image.hidden=item.type!=='npc';if(item.type==='npc')image.src='/store/art/readers/'+(item.readerId||item.id.replace('npc-',''))+'.webp';
+      }
+    }
+    nearCard.hidden=!item;
+    let hall=null,closest=7;
+    for(const[id,point]of Object.entries(world.destinations))if(HALLS[id]){const distance=interactionDistance(point,state.position);if(distance<closest){closest=distance;hall=id;}}
+    caption.hidden=!hall||!exploring||modalOpen;
+    if(hall){caption.querySelector('strong').textContent=HALLS[hall].name;caption.querySelector('p').textContent=HALLS[hall].line;}
+    host.dataset.hall=hall||'';
+    npcButtons.forEach(({button,item})=>{
+      const anchor=item.anchor3d||{...item.point,y:2};hudPoint.set(anchor.x,anchor.y+.45,anchor.z).project(camera);
+      const inFrame=hudPoint.z<1&&Math.abs(hudPoint.x)<.9&&Math.abs(hudPoint.y)<.65;
+      button.hidden=!exploring||modalOpen||!inFrame||interactionDistance(item.point,state.position)>9;
+      if(!button.hidden){button.style.left=((hudPoint.x+1)/2*100)+'%';button.style.top=((1-hudPoint.y)/2*100)+'%';}
+    });
+  }
   function resize() {
     const width = host.clientWidth, height = host.clientHeight;
     if (!width || !height) return;
@@ -125,6 +236,17 @@ function setup() {
   resizeObserver = new ResizeObserver(resize);
   resizeObserver.observe(host);
   resize();
+  applyPreferences(preferences);
+  listen(document,'sowon:preferences',event=>{if(normalizeSettings(event.detail).quality!==preferences.quality){autoReduced=false;qualitySamples=[];}applyPreferences(event.detail);});
+  listen(document,'sowon:preferences-request',()=>applyPreferences(preferences));
+  listen(document,'sowon:wayfinder',event=>body.classList.toggle('wayfinder-expanded',Boolean(event.detail?.expanded)));
+  listen(nearCard,'click',()=>activateInteraction(nearest));
+  listen(document.getElementById('overviewWorld'),'click',()=>setCameraMode(overview?'walk':'overview'));
+  listen(window,'keydown',event=>{
+    if(event.repeat||event.ctrlKey||event.altKey||event.metaKey||document.querySelector('dialog[open]')||document.activeElement?.matches('input,textarea,select,[contenteditable=true]'))return;
+    if(event.code==='KeyE'&&nearest){event.preventDefault();activateInteraction(nearest);}
+    else if(event.code==='KeyV'&&exploring){event.preventDefault();setCameraMode(overview?'walk':'overview');}
+  });
 
   let saved;
   try { saved = readJourney(sessionStorage); } catch (_) {}
@@ -136,6 +258,7 @@ function setup() {
     camera.position.fromArray(saved.camera);
     orbit.target.fromArray(saved.target);
     orbit.update(); resize();
+    setOverviewState(camera.position.distanceTo(orbit.target)>25);
   }
   listen(document, 'sowon:capture', event => {
     event.detail.snapshot = { position: avatar.group.position.toArray(), rotation: avatar.group.rotation.y, camera: camera.position.toArray(), target: orbit.target.toArray(), entered: exploring };
@@ -151,6 +274,7 @@ function setup() {
     movement.setEnabled(!modalOpen);
     if (modalOpen) {
       name.hidden = true;
+      nearCard.hidden=true;caption.hidden=true;npcButtons.forEach(({button})=>{button.hidden=true;});
       placeButtons.forEach(button => { button.hidden = true; });
       // Keep checking modal visibility without drawing the 3D world while reading.
       previousTime = 0;
@@ -158,18 +282,22 @@ function setup() {
       return;
     }
     movement.update(delta);
+    if(preferences.quality==='auto'&&!autoReduced&&delta>0){
+      qualitySamples.push(delta);if(qualitySamples.length>=100){const average=qualitySamples.reduce((a,b)=>a+b,0)/qualitySamples.length;qualitySamples=[];if(average>.028){autoReduced=true;applyPreferences(preferences);}}
+    }
     if (cameraTransition) {
       cameraTransition.elapsed += delta;
       const progress = reducedMotion.matches ? 1 : Math.min(1, cameraTransition.elapsed / 1.05);
       const ease = progress * progress * (3 - 2 * progress);
-      tweenCamera.copy(avatar.group.position).add(cameraOffset);
-      tweenTarget.copy(avatar.group.position).add(targetOffset);
+      if(cameraTransition.overview){tweenCamera.set(28,25,45);tweenTarget.set(0,2,-2);}
+      else{tweenCamera.copy(avatar.group.position).add(cameraOffset);tweenTarget.copy(avatar.group.position).add(targetOffset);}
       camera.position.lerpVectors(cameraTransition.camera, tweenCamera, ease);
       orbit.target.lerpVectors(cameraTransition.target, tweenTarget, ease);
       if (progress >= 1) cameraTransition = null;
     }
     world.update(reducedMotion.matches ? 0 : time / 1000, delta);
     orbit.update();
+    updateHud(time,modalOpen);
     projected.copy(avatar.group.position).add(nameOffset).project(camera);
     const visible = projected.z < 1 && Math.abs(projected.x) < .95 && Math.abs(projected.y) < .95;
     name.hidden = !visible || modalOpen;
@@ -179,7 +307,9 @@ function setup() {
       if (!point) { button.hidden = true; return; }
       placePosition.set(point.x, world.heightAt(point.x, point.z) + 1.65, point.z).project(camera);
       const inFrame = placePosition.z < 1 && Math.abs(placePosition.x) < .88 && placePosition.y < .5 && placePosition.y > -.54;
-      button.hidden = !exploring || !inFrame || modalOpen;
+      const nearbyNpc=npcButtons.some(({item})=>item.hall===button.dataset.worldPlace&&interactionDistance(item.point,avatar.group.position)<6);
+      button.hidden = !exploring || !inFrame || modalOpen || nearbyNpc;
+      button.classList.toggle('is-nearby',interactionDistance(point,avatar.group.position)<5);
       if (inFrame) { button.style.left = ((placePosition.x + 1) / 2 * 100) + '%'; button.style.top = ((1 - placePosition.y) / 2 * 100) + '%'; }
     });
     renderer.render(scene, camera);
@@ -193,6 +323,7 @@ function setup() {
   }
 
   listen(document.getElementById('enterWorld'), 'click', event => {
+    if(body.classList.contains('world-failed'))return;
     event.preventDefault(); event.stopPropagation(); enter();
     renderer.domElement.focus({ preventScroll: true });
   });
@@ -200,7 +331,7 @@ function setup() {
 
   const actionLabels = { wish: '소원 등불이 있는 신당', breath: '바람이 머무는 명상터', blessing: '마음을 전하는 소원나무', myeongri: '토정이 기다리는 명리전', inyeon: '설월이 기다리는 인연정', stars: '태어난 하늘을 펼치는 별마루', readers: '루나와 술사들이 있는 술사각', archive: '이야기가 쌓이는 서고' };
   function walkToAction(action) {
-    if (!world.destinations[action] || document.querySelector('dialog[open]')) return;
+    if (body.classList.contains('world-failed') || !world.destinations[action] || document.querySelector('dialog[open]')) return;
     enter();
     // A map can close and request travel before the next animation frame has
     // resumed movement. Re-enable here instead of treating that pause as no path.
@@ -217,6 +348,7 @@ function setup() {
     if (result === false) { activeJourney = null; status('이곳에서 이야기를 펼칠게요.', 2500); document.dispatchEvent(new CustomEvent('sowon:open', { detail: { action } })); }
   }
   listen(document.querySelector('.hub-world-rituals'), 'click', event => {
+    if(body.classList.contains('world-failed'))return;
     const button = event.target.closest('button');
     if (!button || button.hasAttribute('data-open-journal')) return;
     const action = button.hasAttribute('data-open-wish') ? 'wish' : button.hasAttribute('data-open-breath') ? 'breath' : 'blessing';
@@ -232,6 +364,7 @@ function setup() {
   listen(document.getElementById('returnToGate'), 'click', () => {
     activeJourney = null;
     cameraTransition = null;
+    setOverviewState(false);
     movement.reset();
     camera.position.copy(avatar.group.position).add(cameraOffset);
     orbit.target.copy(avatar.group.position).add(targetOffset);
@@ -259,7 +392,7 @@ function setup() {
     if (event.persisted) return;
     cleanups.forEach(cleanup => cleanup());
     resizeObserver.disconnect();
-    movement.dispose(); orbit.dispose(); avatar.dispose(); world.dispose(); renderer.dispose();
+    wayfinder.dispose();npcButtons.forEach(({button})=>button.remove());movement.dispose(); orbit.dispose(); avatar.dispose(); world.dispose(); renderer.dispose();
   });
   listen(window, 'pageshow', event => {
     if (event.persisted) resume();

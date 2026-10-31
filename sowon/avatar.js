@@ -1,9 +1,13 @@
 import * as THREE from 'three';
+import { getAvatarPalette } from './avatar-palettes.js';
 
 /** A small, original hanbok traveller. Its face points toward local +Z. */
 export function createAvatar() {
   const group = new THREE.Group();
   group.name = 'SamraTraveller';
+  let disposed = false;
+  let appearance = 'sage';
+  group.userData.appearance = appearance;
   const figure = new THREE.Group();
   group.add(figure);
   const materials = {};
@@ -134,12 +138,23 @@ export function createAvatar() {
   let blinkUntil = 2.8;
 
   function setGesture(kind) {
-    if (!['wish', 'greet', 'arrival'].includes(kind)) return;
+    if (disposed || !['wish', 'greet', 'arrival', 'bow'].includes(kind)) return false;
     gesture = kind;
     gestureTime = 0;
+    return true;
+  }
+
+  function setAppearance(id) {
+    const palette = getAvatarPalette(id);
+    if (disposed || !palette) return false;
+    for (const [name, color] of Object.entries(palette.colors)) materials[name].color.set(color);
+    appearance = palette.id;
+    group.userData.appearance = appearance;
+    return true;
   }
 
   function update(delta, moving = false) {
+    if (disposed) return;
     const dt = Math.max(0, Math.min(0.1, Number.isFinite(delta) ? delta : 0));
     const isMoving = typeof moving === 'object' ? Boolean(moving.moving) : Boolean(moving);
     time += dt;
@@ -152,12 +167,13 @@ export function createAvatar() {
     leftArm.rotation.z = -0.14;
     rightArm.rotation.z = 0.14;
     figure.position.y = -0.065 + Math.abs(Math.sin(time * 9.2)) * 0.033 * walkBlend + Math.sin(time * 1.8) * 0.009 * (1 - walkBlend);
+    figure.rotation.x = 0;
     torso.rotation.z = Math.sin(time * 4.6) * 0.015 * walkBlend;
     head.rotation.z = Math.sin(time * 2.1) * 0.023 * (1 - walkBlend);
     head.rotation.x = Math.sin(time * 1.8) * 0.014;
     if (gesture) {
       gestureTime += dt;
-      const length = gesture === 'wish' ? 2.1 : 1.65;
+      const length = gesture === 'wish' ? 2.1 : gesture === 'bow' ? 1.9 : 1.65;
       const fade = Math.min(1, gestureTime * 4, Math.max(0, (length - gestureTime) * 4));
       if (gesture === 'wish') {
         leftArm.rotation.x = -0.85 * fade;
@@ -165,6 +181,14 @@ export function createAvatar() {
         leftArm.rotation.z = 0.36 * fade - 0.14;
         rightArm.rotation.z = -0.36 * fade + 0.14;
         head.rotation.x += 0.16 * fade;
+      } else if (gesture === 'bow') {
+        const dip = Math.sin(Math.PI * Math.min(1, gestureTime / length));
+        figure.rotation.x = 0.28 * dip;
+        head.rotation.x += 0.22 * dip;
+        leftArm.rotation.x = -0.32 * dip;
+        rightArm.rotation.x = -0.32 * dip;
+        leftArm.rotation.z = -0.14 + 0.12 * dip;
+        rightArm.rotation.z = 0.14 - 0.12 * dip;
       } else {
         rightArm.rotation.z = (1.95 + Math.sin(gestureTime * 12) * 0.17) * fade + 0.14;
         rightArm.rotation.x = -0.2 * fade;
@@ -179,6 +203,8 @@ export function createAvatar() {
   }
 
   function dispose() {
+    if (disposed) return;
+    disposed = true;
     const geometries = new Set();
     const usedMaterials = new Set();
     group.traverse(item => {
@@ -190,5 +216,5 @@ export function createAvatar() {
     group.removeFromParent();
   }
 
-  return { group, update, setGesture, dispose };
+  return { group, update, setGesture, setAppearance, getAppearance: () => appearance, dispose };
 }
