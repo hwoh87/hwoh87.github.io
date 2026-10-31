@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
-import { createWorld } from './world.js';
+import { createWorld } from './world.js?v=20261031-home3';
 import { createAvatar } from './avatar.js';
 import { createLocomotion, isWalkable } from './locomotion.js';
 import { readJourney } from './hub-core.js';
