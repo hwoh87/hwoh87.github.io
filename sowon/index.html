@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111c29">
+  <meta name="description" content="달빛 아래 작은 바람을 놓아두는 삼라 소원당. 소원 등불을 밝히고, 잠깐 숨을 고르고, 소중한 사람에게 응원을 보내세요. 가입 없이 무료로 쉬어가는 온라인 신당입니다.">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>삼라 소원당 — 작은 바람도 빛이 되는 밤</title>
+  <link rel="canonical" href="https://samra.cc/sowon/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="삼라만상">
+  <meta property="og:title" content="삼라 소원당 — 작은 바람도 빛이 되는 밤">
+  <meta property="og:description" content="당신의 바람이 머물 자리. 등불 하나 밝히고, 소중한 사람에게 마음을 전해보세요.">
+  <meta property="og:url" content="https://samra.cc/sowon/">
+  <meta property="og:image" content="https://samra.cc/sowon/art/moon-shrine-og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600&display=swap">
+  <link rel="preload" as="image" href="art/moon-shrine.webp" fetchpriority="high">
+  <link rel="stylesheet" href="sowon.css">
+  <link rel="stylesheet" href="world.css">
+  <script src="core.js" defer></script>
+  <script src="app.js" defer></script>
+  <script src="/assets/track.js" defer></script>
+  <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+  <script type="module">import('./scene.js').catch(function(){document.body.classList.add('world-failed');document.getElementById('worldLoading').hidden=true;document.getElementById('worldFallback').hidden=false;document.getElementById('enterWorldLabel').textContent='소원 등불 밝히기';document.getElementById('entranceNote').textContent='가입 없이 무료로 · 나만 볼 수 있는 소원';});</script>
+</head>
+<body>
+  <a class="skip-link" href="#entrance">소원당으로 바로 가기</a>
+  <svg class="icon-library" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 14a8.8 8.8 0 0 1-10.6-10.6A9 9 0 1 0 20.5 14Z"/><path d="m18.5 3 .5 1.5 1.5.5-1.5.5-.5 1.5-.5-1.5-1.5-.5 1.5-.5Z"/></symbol>
+    <symbol id="i-lantern" viewBox="0 0 24 24"><path d="M9 3h6M12 3v3M8 6h8l3 5-1 8H6l-1-8 3-5ZM5 11h14M9 7l-1 4 1 8m6-12 1 4-1 8M9 22h6M12 19v3"/></symbol>
+    <symbol id="i-breath" viewBox="0 0 24 24"><path d="M3 8h12a3 3 0 1 0-3-3M3 12h16a2 2 0 1 1-2 2M3 16h7a3 3 0 1 1-3 3"/></symbol>
+    <symbol id="i-gift" viewBox="0 0 24 24"><path d="M4 10h16v4H4zM6 14v7h12v-7M12 10v11M12 10C8 10 5 8 6 5c2-3 6 1 6 5Zm0 0c4 0 7-2 6-5-2-3-6 1-6 5Z"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 4h7a3 3 0 0 1 3 3v14a4 4 0 0 0-3-1H4V4Zm10 3a3 3 0 0 1 3-3h3v16h-3a4 4 0 0 0-3 1M7 8h3M7 12h3"/></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path d="m11 4-6 5H2v6h3l6 5V4ZM16 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V6a4 4 0 0 1 8 0v4M12 14v3"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V3H3v13h5"/></symbol>
+  </svg>
+
+  <main class="sanctuary" id="entrance">
+    <div class="scene" aria-hidden="true">
+      <img class="scene-image" src="art/moon-shrine.webp" alt="" width="1586" height="992" fetchpriority="high">
+      <div class="scene-shade"></div>
+      <div class="moon-halo"></div>
+      <div class="fireflies"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
+
+    <div class="world-viewport" id="worldViewport" aria-label="캐릭터로 거닐 수 있는 삼라 소원당 3D 공간"></div>
+    <div class="world-vignette" aria-hidden="true"></div>
+    <div class="world-loading" id="worldLoading" role="status"><span></span>달빛 신당을 여는 중</div>
+
+    <header class="shrine-header">
+      <a class="shrine-brand" href="/sowon/" aria-label="삼라 소원당 처음으로">
+        <svg class="brand-moon" aria-hidden="true"><use href="#i-moon"/></svg>
+        <span><span class="brand-name">소원당</span><span class="brand-by">by SAMRA</span></span>
+      </a>
+      <nav class="shrine-nav" aria-label="소원당 메뉴">
+        <button class="about-link" type="button" data-open-about aria-label="소원당 이야기와 이용 안내"><span class="about-text">소원당 이야기</span><span class="about-mobile" aria-hidden="true">?</span></button>
+        <button class="sound-control" type="button" id="soundToggle" aria-pressed="false" aria-label="풍경 소리 켜기">
+          <svg class="icon" aria-hidden="true"><use href="#i-sound"/></svg><span id="soundLabel">소리 끔</span>
+        </button>
+        <button class="journal-control" type="button" data-open-journal><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg><span>내 등불</span><span class="count-badge" id="journalCount">0</span></button>
+      </nav>
+    </header>
+
+    <section class="invitation" aria-labelledby="shrineTitle">
+      <p class="eyebrow"><span></span> 달빛 아래, 당신만의 작은 신당</p>
+      <h1 id="shrineTitle">작은 바람도<br>빛이 되는 밤.</h1>
+      <p class="invitation-copy">말하지 못한 소원 하나,<br>이곳에 잠시 놓아두어도 괜찮아요.</p>
+      <button class="gold-button entrance-button" id="enterWorld" type="button" data-open-wish data-cta="sowon-enter"><svg class="icon" aria-hidden="true"><use href="#i-lantern"/></svg><span id="enterWorldLabel">신당에 들어가기</span><svg class="icon button-arrow" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+      <p class="entrance-note" id="entranceNote">캐릭터로 거닐고, 나만의 소원을 남겨요.</p>
+    </section>
+
+    <aside class="season-note" aria-label="소원당의 계절">
+      <span class="season-rule"></span><p id="seasonLabel">달빛이 머무는 밤</p><span id="seasonMessage">서두르지 않아도 괜찮아요.</span>
+    </aside>
+
+    <div class="lantern-field" id="lanternField" aria-label="내가 밝힌 소원 등불"></div>
+    <button class="scene-lantern" id="sceneLantern" type="button" data-open-wish aria-label="연못 위에 소원 등불 밝히기">
+      <span class="lantern-aura" aria-hidden="true"></span>
+      <span class="paper-lantern" aria-hidden="true"><span class="lantern-handle"></span><span class="lantern-paper"><span class="lantern-heart"></span></span><span class="lantern-base"></span><span class="lantern-tassel"></span></span>
+      <span class="lantern-reflection" aria-hidden="true"></span>
+      <span class="scene-lantern-label">등불을 눌러 마음을 남겨보세요<span>당신의 바람을 기다리고 있어요</span></span>
+    </button>
+
+    <aside class="luna-greeting">
+      <img src="/store/art/readers/luna.webp" width="48" height="48" alt="달빛 무녀 루나" class="luna-avatar">
+      <div><p class="luna-name">달빛지기 루나<span>소원당의 안내자</span></p><p id="lunaGreeting">“바라는 마음이 있다는 건,<br>아직 내일을 믿고 있다는 뜻이니까요.”</p></div>
+    </aside>
+
+    <nav class="ritual-dock" aria-label="소원당에서 할 수 있는 일">
+      <button class="dock-action" type="button" data-open-wish><svg class="dock-icon" aria-hidden="true"><use href="#i-lantern"/></svg><span>소원 등불<small>바람을 남기는 시간</small></span></button>
+      <span class="dock-divider" aria-hidden="true"></span>
+      <button class="dock-action" type="button" data-open-breath><svg class="dock-icon" aria-hidden="true"><use href="#i-breath"/></svg><span>마음 고르기<small>잠깐, 나를 위한 쉼</small></span></button>
+      <span class="dock-divider" aria-hidden="true"></span>
+      <button class="dock-action" type="button" data-open-blessing><svg class="dock-icon" aria-hidden="true"><use href="#i-gift"/></svg><span>응원 보내기<small>소중한 사람을 위해</small></span></button>
+    </nav>
+
+    <p class="my-light-note"><span class="tiny-flame" aria-hidden="true"></span>내가 밝힌 등불 <b id="lanternCount">0</b><span class="note-separator">·</span><span id="visitCount">오늘의 첫 걸음</span></p>
+    <div class="world-help" id="worldHelp"><span class="help-desktop">바닥 클릭으로 걷기<span>·</span>W A S D 이동<span>·</span>드래그로 둘러보기<span>·</span>휠로 확대</span><span class="help-mobile">바닥을 눌러 걷기 · 드래그로 둘러보기 · 두 손가락으로 확대</span></div>
+    <div class="traveler-name" id="travelerName" aria-hidden="true"><span>나</span>달빛 나그네</div>
+    <div class="world-places" aria-label="신당 안의 장소"><button class="world-place" type="button" data-world-place="wish" hidden>소원 등불 <span>↗</span></button><button class="world-place" type="button" data-world-place="breath" hidden>명상터 <span>↗</span></button><button class="world-place" type="button" data-world-place="blessing" hidden>소원나무 <span>↗</span></button></div>
+    <div class="travel-status" id="travelStatus" role="status" hidden></div>
+    <div class="move-controls" id="moveControls" aria-label="캐릭터 이동 조작">
+      <div class="move-stick" id="moveStick" role="group" aria-label="터치로 캐릭터 이동"><span id="moveThumb"></span></div>
+      <div class="move-pad" role="group" aria-label="방향 버튼으로 이동"><button type="button" data-move="forward" aria-label="앞으로 걷기">↑</button><button type="button" data-move="left" aria-label="왼쪽으로 걷기">←</button><button type="button" data-move="backward" aria-label="뒤로 걷기">↓</button><button type="button" data-move="right" aria-label="오른쪽으로 걷기">→</button></div>
+      <span class="move-caption">움직이기</span>
+    </div>
+    <button class="return-gate" id="returnToGate" type="button" aria-label="처음 자리로 돌아가기"><svg class="icon" aria-hidden="true"><use href="#i-moon"/></svg><span>처음 자리</span></button>
+    <button class="traveler-greet" id="greetTraveler" type="button"><span aria-hidden="true">✧</span>인사하기</button>
+    <div class="world-fallback" id="worldFallback" role="status" hidden>이 브라우저에서는 3D 공간을 열 수 없어 달빛 풍경으로 안내해요. 소원과 기록은 그대로 이용할 수 있어요.</div>
+    <p class="storage-notice" id="storageNotice" role="status" hidden>이 브라우저는 기록을 저장할 수 없어요. 지금 남긴 소원은 창을 닫으면 사라질 수 있어요.</p>
+    <noscript><div class="noscript-note">소원 등불을 밝히려면 JavaScript를 켜주세요. 지금은 달빛 풍경을 바라보며 잠시 쉬어가셔도 좋아요.</div></noscript>
+  </main>
+
+  <footer class="shrine-footer"><a href="/" data-cta="sowon-samra">삼라만상<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a><p>당신의 바람과, 당신의 한 걸음을 응원합니다.</p><button type="button" data-open-about>이용 안내</button></footer>
+
+  <dialog class="paper-dialog wish-dialog" id="wishDialog" aria-labelledby="wishTitle">
+    <button class="close-button" type="button" data-close aria-label="소원 쓰기 닫기"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+    <div id="wishFormPanel">
+      <p class="dialog-eyebrow">A LITTLE WISH, A LITTLE LIGHT</p>
+      <h2 id="wishTitle">어떤 바람을<br>놓아두고 싶나요?</h2>
+      <p class="dialog-intro">크지 않아도, 멋진 말이 아니어도 괜찮아요.</p>
+      <form id="wishForm">
+        <fieldset class="category-field"><legend>지금 마음이 향하는 곳</legend><div class="category-choices" id="categoryChoices"></div></fieldset>
+        <label class="field-label" for="wishText">나의 소원<span id="wishCount">0 / 120</span></label>
+        <textarea id="wishText" name="wish" rows="3" maxlength="240" placeholder="내 마음이 조금 더 편안해지기를." required aria-describedby="wishPrivacy wishError"></textarea>
+        <p class="field-privacy" id="wishPrivacy"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg>이 브라우저에만 보관해요. 다른 사람에게 보이지 않아요.</p>
+        <div class="intention-field"><label class="field-label" for="intentionText">이 바람을 위해, 작은 한 걸음<em>선택 · 80자 이내</em></label><input id="intentionText" name="intention" maxlength="160" placeholder="오늘 내가 할 수 있는 일 하나" aria-describedby="wishError"><div class="intention-suggestions" id="intentionSuggestions" aria-label="작은 한 걸음 추천"></div></div>
+        <p class="form-error" id="wishError" role="alert" hidden></p>
+        <button class="ink-button full-width" type="submit" id="wishSubmit"><svg class="icon" aria-hidden="true"><use href="#i-lantern"/></svg>이 마음에 등불 밝히기</button>
+      </form>
+    </div>
+    <section class="wish-success" id="wishSuccess" hidden aria-labelledby="successTitle">
+      <div class="success-emblem" aria-hidden="true"><svg><use href="#i-lantern"/></svg></div>
+      <p class="dialog-eyebrow">YOUR WISH IS HOME</p><h2 id="successTitle">당신의 바람에<br>작은 빛이 켜졌어요.</h2>
+      <p class="success-wish" id="successWish"></p><p class="success-intention" id="successIntention"></p>
+      <div class="success-guidance"><img src="/store/art/readers/luna.webp" alt="" width="32" height="32"><p id="successGuidance"></p></div>
+      <p class="success-date" id="successDate"></p>
+      <button class="ink-button full-width" type="button" id="successDone" data-close>등불 바라보기<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+      <button class="text-button" type="button" data-open-journal>내가 남긴 바람들 보기</button>
+    </section>
+  </dialog>
+
+  <dialog class="paper-dialog journal-dialog" id="journalDialog" aria-labelledby="journalTitle">
+    <button class="close-button" type="button" data-close aria-label="내 등불 닫기"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+    <p class="dialog-eyebrow">MY LITTLE LIGHTS</p><h2 id="journalTitle">내가 남긴 바람들</h2>
+    <p class="dialog-intro" id="journalSummary">마음이 머물렀던 자리를 돌아보세요.</p>
+    <div class="journal-empty" id="journalEmpty"><svg class="empty-lantern" aria-hidden="true"><use href="#i-lantern"/></svg><p>아직 밝힌 등불이 없어요.</p><span>첫 번째 바람을 조용히 놓아두세요.</span><button class="ink-button" type="button" data-open-wish>나의 첫 등불 밝히기</button></div>
+    <div id="journalList" class="journal-list"></div>
+    <p class="journal-storage-note" id="journalStorageNote">최근 50개의 소원을 이 브라우저에 보관해요. 브라우저 데이터를 지우거나 다른 기기로 이동하면 기록을 볼 수 없어요.</p>
+  </dialog>
+
+  <dialog class="paper-dialog delete-dialog" id="deleteDialog" aria-labelledby="deleteTitle">
+    <button class="close-button" type="button" data-close aria-label="기록 지우기 취소"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+    <p class="dialog-eyebrow">LET IT GO</p><h2 id="deleteTitle">이 바람을 보내줄까요?</h2><p id="deleteWishText" class="delete-wish"></p><p class="dialog-intro">지운 소원은 다시 되돌릴 수 없어요.</p>
+    <div class="dialog-button-row"><button class="outline-button" type="button" data-close>간직할게요</button><button class="ink-button" type="button" id="confirmDelete">기록 지우기</button></div>
+  </dialog>
+
+  <dialog class="breath-dialog" id="breathDialog" aria-labelledby="breathTitle">
+    <button class="close-button" type="button" data-close aria-label="마음 고르기 닫기"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+    <p class="dialog-eyebrow">A MOMENT, JUST FOR YOU</p><h2 id="breathTitle">바쁜 마음은 잠시,<br>이 밤에 내려놓아요.</h2>
+    <p class="breath-intro">편안한 만큼만 호흡을 따라가 보세요.</p>
+    <div class="breath-orbit"><div class="breath-orb" id="breathOrb" data-phase="rest"><div class="orb-inner"><svg aria-hidden="true"><use href="#i-moon"/></svg></div></div><p class="breath-phase" id="breathPhase" aria-live="polite">잠깐, 나를 위한 쉼</p><p class="breath-hint" id="breathHint">들이쉬고, 머무르고, 천천히 내쉬어요.</p></div>
+    <div class="breath-progress" id="breathProgress" role="progressbar" aria-label="호흡 진행" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div>
+    <p class="breath-counter" id="breathCounter">네 번의 호흡 · 약 1분</p>
+    <button class="gold-button full-width" type="button" id="breathStart">마음 고르기 시작<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+    <div id="breathFinish" class="breath-finish" hidden><p>조금 느린 걸음으로 돌아가도 괜찮아요.</p><button class="gold-button full-width" type="button" data-open-wish>지금 마음을 등불에 담기</button></div>
+    <button class="text-button" type="button" data-close>풍경으로 돌아가기</button>
+  </dialog>
+
+  <dialog class="paper-dialog blessing-dialog" id="blessingDialog" aria-labelledby="blessingTitle">
+    <button class="close-button" type="button" data-close aria-label="응원 등불 닫기"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+    <p class="dialog-eyebrow">A LIGHT FOR SOMEONE</p><h2 id="blessingTitle">잘되기를 바라는 마음,<br>등불 하나에 담아서.</h2>
+    <p class="dialog-intro">문득 떠오른 그 사람에게 응원을 보내보세요.</p>
+    <div class="category-choices blessing-choices" id="blessingChoices" role="group" aria-label="보내고 싶은 응원"></div>
+    <div class="blessing-card"><span class="blessing-moon" aria-hidden="true">☾</span><p id="blessingPreview"></p><span class="blessing-signature">달빛 아래, 삼라 소원당에서</span></div>
+    <p class="share-privacy">선택한 응원 문구만 전해져요. 내 소원과 기록은 포함되지 않아요.</p>
+    <button class="ink-button full-width" type="button" id="blessingShare"><svg class="icon" aria-hidden="true"><use href="#i-gift"/></svg>응원 등불 전하기</button>
+    <button class="text-button" type="button" id="blessingCopy"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>링크 복사하기</button>
+    <label class="share-link-label" for="blessingLink">응원 링크</label><input class="share-link" id="blessingLink" type="text" readonly aria-describedby="blessingStatus">
+    <p class="share-status" id="blessingStatus" role="status"></p>
+  </dialog>
+
+  <dialog class="paper-dialog receive-dialog" id="blessingReceive" aria-labelledby="receiveTitle">
+    <button class="close-button" type="button" data-close aria-label="받은 응원 닫기"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+    <div class="success-emblem" aria-hidden="true"><svg><use href="#i-gift"/></svg></div><p class="dialog-eyebrow">SOMEONE IS ROOTING FOR YOU</p><h2 id="receiveTitle">당신을 위한 등불이<br>도착했어요.</h2><p class="received-blessing" id="receivedBlessing"></p><p class="dialog-intro">당신의 하루를 응원하는 마음이 여기 있어요.</p><button class="ink-button full-width" type="button" id="receiveStart" data-open-wish>나도 작은 바람 남기기</button><button class="text-button" type="button" data-close>달빛 풍경 바라보기</button>
+  </dialog>
+
+  <dialog class="paper-dialog about-dialog" id="aboutDialog" aria-labelledby="aboutTitle">
+    <button class="close-button" type="button" data-close aria-label="소원당 안내 닫기"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+    <p class="dialog-eyebrow">A HOME FOR YOUR HOPES</p><h2 id="aboutTitle">바라는 마음에도<br>머물 자리가 필요하니까.</h2>
+    <p class="about-lead">달빛 나그네가 되어 신당을 거닐어보세요. 삼라 소원당은 소원을 남기고, 잠시 숨을 고르고, 누군가의 내일을 응원하는 작은 온라인 신당이에요.</p>
+    <div class="about-section"><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg><div><h3>신당을 거니는 방법</h3><p>바닥을 누르면 그곳으로 걸어가요. 드래그로 둘러보고 휠이나 두 손가락으로 가까이 볼 수 있어요. 컴퓨터에서는 방향키와 W·A·S·D, 휴대폰에서는 왼쪽 아래 조이스틱으로 움직여요. 아래의 세 가지 행동을 누르면 해당 장소로 찾아가요.</p></div></div>
+    <div class="about-section"><svg class="icon" aria-hidden="true"><use href="#i-lantern"/></svg><div><h3>등불 하나, 나의 한 걸음</h3><p>바람을 적고 그 마음을 위해 할 수 있는 작은 행동을 골라보세요. 이루어진 바람에는 ‘이루었어요’ 표시를 남길 수 있어요.</p></div></div>
+    <div class="about-section"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg><div><h3>조용히 간직하는 나만의 기록</h3><p>로그인 없이 무료로 이용해요. 소원은 서버에 보내지 않고 이 브라우저에 최대 50개 보관해요. 다른 사람에게 공개되지 않으며, 기기 간 동기화는 지원하지 않아요.</p></div></div>
+    <div class="about-section"><svg class="icon" aria-hidden="true"><use href="#i-moon"/></svg><div><h3>달빛지기 루나와 함께</h3><p>루나의 한마디는 주제에 따라 준비된 응원 문장이에요. 등불은 바라는 마음을 담는 상징이며, 소원당은 특정 종교나 실제 의례를 대신하지 않아요.</p></div></div>
+    <div class="about-links"><a href="/calc/" data-cta="sowon-calc">내 사주 살펴보기<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a><a href="/" data-cta="sowon-reports">삼라 이야기 더 보기<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+    <p class="about-credits">© SAMRA · 달빛 풍경은 삼라를 위해 제작한 AI 이미지예요.</p>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>
