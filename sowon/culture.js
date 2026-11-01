@@ -1,3 +1,5 @@
+import { renderReadingVisuals } from './reading-visuals.js?v=20261101-report-visual1';
+import { buildCelebrityVisuals } from './celebrity-visual-data.js?v=20261101-report-visual1';
 import {CULTURE_ROLES,normalizeCultureDayPillar,culturePath,selectCulturePeople,selectCultureArticles,featuredCulturePeople,validateCultureData} from './culture-core.js?v=20261101-topceleb3';
 import {sanitizeReferenceContent} from './reference.js?v=20261101-freepath4';
 
@@ -214,8 +216,10 @@ export async function mountCulture(container,view,{navigate,signal,onView,dayPil
     }
     if(chart){
       const chartSection=el('section','culture-chart-section');chartSection.append(el('h3','',item.name+'의 공개 명식'),el('p','culture-subtle','년·월·일 세 기둥 · '+item.scope));
-      const chartWrap=el('div','culture-chart');const sourceWrap=document.createElement('div');sourceWrap.append(chart.cloneNode(true));chartWrap.append(sanitizeReferenceContent(sourceWrap,document,new URL(item.path,location.origin).href).fragment);chartSection.append(chartWrap);
-      const bars=parsed.querySelectorAll('.bars .row2');if(bars.length){const distribution=el('div','culture-elements');for(const row of bars){const count=row.querySelector('.pc')?.textContent?.trim(),name=row.querySelector('.nm')?.textContent?.trim();if(name&&/^\d+$/.test(count||'')){const value=el('div');value.append(el('span','',name),el('strong','',count));distribution.append(value);}}chartSection.append(distribution,el('p','culture-subtle','오행은 세 기둥의 여섯 글자만 센 개수예요. 강약이나 능력의 점수가 아니에요.'));}body.append(chartSection);
+      const visualizations=buildCelebrityVisuals(parsed,item);
+      if(visualizations.length)chartSection.append(renderReadingVisuals(visualizations,{document,compact:true}));
+      const sourceChart=el('details','culture-raw-chart');sourceChart.append(el('summary','','표로 보는 공개 명식'));
+      const chartWrap=el('div','culture-chart');const sourceWrap=document.createElement('div');sourceWrap.append(chart.cloneNode(true));chartWrap.append(sanitizeReferenceContent(sourceWrap,document,new URL(item.path,location.origin).href).fragment);sourceChart.append(chartWrap);chartSection.append(sourceChart);body.append(chartSection);
     }
     const reading=el('div','culture-story-body');
     const marker=paper.querySelector('.celeb-article-note,.celeb-editorial-note');

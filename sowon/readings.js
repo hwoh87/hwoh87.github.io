@@ -1,6 +1,7 @@
 import { ENGINE_URL } from '../calc/panels/manifest.js';
 import { mountBirth, mountTimeCompare, mountJourney } from '../calc/panels/helpers.js';
 import { profileSearch } from './profile-core.js?v=20261101-freepath4';
+import { refreshCalculatorVisuals } from './calculator-visuals.js?v=20261101-report-visual1';
 
 const modules = {
   saju: () => import('../calc/panels/saju.js'),
@@ -299,7 +300,8 @@ export async function mountReading(container, kind, options = {}) {
     }
     const style = document.createElement('style'); style.textContent = view.styles; root.appendChild(style);
     const polish = document.createElement('link'); polish.rel = 'stylesheet'; polish.href = '/sowon/readings.css?v=20261101-freepath4'; root.appendChild(polish);
-    const theme = document.createElement('link'); theme.rel='stylesheet';theme.href='/sowon/reading-theme.css?v=20261101-freepath4';root.appendChild(theme);
+    const theme = document.createElement('link'); theme.rel='stylesheet';theme.href='/sowon/reading-theme.css?v=20261101-report-visual1';root.appendChild(theme);
+    const charts = document.createElement('link'); charts.rel='stylesheet';charts.href='/sowon/reading-visuals.css?v=20261101-report-visual1';root.appendChild(charts);
     const template = document.createElement('template');
     template.innerHTML = view.markup;
     root.appendChild(template.content.cloneNode(true));
@@ -319,7 +321,12 @@ export async function mountReading(container, kind, options = {}) {
     }
     if(options.autoScroll===false){const result=root.getElementById('result');if(result)result.scrollIntoView=()=>{};}
     root.querySelectorAll('form').forEach(form => form.addEventListener('submit', event => event.preventDefault()));
-    env = createEnvironment(root, kind, readingFormOptions(options, kind));
+    const formOptions = readingFormOptions(options, kind);
+    env = createEnvironment(root, kind, {...formOptions, onCalculated(input, context) {
+      if (disposed) return;
+      if (options.visuals !== false) refreshCalculatorVisuals(root,kind,input,{engine:window['engine-core']});
+      options.onCalculated?.(input,context);
+    }});
     mountBirth(env);
     const runtime = view.mountRuntime(env);
     Object.assign(env.window, { loadEngine: runtime.loadEngine, SajuCalc: runtime.SajuCalc, readForm: runtime.readForm });

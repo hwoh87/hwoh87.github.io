@@ -1,6 +1,8 @@
+import { renderReadingVisuals } from './reading-visuals.js?v=20261101-report-visual1';
+import { buildCompatibilityVisuals } from './compatibility-visual-data.js?v=20261101-report-visual1';
 import { DEMO_SELF, DEMO_TRAVELERS, createDemoSession } from './ilju-demo-core.js?v=20261101-peerrequest1';
-import { loadReadingEngine } from './readings.js?v=20261101-freepath4';
-import { safeResult } from './social-core.js?v=20261101-freepath4';
+import { loadReadingEngine } from './readings.js?v=20261101-report-visual1';
+import { safeResult } from './social-core.js?v=20261101-report-visual1';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
 const actionButton = (action, label, extra = '') => `<button type="button" data-demo-action="${action}" ${extra}>${esc(label)}</button>`;
@@ -107,7 +109,7 @@ export function createIljuDemo({ onApproach, onChange } = {}) {
       return before + name + suffix;
     }));
     const rows = (heading, values, label, content) => values.length ? `<section class="demo-reading-section"><h4>${heading}</h4>${values.map(row => `<article><h5>${personText(row[label])}</h5><p>${personText(row[content])}</p></article>`).join('')}</section>` : '';
-    return `<section class="demo-reading" aria-label="가상 인물의 친구 궁합 결과"><p class="demo-eyebrow">삼라 궁합 엔진 · 친구</p><div class="demo-reading-heading"><div><h3>${esc(DEMO_SELF.nickname)} <span>×</span> ${esc(current().nickname)}</h3><p>고정된 가상 출생정보로 계산한 체험 결과</p></div><div class="demo-score"><strong>${result.totalScore}</strong><span>점</span></div></div><p class="demo-verdict">${personText(result.verdict)}</p><div class="demo-scores">${Object.entries({ bond: '결속력', stability: '안정성', growth: '성장성', consumption: '소모도' }).filter(([key]) => result.subScores[key] !== null).map(([key, label]) => `<div><span>${label}</span><strong>${result.subScores[key]}</strong></div>`).join('')}</div>${result.iljuPair ? `<section class="demo-reading-section"><h4>두 일주가 만나는 결</h4><article><h5>${personText(result.iljuPair.headline)}</h5><p>${personText(result.iljuPair.detail)}</p><p>${personText(result.iljuPair.advice)}</p></article></section>` : ''}${rows('함께 살릴 강점', result.strengths.slice(0, 2), 'label', 'sub')}${rows('서로 알아둘 조율점', result.cautions.slice(0, 2), 'label', 'sub')}${result.narrative.length || result.axes.length ? `<details class="demo-reading-more"><summary>관계의 이야기 더 읽기</summary>${rows('두 사람의 이야기', result.narrative, 'label', 'text')}${rows('관계의 바탕', result.axes, 'headline', 'detail')}</details>` : ''}<p class="demo-result-note">점수는 관계를 이해하는 참고예요. 이 해석은 실제 내 사주나 실제 나그네의 결과가 아니에요.</p></section>`;
+    return `<section class="demo-reading" aria-label="가상 인물의 친구 궁합 결과"><p class="demo-eyebrow">삼라 궁합 엔진 · 친구</p><div class="demo-reading-heading"><div><h3>${esc(DEMO_SELF.nickname)} <span>×</span> ${esc(current().nickname)}</h3><p>고정된 가상 출생정보로 계산한 체험 결과</p></div><div class="demo-score" style="--score:${result.totalScore}" role="img" aria-label="관계 종합 ${result.totalScore}점"><strong>${result.totalScore}</strong><span>점</span></div></div><p class="demo-verdict">${personText(result.verdict)}</p><div class="demo-result-visuals" data-demo-result-visuals></div>${result.iljuPair ? `<section class="demo-reading-section"><h4>두 일주가 만나는 결</h4><article><h5>${personText(result.iljuPair.headline)}</h5><p>${personText(result.iljuPair.detail)}</p><p>${personText(result.iljuPair.advice)}</p></article></section>` : ''}${rows('함께 살릴 강점', result.strengths.slice(0, 2), 'label', 'sub')}${rows('서로 알아둘 조율점', result.cautions.slice(0, 2), 'label', 'sub')}${result.narrative.length || result.axes.length ? `<details class="demo-reading-more"><summary>관계의 이야기 더 읽기</summary>${rows('두 사람의 이야기', result.narrative, 'label', 'text')}${rows('관계의 바탕', result.axes, 'headline', 'detail')}</details>` : ''}<p class="demo-result-note">점수는 관계를 이해하는 참고예요. 이 해석은 실제 내 사주나 실제 나그네의 결과가 아니에요.</p></section>`;
   }
   function requestMarkup(peer, state) {
     if (state.phase === 'pending-outgoing') return `<section class="demo-request"><p class="demo-eyebrow">승인 대기</p><h3>궁합 보기 요청을 보냈어요.</h3><p>${esc(peer.nickname)}${particle(peer.nickname, '이', '가')} 승인하면 함께 볼 수 있어요.</p>${autoMode ? '<p class="demo-walking-note">가상 나그네가 다가오면 자동으로 응답해요.</p>' : ''}${actionButton('cancel', '요청 취소', 'class="demo-text-button"')}</section>`;
@@ -133,6 +135,9 @@ export function createIljuDemo({ onApproach, onChange } = {}) {
     const state = session.get(peer.id);
     dialog.dataset.peer = peer.id; dialog.dataset.phase = state.phase; dialog.dataset.loading = String(busy);
     dialog.innerHTML = `<header class="demo-header"><div class="demo-portrait demo-outfit-${esc(peer.outfit)}" aria-hidden="true">${esc(peer.nickname.charAt(0))}</div><div class="demo-person-heading"><p>가상 나그네</p><h2 id="iljuDemoTitle">${esc(peer.nickname + particle(peer.nickname, '과', '와'))} 궁합</h2></div>${actionButton('close', '닫기', 'class="demo-close" aria-label="가상 나그네 궁합 닫기"')}</header><div class="demo-body">${requestMarkup(peer, state)}<div class="demo-secondary-actions">${actionButton('approach', '다가가기', 'class="demo-approach"')}</div><p class="demo-disclaimer">실제 접속자가 아닌 가상 인물이에요.<br>가상 정보로 체험하며 실제 요청은 보내지 않아요.</p>${toolsMarkup(peer, state, toolsExpanded)}</div>`;
+    const visualHost = dialog.querySelector('[data-demo-result-visuals]');
+    const cached = results.get(peer.id);
+    if (visualHost && state.resultAllowed && cached?.revision === state.revision) visualHost.replaceChildren(renderReadingVisuals(buildCompatibilityVisuals(cached.result), { document, compact: true }));
     const body = dialog.querySelector('.demo-body'); if (body) body.scrollTop = scrollTop;
     if (previousAction) {
       const match = [...dialog.querySelectorAll('[data-demo-action]')].find(node => node.dataset.demoAction === previousAction);

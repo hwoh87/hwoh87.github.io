@@ -5,8 +5,8 @@
   --report-muted: #626c65;
   --report-green: #526b55;
   --report-line: #d9ddd4;
-  width: min(980px,calc(100vw - 40px));
-  max-width: 980px;
+  width: min(1120px,calc(100vw - 40px));
+  max-width: 1120px;
   height: 92dvh;
   max-height: 92dvh;
   padding: 0;
@@ -197,4 +197,50 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .xp-personal-dialog { scroll-behavior: auto; }
+}
+
+/* A report cover and data atlas precede the long-form interpretation. */
+.xp-personal-dialog .report-content { padding: 26px 32px 36px; }
+.xp-personal-dialog .report-intro {
+  max-width: none; margin: 0 0 30px; padding: 26px 30px 20px;
+  border: 1px solid #315351; border-top: 3px solid #c6a970; border-radius: 14px;
+  background: #1c403c; color: #f8f5e9;
+}
+.xp-personal-dialog .report-kicker { color: #d1c29b; font-size: 12px; letter-spacing: .045em; }
+.xp-personal-dialog .report-title { color: #fffdf5; font-size: clamp(28px,3.4vw,38px); line-height: 1.4; }
+.xp-personal-dialog .report-lead { margin-top: 7px; color: #e5eedd; font-size: 20px; line-height: 1.65; }
+.xp-personal-dialog .report-profile { margin-top: 10px; color: #bacbc0; }
+.xp-personal-dialog .report-profile button { color: #e6d6ac; }
+.xp-personal-dialog .report-summary { max-width: 52em; color: #e3e9dc; font-size: 15px; line-height: 1.85; }
+.xp-personal-dialog .report-reading-meta { margin-top: 16px; padding-top: 10px; border-top: 1px solid #ffffff26; color: #c1cec0; }
+.xp-personal-dialog .report-type-size { color: #e5d6af; }
+.xp-personal-dialog .report-dashboard { margin: 0 0 30px; scroll-margin-top: 100px; }
+.xp-personal-dialog .report-dashboard[hidden] { display: none; }
+.xp-personal-dialog .report-dashboard-header { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.xp-personal-dialog .report-dashboard-kicker { margin: 0 0 4px; color: #8a6c35; font-size: 11px; font-weight: 600; letter-spacing: .06em; }
+.xp-personal-dialog .report-dashboard-header h2 { margin: 0; color: #203b35; font-family: var(--serif,"Noto Serif KR",serif); font-size: 25px; font-weight: 600; line-height: 1.5; letter-spacing: -.04em; }
+.xp-personal-dialog .report-dashboard-source { flex: none; padding: 6px 10px; border: 1px solid #d5dbcd; border-radius: 30px; color: #50634d; font-size: 11px; line-height: 1.6; }
+.xp-personal-dialog .report-digest { background: #eef0e9; border-radius: 12px; padding: 22px 24px; }
+.xp-personal-dialog .report-digest-items dd { font-size: 21px; }
+.xp-personal-dialog .report-chapter-number { display: inline-grid; place-items: center; min-width: 30px; height: 30px; margin-bottom: 13px; border: 1px solid #d2c7a8; border-radius: 50%; color: #866b38; font-size: 11px; letter-spacing: 0; }
+.xp-personal-dialog .report-chapter>.report-takeaway { padding: 13px 16px; border-left: 3px solid #a8b79a; border-radius: 0 7px 7px 0; background: #ecefe6; font-size: 15px; }
+.xp-personal-dialog .report-reading-route .report-data-reading { color: #7d6134; }
+.xp-personal-dialog.is-large-text .report-intro .report-summary { color: #edf2e6; }
+@media(max-width:759px) {
+  .xp-personal-dialog .report-content { padding: 18px 16px 28px; }
+  .xp-personal-dialog .report-intro { padding: 21px 20px 16px; margin-bottom: 25px; border-radius: 11px; }
+  .xp-personal-dialog .report-title { font-size: 28px; }
+  .xp-personal-dialog .report-lead { font-size: 18px; }
+  .xp-personal-dialog .report-summary { font-size: 15px; }
+  .xp-personal-dialog .report-dashboard-header { align-items: start; gap: 10px; }
+  .xp-personal-dialog .report-dashboard-header h2 { font-size: 23px; }
+  .xp-personal-dialog .report-dashboard-source { padding: 5px 8px; font-size: 10px; }
+  .xp-personal-dialog .report-dashboard { scroll-margin-top: 130px; }
+  .xp-personal-dialog .report-digest { padding: 18px; }
+}
+@media(max-width:360px) {
+  .xp-personal-dialog .report-content { padding-right: 12px; padding-left: 12px; }
+  .xp-personal-dialog .report-intro { padding: 18px 16px 14px; }
+  .xp-personal-dialog .report-dashboard-header { display: block; }
+  .xp-personal-dialog .report-dashboard-source { display: inline-block; margin-top: 8px; }
 }

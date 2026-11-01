@@ -65,7 +65,7 @@ export function safeResult(raw) {
   const subScores = Object.fromEntries(['bond', 'stability', 'growth', 'consumption'].map(key => [key, score(r.subScores?.[key])]));
   return { totalScore: score(r.totalScore), verdict: cleanText(r.verdict, 1600), confidence: score(r.confidence), unknownTimeA: r.unknownTimeA === true, unknownTimeB: r.unknownTimeB === true,
     subScores, narrative: textRows(r.narrative, ['icon', 'label', 'text']), strengths: textRows(r.strengths, ['emoji', 'label', 'sub']), cautions: textRows(r.cautions, ['emoji', 'label', 'sub']),
-    axes: textRows(r.axes, ['name', 'tone', 'headline', 'detail']),
+    axes: (Array.isArray(r.axes) ? r.axes : []).slice(0, 20).map(row => ({ ...Object.fromEntries(['name', 'tone', 'headline', 'detail'].map(key => [key, cleanText(row?.[key], key === 'detail' ? 1600 : 220)])), key: cleanText(row?.key, 80), score: score(row?.score) })).filter(row => row.name || row.headline || row.detail),
     iljuPair: r.iljuPair ? Object.fromEntries(['tone', 'headline', 'detail', 'advice'].map(key => [key, cleanText(r.iljuPair[key], 1600)])) : null,
     names: { a: cleanText(raw.names?.a || raw.nameA, 12), b: cleanText(raw.names?.b || raw.nameB, 12) },
   };

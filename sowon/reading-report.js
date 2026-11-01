@@ -1,7 +1,8 @@
-import { loadReadingEngine, mountReading } from './readings.js?v=20261101-freepath4';
-import { buildReadingInsight } from './reading-insight-core.js?v=20261101-freepath4';
-import { mountReadingOffers } from './reading-offers.js?v=20261101-freepath4';
+import { loadReadingEngine, mountReading } from './readings.js?v=20261101-report-visual1';
+import { buildReadingInsight } from './reading-insight-core.js?v=20261101-report-visual1';
+import { mountReadingOffers } from './reading-offers.js?v=20261101-report-visual1';
 import { profileSearch } from './profile-core.js?v=20261101-freepath4';
+import { renderReadingVisuals } from './reading-visuals.js?v=20261101-report-visual1';
 
 const HOSTS = { tojeong: { name: '토정과', kind: 'saju' }, seol: { name: '설월과', kind: 'saju' }, luna: { name: '루나와', kind: 'star' } };
 const KINDS = [['saju', '사주'], ['jami', '자미두수'], ['star', '별자리']];
@@ -75,6 +76,7 @@ export function mountReadingReport(container, npc, profile, options = {}) {
     readingMeta.append(length, typeSize);
     intro.append(make('p', 'report-kicker', `${HOSTS[npc].name} 함께 읽는 개인 해석`), title, lead, meta, summary, readingMeta);
     const digest = make('section', 'report-digest'); digest.hidden = true; digest.setAttribute('aria-label', '먼저 읽는 핵심 요약');
+    const dashboard = make('section', 'report-dashboard'); dashboard.hidden = true; dashboard.tabIndex = -1; dashboard.setAttribute('aria-label', '한눈에 보는 분석 데이터');
     const pending = make('p', 'report-pending', '입력한 정보로 기본 해석을 계산하고 있어요.'); pending.setAttribute('role', 'status');
     const layout = make('div', 'report-layout'), chapters = make('div', 'report-chapters'), outline = make('nav', 'report-outline'); outline.setAttribute('aria-label', '해석 목차'); layout.append(chapters, outline);
     const notes = make('div', 'report-notes');
@@ -93,21 +95,34 @@ export function mountReadingReport(container, npc, profile, options = {}) {
       offerHost.scrollIntoView({ block: 'start', behavior: 'auto' }); offerHost.focus({ preventScroll: true });
     }, viewSignal);
     offerHost.tabIndex = -1;
-    readingRoute.append(freeScope, readStart, moreReading);
+    const dataStart = button('report-data-reading', '분석 데이터 다시 보기 ↑', () => {
+      if (!dashboard.hidden) { dashboard.scrollIntoView({ block: 'start', behavior: 'auto' }); dashboard.focus({ preventScroll: true }); }
+    }, viewSignal);
+    readingRoute.append(freeScope, dataStart, readStart, moreReading);
     const returnConversation = make('div', 'report-return-conversation');
     if (options.onGuide) returnConversation.append(make('p', '', options.guideLabel === '대화 이어가기' ? `술사와의 대화는 캐릭터에 저장한 정보의 ${conversationSubject} 기본 풀이로 이어져요.${npc === 'tojeong' ? '' : ' 별자리는 서울 기준이에요.'}` : '읽다가 궁금해진 대목이 있나요?'), button('', options.guideLabel === '대화 이어가기' ? `${HOSTS[npc].name} ${conversationSubject} 이야기` : guideText, () => options.onGuide?.(), viewSignal));
-    content.append(intro, pending, digest, readingRoute, layout, notes, technical, offerHost, returnConversation, make('p', 'report-footnote', '삼라 앱과 같은 계산 엔진의 결과를 바탕으로 읽었어요. 별자리·자미두수의 풀이는 앱의 기본 해석과 같은 출처이며, 사주의 생활 안내는 계산된 일간·십신·격국·강약을 풀어 썼어요. NPC의 AI 대화와 유료 심층 리포트는 별도의 해석이에요.'));
+    content.append(intro, pending, dashboard, digest, readingRoute, layout, notes, technical, offerHost, returnConversation, make('p', 'report-footnote', '삼라 앱과 같은 계산 엔진의 결과를 바탕으로 읽었어요. 별자리·자미두수의 풀이는 앱의 기본 해석과 같은 출처이며, 사주의 생활 안내는 계산된 일간·십신·격국·강약을 풀어 썼어요. NPC의 AI 대화와 유료 심층 리포트는 별도의 해석이에요.'));
     let calculation = 0, inputCalendar = profile.birth?.calendar;
     async function refresh() {
       const revision = ++calculation;
       offerHost.hidden = true;
       readingRoute.hidden = true;
+      dashboard.replaceChildren(); dashboard.hidden = true;
       outlineAbort?.abort(); outlineAbort = new AbortController(); const outlineSignal = outlineAbort.signal;
       try {
         enginePromise ||= Promise.resolve().then(loadEngine);
         const engine = await enginePromise;
         if (disposed || ticket !== version || revision !== calculation) return;
         const result = interpret(kind, currentBirth, { engine, year: options.year || yearInKorea(), location, trueSolarTime });
+        const visualizations = Array.isArray(result.visualizations) ? result.visualizations : [];
+        if (visualizations.length && !result.requiresTime) {
+          const dashboardHeader = make('header', 'report-dashboard-header'), dashboardTitle = make('div', '');
+          dashboardTitle.append(make('p', 'report-dashboard-kicker', '나를 읽는 데이터'), make('h2', '', '한눈에 보는 나의 구조'));
+          dashboardHeader.append(dashboardTitle, make('span', 'report-dashboard-source', '삼라 계산 엔진'));
+          dashboard.append(dashboardHeader, renderReadingVisuals(visualizations, { document }));
+          dashboard.hidden = false;
+        }
+        dataStart.hidden = dashboard.hidden;
         title.textContent = result.title; lead.textContent = result.headline; metadata.textContent = profileLabel(); summary.textContent = result.summary;
         length.textContent = result.sections.length ? `${result.sections.length}개 주제${result.readMinutes ? ` · 약 ${result.readMinutes}분` : ''} · 무료 해석` : '';
         digest.replaceChildren();
@@ -131,7 +146,7 @@ export function mountReadingReport(container, npc, profile, options = {}) {
           section.append(make('span', 'report-chapter-number', String(index + 1).padStart(2, '0')), heading);
           if (chapter.takeaway) section.append(make('p', 'report-takeaway', chapter.takeaway));
           chapter.paragraphs.forEach(paragraph => section.append(make('p', '', paragraph)));
-          if (chapter.visual?.type === 'elements' && chapter.visual.rows?.length) {
+          if (chapter.visual?.type === 'elements' && chapter.visual.rows?.length && !visualizations.some(visual => visual.type === 'distribution' && visual.variant === 'elements')) {
             const visual = make('figure', 'report-balance'); visual.append(make('figcaption', '', chapter.visual.caption));
             chapter.visual.rows.forEach(row => {
               const item = make('div', 'report-balance-row');
@@ -163,7 +178,7 @@ export function mountReadingReport(container, npc, profile, options = {}) {
       } catch (_) {
         if (disposed || ticket !== version || revision !== calculation) return;
         enginePromise = null; title.textContent = '해석을 확인해 주세요'; lead.textContent = ''; summary.textContent = ''; metadata.textContent = profileLabel();
-        chapters.replaceChildren(); outline.replaceChildren(); layout.hidden = true; notes.replaceChildren(); offerHost.hidden = true; readingRoute.hidden = true; digest.replaceChildren(); digest.hidden = true; length.textContent = '';
+        chapters.replaceChildren(); outline.replaceChildren(); layout.hidden = true; notes.replaceChildren(); offerHost.hidden = true; readingRoute.hidden = true; digest.replaceChildren(); digest.hidden = true; dashboard.replaceChildren(); dashboard.hidden = true; length.textContent = '';
         pending.hidden = false; pending.className = 'report-error'; pending.textContent = '기본 해석을 준비하지 못했어요. 아래에서 계산 조건을 확인하고 다시 계산해 주세요.';
       }
     }
@@ -173,7 +188,7 @@ export function mountReadingReport(container, npc, profile, options = {}) {
       rawStarted = true; rawAbort = new AbortController();
       try {
         const mounted = await mountCalculator(rawBody, kind, {
-          search: profileSearch(kind, profile), signal: rawAbort.signal, autoScroll: false, navigate,
+          search: profileSearch(kind, profile), signal: rawAbort.signal, autoScroll: false, visuals: false, navigate,
           onCalculated(input, context) {
             if (disposed || ticket !== version || !input) return;
             currentBirth = { y: +input.y, mo: +input.mo, d: +input.d, h: input.unk || +input.h === -1 ? -1 : +input.h, mi: +input.mi || 0, g: input.g, unk: !!input.unk || +input.h === -1 };

@@ -154,3 +154,9 @@
 @media(max-width:540px){.culture-feature-entry{padding-bottom:12px}.culture-feature-entry>.culture-photo-credit{padding-top:2px}.culture-feature-card>.culture-art.culture-portrait{width:68px;height:85px}.culture-story-person>.culture-art.culture-portrait{width:64px;height:80px}.culture-photo-credit{font-size:10px;line-height:1.8}.culture-portrait-figure,.culture-portrait-fallback{grid-template-columns:96px minmax(0,1fr);gap:14px}.culture-reader-portrait{width:96px;max-width:100%;max-height:124px;margin:0}.culture-portrait-figure>.culture-photo-credit{max-width:none;padding-bottom:0;font-size:11px}}
 
 @media(max-width:540px){.culture-section-tabs{gap:9px;margin-bottom:20px}.culture-section-tab.culture-chip{min-height:69px;padding:12px;font-size:14px!important}.culture-section-count{font-size:11px}}
+
+.culture-chart-section>.reading-visuals{margin:20px 0 24px}.culture-chart-section .reading-visuals{min-width:0}
+.culture-raw-chart{margin:20px 0 0;border-top:1px solid #d9d3c4;border-bottom:1px solid #d9d3c4;padding:0 0 3px}
+.culture-raw-chart>summary{cursor:pointer;min-height:48px;display:flex;align-items:center;font-size:13px;font-weight:600;color:#62533e;list-style-position:inside}
+.culture-raw-chart>summary:before{content:'＋';margin-right:9px;color:#93743d}.culture-raw-chart[open]>summary:before{content:'−'}
+.culture-raw-chart>summary:focus-visible{outline:2px solid #927a48;outline-offset:3px}.culture-raw-chart .culture-chart{margin:0 0 16px}

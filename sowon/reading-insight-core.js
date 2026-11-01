@@ -1,4 +1,5 @@
 import { STEM_COUNSEL, GOD_GROUP, GROUP_COUNSEL, ELEMENT_PRACTICE } from './reading-counsel.js?v=20261101-freepath4';
+import { buildSajuVisuals, buildStarVisuals, buildJamiVisuals } from './reading-visual-data.js?v=20261101-report-visual1';
 
 /**
  * A local reading from the same deterministic engine as /calc/.
@@ -35,7 +36,7 @@ const highlight = (label, value, detail) => ({ label, value: text(value), detail
 function finish(reading) {
   const sections = reading.sections.filter(row => row.paragraphs.length);
   const chars = [reading.summary, ...sections.flatMap(row => [...row.paragraphs, ...row.actions])].join('').length;
-  return { ...reading, sections, highlights: list(reading.highlights).filter(row => row.value).slice(0, 3), readMinutes: Math.max(2, Math.ceil(chars / 550)) };
+  return { ...reading, visualizations: list(reading.visualizations), sections, highlights: list(reading.highlights).filter(row => row.value).slice(0, 3), readMinutes: Math.max(2, Math.ceil(chars / 550)) };
 }
 function fail(code, message) { throw Object.assign(new Error(message), { code }); }
 function json(value) {
@@ -124,7 +125,7 @@ function sajuReading(v, options) {
   ],[],{takeaway:'맞는지 단정하기보다 내 경험으로 확인해요',evidence:['이 장의 실천은 앞에서 확인한 일간·십신·강약을 일상적인 질문으로 바꾼 안내예요. 미래의 사건을 확정하는 예언은 아니에요.']}));
   const notes=unknown ? ['출생시간 미상으로 시주를 제외한 세 기둥을 읽었어요. 정오를 대신 사용하므로 날짜 경계와 대운 시작 시점은 실제 출생시간에 따라 달라질 수 있어요.'] : [];
   if(options.trueSolarTime === true)notes.push(`${geo.name}의 경도로 진태양시를 보정했어요. 태어난 도시가 다르면 시간 경계의 명식을 다시 확인해 주세요.`);
-  return finish({ kind:'saju',title:'나의 사주 리포트',headline:text(c.iljuKr)+'일주, '+(stemNote?.[0] || element(t.dayElement)+'의 결'),summary:describeStrength(st),sections,notes,requiresTime:false,source:'samra-engine',identity:{iljuKr:text(c.iljuKr),ganzi:text(c.pillars.day.ganzi),dayElement:text(t.dayElement)},highlights:[highlight('나의 출발점',text(c.iljuKr)+'일주',stemNote?.[0]),highlight('일을 읽는 틀',gg.hangul,group?.title),highlight('균형을 돕는 방향',yong.join(' · '),st.neutral ? '중화에 가까워 보조 참고로 읽어요' : '억부 기준으로 계산한 보완 방향')] });
+  return finish({ kind:'saju',title:'나의 사주 리포트',headline:text(c.iljuKr)+'일주, '+(stemNote?.[0] || element(t.dayElement)+'의 결'),summary:describeStrength(st),sections,notes,requiresTime:false,source:'samra-engine',visualizations:buildSajuVisuals(c,t,{unknown,year:options.year}),identity:{iljuKr:text(c.iljuKr),ganzi:text(c.pillars.day.ganzi),dayElement:text(t.dayElement)},highlights:[highlight('나의 출발점',text(c.iljuKr)+'일주',stemNote?.[0]),highlight('일을 읽는 틀',gg.hangul,group?.title),highlight('균형을 돕는 방향',yong.join(' · '),st.neutral ? '중화에 가까워 보조 참고로 읽어요' : '억부 기준으로 계산한 보완 방향')] });
 }
 
 function starReading(v, options) {
@@ -160,7 +161,7 @@ function starReading(v, options) {
   sections.push(section('practice','일상에서 살려 볼 방향',[t.growthTheme?.description,t.growthTheme?.advice || t.overview?.focus],[signal('성장의 방향',t.growthTheme?.title),signal('작은 실천',list(t.growthTheme?.keywords).map(text).filter(Boolean).join(' · '))],{takeaway:'익숙한 방식에서 한 걸음 넓혀 봐요',evidence:[t.growthTheme?.expertBasis],actions:[t.mirror?.dailyUse]}));
   const notes = [`출생지는 ${geo.name} 기준, 입력 시각은 한국 표준시로 읽었어요.${unknown ? '' : ' 태어난 도시나 시간대가 다르면 상승궁과 하우스 등 시간·장소에 민감한 결과를 다시 확인해 주세요.'}`];
   if (unknown) notes.unshift('출생시간 미상으로 정오의 행성 배치를 참고했어요. 달처럼 빠르게 움직이는 천체는 실제 시간에 따라 달라질 수 있어요. 상승궁·하우스·차트 룰러 풀이는 제외했어요.');
-  return finish({ kind:'star',title:'나의 별자리 리포트',headline:text(t.headline),summary:unknown ? '정오를 대신 사용한 행성 배치로 기본 기질을 읽었어요. 출생 시간이 필요한 상승궁과 하우스는 제외했어요.' : text(t.headlineBody),sections,notes,requiresTime:false,source:'samra-engine',highlights:[highlight('기본 성향',sun.signKo,sun.title),unknown ? highlight('두드러진 기질',balances[0]?.label,modality?.description) : highlight('마음의 반응',moon?.signKo,moon?.title),highlight(unknown ? '관계의 단서' : '세상과 만나는 태도',unknown ? list(venus?.keywords).map(text).join(' · ') || venusSign : rising?.signKo,unknown ? venus?.sentence || '금성이 놓인 별자리도 함께 살펴요' : rising?.title)] });
+  return finish({ kind:'star',title:'나의 별자리 리포트',headline:text(t.headline),summary:unknown ? '정오를 대신 사용한 행성 배치로 기본 기질을 읽었어요. 출생 시간이 필요한 상승궁과 하우스는 제외했어요.' : text(t.headlineBody),sections,notes,requiresTime:false,source:'samra-engine',visualizations:buildStarVisuals(c,t,{unknown}),highlights:[highlight('기본 성향',sun.signKo,sun.title),unknown ? highlight('두드러진 기질',balances[0]?.label,modality?.description) : highlight('마음의 반응',moon?.signKo,moon?.title),highlight(unknown ? '관계의 단서' : '세상과 만나는 태도',unknown ? list(venus?.keywords).map(text).join(' · ') || venusSign : rising?.signKo,unknown ? venus?.sentence || '금성이 놓인 별자리도 함께 살펴요' : rising?.title)] });
 }
 
 function jamiReading(v, options) {
@@ -184,7 +185,7 @@ function jamiReading(v, options) {
   const annual=palaces.map(palace=>({palace,actions:list(palace.actions).map(text).filter(value=>value.startsWith('올해 '))})).filter(row=>row.actions.length);
   if(annual.length)sections.push(section('flow',`${options.year}년, 한 번 더 살펴볼 영역`,annual.slice(0,2).map(row=>`${palaceName(row.palace)}의 ${text(row.palace.theme)} 영역이에요. ${row.actions[0]}`),annual.slice(0,2).map(row=>signal('올해의 관찰 영역',palaceName(row.palace))),{takeaway:'태어난 명반 위에 올해의 변화를 겹쳐 읽어요',evidence:['이 장은 선택한 연도의 유년 사화가 실제로 놓이는 궁에 대한 앱의 행동 안내를 가져왔어요. 출생 명반의 별과 올해 이동하는 신호를 구분해서 읽어요.','명반의 신호를 실제 사건이나 성공·실패의 확정값으로 바꾸지 않았어요.']}));
   const work=palaces.find(row=>row.name==='官祿'), shen=palaces.find(row=>row.isShenGong);
-  return finish({kind:'jami',title:'나의 자미두수 리포트',headline:text(t.lead),summary:text(ming.hint),sections,notes:[`${options.year}년을 기준으로 별의 자리와 기본 행동 안내를 읽었어요. 실제 사건이나 성과를 확정하는 예고는 아니에요.`,`출생지는 ${geo.name} 기준이에요. 태어난 도시가 다르면 시간 경계의 명반을 다시 확인해 주세요.`],requiresTime:false,source:'samra-engine',highlights:[highlight('나의 중심',starsIn(ming)||'명궁에 주성 없음',ming.theme),highlight('일의 무대',starsIn(work)||'관록궁에 주성 없음',work?.theme),highlight('생활에서 펼치는 자리',shen ? palaceName(shen) : '',shen?.theme)]});
+  return finish({kind:'jami',title:'나의 자미두수 리포트',headline:text(t.lead),summary:text(ming.hint),sections,notes:[`${options.year}년을 기준으로 별의 자리와 기본 행동 안내를 읽었어요. 실제 사건이나 성과를 확정하는 예고는 아니에요.`,`출생지는 ${geo.name} 기준이에요. 태어난 도시가 다르면 시간 경계의 명반을 다시 확인해 주세요.`],requiresTime:false,source:'samra-engine',visualizations:buildJamiVisuals(t,{year:options.year}),highlights:[highlight('나의 중심',starsIn(ming)||'명궁에 주성 없음',ming.theme),highlight('일의 무대',starsIn(work)||'관록궁에 주성 없음',work?.theme),highlight('생활에서 펼치는 자리',shen ? palaceName(shen) : '',shen?.theme)]});
 }
 
 /** `solar` is owned, already calendar-converted birth data. Never a remote peer. */
