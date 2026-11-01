@@ -1,7 +1,7 @@
-import { renderReadingVisuals } from './reading-visuals.js?v=20261101-report-visual2';
-import { buildCompatibilityVisuals } from './compatibility-visual-data.js?v=20261101-report-visual2';
-import { getOwnProfile } from './profile.js?v=20261101-report-visual2';
-import { RELATION_KINDS, safePosition, serverProfile, safeVisitors, safeRequests, availableActions, safeResult, socialError, cleanText, createSocialClient, safeIlju, roomForKey, safeRoomCounts, validId } from './social-core.js?v=20261101-report-visual2';
+import { renderReadingVisuals } from './reading-visuals.js?v=20261101-report-visual3';
+import { buildCompatibilityVisuals } from './compatibility-visual-data.js?v=20261101-report-visual3';
+import { getOwnProfile } from './profile.js?v=20261101-report-visual3';
+import { RELATION_KINDS, safePosition, serverProfile, safeVisitors, safeRequests, availableActions, safeResult, socialError, cleanText, createSocialClient, safeIlju, roomForKey, safeRoomCounts, validId } from './social-core.js?v=20261101-report-visual3';
 
 let storage;
 try { storage = sessionStorage; } catch (_) {}

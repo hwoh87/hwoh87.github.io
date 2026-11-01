@@ -1,6 +1,6 @@
-import { buildSajuVisuals, buildStarVisuals, buildJamiVisuals } from './reading-visual-data.js?v=20261101-report-visual2';
-import { buildCompatibilityVisuals } from './compatibility-visual-data.js?v=20261101-report-visual2';
-import { renderReadingVisuals } from './reading-visuals.js?v=20261101-report-visual2';
+import { buildSajuVisuals, buildStarVisuals, buildJamiVisuals } from './reading-visual-data.js?v=20261101-report-visual3';
+import { buildCompatibilityVisuals } from './compatibility-visual-data.js?v=20261101-report-visual3';
+import { renderReadingVisuals } from './reading-visuals.js?v=20261101-report-visual3';
 
 const NAMES = Object.freeze({saju:'사주',gunghap:'궁합',jami:'자미두수',star:'별자리'});
 const yearInKorea = () => Number(new Intl.DateTimeFormat('en',{year:'numeric',timeZone:'Asia/Seoul'}).format(new Date()));

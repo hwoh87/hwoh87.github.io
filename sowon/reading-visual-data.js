@@ -55,7 +55,8 @@ export function buildSajuVisuals(c={},t={},options={}) {
       return {label:clean(row.ganzi),detail:join([`${row.startYear}–${endYear}년`,clean(row.stemSipsin)]),tag:absolute===active?'현재 대운':year!==null&&row.startYear>year?'다가올 흐름':year!==null?'지나온 흐름':'',active:absolute===active};
     }),{kicker:year===null?'계산된 대운 순서':`${year}년 기준`,description:'약 10년 단위로 바뀌는 긴 배경을 살펴요.',note:unknown?'정오를 대신 사용한 대운 시작 연도예요. 실제 출생시간에 따라 경계가 달라질 수 있어요.':'계산된 시작 연도를 기준으로 나눈 구간이에요. 사건이나 행운의 크기를 점수로 만들지 않았어요.'}));
   }
-  return visuals.filter(Boolean);
+  const displayOrder=['pillars','elements','polarity','strength','gods','daewoon'];
+  return visuals.filter(Boolean).sort((a,b)=>displayOrder.indexOf(a.id)-displayOrder.indexOf(b.id));
 }
 
 export function buildStarVisuals(c={},t={},options={}) {

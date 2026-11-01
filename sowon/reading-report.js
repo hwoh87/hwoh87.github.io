@@ -1,8 +1,8 @@
-import { loadReadingEngine, mountReading } from './readings.js?v=20261101-report-visual2';
-import { buildReadingInsight } from './reading-insight-core.js?v=20261101-report-visual2';
-import { mountReadingOffers } from './reading-offers.js?v=20261101-report-visual2';
+import { loadReadingEngine, mountReading } from './readings.js?v=20261101-report-visual3';
+import { buildReadingInsight } from './reading-insight-core.js?v=20261101-report-visual3';
+import { mountReadingOffers } from './reading-offers.js?v=20261101-report-visual3';
 import { profileSearch } from './profile-core.js?v=20261101-freepath4';
-import { renderReadingVisuals } from './reading-visuals.js?v=20261101-report-visual2';
+import { renderReadingVisuals } from './reading-visuals.js?v=20261101-report-visual3';
 
 const HOSTS = { tojeong: { name: '토정과', kind: 'saju' }, seol: { name: '설월과', kind: 'saju' }, luna: { name: '루나와', kind: 'star' } };
 const KINDS = [['saju', '사주'], ['jami', '자미두수'], ['star', '별자리']];
