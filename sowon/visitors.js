@@ -24,7 +24,7 @@ export function demoLabelOffsets(items, gap=8) {
       offset=Math.min(offset,...collisions.map(rect=>rect.top-gap-item.rect.bottom));
     }
     offsets[item.index]=offset;
-    placed.push({...item.rect,top:item.rect.top+offset,bottom:item.rect.bottom+offset});
+    placed.push({left:item.rect.left,right:item.rect.right,top:item.rect.top+offset,bottom:item.rect.bottom+offset});
   }
   return offsets;
 }
