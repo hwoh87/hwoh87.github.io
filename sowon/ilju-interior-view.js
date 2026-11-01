@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
-import { createIljuInterior } from './ilju-interior.js?v=20261101-templeroom1';
+import { createIljuInterior } from './ilju-interior.js?v=20261101-templewarm1';
+import { createIljuInteriorLighting } from './ilju-interior-lighting.js?v=20261101-templewarm1';
 import { interiorForRoom, interiorViewPose, applyInteriorSeat } from './ilju-interior-core.js?v=20261101-templeroom2';
 import { createAvatar } from './avatar.js?v=20261101-templeroom1';
 import { createLocomotion } from './locomotion.js?v=20261101-templeroom1';
@@ -56,14 +57,30 @@ function applyAppearance() {
   engine.avatar.setGender?.(profile?.solar.g || null);
   let settings; try { settings = readSettings(localStorage); } catch (_) {}
   engine.avatar.setAppearance(settings?.outfit || 'sage');
+  applyLightingQuality(settings);
   const identity = getOwnIdentity();
   $('.interior-name').textContent = identity.hasIdentity ? `${identity.ilju}일주 · ${profile?.nickname || '나'}` : profile?.nickname || '나';
+}
+function applyLightingQuality(settings) {
+  if (!engine) return;
+  if (!settings) { try { settings = readSettings(localStorage); } catch (_) {} }
+  const quality = settings?.quality || 'auto', narrow = innerWidth < 760;
+  engine.lighting.setQuality({quality, narrow});
+  const shadows = quality !== 'smooth';
+  if (engine.renderer.shadowMap.enabled !== shadows) {
+    engine.renderer.shadowMap.enabled = shadows;
+    // Shadow availability is part of Three.js's material program selection.
+    engine.scene.traverse(node => {
+      if (node.material) for (const material of [node.material].flat()) material.needsUpdate = true;
+    });
+  }
 }
 function resize() {
   if (!engine || layer.hidden) return;
   const width = canvasHost.clientWidth, height = canvasHost.clientHeight;
   if (!width || !height) return;
   engine.renderer.setSize(width, height, false);
+  applyLightingQuality();
   engine.camera.aspect = width / height; engine.camera.fov = width / height < .85 ? 62 : 48; engine.camera.updateProjectionMatrix();
   setView(muralView ? 'mural' : 'overview', true);
 }
@@ -113,16 +130,16 @@ function createEngine() {
   const renderer = new THREE.WebGLRenderer({antialias: true, powerPreference: 'low-power'});
   pendingResources.push(() => { renderer.dispose(); renderer.domElement.remove(); });
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, innerWidth < 760 ? 1.35 : 1.7));
-  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.25;
+  renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.1;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.domElement.tabIndex = 0; renderer.domElement.setAttribute('role', 'application'); renderer.domElement.setAttribute('aria-label', '일주방 입체 공간. 바닥이나 방석을 누르거나 방향키로 이동해요.');
   canvasHost.appendChild(renderer.domElement);
   const scene = new THREE.Scene(); scene.background = new THREE.Color('#312b26');
   const camera = new THREE.PerspectiveCamera(48, 1, .1, 150);
   const world = createIljuInterior(); scene.add(world.group);
   pendingResources.push(() => world.dispose());
-  scene.add(new THREE.HemisphereLight('#fff2d8', '#625343', 2.2));
-  scene.add(new THREE.AmbientLight('#f8e5c8', .65));
-  const sunlight = new THREE.DirectionalLight('#fff2d9', 2.5); sunlight.position.set(-5, 11, 5); scene.add(sunlight);
+  const lighting = createIljuInteriorLighting({narrow: innerWidth < 760}); scene.add(lighting.group);
+  pendingResources.push(() => lighting.dispose());
   const avatar = createAvatar(); avatar.group.position.set(world.spawn.x, 0, world.spawn.z); avatar.group.rotation.y = Math.PI; scene.add(avatar.group);
   pendingResources.push(() => avatar.dispose());
   const orbit = new OrbitControls(camera, renderer.domElement); orbit.enableDamping = true; orbit.enablePan = false; orbit.dampingFactor = .07; orbit.minDistance = 5; orbit.maxDistance = 44; orbit.rotateSpeed = .4;
@@ -140,7 +157,7 @@ function createEngine() {
       if (!hit) return false; let node = hit.object; while (node && !node.userData.seatId) node = node.parent;
       if (node) { chooseSeat(node.userData.seatId); return true; } return false;
     }});
-  engine = {renderer, scene, camera, world, avatar, orbit, movement, visitors};
+  engine = {renderer, scene, camera, world, lighting, avatar, orbit, movement, visitors};
   const list = $('.interior-seat-list'); list.replaceChildren();
   world.seats.forEach(seat => { const button = document.createElement('button'); button.type = 'button'; button.dataset.interiorSeat = seat.id; button.textContent = seat.label; button.setAttribute('aria-pressed', 'false'); list.appendChild(button); });
   renderer.domElement.addEventListener('webglcontextlost', event => { event.preventDefault(); showFallback(); });
@@ -154,7 +171,7 @@ function createEngine() {
 function destroyEngine() {
   if (!engine) return;
   const current = engine; engine = null;
-  current.movement.dispose(); current.visitors.dispose(); current.orbit.dispose(); current.avatar.dispose(); current.world.dispose();
+  current.movement.dispose(); current.visitors.dispose(); current.orbit.dispose(); current.avatar.dispose(); current.world.dispose(); current.lighting.dispose();
   current.renderer.dispose(); current.renderer.domElement.remove(); transition = null;
 }
 function showFallback() {
@@ -193,6 +210,7 @@ function render(time) {
       if (t === 1) transition = null;
     }
     engine.orbit.update(); engine.world.update(time / 1000, dt);
+    engine.lighting.update(matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : time / 1000);
     engine.visitors.update(dt, {exploring: true, modalOpen: false, position: engine.avatar.group.position});
     const point = engine.avatar.group.position.clone().add(new THREE.Vector3(0, activeSeat ? 1.35 : 1.8, 0)).project(engine.camera);
     const name = $('.interior-name'); name.hidden = point.z > 1 || Math.abs(point.x) > .9 || Math.abs(point.y) > .8;

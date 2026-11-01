@@ -33,6 +33,7 @@ export function createIljuInterior() {
     accent: new THREE.MeshStandardMaterial({ color: '#71816b', roughness: 1 }),
     accentLight: new THREE.MeshStandardMaterial({ color: '#a3ad91', roughness: 1 }),
     lantern: new THREE.MeshStandardMaterial({ color: '#e9d3a3', roughness: .9, emissive: '#f2c685', emissiveIntensity: .32 }),
+    ceramic: new THREE.MeshStandardMaterial({ color: '#91a69a', roughness: .45, metalness: .04 }),
   };
   // Basic material keeps the illustration readable in every light setting.
   const muralMaterial = new THREE.MeshBasicMaterial({ color: '#dbd4bb', toneMapped: false });
@@ -46,6 +47,18 @@ export function createIljuInterior() {
   }
   const box = (key, width, height, depth, x, y, z) => add(key, new THREE.BoxGeometry(width, height, depth), [x, y, z]);
   const cylinder = (key, top, bottom, height, x, y, z, sides = 12) => add(key, new THREE.CylinderGeometry(top, bottom, height, sides), [x, y, z]);
+  const line = (key, points, radius = .025) => add(key, new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points.map(point => new THREE.Vector3(...point))), Math.max(4, points.length * 3), radius, 5, false));
+  function ellipse(key, x, y, z, width, height, depth, rotation = 0) {
+    const geometry = new THREE.SphereGeometry(1, 8, 5);
+    geometry.scale(width / 2, height / 2, depth / 2);
+    add(key, geometry, [x, y, z], [0, 0, rotation]);
+  }
+  const decor = group.userData.decor = { screens: [], floorLanterns: [], teaShelves: [], planters: [] };
+  function describe(name, placement) {
+    const marker = new THREE.Group(); marker.name = name; marker.userData.decor = placement;
+    marker.position.set(placement.x, placement.y || 0, placement.z); group.add(marker);
+    return placement;
+  }
   function collide(x, z, width, depth) {
     colliders.push({ minX: x - width / 2, maxX: x + width / 2, minZ: z - depth / 2, maxZ: z + depth / 2 });
   }
@@ -148,6 +161,157 @@ export function createIljuInterior() {
   group.add(mural);
   for (const y of [muralCenter - muralHeight / 2 - .11, muralCenter + muralHeight / 2 + .11]) box('brass', muralWidth + .38, .022, .025, 0, y, -11.385);
   for (const x of [-(muralWidth / 2 + .16), muralWidth / 2 + .16]) box('brass', .022, muralHeight + .24, .025, x, muralCenter, -11.385);
+
+  // A shallow timber sanctum belongs to the wall, entirely behind the empty
+  // dais. Its stepped cornice and carved returns add depth around, never over,
+  // the shared illustration's complete rectangle.
+  decor.frontSanctum = describe('Timber mural sanctum', { x: 0, y: .55, z: -11.34, width: 8.86, height: 6.88, depth: .66 });
+  for (const side of [-1, 1]) {
+    box('wood', .25, 6.38, .34, side * 4.18, 3.86, -11.32);
+    box('woodLight', .085, 6.2, .055, side * 4.04, 3.84, -11.115);
+    box('woodDark', .4, .16, .46, side * 4.18, .76, -11.28);
+    box('woodLight', .37, .12, .41, side * 4.18, 1, -11.28);
+    for (const y of [1.4, 6.45]) {
+      box('wood', .6, .15, .47, side * 4.1, y, -11.26);
+      box('accent', .51, .045, .05, side * 4.1, y + .04, -11.005);
+      add('brass', new THREE.BoxGeometry(.1, .1, .025), [side * 4.1, y, -10.97], [0, 0, Math.PI / 4]);
+    }
+  }
+  for (const [width, height, y, z, depth] of [[8.55, .11, 7.02, -11.32, .43], [8.86, .13, 7.16, -11.3, .59], [8.62, .09, 7.29, -11.32, .52]]) {
+    box('woodDark', width, height, depth, 0, y, z);
+    box('woodLight', width - .1, .028, depth + .012, 0, y - height / 2 + .018, z);
+  }
+  for (let x = -4.04; x <= 4.05; x += .42) box('wood', .1, .12, .41, x, 7.095, -11.25);
+  box('wood', 8.72, .17, .37, 0, .96, -11.33);
+  box('woodLight', 8.85, .07, .47, 0, 1.08, -11.29);
+  box('woodDark', 8.5, .16, .23, 0, .72, -11.42);
+  // The decorative structure is shallow, but its full projection is solid.
+  collide(0, -11.34, 8.86, .66);
+
+  // Paired folding-screen panels make the surrounding wall feel considered:
+  // carved lotus and moon on one side, a moonlit branch on the other. These are
+  // restrained relief geometry rather than another downloaded picture.
+  function petal(x, y, z, angle, scale = 1) {
+    const shape = new THREE.Shape(); shape.moveTo(0, 0);
+    shape.quadraticCurveTo(-.46, .5, 0, 1.03);
+    shape.quadraticCurveTo(.46, .5, 0, 0);
+    const geometry = new THREE.ExtrudeGeometry(shape, { depth: .022, bevelEnabled: false, curveSegments: 5 });
+    geometry.scale(scale, scale, 1);
+    add('accentLight', geometry, [x, y, z], [0, 0, angle]);
+  }
+  for (const side of [-1, 1]) {
+    const x = side * 5.83, z = -11.18;
+    decor.screens.push(describe(side < 0 ? 'Lotus relief screen' : 'Moon and branch relief screen', { x, y: .1, z, width: 2.27, height: 5.8, depth: .46, motif: side < 0 ? 'lotus-moon' : 'branch-moon' }));
+    box('woodDark', 2.18, 5.48, .16, x, 3.03, z);
+    box('paper', 1.93, 5.18, .08, x, 3.03, z + .12);
+    for (const dx of [-1.02, 1.02]) box('wood', .1, 5.62, .2, x + dx, 3.03, z + .08);
+    for (const y of [.27, .56, 5.5, 5.79]) box('woodLight', 2.2, .07, .23, x, y, z + .1);
+    box('wood', 2.27, .18, .4, x, .2, z);
+    for (const y of [.8, 5.24]) for (let i = -3; i <= 3; i++) {
+      add('wood', new THREE.BoxGeometry(.12, .12, .04), [x + i * .23, y, z + .185], [0, 0, Math.PI / 4]);
+    }
+    add('brass', new THREE.RingGeometry(.39, .425, 36), [x, 4.45, z + .19]);
+    if (side < 0) {
+      for (const angle of [-1.05, -.67, -.32, 0, .32, .67, 1.05]) petal(x, 2.08, z + .2, angle, .85);
+      line('woodLight', [[x - .65, 1.88, z + .21], [x, 1.83, z + .21], [x + .65, 1.88, z + .21]], .018);
+      line('accent', [[x, 1.25, z + .21], [x - .03, 1.6, z + .21], [x, 2.12, z + .21]], .018);
+      ellipse('accent', x - .3, 1.55, z + .21, .55, .14, .035, -.2);
+      ellipse('accent', x + .25, 1.36, z + .21, .48, .13, .035, .18);
+    } else {
+      line('wood', [[x - .6, 1.1, z + .21], [x - .32, 1.95, z + .21], [x + .1, 2.8, z + .21], [x + .35, 3.8, z + .21]], .035);
+      line('wood', [[x - .3, 1.95, z + .21], [x + .18, 2.1, z + .21], [x + .63, 2.45, z + .21]], .021);
+      line('wood', [[x + .03, 2.7, z + .21], [x - .4, 3, z + .21], [x - .62, 3.5, z + .21]], .02);
+      for (const [dx, y, angle] of [[-.53, 3.36, -.55], [-.3, 3.02, .64], [.3, 3.55, -.55], [.25, 3.15, .5], [.57, 2.43, -.55], [.26, 2.13, .7], [-.4, 1.72, -.4]]) ellipse('accent', x + dx, y, z + .23, .17, .42, .035, angle);
+    }
+    collide(x, z, 2.27, .46);
+  }
+
+  // Freestanding paper lamps sit on the floor beside the dais, never on it.
+  // Their broad stepped feet, paper ribs and little brass finials read at the
+  // overview distance; all decorative surfaces share the architecture batches.
+  for (const side of [-1, 1]) {
+    const x = side * 6.2, z = -7.1;
+    decor.floorLanterns.push(describe('Standing paper lantern', { x, y: 0, z, width: .94, height: 2.66, depth: .94 }));
+    cylinder('woodDark', .43, .47, .14, x, .07, z, 8);
+    cylinder('woodLight', .34, .39, .1, x, .19, z, 8);
+    cylinder('wood', .12, .17, .73, x, .58, z, 8);
+    cylinder('brass', .2, .22, .08, x, .97, z, 8);
+    cylinder('woodDark', .43, .38, .12, x, 1.1, z, 8);
+    cylinder('lantern', .36, .36, 1.24, x, 1.78, z, 8);
+    for (let rib = 0; rib < 8; rib++) {
+      const angle = rib * Math.PI / 4;
+      cylinder('wood', .016, .016, 1.25, x + Math.cos(angle) * .365, 1.78, z + Math.sin(angle) * .365, 5);
+    }
+    cylinder('woodDark', .4, .43, .12, x, 2.45, z, 8);
+    cylinder('woodLight', .27, .36, .08, x, 2.55, z, 8);
+    cylinder('brass', .07, .13, .07, x, 2.625, z, 8);
+    collide(x, z, .94, .94);
+  }
+
+  // Low side cabinets and tea utensils suggest a cared-for shared room.
+  // Keep everything beyond the colonnades so the occupied seats stay visible.
+  for (const side of [-1, 1]) {
+    const x = side * 8.17, z = -6.5;
+    decor.teaShelves.push(describe('Tea and scroll cabinet', { x, y: 0, z, width: 1.04, height: 1.58, depth: 2.72 }));
+    box('woodDark', .96, .12, 2.56, x, .17, z);
+    box('wood', .94, .6, 2.54, x, .51, z);
+    box('woodLight', 1.04, .09, 2.72, x, .855, z);
+    box('woodDark', .025, .41, 2.36, x - side * .485, .53, z);
+    for (const dz of [-.78, 0, .78]) {
+      box('wood', .04, .4, .7, x - side * .51, .52, z + dz);
+      box('brass', .035, .035, .11, x - side * .538, .6, z + dz);
+    }
+    for (const dz of [-1.02, 1.02]) box('woodDark', .66, .22, .11, x, .11, z + dz);
+    // A tray, lidded pot, cup and nested bowls on each cabinet.
+    box('woodDark', .7, .035, .82, x, .92, z - .63);
+    cylinder('ceramic', .13, .2, .25, x, 1.065, z - .72, 12);
+    cylinder('ceramic', .16, .11, .045, x, 1.21, z - .72, 12);
+    cylinder('brass', .027, .037, .04, x, 1.25, z - .72, 8);
+    line('ceramic', [[x - side * .12, 1.09, z - .72], [x - side * .27, 1.12, z - .72], [x - side * .3, 1.19, z - .72]], .038);
+    add('ceramic', new THREE.TorusGeometry(.135, .025, 5, 12), [x + side * .17, 1.09, z - .72], [0, Math.PI / 2, 0]);
+    for (const dz of [-.44, -.25]) {
+      cylinder('ceramic', .072, .052, .09, x - side * .15, .98, z + dz, 10);
+      cylinder('woodDark', .058, .058, .006, x - side * .15, 1.028, z + dz, 10);
+    }
+    for (let i = 0; i < 3; i++) {
+      cylinder('paper', .16, .13, .035, x + side * .09, .95 + i * .028, z + .2, 12);
+    }
+    // Rolled paper and a folded cloth occupy the far end of the shelf.
+    for (let i = 0; i < 3; i++) {
+      add('paper', new THREE.CylinderGeometry(.064, .064, .52, 10), [x - side * .04, .98 + (i === 2 ? .11 : 0), z + .7 + (i % 2) * .14], [0, 0, Math.PI / 2]);
+      add('woodDark', new THREE.CylinderGeometry(.025, .025, .58, 8), [x - side * .04, .98 + (i === 2 ? .11 : 0), z + .7 + (i % 2) * .14], [0, 0, Math.PI / 2]);
+    }
+    box('accent', .62, .045, .34, x, .94, z + 1.05);
+    // A small bud vase, separate from the larger floor planting below.
+    cylinder('ceramic', .05, .13, .3, x + side * .12, 1.05, z - 1.1, 12);
+    line('wood', [[x + side * .12, 1.18, z - 1.1], [x + side * .16, 1.36, z - 1.09], [x + side * .08, 1.57, z - 1.05]], .013);
+    ellipse('accentLight', x + side * .02, 1.45, z - 1.05, .16, .08, .09, -.35);
+    collide(x, z, 1.04, 2.72);
+
+    const px = side * 8.12, pz = 6.4;
+    decor.planters.push(describe('Quiet side planting', { x: px, y: 0, z: pz, width: 1.02, height: 2.18, depth: 1.02 }));
+    cylinder('stone', .35, .43, .1, px, .05, pz, 12);
+    cylinder('ceramic', .4, .29, .5, px, .35, pz, 12);
+    cylinder('woodDark', .345, .345, .025, px, .61, pz, 12);
+    for (const [dx, dz, h] of [[-.16, -.08, 1.45], [.13, .05, 1.9], [0, .12, 1.65]]) {
+      line('wood', [[px + dx, .62, pz + dz], [px + dx * .7, h * .72, pz + dz], [px + dx * 1.2, h + .2, pz + dz]], .017);
+      for (let i = 0; i < 4; i++) {
+        const y = .95 + i * (h - .7) / 4, leafSide = i % 2 ? -1 : 1;
+        ellipse('accent', px + dx + leafSide * .15, y, pz + dz, .38, .12, .18, leafSide * .4);
+      }
+    }
+    // The foliage is walk-through at head height, but the ceramic vessel isn't.
+    collide(px, pz, .86, .86);
+  }
+
+  // A woven runner draws the eye down the long, unobstructed central aisle.
+  // Low thread relief catches side-light without introducing another image or
+  // any collision above the walkable floor.
+  decor.aisleRunner = describe('Woven central aisle runner', { x: 0, y: .013, z: 1.55, width: 1.46, height: .014, depth: 16.9 });
+  box('accent', 1.46, .012, 16.9, 0, .015, 1.55);
+  for (const x of [-.66, -.59, .59, .66]) box('accentLight', .018, .002, 16.75, x, .022, 1.55);
+  for (let z = -6.8; z <= 9.9; z += .075) box('accentLight', 1.08, .0015, .009, 0, .022, z);
+  for (const z of [-6.99, 10.09]) for (let x = -.69; x <= .7; x += .055) box('paper', .018, .004, .17, x, .014, z);
 
   // Four columns of six low textile cushions: large gaps between rows and a
   // central aisle wide enough for several travellers to pass each other.
