@@ -34,6 +34,7 @@ let active = null, engine = null, opener = null, pendingExit = false, activeSeat
 let frame = 0, previous = 0, muralVersion = 0, muralTexture = null, transition = null, muralView = false;
 let presence = null, oldInert = false, disposed = false, roomVersion = 0;
 let outsideTitle = '';
+let latestSettings = null;
 const cleanup = [];
 function listen(target, name, callback, options) { target.addEventListener(name, callback, options); cleanup.push(() => target.removeEventListener(name, callback, options)); }
 function message(text) { $('.interior-status').textContent = text; }
@@ -51,11 +52,12 @@ function updatePresence() {
   const valid = here && presence?.roomKey === active.room.key && state.connected;
   engine?.visitors.sync(valid ? presence.visitors : [], valid ? presence.selfId : '');
 }
-function applyAppearance() {
+function applyAppearance(event) {
+  if (event?.type === 'sowon:preferences' && event.detail) latestSettings = {...event.detail};
   if (!engine) return;
   const profile = getOwnProfile();
   engine.avatar.setGender?.(profile?.solar.g || null);
-  let settings; try { settings = readSettings(localStorage); } catch (_) {}
+  let settings = latestSettings; if (!settings) { try { settings = readSettings(localStorage); } catch (_) {} }
   engine.avatar.setAppearance(settings?.outfit || 'sage');
   applyLightingQuality(settings);
   const identity = getOwnIdentity();
@@ -63,7 +65,7 @@ function applyAppearance() {
 }
 function applyLightingQuality(settings) {
   if (!engine) return;
-  if (!settings) { try { settings = readSettings(localStorage); } catch (_) {} }
+  if (!settings) { settings = latestSettings; if (!settings) { try { settings = readSettings(localStorage); } catch (_) {} } }
   const quality = settings?.quality || 'auto', narrow = innerWidth < 760;
   engine.lighting.setQuality({quality, narrow});
   const shadows = quality !== 'smooth';
