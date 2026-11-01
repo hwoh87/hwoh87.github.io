@@ -19,3 +19,6 @@
 @media(max-width:360px){.interior-tools>button{font-size:11px;padding:7px 5px}}
 
 @media(max-height:360px){.interior-header{top:8px;min-height:56px;padding:5px 9px}.interior-heading p{display:none}.interior-heading h1{font-size:18px}.interior-presence{top:72px;padding-top:3px;padding-bottom:3px}.interior-presence>button{min-height:32px}.interior-status{display:none}.interior-tools{bottom:8px}}
+
+/* Paper labels retain contrast against the pale timber floor. */
+.interior-mural-caption{padding:12px 15px;border:1px solid #dddccc;border-radius:8px;background:#fbf8f0f2;color:#3e5039;text-shadow:none}.interior-mural-caption>span{color:#6f7d62}.interior-mural-caption p{color:#69775e}.interior-status{padding:5px 12px;border:1px solid #dddccc;border-radius:6px;background:#fbf8f0ed;color:#52634b;text-shadow:none}
