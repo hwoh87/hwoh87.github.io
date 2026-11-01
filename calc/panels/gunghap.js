@@ -545,6 +545,13 @@ function loadImg(src){
   });
 }
 
+function drawCover(c, im, x, y, w, h){
+  var sw = im.naturalWidth || im.width, sh = im.naturalHeight || im.height;
+  if (!(sw > 0 && sh > 0)) return;
+  var scale = Math.max(w / sw, h / sh), cw = w / scale, ch = h / scale;
+  c.drawImage(im, (sw - cw) / 2, (sh - ch) / 2, cw, ch, x, y, w, h);
+}
+
 function drawPairCard(r, f, imgs, pillars){
   var cv = document.createElement("canvas");
   cv.width = CARD_W; cv.height = CARD_H;
@@ -560,7 +567,7 @@ function drawPairCard(r, f, imgs, pillars){
     var im = t[0], x = t[1];
     c.save();
     roundRect(c, x, iy, iw, ih, 20); c.clip();
-    if (im) c.drawImage(im, x, iy, iw, ih);
+    if (im) drawCover(c, im, x, iy, iw, ih);
     else { c.fillStyle = "rgba(255,255,255,.05)"; c.fillRect(x, iy, iw, ih); }
     var sc = c.createLinearGradient(0, iy + ih * 0.45, 0, iy + ih);
     sc.addColorStop(0, "rgba(8,8,13,0)"); sc.addColorStop(1, "rgba(8,8,13,.92)");
