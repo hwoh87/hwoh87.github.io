@@ -20,6 +20,7 @@
 .sanctuary-destinations button>span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:11px; color:#596b5e; }
 .sanctuary-destinations button:hover { background:#eaf0e7; }
 .sanctuary-destinations button:first-child { background:#e9efe6; }
+.interface-shell .world-wayfinder { top:184px; right:24px; }
 .sanctuary-destinations button:focus-visible,.sanctuary-room-status button:focus-visible { outline:2px solid #345d4c; outline-offset:2px; }
 .sanctuary-room-status { position:absolute; z-index:4; left:24px; top:156px; display:none; flex-wrap:wrap; align-items:center; gap:7px 10px; max-width:calc(100% - 320px); padding:10px 13px; border:1px solid #b9ccc15e; border-radius:10px; background:#152d2be8; color:#f3f4eb; font-size:12px; }
 .sanctuary-room-status strong { font-size:13px; font-weight:600; }

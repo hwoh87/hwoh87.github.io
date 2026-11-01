@@ -1,6 +1,6 @@
 import {DEFAULT_BOUNDS,MAP_SIZE,mapPoint,headingDegrees,routePoints,routeDistance,journeyProgress,validPoint} from './wayfinder-core.js?v=20261101-freepath4';
 
-const PLACES={myeongri:{name:'명리전',short:'명리전',kind:'hall'},inyeon:{name:'인연정',short:'인연정',kind:'hall'},stars:{name:'별마루',short:'별마루',kind:'hall'},readers:{name:'술사각',short:'술사각',kind:'hall'},archive:{name:'서고',short:'서고',kind:'hall'},wish:{name:'소원 등불',short:'소원',kind:'ritual'},breath:{name:'마음 고르기',short:'쉼',kind:'ritual'},blessing:{name:'응원나무',short:'응원',kind:'ritual'}};
+const PLACES={myeongri:{name:'명리전',short:'명리전',kind:'hall'},inyeon:{name:'인연정',short:'인연정',kind:'hall'},stars:{name:'별마루',short:'별마루',kind:'hall'},readers:{name:'술사각',short:'술사각',kind:'hall'},archive:{name:'서고',short:'서고',kind:'hall'},rooms:{name:'일주마당',short:'일주방',kind:'hall'},celeb:{name:'연예인 사주관',short:'인물관',kind:'hall'},wish:{name:'소원 등불',short:'소원',kind:'ritual'},breath:{name:'마음 고르기',short:'쉼',kind:'ritual'},blessing:{name:'응원나무',short:'응원',kind:'ritual'}};
 let sequence=0;
 function el(tag,cls,text){const node=document.createElement(tag);if(cls)node.className=cls;if(text!==undefined)node.textContent=text;return node;}
 function svg(tag,attrs={}){const node=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const[key,value]of Object.entries(attrs))node.setAttribute(key,String(value));return node;}
