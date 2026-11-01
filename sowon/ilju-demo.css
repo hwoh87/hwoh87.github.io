@@ -20,6 +20,7 @@
 .demo-request h3{font-family:var(--serif,serif);font-weight:500;font-size:22px;letter-spacing:-.045em;line-height:1.6;margin:0 0 10px}
 .demo-request>p:not(.demo-eyebrow){font-size:14px;line-height:1.85;color:#64745b;margin:0 0 20px}
 .demo-eyebrow{font-size:11px;line-height:1.7;color:#68775d;margin:0 0 7px}
+.demo-request>p.demo-walking-note{margin:-5px 0 12px;padding-left:12px;border-left:2px solid #b9c9a9;color:#587049;font-size:12px;line-height:1.9}
 .demo-actions{display:flex;gap:8px;flex-wrap:wrap}
 .demo-actions>button{flex:1}
 .demo-actions button,.demo-tools button:not(.demo-text-button),.demo-engine-error button,.demo-approved>button,.demo-revoke button{border:1px solid #cbd5bf;border-radius:6px;background:transparent;color:#526d47;padding:11px 16px;font-size:14px}

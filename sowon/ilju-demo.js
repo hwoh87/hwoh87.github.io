@@ -8,16 +8,55 @@ const finalConsonant = name => { const code = String(name).charCodeAt(String(nam
 const particle = (name, withConsonant, withoutConsonant) => finalConsonant(name) ? withConsonant : withoutConsonant;
 
 /** Private, disposable rehearsal. Real profiles, presence and consent never enter this module. */
-export function createIljuDemo({ onApproach } = {}) {
+export function createIljuDemo({ onApproach, onChange } = {}) {
   const session = createDemoSession(), results = new Map();
   const dialog = document.createElement('dialog');
   dialog.id = 'iljuDemoDialog'; dialog.className = 'ilju-demo';
   dialog.setAttribute('aria-labelledby', 'iljuDemoTitle');
   document.body.appendChild(dialog);
-  let selected = '', opener = null, disposed = false, ticket = 0, busy = false, error = '';
+  let selected = '', opener = null, disposed = false, ticket = 0, busy = false, error = '', autoMode = false;
   const peerFor = id => DEMO_TRAVELERS.find(peer => peer.id === id);
   const isDemo = id => Boolean(peerFor(id));
   const current = () => peerFor(selected);
+  const externalActions = new Set(['receive', 'peer-approve', 'peer-decline']);
+
+  function getState(id) {
+    if (disposed || !isDemo(id)) return null;
+    const state = session.get(id);
+    return Object.freeze({ peerId: id, id, phase: state.phase, revision: state.revision, resultAllowed: state.resultAllowed });
+  }
+  function getStates() {
+    return Object.freeze(disposed ? [] : DEMO_TRAVELERS.map(peer => getState(peer.id)));
+  }
+  function notify(id, action) {
+    const state = getState(id); if (!state) return;
+    // A host's notification UI must never interrupt or roll back local consent.
+    try { onChange?.(Object.freeze({ ...state, action })); } catch (_) { /* The transition already succeeded. */ }
+  }
+  function transitionPeer(id, action, expectedRevision) {
+    if (disposed || !isDemo(id)) return false;
+    const previous = session.get(id);
+    if (expectedRevision !== undefined && (!Number.isInteger(expectedRevision) || expectedRevision < 0 || previous.revision !== expectedRevision)) return false;
+    try {
+      if (action === 'request' || action === 'receive') session.act(id, action, 'FRIEND');
+      else session.act(id, action);
+    } catch (_) { return false; }
+    results.delete(id);
+    // Another person's invitation must not cancel the selected person's engine work.
+    const visible = dialog.open && selected === id;
+    if (visible) { invalidate(); render(); }
+    notify(id, action);
+    if (dialog.open && selected === id && session.get(id).resultAllowed) void calculate();
+    return true;
+  }
+  function act(id, action, expectedRevision) {
+    return externalActions.has(action) && transitionPeer(id, action, expectedRevision);
+  }
+  function setAutoMode(enabled) {
+    if (disposed) return;
+    autoMode = enabled === true;
+    if (dialog.open) render();
+  }
 
   function focusReturn() {
     if (opener?.isConnected && !opener.closest?.('[inert]')) opener.focus({ preventScroll: true });
@@ -46,13 +85,15 @@ export function createIljuDemo({ onApproach } = {}) {
     dialog.querySelector('[data-demo-action="close"]')?.focus({ preventScroll: true });
     return true;
   }
-  function reset() {
-    for (const peer of DEMO_TRAVELERS) session.act(peer.id, 'reset');
+  function reset({ silent = false } = {}) {
+    if (disposed) return;
+    const states = session.reset();
     results.clear(); close();
+    if (!silent) for (const state of states) notify(state.id, 'reset');
   }
   function dispose() {
     if (disposed) return;
-    reset(); disposed = true;
+    reset({ silent: true }); disposed = true;
     dialog.removeEventListener('click', clicked);
     dialog.removeEventListener('cancel', cancelled);
     dialog.removeEventListener('close', closed);
@@ -69,7 +110,7 @@ export function createIljuDemo({ onApproach } = {}) {
     return `<section class="demo-reading" aria-label="가상 인물의 친구 궁합 결과"><p class="demo-eyebrow">삼라 궁합 엔진 · 친구</p><div class="demo-reading-heading"><div><h3>${esc(DEMO_SELF.nickname)} <span>×</span> ${esc(current().nickname)}</h3><p>고정된 가상 출생정보로 계산한 체험 결과</p></div><div class="demo-score"><strong>${result.totalScore}</strong><span>점</span></div></div><p class="demo-verdict">${personText(result.verdict)}</p><div class="demo-scores">${Object.entries({ bond: '결속력', stability: '안정성', growth: '성장성', consumption: '소모도' }).filter(([key]) => result.subScores[key] !== null).map(([key, label]) => `<div><span>${label}</span><strong>${result.subScores[key]}</strong></div>`).join('')}</div>${result.iljuPair ? `<section class="demo-reading-section"><h4>두 일주가 만나는 결</h4><article><h5>${personText(result.iljuPair.headline)}</h5><p>${personText(result.iljuPair.detail)}</p><p>${personText(result.iljuPair.advice)}</p></article></section>` : ''}${rows('함께 살릴 강점', result.strengths.slice(0, 2), 'label', 'sub')}${rows('서로 알아둘 조율점', result.cautions.slice(0, 2), 'label', 'sub')}${result.narrative.length || result.axes.length ? `<details class="demo-reading-more"><summary>관계의 이야기 더 읽기</summary>${rows('두 사람의 이야기', result.narrative, 'label', 'text')}${rows('관계의 바탕', result.axes, 'headline', 'detail')}</details>` : ''}<p class="demo-result-note">점수는 관계를 이해하는 참고예요. 이 해석은 실제 내 사주나 실제 나그네의 결과가 아니에요.</p></section>`;
   }
   function requestMarkup(peer, state) {
-    if (state.phase === 'pending-outgoing') return `<section class="demo-request"><p class="demo-eyebrow">승인 대기</p><h3>궁합 보기 요청을 보냈어요.</h3><p>${esc(peer.nickname)}${particle(peer.nickname, '이', '가')} 승인하면 함께 볼 수 있어요.</p>${actionButton('cancel', '요청 취소', 'class="demo-text-button"')}</section>`;
+    if (state.phase === 'pending-outgoing') return `<section class="demo-request"><p class="demo-eyebrow">승인 대기</p><h3>궁합 보기 요청을 보냈어요.</h3><p>${esc(peer.nickname)}${particle(peer.nickname, '이', '가')} 승인하면 함께 볼 수 있어요.</p>${autoMode ? '<p class="demo-walking-note">가상 나그네가 다가오면 자동으로 응답해요.</p>' : ''}${actionButton('cancel', '요청 취소', 'class="demo-text-button"')}</section>`;
     if (state.phase === 'pending-incoming') return `<section class="demo-request"><p class="demo-eyebrow">받은 요청 · 가상 체험</p><h3>함께 궁합을 볼까요?</h3><p>${esc(peer.nickname)}${particle(peer.nickname, '이', '가')} 궁합 보기를 요청했어요.</p><div class="demo-actions">${actionButton('approve', '승인하고 궁합 보기', 'class="demo-primary"')}${actionButton('decline', '사양하기')}</div></section>`;
     if (state.resultAllowed) {
       const cached = results.get(peer.id);
@@ -131,18 +172,11 @@ export function createIljuDemo({ onApproach } = {}) {
     if (action === 'retry') { void calculate(); return; }
     const transition = action === 'reset-peer' ? 'reset' : action;
     if (!['request', 'receive', 'approve', 'decline', 'peer-approve', 'peer-decline', 'cancel', 'revoke', 'reset'].includes(transition)) return;
-    try {
-      invalidate();
-      if (transition === 'request' || transition === 'receive') session.act(peer.id, transition, 'FRIEND');
-      else session.act(peer.id, transition);
-      results.delete(peer.id);
-      render();
-      if (session.get(peer.id).resultAllowed) void calculate();
-    } catch (_) { render(); }
+    transitionPeer(peer.id, transition);
   }
   function cancelled(event) { event.preventDefault(); close(); }
   dialog.addEventListener('click', clicked);
   dialog.addEventListener('cancel', cancelled);
   dialog.addEventListener('close', closed);
-  return { open, close, reset, dispose, isDemo };
+  return { open, close, reset, dispose, isDemo, getState, getStates, act, setAutoMode };
 }

@@ -5,9 +5,10 @@ import { createIljuInteriorLighting } from './ilju-interior-lighting.js?v=202611
 import { interiorForRoom, interiorViewPose, applyInteriorSeat } from './ilju-interior-core.js?v=20261101-templeroom2';
 import { createAvatar } from './avatar.js?v=20261101-templeroom1';
 import { createLocomotion } from './locomotion.js?v=20261101-templeroom1';
-import { createVisitors } from './visitors.js?v=20261101-peerrequest1';
+import { createVisitors } from './visitors.js?v=20261101-demo-walk1';
 import { getDemoVisitors } from './ilju-demo-core.js?v=20261101-peerrequest1';
-import { createIljuDemo } from './ilju-demo.js?v=20261101-peerrequest1';
+import { createIljuDemo } from './ilju-demo.js?v=20261101-demo-walk1';
+import { createDemoWalk } from './ilju-demo-walk.js?v=20261101-demo-walk1';
 import { getOwnProfile } from './profile.js?v=20261101-freepath4';
 import { getOwnIdentity } from './identity.js?v=20261101-freepath4';
 import { readSettings } from './experience-core.js?v=20261101-freepath4';
@@ -19,7 +20,8 @@ layer.setAttribute('aria-labelledby', 'interiorTitle');
 layer.innerHTML = `<div class="interior-canvas" aria-label="일주방의 넓은 마루와 벽화"></div>
   <header class="interior-header"><button type="button" data-interior-back><span aria-hidden="true">←</span> 신당 마당</button><div class="interior-heading"><p>삼라 · 일주방</p><h1 id="interiorTitle" tabindex="-1"></h1></div><button type="button" data-open-ilju-rooms>다른 방</button></header>
   <div class="interior-presence"><span class="interior-presence-dot" aria-hidden="true"></span><span data-interior-presence>혼자 둘러보는 중</span><button type="button" data-interior-social>함께 머물기</button></div>
-  <aside class="interior-demo-bar" aria-label="가상 나그네 체험"><div><strong data-interior-demo-label>가상 나그네 3명</strong><small>실제 접속자 아님 · 궁합 요청 체험</small></div><button type="button" data-interior-demo-toggle aria-pressed="true">숨기기</button></aside>
+  <aside class="interior-demo-bar" aria-label="가상 나그네 체험"><div><strong data-interior-demo-label>가상 나그네 3명</strong><small data-interior-demo-status>실제 접속자 아님 · 궁합 요청 체험</small></div><button type="button" data-interior-demo-run aria-pressed="false">자동 체험</button><button type="button" data-interior-demo-toggle aria-pressed="true">숨기기</button></aside>
+  <section class="interior-demo-alert" aria-label="가상 궁합 요청 알림" hidden><div role="status" aria-live="polite"><strong data-interior-demo-alert-title></strong><p data-interior-demo-alert-detail></p></div><button type="button" data-interior-demo-notice>요청 확인</button></section>
   <div class="interior-visitor-names" aria-label="같은 일주방에 머무는 나그네"></div>
   <div class="interior-demo-names interior-visitor-names" aria-label="체험용 가상 나그네"></div>
   <div class="interior-name" hidden></div>
@@ -40,7 +42,9 @@ let presence = null, oldInert = false, disposed = false, roomVersion = 0;
 let outsideTitle = '';
 let latestSettings = null;
 let demoEnabled = true;
-const demo = createIljuDemo({onApproach: approachDemo});
+let demoRunning = false, resettingDemo = false, demoNotice = null;
+const seenDemoResults = new Set();
+const demo = createIljuDemo({onApproach: approachDemo, onChange: demoChanged});
 const cleanup = [];
 function listen(target, name, callback, options) { target.addEventListener(name, callback, options); cleanup.push(() => target.removeEventListener(name, callback, options)); }
 function message(text) { $('.interior-status').textContent = text; }
@@ -66,14 +70,68 @@ function updateDemo() {
   $('[data-interior-demo-label]').textContent = visible ? '가상 나그네 3명' : '가상 나그네 체험';
   $('[data-interior-demo-toggle]').textContent = visible ? '숨기기' : '불러오기';
   $('[data-interior-demo-toggle]').setAttribute('aria-pressed', String(visible));
-  engine?.demoVisitors.sync(visible ? getDemoVisitors() : [], '');
+  if (!visible && demoRunning) setDemoRun(false);
+  if (!demoRunning) engine?.demoVisitors.sync(visible ? getDemoVisitors() : [], '');
   layer.dataset.demoVisitors = String(visible ? getDemoVisitors().length : 0);
   if (!visible) demo.close();
+  updateDemoNotice();
+}
+function demoChanged(change) {
+  if (resettingDemo) return;
+  const openedPeer = document.querySelector('#iljuDemoDialog[open]')?.dataset.peer;
+  if (change.phase === 'approved' && (change.action === 'approve' || openedPeer === change.peerId)) seenDemoResults.add(`${change.peerId}:${change.revision}`);
+  updateDemoNotice();
+}
+function updateDemoNotice() {
+  const states = demo.getStates(), received = states.filter(state => state.phase === 'pending-incoming');
+  const unread = states.filter(state => state.phase === 'approved' && !seenDemoResults.has(`${state.peerId}:${state.revision}`));
+  const available = Boolean(active && engine && demoEnabled && !getSocialRoomState().joined);
+  demoNotice = available ? received[0] || unread[0] || null : null;
+  const notice = $('.interior-demo-alert'); notice.hidden = !demoNotice;
+  layer.dataset.demoAlert = String(Boolean(demoNotice));
+  if (demoNotice) {
+    const peer = getDemoVisitors().find(peer => peer.id === demoNotice.peerId);
+    const incoming = demoNotice.phase === 'pending-incoming';
+    $('[data-interior-demo-alert-title]').textContent = incoming ? `${peer.nickname}님에게서 궁합 요청이 왔어요` : `${peer.nickname}님과 궁합이 열렸어요`;
+    $('[data-interior-demo-alert-detail]').textContent = incoming ? `가상 체험 · 받은 요청 ${received.length}개 · 승인 전에는 결과가 열리지 않아요.` : '가상 체험 · 상대가 승인했어요. 결과를 확인해 보세요.';
+    $('[data-interior-demo-notice]').textContent = incoming ? `요청 확인${received.length > 1 ? ` ${received.length}` : ''}` : '결과 보기';
+  }
+  $('[data-interior-demo-run]').textContent = demoRunning ? '체험 중지' : '자동 체험';
+  $('[data-interior-demo-run]').setAttribute('aria-pressed', String(demoRunning));
+  $('[data-interior-demo-status]').textContent = !demoRunning ? '실제 접속자 아님 · 궁합 요청 체험' : received.length ? '자동 체험 중 · 도착한 요청을 확인해 보세요' : '자동 체험 중 · 이동·요청·승인을 살펴보세요';
+  engine?.demoVisitors.setRequestStates(states);
+  layer.dataset.demoRunning = String(demoRunning);
+  layer.dataset.demoIncoming = String(available ? received.length : 0);
+}
+function setDemoRun(enabled) {
+  if (enabled && (!active || !engine || !demoEnabled || getSocialRoomState().joined)) return;
+  resettingDemo = true; demoRunning = false; demo.setAutoMode(false); demo.reset();
+  engine?.demoWalk.reset(); seenDemoResults.clear(); demoNotice = null;
+  resettingDemo = false; demoRunning = Boolean(enabled); demo.setAutoMode(demoRunning);
+  updateDemoNotice();
+  if (active && engine && demoEnabled && !getSocialRoomState().joined) engine.demoVisitors.sync(getDemoVisitors(), '');
+  if (enabled) message('가상 나그네가 산책을 시작했어요. 다온이 다가와 궁합을 요청해요.');
+}
+function openDemoPeer(id) {
+  const state = demo.getState(id);
+  if (state?.phase === 'approved') seenDemoResults.add(`${id}:${state.revision}`);
+  engine.movement.cancel(); toggleSeats(false); demo.open(id); updateDemoNotice();
+}
+function advanceDemo(delta, blocked) {
+  if (!demoRunning || !engine) return;
+  const phases = Object.fromEntries(demo.getStates().map(state => [state.peerId, state]));
+  const step = engine.demoWalk.update(delta, {position: engine.avatar.group.position, blocked, phases});
+  if (!blocked) {
+    engine.demoVisitors.sync(step.visitors, '');
+    for (const event of step.events) if (['request', 'approve'].includes(event.type)) demo.act(event.peerId, event.type === 'request' ? 'receive' : 'peer-approve', event.revision);
+  }
+  layer.dataset.demoElapsed = String(Number(step.state.elapsed || 0).toFixed(1));
+  layer.dataset.demoWalking = String(step.state.peers.filter(peer => peer.moving).length);
 }
 function selectVisitor(id) {
   if (demo.isDemo(id)) {
     if (active && engine && demoEnabled && !getSocialRoomState().joined && !dialogOpen()) {
-      engine.movement.cancel(); toggleSeats(false); demo.open(id);
+      openDemoPeer(id);
     }
     return;
   }
@@ -187,6 +245,8 @@ function createEngine() {
   pendingResources.push(() => visitors.dispose());
   const demoVisitors = createVisitors({scene, world, camera, host: $('.interior-demo-names'), onSelect: selectVisitor, demo: true});
   pendingResources.push(() => demoVisitors.dispose());
+  const demoWalk = createDemoWalk({world, visitors: getDemoVisitors()});
+  pendingResources.push(() => demoWalk.dispose());
   const movement = createLocomotion({camera, domElement: renderer.domElement, avatar, world, orbitControls: orbit,
     follow: false,
     controls: {stick: $('.interior-stick'), thumb: $('.interior-stick-thumb'), directionButtons: []},
@@ -198,7 +258,7 @@ function createEngine() {
       if (!hit) return false; let node = hit.object; while (node && !node.userData.seatId) node = node.parent;
       if (node) { chooseSeat(node.userData.seatId); return true; } return false;
     }});
-  engine = {renderer, scene, camera, world, lighting, avatar, orbit, movement, visitors, demoVisitors};
+  engine = {renderer, scene, camera, world, lighting, avatar, orbit, movement, visitors, demoVisitors, demoWalk};
   const list = $('.interior-seat-list'); list.replaceChildren();
   world.seats.forEach(seat => { const button = document.createElement('button'); button.type = 'button'; button.dataset.interiorSeat = seat.id; button.textContent = seat.label; button.setAttribute('aria-pressed', 'false'); list.appendChild(button); });
   renderer.domElement.addEventListener('webglcontextlost', event => { event.preventDefault(); showFallback(); });
@@ -211,8 +271,9 @@ function createEngine() {
 }
 function destroyEngine() {
   if (!engine) return;
+  setDemoRun(false);
   const current = engine; engine = null;
-  demo.close(); current.movement.dispose(); current.visitors.dispose(); current.demoVisitors.dispose(); current.orbit.dispose(); current.avatar.dispose(); current.world.dispose(); current.lighting.dispose();
+  demo.close(); current.demoWalk.dispose(); current.movement.dispose(); current.visitors.dispose(); current.demoVisitors.dispose(); current.orbit.dispose(); current.avatar.dispose(); current.world.dispose(); current.lighting.dispose();
   current.renderer.dispose(); current.renderer.domElement.remove(); transition = null;
 }
 function showFallback() {
@@ -241,9 +302,11 @@ function loadMural(data) {
 function render(time) {
   frame = 0; if (!active || !engine || document.hidden || disposed) return;
   const dt = previous ? Math.min(.05, (time - previous) / 1000) : 0; previous = time;
-  const modal = dialogOpen(); engine.movement.setEnabled(!modal && !pendingExit);
-  if (!modal) {
-    engine.movement.update(dt);
+  const modal = dialogOpen(), demoModal = Boolean(document.querySelector('#iljuDemoDialog[open]'));
+  engine.movement.setEnabled(!modal && !pendingExit);
+  if (!modal) engine.movement.update(dt);
+  advanceDemo(dt, pendingExit || (modal && !demoModal));
+  if (!modal || demoModal) {
     applyInteriorSeat(engine.avatar, activeSeat);
     if (transition) {
       transition.time += dt; const t = Math.min(1, transition.time / .8), eased = t * t * (3 - 2 * t);
@@ -253,10 +316,10 @@ function render(time) {
     }
     engine.orbit.update(); engine.world.update(time / 1000, dt);
     engine.lighting.update(matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : time / 1000);
-    engine.visitors.update(dt, {exploring: true, modalOpen: false, position: engine.avatar.group.position});
-    engine.demoVisitors.update(dt, {exploring: true, modalOpen: false, position: engine.avatar.group.position});
+    engine.visitors.update(dt, {exploring: true, modalOpen: modal, position: engine.avatar.group.position});
+    engine.demoVisitors.update(dt, {exploring: true, modalOpen: modal, position: engine.avatar.group.position});
     const point = engine.avatar.group.position.clone().add(new THREE.Vector3(0, activeSeat ? 1.35 : 1.8, 0)).project(engine.camera);
-    const name = $('.interior-name'); name.hidden = point.z > 1 || Math.abs(point.x) > .9 || Math.abs(point.y) > .8;
+    const name = $('.interior-name'); name.hidden = modal || point.z > 1 || Math.abs(point.x) > .9 || Math.abs(point.y) > .8;
     if (!name.hidden) { name.style.left = `${(point.x + 1) * 50}%`; name.style.top = `${(1 - point.y) * 50}%`; }
     engine.renderer.render(engine.scene, engine.camera);
     layer.dataset.position = `${engine.avatar.group.position.x.toFixed(2)},${engine.avatar.group.position.z.toFixed(2)}`;
@@ -276,7 +339,7 @@ export async function openIljuInterior(key) {
     if (disposed || !accepted || !latest.joined || latest.roomKey !== key) return false;
   }
   if (active?.room.key === key) { updatePresence(); if (!dialogOpen()) $('#interiorTitle').focus({preventScroll:true}); return true; }
-  demo.close();
+  setDemoRun(false); demo.close();
   const first = !active; ++roomVersion;
   if (first) { opener = document.activeElement; outsideTitle = document.title; oldInert = Boolean(sanctuary?.inert); if (sanctuary) sanctuary.inert = true; }
   active = data; activeSeat = null; pendingExit = false; muralView = false;
@@ -322,7 +385,9 @@ listen(layer, 'click', async event => {
     if (connectedHere()) document.dispatchEvent(new CustomEvent('sowon:social-open'));
     else if (active) { const version = roomVersion, key = active.room.key; await enterSocialRoom(key); if (version === roomVersion && active?.room.key === key) updatePresence(); }
   } else if (button.hasAttribute('data-interior-seat')) chooseSeat(button.dataset.interiorSeat);
-  else if (button.hasAttribute('data-interior-demo-toggle')) { demoEnabled = !demoEnabled; updateDemo(); }
+  else if (button.hasAttribute('data-interior-demo-run')) setDemoRun(!demoRunning);
+  else if (button.hasAttribute('data-interior-demo-notice')) { if (demoNotice && !dialogOpen()) openDemoPeer(demoNotice.peerId); }
+  else if (button.hasAttribute('data-interior-demo-toggle')) { if (demoEnabled) setDemoRun(false); demoEnabled = !demoEnabled; updateDemo(); }
   else if (button.hasAttribute('data-interior-seats')) toggleSeats($('#interiorSeats').hidden);
   else if (button.hasAttribute('data-interior-seats-close')) toggleSeats(false);
   else if (button.hasAttribute('data-interior-mural')) { toggleSeats(false); setView(muralView ? 'overview' : 'mural'); }
