@@ -5,13 +5,13 @@ import { createIljuInteriorLighting } from './ilju-interior-lighting.js?v=202611
 import { interiorForRoom, interiorViewPose, applyInteriorSeat } from './ilju-interior-core.js?v=20261101-templeroom2';
 import { createAvatar } from './avatar.js?v=20261101-templeroom1';
 import { createLocomotion } from './locomotion.js?v=20261101-templeroom1';
-import { createVisitors } from './visitors.js?v=20261101-demotravelers2';
-import { getDemoVisitors } from './ilju-demo-core.js?v=20261101-demotravelers2';
-import { createIljuDemo } from './ilju-demo.js?v=20261101-demotravelers2';
+import { createVisitors } from './visitors.js?v=20261101-peerrequest1';
+import { getDemoVisitors } from './ilju-demo-core.js?v=20261101-peerrequest1';
+import { createIljuDemo } from './ilju-demo.js?v=20261101-peerrequest1';
 import { getOwnProfile } from './profile.js?v=20261101-freepath4';
 import { getOwnIdentity } from './identity.js?v=20261101-freepath4';
 import { readSettings } from './experience-core.js?v=20261101-freepath4';
-import { enterSocialRoom, getSocialRoomState } from './social.js?v=20261101-pairpaths4';
+import { enterSocialRoom, getSocialRoomState } from './social.js?v=20261101-peerrequest1';
 
 const layer = document.createElement('section');
 layer.id = 'iljuInterior'; layer.className = 'ilju-interior'; layer.hidden = true;
@@ -19,7 +19,7 @@ layer.setAttribute('aria-labelledby', 'interiorTitle');
 layer.innerHTML = `<div class="interior-canvas" aria-label="일주방의 넓은 마루와 벽화"></div>
   <header class="interior-header"><button type="button" data-interior-back><span aria-hidden="true">←</span> 신당 마당</button><div class="interior-heading"><p>삼라 · 일주방</p><h1 id="interiorTitle" tabindex="-1"></h1></div><button type="button" data-open-ilju-rooms>다른 방</button></header>
   <div class="interior-presence"><span class="interior-presence-dot" aria-hidden="true"></span><span data-interior-presence>혼자 둘러보는 중</span><button type="button" data-interior-social>함께 머물기</button></div>
-  <aside class="interior-demo-bar" aria-label="가상 나그네 체험"><div><strong data-interior-demo-label>가상 나그네 3명</strong><small>실제 접속자 아님 · 눌러서 대화해 보세요</small></div><button type="button" data-interior-demo-toggle aria-pressed="true">숨기기</button></aside>
+  <aside class="interior-demo-bar" aria-label="가상 나그네 체험"><div><strong data-interior-demo-label>가상 나그네 3명</strong><small>실제 접속자 아님 · 궁합 요청 체험</small></div><button type="button" data-interior-demo-toggle aria-pressed="true">숨기기</button></aside>
   <div class="interior-visitor-names" aria-label="같은 일주방에 머무는 나그네"></div>
   <div class="interior-demo-names interior-visitor-names" aria-label="체험용 가상 나그네"></div>
   <div class="interior-name" hidden></div>
@@ -87,7 +87,7 @@ function approachDemo(id) {
   const target = {x: point.x + dx / length * 1.2, z: point.z + (dx || dz ? dz / length : 1) * 1.2};
   stand(); toggleSeats(false); setView('overview'); engine.movement.setEnabled(true);
   message('가상 나그네에게 걸어가고 있어요.');
-  if (!engine.movement.goTo(target, () => message('가까이 왔어요. 이름표를 눌러 이야기를 이어가세요.'))) message('통로에서 다시 다가가 보세요.');
+  if (!engine.movement.goTo(target, () => message('가까이 왔어요. 이름표를 눌러 궁합을 요청해 보세요.'))) message('통로에서 다시 다가가 보세요.');
 }
 function applyAppearance(event) {
   if (event?.type === 'sowon:preferences' && event.detail) latestSettings = {...event.detail};

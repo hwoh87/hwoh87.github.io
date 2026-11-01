@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
 import { createWorld } from './world.js?v=20261101-celebhouse1';
 import { createAvatar } from './avatar.js?v=20261101-templeroom1';
-import { getSocialRoomState } from './social.js?v=20261101-pairpaths4';
+import { getSocialRoomState } from './social.js?v=20261101-peerrequest1';
 import { getOwnIdentity } from './identity.js?v=20261101-freepath4';
 import { getOwnProfile } from './profile.js?v=20261101-freepath4';
 import { createLocomotion, isWalkable } from './locomotion.js?v=20261101-templeroom1';
@@ -10,7 +10,7 @@ import { readJourney } from './hub-core.js?v=20261101-freepath4';
 import { readSettings, normalizeSettings, effectiveQuality, nearestInteraction, pickedInteraction, interactionDistance } from './experience-core.js?v=20261101-freepath4';
 import { createWayfinder } from './wayfinder.js?v=20261101-celebhouse1';
 import { HALLS, getFeature } from './hub-core.js?v=20261101-freepath4';
-import { createVisitors } from './visitors.js?v=20261101-freepath4';
+import { createVisitors } from './visitors.js?v=20261101-peerrequest1';
 import { createConversationFocus } from './conversation-focus.js?v=20261101-freepath4';
 import { portraitHallView } from './portrait-hall-view.js?v=20261101-celebhouse2';
 

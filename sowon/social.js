@@ -1,5 +1,5 @@
 import { getOwnProfile } from './profile.js?v=20261101-freepath4';
-import { RELATION_KINDS, safePosition, serverProfile, safeVisitors, safeRequests, availableActions, safeResult, socialError, cleanText, createSocialClient, safeIlju, roomForKey, safeRoomCounts } from './social-core.js?v=20261101-freepath4';
+import { RELATION_KINDS, safePosition, serverProfile, safeVisitors, safeRequests, availableActions, safeResult, socialError, cleanText, createSocialClient, safeIlju, roomForKey, safeRoomCounts, validId } from './social-core.js?v=20261101-freepath4';
 
 let storage;
 try { storage = sessionStorage; } catch (_) {}
@@ -10,6 +10,11 @@ document.body.appendChild(dialog);
 const state = { joined: false, joining: false, busy: false, stale: false, selfId: '', visitors: [], requests: [], tab: 'visitors', selected: null, kind: 'FRIEND', deleteArmed: false, confirm: null, result: null, resultId: null, error: '', status: '', roomKey: 'courtyard', ownIlju: null, presenceEpoch: null, roomCounts: {}, switchingRoom: false, deletionPending: false };
 let opener, timer, refreshPromise, operation = 0, resultVersion = 0, visibilityVersion = 0, lastProfile = '';
 let config = {}, pendingRoom = null, leavePromise = null, leaveRemoves = false;
+// Clicking an avatar keeps this dialog scoped to that one public identity.
+let focusedPeerId = null, focusedPeer = null, focusedRoom = null, encounterVersion = 0;
+const isPeerFocus = () => focusedPeerId !== null;
+const focusedVisitor = () => state.joined && !state.stale && state.roomKey === focusedRoom ? state.visitors.find(visitor => visitor.id === focusedPeerId) : null;
+const peerRequest = () => state.requests.find(request => request.peer.id === focusedPeerId && ['pending', 'approved'].includes(request.status)) || state.requests.find(request => request.peer.id === focusedPeerId);
 export function getSocialRoomState() { return { joined: state.joined, connected: state.joined && !state.stale, busy: state.busy || state.switchingRoom || state.joining || state.deletionPending || Boolean(leavePromise), roomKey: state.roomKey, ownIlju: state.ownIlju, roomCounts: { ...state.roomCounts } }; }
 const controllers = new Set();
 const announcedRequests = new Set();
@@ -54,8 +59,8 @@ function emitPresence() {
 function resetTransient() { ++resultVersion; state.result = null; state.resultId = null; state.confirm = null; state.selected = null; state.deleteArmed = false; }
 function statusText(status) { return ({ pending: '승인을 기다려요', approved: '함께 볼 수 있어요', declined: '이번에는 사양했어요', cancelled: '요청을 취소했어요', revoked: '공유가 철회됐어요', expired: '시간이 지났어요' })[status] || ''; }
 function requestActions(request) {
-  const labels = { approve: '승인하고 함께 보기', decline: '사양하기', cancel: '요청 취소', result: '궁합 다시 보기', revoke: '공유 철회' };
-  return availableActions(request).map(action => button(action, labels[action], `data-request-id="${request.id}" ${action === 'approve' || action === 'result' ? 'class="social-primary"' : ''}`)).join('');
+  const labels = { approve: '승인하고 궁합 보기', decline: '사양하기', cancel: '요청 취소', result: '궁합 보기', revoke: '공유 철회' };
+  return availableActions(request).map(action => button(action, !isPeerFocus() && action === 'approve' ? '승인하고 함께 보기' : !isPeerFocus() && action === 'result' ? '궁합 다시 보기' : labels[action], `data-request-id="${request.id}" ${action === 'approve' || action === 'result' ? 'class="social-primary"' : ''}`)).join('');
 }
 function visitorCard(visitor) {
   const active = state.requests.find(r => r.peer.id === visitor.id && ['pending', 'approved'].includes(r.status));
@@ -68,35 +73,50 @@ function requestCard(request) {
 }
 function resultMarkup() {
   const r = state.result, request = state.requests.find(item => item.id === state.resultId);
-  if (!r || !request || request.status !== 'approved') return '';
+  if (!r || !request || request.status !== 'approved' || (isPeerFocus() && request.peer.id !== focusedPeerId)) return '';
   const names = r.names.a && r.names.b ? `${r.names.a} · ${r.names.b}` : `${profile()?.nickname || '나'} · ${request.peer.nickname}`;
   const text = value => esc(value).replace(/(^|[^A-Za-z])([AB])(?![A-Za-z])/g, (_m, pre, who) => pre + esc(who === 'A' ? r.names.a || '첫 번째 나그네' : r.names.b || '두 번째 나그네'));
   const section = (title, values, content) => values.length ? `<section class="social-result-section"><h3>${title}</h3>${values.map(content).join('')}</section>` : '';
-  return `<div class="social-result">${button('news', '← 궁합 소식으로')}<p class="social-eyebrow">${esc(RELATION_KINDS[request.kind])} · 두 사람만의 해석</p><h3 class="social-pair-names">${esc(names)}</h3><div class="social-score" style="--score:${r.totalScore}"><strong>${r.totalScore < 10 ? '측정 어려움' : `${r.totalScore}<small>점</small>`}</strong></div><h4 class="social-verdict">${text(r.verdict)}</h4><p class="social-result-note">${r.confidence === null ? '' : `분석 신뢰도 ${r.confidence}% · `}삼라 궁합 엔진으로 계산했어요.${r.unknownTimeA || r.unknownTimeB ? ' 시간 미상이 포함되어 시주 풀이는 제외했어요.' : ''}</p><div class="social-subs">${Object.entries({ bond: '결속력', stability: '안정성', growth: '성장성', consumption: '소모도' }).filter(([key]) => r.subScores[key] !== null).map(([key, label]) => `<div><span>${label}</span><strong>${r.subScores[key]}</strong></div>`).join('')}</div>${section('두 사람을 관통하는 이야기', r.narrative, row => `<article><h4>${esc(row.icon)} ${esc(row.label)}</h4><p>${text(row.text)}</p></article>`)}${section('함께 살릴 강점', r.strengths, row => `<article><h4>${esc(row.emoji)} ${esc(row.label)}</h4><p>${text(row.sub)}</p></article>`)}${section('서로 알아둘 조율점', r.cautions, row => `<article><h4>${esc(row.emoji)} ${esc(row.label)}</h4><p>${text(row.sub)}</p></article>`)}${r.iljuPair ? `<section class="social-result-section"><h3>일주가 만나는 결</h3><article><h4>${text(r.iljuPair.headline)}</h4><p>${text(r.iljuPair.detail)}</p><p>${text(r.iljuPair.advice)}</p></article></section>` : ''}${section('관계의 바탕', r.axes, row => `<article><span class="social-axis-tone">${esc(row.name)} · ${esc(row.tone)}</span><h4>${text(row.headline)}</h4><p>${text(row.detail)}</p></article>`)}<p class="social-result-note">점수는 서로의 방식을 이해하는 참고예요. 출생 원문은 상대에게 공개하지 않아요. 한 사람이 철회하면 이 화면을 다시 열 수 없어요.</p>${button('revoke', '이 궁합의 공유 철회', `data-request-id="${request.id}"`)}</div>`;
+  return `<div class="social-result">${button('news', isPeerFocus() ? '← 돌아가기' : '← 궁합 소식으로')}<p class="social-eyebrow">${esc(RELATION_KINDS[request.kind])} · 두 사람만의 해석</p><h3 class="social-pair-names">${esc(names)}</h3><div class="social-score" style="--score:${r.totalScore}"><strong>${r.totalScore < 10 ? '측정 어려움' : `${r.totalScore}<small>점</small>`}</strong></div><h4 class="social-verdict">${text(r.verdict)}</h4><p class="social-result-note">${r.confidence === null ? '' : `분석 신뢰도 ${r.confidence}% · `}삼라 궁합 엔진으로 계산했어요.${r.unknownTimeA || r.unknownTimeB ? ' 시간 미상이 포함되어 시주 풀이는 제외했어요.' : ''}</p><div class="social-subs">${Object.entries({ bond: '결속력', stability: '안정성', growth: '성장성', consumption: '소모도' }).filter(([key]) => r.subScores[key] !== null).map(([key, label]) => `<div><span>${label}</span><strong>${r.subScores[key]}</strong></div>`).join('')}</div>${section('두 사람을 관통하는 이야기', r.narrative, row => `<article><h4>${esc(row.icon)} ${esc(row.label)}</h4><p>${text(row.text)}</p></article>`)}${section('함께 살릴 강점', r.strengths, row => `<article><h4>${esc(row.emoji)} ${esc(row.label)}</h4><p>${text(row.sub)}</p></article>`)}${section('서로 알아둘 조율점', r.cautions, row => `<article><h4>${esc(row.emoji)} ${esc(row.label)}</h4><p>${text(row.sub)}</p></article>`)}${r.iljuPair ? `<section class="social-result-section"><h3>일주가 만나는 결</h3><article><h4>${text(r.iljuPair.headline)}</h4><p>${text(r.iljuPair.detail)}</p><p>${text(r.iljuPair.advice)}</p></article></section>` : ''}${section('관계의 바탕', r.axes, row => `<article><span class="social-axis-tone">${esc(row.name)} · ${esc(row.tone)}</span><h4>${text(row.headline)}</h4><p>${text(row.detail)}</p></article>`)}<p class="social-result-note">점수는 서로의 방식을 이해하는 참고예요. 출생 원문은 상대에게 공개하지 않아요. 한 사람이 철회하면 이 화면을 다시 열 수 없어요.</p>${button('revoke', '이 궁합의 공유 철회', `data-request-id="${request.id}"`)}</div>`;
 }
 function deleteButton() { return button('delete', state.deleteArmed ? '한 번 더 눌러 내 정보와 모든 공유 지우기' : '서버의 내 정보와 공유 지우기', state.deleteArmed ? 'class="social-delete-confirm"' : ''); }
+function peerMarkup() {
+  const visitor = focusedVisitor(), request = peerRequest();
+  const peer = visitor || focusedPeer || request?.peer;
+  const nearby = visitor && Math.hypot(snapshot().x - visitor.x, snapshot().z - visitor.z) <= 8;
+  const name = peer?.nickname || '이 나그네';
+  return `<section class="social-peer" aria-label="${esc(name)}와 궁합"><div class="social-peer-identity"><div class="social-avatar social-cloth-${esc(peer?.outfit || 'sage')}" aria-hidden="true">人</div><div><h3>${esc(name)}</h3>${peer?.ilju ? `<p class="social-peer-ilju">${esc(peer.ilju)} 일주</p>` : ''}</div></div>${!visitor ? `<p class="social-peer-away">${!state.joined ? '이 나그네와 궁합을 보려면 먼저 만남에 참여해 주세요.' : state.stale ? '연결을 확인하고 있어요. 잠시 후 다시 만나 주세요.' : '이 나그네가 잠시 자리를 비웠어요. 다시 만나면 궁합을 청할 수 있어요.'}</p>${state.joined ? button('refresh', '다시 확인', state.busy ? 'disabled' : '') : ''}` : ''}${request && ['pending', 'approved'].includes(request.status) ? `<div class="social-peer-request"><p class="social-peer-state">${request.direction === 'incoming' && request.status === 'pending' ? '궁합 요청이 도착했어요' : statusText(request.status)}</p><p>${esc(RELATION_KINDS[request.kind])} 관계 · ${request.status === 'approved' ? '두 사람 모두 승인한 궁합이에요.' : request.direction === 'incoming' ? '승인하면 두 사람이 같은 해석을 볼 수 있어요.' : '상대가 승인하면 함께 볼 수 있어요.'}</p><div class="social-request-actions">${requestActions(request)}</div></div>` : visitor ? `<div class="social-request-compose"><label for="socialPeerKind">어떤 관계로 볼까요?<select id="socialPeerKind" data-social-kind>${Object.entries(RELATION_KINDS).map(([key, label]) => `<option value="${key}" ${key === state.kind ? 'selected' : ''}>${label}</option>`).join('')}</select></label><p>상대가 승인하면 두 사람만 궁합을 볼 수 있어요. 출생 정보 원문은 공개되지 않아요.</p>${nearby ? button('request', '궁합 보기 요청', `class="social-primary" data-visitor-id="${visitor.id}"`) : `<p>조금 더 가까이 다가가서 궁합을 청해 보세요.</p>${button('approach', '다가가기', `class="social-primary" data-visitor-id="${visitor.id}"`)}`}</div>` : ''}</section>`;
+}
 function consentMarkup() {
   const own = profile(), destination = roomForKey(pendingRoom)?.label || roomForKey(state.roomKey)?.label || '신당 마당';
-  return `<div class="social-welcome"><span class="social-knot" aria-hidden="true">∞</span><p class="social-eyebrow">AN ENCOUNTER IN THE GARDEN</p><h3>같은 마당에서,<br>서로의 결을 알아가요.</h3><p>이곳에 실제로 머무는 사람에게 궁합을 청하고, 두 사람의 승인이 모이면 같은 해석을 함께 볼 수 있어요.</p><ol><li>내 출생 정보를 먼저 준비해요.</li><li>닉네임·캐릭터·현재 위치와 계산한 일주가 같은 공간의 나그네에게 보여요. 생년월일·시간·성별 원문은 공개하지 않아요.</li><li>출생 정보는 계산을 위해 서버에 보관하며 상대에게 원문을 보여주지 않아요.</li><li>보낸 사람의 동의와 받은 사람의 승인이 모이면 두 참여자만 사주 특성이 담긴 궁합 해석을 열 수 있어요. 언제든 공유를 철회할 수 있어요.</li></ol><p class="social-retention">만남 연결과 서버의 정보는 최대 24시간 동안 유효해요. 이 탭에서 다시 참여해 승인한 궁합을 이어 볼 수 있고, ‘서버의 내 정보와 공유 지우기’로 먼저 지울 수도 있어요. 내 캐릭터의 기기 기억 설정은 별도로 유지돼요.</p>${own ? `<p class="social-own-name">오늘 만날 이름 <strong>${esc(own.nickname || '나그네')}</strong> ${button('profile', '내 정보 수정')}</p><p class="social-destination">참여할 공간 <strong>${esc(destination)}</strong></p><label class="social-consent"><input type="checkbox" data-social-consent>위 공개·보관 범위를 확인했고, 만남에 참여할게요.</label>${button('join', state.deletionPending ? '이전 서버 정보 삭제를 먼저 확인해 주세요' : state.joining ? '만남을 준비하고 있어요…' : `동의하고 ${destination}에 들어가기`, `class="social-primary" ${state.joining ? 'disabled' : ''}`)}` : `<p class="social-empty">태어난 날짜·시간과 성별을 저장하면 준비가 끝나요.</p>${button('profile', '내 캐릭터 정보 준비하기', 'class="social-primary"')}`}</div>`;
+  return `<div class="social-welcome"><span class="social-knot" aria-hidden="true">∞</span><p class="social-eyebrow">AN ENCOUNTER IN THE GARDEN</p><h3>같은 마당에서,<br>서로의 결을 알아가요.</h3><p>이곳에 실제로 머무는 사람에게 궁합을 청하고, 두 사람의 승인이 모이면 같은 해석을 함께 볼 수 있어요.</p><ol><li>내 출생 정보를 먼저 준비해요.</li><li>닉네임·캐릭터·현재 위치와 계산한 일주가 같은 공간의 나그네에게 보여요. 생년월일·시간·성별 원문은 공개하지 않아요.</li><li>출생 정보는 계산을 위해 서버에 보관하며 상대에게 원문을 보여주지 않아요.</li><li>보낸 사람의 동의와 받은 사람의 승인이 모이면 두 참여자만 사주 특성이 담긴 궁합 해석을 열 수 있어요. 언제든 공유를 철회할 수 있어요.</li></ol><p class="social-retention">만남 연결과 서버의 정보는 최대 24시간 동안 유효해요. 이 탭에서 다시 참여해 승인한 궁합을 이어 볼 수 있고, ${isPeerFocus() ? '만남 관리 화면에서 내 정보와 공유를 먼저 지울 수도 있어요.' : '‘서버의 내 정보와 공유 지우기’로 먼저 지울 수도 있어요.'} 내 캐릭터의 기기 기억 설정은 별도로 유지돼요.</p>${own ? `<p class="social-own-name">오늘 만날 이름 <strong>${esc(own.nickname || '나그네')}</strong> ${button('profile', '내 정보 수정')}</p><p class="social-destination">참여할 공간 <strong>${esc(destination)}</strong></p><label class="social-consent"><input type="checkbox" data-social-consent>위 공개·보관 범위를 확인했고, 만남에 참여할게요.</label>${button('join', state.deletionPending ? '이전 서버 정보 삭제를 먼저 확인해 주세요' : state.joining ? '만남을 준비하고 있어요…' : `동의하고 ${destination}에 들어가기`, `class="social-primary" ${state.joining ? 'disabled' : ''}`)}` : `<p class="social-empty">태어난 날짜·시간과 성별을 저장하면 준비가 끝나요.</p>${button('profile', '내 캐릭터 정보 준비하기', 'class="social-primary"')}`}</div>`;
 }
 function confirmMarkup() {
   const confirmation = state.confirm;
   if (!confirmation) return '';
   const request = state.requests.find(item => item.id === confirmation.id);
-  if (!request) return '';
+  if (!request || (isPeerFocus() && request.peer.id !== focusedPeerId)) return '';
   const approve = confirmation.action === 'approve';
   return `<section class="social-confirm" role="region" aria-label="${approve ? '궁합 승인 확인' : '공유 철회 확인'}"><p class="social-eyebrow">${approve ? 'TWO YESSES, ONE READING' : 'YOUR CHOICE, ALWAYS'}</p><h3>${approve ? `${esc(request.peer.nickname)}와 궁합을 함께 볼까요?` : '이 궁합의 공유를 철회할까요?'}</h3><p>${approve ? `${esc(RELATION_KINDS[request.kind])} 관계로 계산해요. 승인하면 두 사람이 사주 특성이 담긴 같은 궁합 해석을 볼 수 있어요. 출생 원문은 서로에게 공개되지 않아요.` : '두 사람 모두 이 결과를 다시 열 수 없게 돼요. 이미 본 내용을 되돌리거나 별도로 저장한 화면까지 지울 수는 없어요.'}</p><div>${button('confirm', approve ? '승인하고 우리 궁합 보기' : '공유 철회하기', `class="social-primary" data-request-id="${request.id}" data-decision="${confirmation.action}"`)}${button('dismiss-confirm', '돌아가기')}</div></section>`;
 }
 function render() {
   if (!dialog.open) return;
+  const scrollTop = dialog.querySelector('.social-body')?.scrollTop || 0;
+  const focusKind = document.activeElement?.matches?.('[data-social-kind]') === true;
   const focusAction = document.activeElement?.dataset?.socialAction;
   const focusRequest = document.activeElement?.dataset?.requestId;
   const count = state.requests.filter(r => r.direction === 'incoming' && r.status === 'pending').length;
-  dialog.innerHTML = `<header class="social-header"><div><p>MEET A FELLOW TRAVELER</p><h2 id="socialTitle">마당의 인연</h2></div>${button('close', '×', 'class="social-close" aria-label="마당의 인연 닫기"')}</header><div class="social-body">${state.error ? `<p class="social-error" role="alert">${esc(state.error)}</p>` : ''}${state.status ? `<p class="social-status" role="status">${esc(state.status)}</p>` : ''}${state.joined ? `<div class="social-connected"><span class="social-live-dot ${state.stale ? 'social-disconnected' : ''}" aria-hidden="true"></span><span>${state.stale ? '다시 연결하고 있어요' : '실제 나그네와 연결되어 있어요'}</span>${button('refresh', '새로고침', state.busy ? 'disabled' : '')}</div><div class="social-current-room"><strong>${esc(roomForKey(state.roomKey)?.label || '신당 마당')}</strong>${state.ownIlju ? `<span>내 일주 ${esc(state.ownIlju)}</span>` : ''}${button('rooms', '일주방 둘러보기')}</div><nav class="social-tabs" aria-label="만남과 궁합"><button type="button" data-social-action="visitors" aria-pressed="${state.tab === 'visitors'}">만난 나그네 <span>${state.visitors.length}</span></button><button type="button" data-social-action="news" aria-pressed="${state.tab === 'news'}">궁합 소식 ${count ? `<span class="social-count">${count}</span>` : ''}</button></nav>${state.confirm ? confirmMarkup() : state.result ? resultMarkup() : state.tab === 'visitors' ? `<p class="social-lead">${state.stale ? '연결이 회복되면 다시 현재 나그네를 보여드려요.' : '캐릭터를 누르거나 이 목록에서 인연을 청해 보세요.'}</p><div class="social-people">${!state.stale && state.visitors.length ? state.visitors.map(visitorCard).join('') : `<p class="social-empty">${state.stale ? '아직 만남 정보를 확인하지 못했어요.' : '아직 다른 나그네가 없어요. 마당을 산책하며 기다려 보세요.'}</p>`}</div>` : `<p class="social-lead">승인 전에는 결과가 열리지 않아요. 서로의 동의는 언제든 거둘 수 있어요.</p><div class="social-requests">${state.requests.length ? state.requests.map(requestCard).join('') : '<p class="social-empty">아직 주고받은 궁합 요청이 없어요.</p>'}</div>`}<footer class="social-session-actions">${button('leave', '마당의 만남 잠시 끄기')}${deleteButton()}</footer>` : `${consentMarkup()}${client.hasSession() ? `<footer class="social-session-actions">${deleteButton()}</footer>` : ''}`}</div><footer class="social-footer"><div>${button('direct', '직접 입력해 궁합 보기')}</div><span>닉네임·캐릭터·위치·일주 공개 · 출생 원문은 비공개</span></footer>`;
+  const focused = isPeerFocus();
+  if (focused) dialog.classList.add('social-peer-dialog'); else dialog.classList.remove('social-peer-dialog');
+  if (focused && state.result) dialog.classList.add('social-peer-result'); else dialog.classList.remove('social-peer-result');
+  const content = focused ? (state.joined ? state.confirm ? confirmMarkup() : state.result ? resultMarkup() : peerMarkup() : `${peerMarkup()}${consentMarkup()}`) : state.joined ? `<div class="social-connected"><span class="social-live-dot ${state.stale ? 'social-disconnected' : ''}" aria-hidden="true"></span><span>${state.stale ? '다시 연결하고 있어요' : '실제 나그네와 연결되어 있어요'}</span>${button('refresh', '새로고침', state.busy ? 'disabled' : '')}</div><div class="social-current-room"><strong>${esc(roomForKey(state.roomKey)?.label || '신당 마당')}</strong>${state.ownIlju ? `<span>내 일주 ${esc(state.ownIlju)}</span>` : ''}${button('rooms', '일주방 둘러보기')}</div><nav class="social-tabs" aria-label="만남과 궁합"><button type="button" data-social-action="visitors" aria-pressed="${state.tab === 'visitors'}">만난 나그네 <span>${state.visitors.length}</span></button><button type="button" data-social-action="news" aria-pressed="${state.tab === 'news'}">궁합 소식 ${count ? `<span class="social-count">${count}</span>` : ''}</button></nav>${state.confirm ? confirmMarkup() : state.result ? resultMarkup() : state.tab === 'visitors' ? `<p class="social-lead">${state.stale ? '연결이 회복되면 다시 현재 나그네를 보여드려요.' : '캐릭터를 누르거나 이 목록에서 인연을 청해 보세요.'}</p><div class="social-people">${!state.stale && state.visitors.length ? state.visitors.map(visitorCard).join('') : `<p class="social-empty">${state.stale ? '아직 만남 정보를 확인하지 못했어요.' : '아직 다른 나그네가 없어요. 마당을 산책하며 기다려 보세요.'}</p>`}</div>` : `<p class="social-lead">승인 전에는 결과가 열리지 않아요. 서로의 동의는 언제든 거둘 수 있어요.</p><div class="social-requests">${state.requests.length ? state.requests.map(requestCard).join('') : '<p class="social-empty">아직 주고받은 궁합 요청이 없어요.</p>'}</div>`}<footer class="social-session-actions">${button('leave', '마당의 만남 잠시 끄기')}${deleteButton()}</footer>` : `${consentMarkup()}${client.hasSession() ? `<footer class="social-session-actions">${deleteButton()}</footer>` : ''}`;
+  dialog.innerHTML = `<header class="social-header"><div><p>${focused ? 'FELLOW TRAVELER' : 'MEET A FELLOW TRAVELER'}</p><h2 id="socialTitle">${focused ? '궁합 보기' : '마당의 인연'}</h2></div>${button('close', '×', 'class="social-close" aria-label="마당의 인연 닫기"')}</header><div class="social-body">${state.error ? `<p class="social-error" role="alert">${esc(state.error)}</p>` : ''}${state.status ? `<p class="social-status" role="status">${esc(state.status)}</p>` : ''}${content}</div><footer class="social-footer">${focused ? '<span>서로 승인한 궁합만 함께 볼 수 있어요.</span>' : `<div>${button('direct', '직접 입력해 궁합 보기')}</div><span>닉네임·캐릭터·위치·일주 공개 · 출생 원문은 비공개</span>`}</footer>`;
+  const body = dialog.querySelector('.social-body'); if (body) body.scrollTop = scrollTop;
   dialog.querySelectorAll('button').forEach(node => { if ((state.busy && !['close', 'direct'].includes(node.dataset.socialAction)) || (state.deletionPending && node.dataset.socialAction === 'join')) node.disabled = true; });
-  if (focusAction) {
+  if (focusKind) dialog.querySelector('[data-social-kind]')?.focus({ preventScroll: true });
+  else if (focusAction) {
     const match = [...dialog.querySelectorAll('[data-social-action]')].find(node => node.dataset.socialAction === focusAction && (!focusRequest || node.dataset.requestId === focusRequest));
-    match?.focus({ preventScroll: true });
+    (match || dialog.querySelector('.social-primary:not(:disabled)') || dialog.querySelector('[data-social-action="close"]'))?.focus({ preventScroll: true });
   }
 }
 function stopPolling() { clearTimeout(timer); timer = null; }
@@ -114,10 +134,11 @@ function adopt(data) {
   state.roomCounts = safeRoomCounts(data.room_counts);
   state.selfId = cleanText(data.self_id, 80) || state.selfId;
   state.visitors = safeVisitors(data.visitors, state.selfId);
+  if (isPeerFocus() && focusedVisitor()) focusedPeer = { ...focusedVisitor() };
   state.requests = safeRequests(data.requests);
   state.stale = false;
   if (state.resultId && !state.requests.some(item => item.id === state.resultId && item.status === 'approved')) {
-    resetResult(); state.status = '공유 상태가 바뀌었어요. 궁합 소식에서 확인해 주세요.';
+    resetResult(); state.status = isPeerFocus() ? '공유 상태가 바뀌었어요. 이 나그네와의 요청을 다시 확인해 주세요.' : '공유 상태가 바뀌었어요. 궁합 소식에서 확인해 주세요.';
   }
   if (state.confirm && !state.requests.some(item => item.id === state.confirm.id && availableActions(item).includes(state.confirm.action))) state.confirm = null;
   if (previousRoom !== state.roomKey) document.dispatchEvent(new CustomEvent('sowon:room-change', { detail: { roomKey: state.roomKey, previousRoom, previousRoomKey: previousRoom, room: roomForKey(state.roomKey), joined: state.joined, ownIlju: state.ownIlju } }));
@@ -168,27 +189,27 @@ async function join() {
 }
 async function mutate(action, params, message) {
   if (state.busy || !state.joined) return;
-  const version = operation; state.busy = true; state.error = ''; state.status = ''; render();
+  const version = operation, encounter = encounterVersion; state.busy = true; state.error = ''; state.status = ''; render();
   try {
     const data = await api(action, params);
     if (version !== operation) return;
-    resetTransient(); state.status = message; if (refreshPromise) await refreshPromise; if (version !== operation) return; await refresh();
-    if (params.decision === 'approve' && data.request?.status === 'approved') await showResult(params.request_id);
-  } catch (error) { if (version === operation) state.error = socialError(error); }
+    if (encounter === encounterVersion) { resetTransient(); state.status = message; } if (refreshPromise) await refreshPromise; if (version !== operation) return; await refresh();
+    if (encounter === encounterVersion && params.decision === 'approve' && data.request?.status === 'approved') await showResult(params.request_id);
+  } catch (error) { if (version === operation && encounter === encounterVersion) state.error = socialError(error); }
   finally { if (version === operation) { state.busy = false; render(); } }
 }
 async function showResult(id) {
   const request = state.requests.find(item => item.id === id && item.status === 'approved');
-  if (!request) return;
+  if (!request || (isPeerFocus() && request.peer.id !== focusedPeerId)) return;
   const version = operation, resultRequestVersion = ++resultVersion; state.error = ''; state.status = '';
   try {
     const data = await api('result', { request_id: id });
-    if (version !== operation || resultRequestVersion !== resultVersion || !state.joined || state.stale || document.hidden || !state.requests.some(item => item.id === id && item.status === 'approved')) return;
+    if (version !== operation || resultRequestVersion !== resultVersion || (isPeerFocus() && request.peer.id !== focusedPeerId) || !state.joined || state.stale || document.hidden || !state.requests.some(item => item.id === id && item.status === 'approved')) return;
     if (data.request?.status !== 'approved' || data.request.id !== id) throw Object.assign(new Error('result_revoked'), { code: 'result_revoked' });
     const result = safeResult(data.result);
     if (!result) throw new Error('bad_result');
     state.result = result; state.resultId = id; state.confirm = null; state.tab = 'news'; render(); dialog.querySelector('.social-body')?.scrollTo({ top: 0 });
-  } catch (error) { if (version === operation) { state.error = socialError(error); state.result = null; state.resultId = null; await refresh(); render(); } }
+  } catch (error) { if (version === operation && resultRequestVersion === resultVersion && (!isPeerFocus() || request.peer.id === focusedPeerId)) { state.error = socialError(error); state.result = null; state.resultId = null; await refresh(); render(); } }
 }
 async function leave({ remove = false } = {}) {
   // Keep every caller on the same departure. A profile change during an ordinary
@@ -259,17 +280,26 @@ export async function enterSocialRoom(key) {
   }
 }
 function open(visitorId) {
-  if (dialog.open) { if (visitorId) { state.tab = 'visitors'; state.selected = visitorId; resetResult(); render(); } return; }
-  if (document.querySelector('dialog[open]')) return;
-  opener = document.activeElement; if (visitorId) { state.tab = 'visitors'; state.selected = visitorId; }
+  if (!dialog.open && document.querySelector('dialog[open]')) return;
+  ++encounterVersion;
+  focusedPeerId = visitorId === undefined || visitorId === null ? null : validId(visitorId) ? visitorId : '';
+  focusedRoom = isPeerFocus() ? state.roomKey : null;
+  const peer = isPeerFocus() ? state.visitors.find(visitor => visitor.id === focusedPeerId) || state.requests.find(request => request.peer.id === focusedPeerId)?.peer : null;
+  focusedPeer = peer ? { ...peer } : null;
+  state.deleteArmed = false; state.selected = null; state.error = ''; state.status = ''; resetResult();
+  if (isPeerFocus()) state.tab = 'visitors';
+  if (dialog.open) { render(); dialog.querySelector('.social-body')?.scrollTo({ top: 0 }); return; }
+  opener = document.activeElement;
   dialog.showModal(); document.body.classList.add('dialog-open'); render();
   if (state.joined) refresh();
 }
 function resetResult() { ++resultVersion; state.result = null; state.resultId = null; state.confirm = null; }
-function close() { state.deleteArmed = false; dialog.close(); }
+function close() { ++encounterVersion; state.deleteArmed = false; resetResult(); dialog.close(); }
 dialog.addEventListener('click', async event => {
   const target = event.target.closest('[data-social-action]'); if (!target) return;
   const action = target.dataset.socialAction, id = target.dataset.requestId;
+  if (isPeerFocus() && ['direct', 'rooms', 'visitors', 'choose', 'leave', 'delete'].includes(action)) return;
+  if (isPeerFocus() && ['request', 'approach'].includes(action) && target.dataset.visitorId !== focusedPeerId) return;
   if (!['delete', 'refresh'].includes(action)) state.deleteArmed = false;
   if (action === 'close') return close();
   if (action === 'direct') { close(); document.dispatchEvent(new CustomEvent('sowon:feature', { detail: { id: 'gunghap' } })); return; }
@@ -278,16 +308,17 @@ dialog.addEventListener('click', async event => {
   if (state.busy) return;
   if (action === 'join') return join();
   if (action === 'refresh') { state.error = ''; return refresh(); }
-  if (action === 'visitors' || action === 'news') { state.tab = action; resetResult(); render(); return; }
-  if (action === 'approach') { const visitorId = target.dataset.visitorId; if (!state.visitors.some(v => v.id === visitorId)) return; close(); document.dispatchEvent(new CustomEvent('sowon:social-walk', { detail: { visitorId } })); return; }
-  if (action === 'choose') { state.selected = state.selected === target.dataset.visitorId ? null : target.dataset.visitorId; render(); return; }
+  if (action === 'visitors' || action === 'news') { state.tab = action; resetResult(); render(); dialog.querySelector('.social-body')?.scrollTo({ top: 0 }); return; }
+  if (action === 'approach') { const visitorId = target.dataset.visitorId; if (!state.visitors.some(v => v.id === visitorId) || (isPeerFocus() && !focusedVisitor())) return; close(); document.dispatchEvent(new CustomEvent('sowon:social-walk', { detail: { visitorId } })); return; }
+  if (action === 'choose') { if (state.visitors.some(visitor => visitor.id === target.dataset.visitorId)) open(target.dataset.visitorId); return; }
   if (action === 'request') {
     const kind = target.closest('.social-request-compose')?.querySelector('[data-social-kind]')?.value;
-    if (!Object.hasOwn(RELATION_KINDS, kind) || !state.visitors.some(v => v.id === target.dataset.visitorId)) return;
+    if (!Object.hasOwn(RELATION_KINDS, kind) || !state.visitors.some(v => v.id === target.dataset.visitorId) || (isPeerFocus() && !focusedVisitor())) return;
     state.tab = 'news'; return mutate('request', { target_id: target.dataset.visitorId, kind }, '궁합 요청을 보냈어요. 상대의 승인을 기다려 주세요.');
   }
   const request = state.requests.find(item => item.id === id);
-  if (action === 'approve' || action === 'revoke') { if (!request || !availableActions(request).includes(action)) return; resetResult(); state.confirm = { action, id }; render(); return; }
+  if (isPeerFocus() && request && request.peer.id !== focusedPeerId) return;
+  if (action === 'approve' || action === 'revoke') { if (!request || !availableActions(request).includes(action)) return; resetResult(); state.confirm = { action, id }; render(); dialog.querySelector('.social-body')?.scrollTo({ top: 0 }); return; }
   if (action === 'dismiss-confirm') { state.confirm = null; render(); return; }
   if (action === 'confirm') {
     const decision = target.dataset.decision;
@@ -303,7 +334,7 @@ dialog.addEventListener('click', async event => {
   }
 });
 dialog.addEventListener('change', event => { if (event.target.matches('[data-social-kind]') && Object.hasOwn(RELATION_KINDS, event.target.value)) state.kind = event.target.value; });
-dialog.addEventListener('close', () => { state.deleteArmed = false; resetResult(); if (!document.querySelector('dialog[open]')) { document.body.classList.remove('dialog-open'); if (opener?.isConnected) opener.focus({ preventScroll: true }); } });
+dialog.addEventListener('close', () => { if (dialog.open) return; ++encounterVersion; state.deleteArmed = false; resetResult(); if (!document.querySelector('dialog[open]')) { document.body.classList.remove('dialog-open'); if (opener?.isConnected) opener.focus({ preventScroll: true }); } });
 document.addEventListener('click', event => { if (event.target.closest?.('[data-open-social]')) { event.preventDefault(); pendingRoom = null; open(); } });
 document.addEventListener('sowon:social-state-request', emitPresence);
 document.addEventListener('sowon:social-open', event => open(event.detail?.visitorId));

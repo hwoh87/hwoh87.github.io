@@ -38,7 +38,7 @@ export function createVisitors({scene,world,camera,host,onSelect,demo=false}) {
     const safe=(Array.isArray(visitors)?visitors:[]).map(publicVisitor).filter(value=>value&&value.id!==selfId).slice(0,24);
     const ids=new Set(safe.map(value=>value.id));
     for(const[id,peer]of peers)if(!ids.has(id)){remove(peer);peers.delete(id);}
-    for(const data of safe){let peer=peers.get(data.id);if(!peer){peer=make(data);peers.set(data.id,peer);}peer.data=data;peer.label.textContent=demo?data.nickname+' · 체험':data.ilju?data.ilju+' 일주\n'+data.nickname:data.nickname+' · 궁합';peer.label.setAttribute('aria-label',demo?'가상 나그네 '+data.nickname+', 이야기하기':data.nickname+(data.ilju?' · '+data.ilju+' 일주':'')+'님에게 궁합 요청하기');const palette=getAvatarPalette(data.outfit);peer.materials.cloth.color.set(palette.colors.cream);peer.materials.pants.color.set(palette.colors.sage);}
+    for(const data of safe){let peer=peers.get(data.id);if(!peer){peer=make(data);peers.set(data.id,peer);}peer.data=data;peer.label.textContent=demo?data.nickname+' · 체험':data.ilju?data.ilju+' 일주\n'+data.nickname:data.nickname+' · 궁합';peer.label.setAttribute('aria-label',demo?'가상 나그네 '+data.nickname+'님에게 궁합 요청하기':data.nickname+(data.ilju?' · '+data.ilju+' 일주':'')+'님에게 궁합 요청하기');const palette=getAvatarPalette(data.outfit);peer.materials.cloth.color.set(palette.colors.cream);peer.materials.pants.color.set(palette.colors.sage);}
   }
   function update(delta,{exploring,modalOpen,position}){
     if(disposed)return;
