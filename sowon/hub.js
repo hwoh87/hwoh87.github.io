@@ -169,7 +169,7 @@ async function render(view) {
       const module=await import('./readings.js?v=20261101-freepath4'); if(version!==generation)return;
       result=await module.mountReading(mount,item.value,{navigate,signal:viewAbort.signal,...readingOptions.get(item.value)});
     } else if(item.kind==='culture') {
-      const module=await import('./culture.js?v=20261101-compact2');if(version!==generation)return;
+      const module=await import('./culture.js?v=20261101-topceleb3');if(version!==generation)return;
       result=await module.mountCulture(mount,item.value,{navigate,signal:viewAbort.signal,dayPillar:getOwnIdentity().ilju});
     } else {
       const module=await import('./collection.js?v=20261101-freepath4');if(version!==generation)return;
@@ -182,7 +182,7 @@ async function render(view) {
     if(version!==generation)return;
     loading.remove();mount.replaceChildren(el('h3','','화면을 불러오지 못했어요.'),el('p','','연결을 확인한 뒤 다시 열어주세요.'));
     const retry=el('button','hub-primary','다시 열기');retry.type='button';retry.onclick=()=>render(view);mount.append(retry);
-    const routes={saju:'/calc/',gunghap:'/calc/gunghap/',jami:'/calc/jami/',star:'/calc/star/',catalog:'/',readers:'/#readers',archive:'/learn/',library:'/store/library.html',celeb:'/celeb/',magazine:'/m/'};
+    const routes={saju:'/calc/',gunghap:'/calc/gunghap/',jami:'/calc/jami/',star:'/calc/star/',catalog:'/',readers:'/#readers',archive:'/learn/',library:'/store/library.html',celeb:'/celeb/',magazine:'/learn/'};
     const route=routes[item.value];if(route){const link=el('a','hub-fallback-link','기존 삼라 화면에서 열기 ↗');link.href=route;link.onclick=event=>{event.preventDefault();navigate(route,{canonical:true});};mount.append(link);}
   }
 }

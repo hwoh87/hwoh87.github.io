@@ -7,7 +7,7 @@ configureSocial({getRoomPosition:roomKey=>roomKey==='courtyard'?{x:0,z:14,headin
 const shell=document.querySelector('.sanctuary');
 const nav=document.createElement('nav');nav.className='sanctuary-destinations';nav.setAttribute('aria-label','나의 해석과 새 공간');
 let pendingOwnReport=false;
-const items=[['personal','내 해석','나의 사주·하늘·흐름'],['rooms','일주방','같은 일주의 나그네'],['celeb','연예인 사주','익숙한 얼굴의 명식'],['magazine','매거진','읽을수록 선명해지는 나']];
+const items=[['personal','내 해석','나의 사주·하늘·흐름'],['rooms','일주방','같은 일주의 나그네'],['celeb','연예인 사주','공개 명식과 인물 이야기'],['magazine','삼라 매거진','사주 지식과 명리 읽기']];
 for(const [id,title,description] of items){
   const button=document.createElement('button');button.type='button';button.dataset.destination=id;
   const label=document.createElement('strong');label.textContent=title;
