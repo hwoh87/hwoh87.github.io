@@ -28,7 +28,7 @@
 .sanctuary-room-status button { min-height:32px; padding:4px 0 4px 8px; border:0; border-left:1px solid #80998d66; background:transparent; color:#e5e9d3; font:inherit; cursor:pointer; }
 .is-exploring .sanctuary-room-status { display:flex; }
 .world-modal-open :is(.sanctuary-destinations,.sanctuary-room-status) { visibility:hidden; }
-.interface-shell .ritual-dock.hub-dock { border-radius:13px; padding:8px 12px; }
+.interface-shell .ritual-dock.hub-dock { width:min(920px,calc(100% - 280px)); border-radius:13px; padding:8px 12px; }
 .interface-shell .hub-dock .dock-action>span { font-size:14px; }
 .interface-shell .hub-dock .dock-action small { font-size:11px; color:#5e6b5c; }
 .interface-shell .hub-world-rituals { border-radius:9px; }
@@ -99,6 +99,15 @@ dialog.npc-dialog .npc-status { color:#576b5d; font-size:12px; }
 dialog.npc-dialog .npc-disclosure { color:#59695c; font-size:11px; }
 dialog.npc-dialog .npc-message--user .npc-message-text { font-size:15px; }
 
+@media(max-width:1200px) and (min-width:761px) {
+  .interface-shell .hub-dock .dock-action { flex-direction:column; gap:4px; padding:6px 5px; text-align:center; }
+  .interface-shell .hub-dock .dock-action small { display:none; }
+  .interface-shell .hub-dock .dock-icon { width:20px; height:23px; }
+}
+@media(max-width:900px) and (min-width:761px) {
+  .interface-shell .hub-dock .dock-action { white-space:normal; word-break:keep-all; }
+  .interface-shell .hub-dock .dock-icon { display:none; }
+}
 @media(max-width:1040px) and (min-width:761px) {
   .sanctuary-destinations { min-height:50px; }
   .sanctuary-destinations button { padding:8px 10px; min-height:44px; }
