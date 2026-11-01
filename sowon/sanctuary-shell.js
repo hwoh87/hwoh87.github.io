@@ -2,7 +2,7 @@ import { getOwnProfile } from './profile.js?v=20261101-freepath4';
 import { getOwnIdentity } from './identity.js?v=20261101-freepath4';
 import { configureSocial } from './social.js?v=20261101-pairpaths4';
 import './ilju-rooms.js?v=20261101-templeroom1';
-import './ilju-interior-view.js?v=20261101-templewarm2';
+import './ilju-interior-view.js?v=20261101-demotravelers1';
 
 configureSocial({getRoomPosition:roomKey=>roomKey==='courtyard'?{x:0,z:14,heading:Math.PI}:{x:0,z:8,heading:Math.PI}});
 const shell=document.querySelector('.sanctuary');

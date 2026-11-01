@@ -5,7 +5,9 @@ import { createIljuInteriorLighting } from './ilju-interior-lighting.js?v=202611
 import { interiorForRoom, interiorViewPose, applyInteriorSeat } from './ilju-interior-core.js?v=20261101-templeroom2';
 import { createAvatar } from './avatar.js?v=20261101-templeroom1';
 import { createLocomotion } from './locomotion.js?v=20261101-templeroom1';
-import { createVisitors } from './visitors.js?v=20261101-freepath4';
+import { createVisitors } from './visitors.js?v=20261101-demotravelers1';
+import { getDemoVisitors } from './ilju-demo-core.js?v=20261101-demotravelers1';
+import { createIljuDemo } from './ilju-demo.js?v=20261101-demotravelers1';
 import { getOwnProfile } from './profile.js?v=20261101-freepath4';
 import { getOwnIdentity } from './identity.js?v=20261101-freepath4';
 import { readSettings } from './experience-core.js?v=20261101-freepath4';
@@ -17,7 +19,9 @@ layer.setAttribute('aria-labelledby', 'interiorTitle');
 layer.innerHTML = `<div class="interior-canvas" aria-label="일주방의 넓은 마루와 벽화"></div>
   <header class="interior-header"><button type="button" data-interior-back><span aria-hidden="true">←</span> 신당 마당</button><div class="interior-heading"><p>삼라 · 일주방</p><h1 id="interiorTitle" tabindex="-1"></h1></div><button type="button" data-open-ilju-rooms>다른 방</button></header>
   <div class="interior-presence"><span class="interior-presence-dot" aria-hidden="true"></span><span data-interior-presence>혼자 둘러보는 중</span><button type="button" data-interior-social>함께 머물기</button></div>
+  <aside class="interior-demo-bar" aria-label="가상 나그네 체험"><div><strong data-interior-demo-label>가상 나그네 3명</strong><small>실제 접속자 아님 · 눌러서 대화해 보세요</small></div><button type="button" data-interior-demo-toggle aria-pressed="true">숨기기</button></aside>
   <div class="interior-visitor-names" aria-label="같은 일주방에 머무는 나그네"></div>
+  <div class="interior-demo-names interior-visitor-names" aria-label="체험용 가상 나그네"></div>
   <div class="interior-name" hidden></div>
   <aside class="interior-mural-caption"><span data-interior-ganzi></span><h2 data-interior-mural-title></h2><p>나의 일주를 담은 물상 벽화</p></aside>
   <p class="interior-status" role="status" aria-live="polite">마음에 드는 자리를 골라 잠시 쉬어가세요.</p>
@@ -35,6 +39,8 @@ let frame = 0, previous = 0, muralVersion = 0, muralTexture = null, transition =
 let presence = null, oldInert = false, disposed = false, roomVersion = 0;
 let outsideTitle = '';
 let latestSettings = null;
+let demoEnabled = true;
+const demo = createIljuDemo({onApproach: approachDemo});
 const cleanup = [];
 function listen(target, name, callback, options) { target.addEventListener(name, callback, options); cleanup.push(() => target.removeEventListener(name, callback, options)); }
 function message(text) { $('.interior-status').textContent = text; }
@@ -51,6 +57,37 @@ function updatePresence() {
   $('[data-interior-back]').disabled = pendingExit || state.busy;
   const valid = here && presence?.roomKey === active.room.key && state.connected;
   engine?.visitors.sync(valid ? presence.visitors : [], valid ? presence.selfId : '');
+  updateDemo();
+}
+function updateDemo() {
+  const available = Boolean(active && engine && !getSocialRoomState().joined);
+  const visible = available && demoEnabled;
+  $('.interior-demo-bar').hidden = !available;
+  $('[data-interior-demo-label]').textContent = visible ? '가상 나그네 3명' : '가상 나그네 체험';
+  $('[data-interior-demo-toggle]').textContent = visible ? '숨기기' : '불러오기';
+  $('[data-interior-demo-toggle]').setAttribute('aria-pressed', String(visible));
+  engine?.demoVisitors.sync(visible ? getDemoVisitors() : [], '');
+  layer.dataset.demoVisitors = String(visible ? getDemoVisitors().length : 0);
+  if (!visible) demo.close();
+}
+function selectVisitor(id) {
+  if (demo.isDemo(id)) {
+    if (active && engine && demoEnabled && !getSocialRoomState().joined && !dialogOpen()) {
+      engine.movement.cancel(); toggleSeats(false); demo.open(id);
+    }
+    return;
+  }
+  document.dispatchEvent(new CustomEvent('sowon:social-open', {detail: {visitorId: id}}));
+}
+function approachDemo(id) {
+  if (!active || !engine || !demoEnabled || getSocialRoomState().joined) return;
+  const point = engine.demoVisitors.getPoint(id); if (!point) return;
+  const dx = engine.avatar.group.position.x - point.x, dz = engine.avatar.group.position.z - point.z;
+  const length = Math.hypot(dx, dz) || 1;
+  const target = {x: point.x + dx / length * 1.2, z: point.z + (dx || dz ? dz / length : 1) * 1.2};
+  stand(); toggleSeats(false); setView('overview'); engine.movement.setEnabled(true);
+  message('가상 나그네에게 걸어가고 있어요.');
+  if (!engine.movement.goTo(target, () => message('가까이 왔어요. 이름표를 눌러 이야기를 이어가세요.'))) message('통로에서 다시 다가가 보세요.');
 }
 function applyAppearance(event) {
   if (event?.type === 'sowon:preferences' && event.detail) latestSettings = {...event.detail};
@@ -146,20 +183,22 @@ function createEngine() {
   pendingResources.push(() => avatar.dispose());
   const orbit = new OrbitControls(camera, renderer.domElement); orbit.enableDamping = true; orbit.enablePan = false; orbit.dampingFactor = .07; orbit.minDistance = 5; orbit.maxDistance = 44; orbit.rotateSpeed = .4;
   pendingResources.push(() => orbit.dispose());
-  const visitors = createVisitors({scene, world, camera, host: $('.interior-visitor-names'), onSelect: id => document.dispatchEvent(new CustomEvent('sowon:social-open', {detail: {visitorId: id}}))});
+  const visitors = createVisitors({scene, world, camera, host: $('.interior-visitor-names'), onSelect: selectVisitor});
   pendingResources.push(() => visitors.dispose());
+  const demoVisitors = createVisitors({scene, world, camera, host: $('.interior-demo-names'), onSelect: selectVisitor, demo: true});
+  pendingResources.push(() => demoVisitors.dispose());
   const movement = createLocomotion({camera, domElement: renderer.domElement, avatar, world, orbitControls: orbit,
     follow: false,
     controls: {stick: $('.interior-stick'), thumb: $('.interior-stick-thumb'), directionButtons: []},
     onMove: () => { if (activeSeat) { stand(); message('마음이 가는 자리로 천천히 걸어보세요.'); } },
     onPick: raycaster => {
-      const peer = raycaster.intersectObject(visitors.group, true)[0];
-      if (peer) { let node = peer.object; while (node && !node.userData.visitorId) node = node.parent; if (node) { document.dispatchEvent(new CustomEvent('sowon:social-open', {detail: {visitorId: node.userData.visitorId}})); return true; } }
+      const peer = raycaster.intersectObjects([visitors.group, demoVisitors.group], true)[0];
+      if (peer) { let node = peer.object; while (node && !node.userData.visitorId) node = node.parent; if (node) { selectVisitor(node.userData.visitorId); return true; } }
       const hit = raycaster.intersectObjects(world.seats.map(seat => seat.group), true)[0];
       if (!hit) return false; let node = hit.object; while (node && !node.userData.seatId) node = node.parent;
       if (node) { chooseSeat(node.userData.seatId); return true; } return false;
     }});
-  engine = {renderer, scene, camera, world, lighting, avatar, orbit, movement, visitors};
+  engine = {renderer, scene, camera, world, lighting, avatar, orbit, movement, visitors, demoVisitors};
   const list = $('.interior-seat-list'); list.replaceChildren();
   world.seats.forEach(seat => { const button = document.createElement('button'); button.type = 'button'; button.dataset.interiorSeat = seat.id; button.textContent = seat.label; button.setAttribute('aria-pressed', 'false'); list.appendChild(button); });
   renderer.domElement.addEventListener('webglcontextlost', event => { event.preventDefault(); showFallback(); });
@@ -173,13 +212,14 @@ function createEngine() {
 function destroyEngine() {
   if (!engine) return;
   const current = engine; engine = null;
-  current.movement.dispose(); current.visitors.dispose(); current.orbit.dispose(); current.avatar.dispose(); current.world.dispose(); current.lighting.dispose();
+  demo.close(); current.movement.dispose(); current.visitors.dispose(); current.demoVisitors.dispose(); current.orbit.dispose(); current.avatar.dispose(); current.world.dispose(); current.lighting.dispose();
   current.renderer.dispose(); current.renderer.domElement.remove(); transition = null;
 }
 function showFallback() {
   cancelAnimationFrame(frame); frame = 0; destroyEngine();
   $('.interior-fallback').hidden = false; $('.interior-loading').hidden = true;
   layer.dataset.renderMode = 'fallback';
+  updateDemo();
   const img = $('.interior-fallback img'); img.src = active.mural.src; img.alt = active.mural.alt;
   message('벽화와 함께 조용히 머물러 보세요.');
 }
@@ -214,13 +254,14 @@ function render(time) {
     engine.orbit.update(); engine.world.update(time / 1000, dt);
     engine.lighting.update(matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : time / 1000);
     engine.visitors.update(dt, {exploring: true, modalOpen: false, position: engine.avatar.group.position});
+    engine.demoVisitors.update(dt, {exploring: true, modalOpen: false, position: engine.avatar.group.position});
     const point = engine.avatar.group.position.clone().add(new THREE.Vector3(0, activeSeat ? 1.35 : 1.8, 0)).project(engine.camera);
     const name = $('.interior-name'); name.hidden = point.z > 1 || Math.abs(point.x) > .9 || Math.abs(point.y) > .8;
     if (!name.hidden) { name.style.left = `${(point.x + 1) * 50}%`; name.style.top = `${(1 - point.y) * 50}%`; }
     engine.renderer.render(engine.scene, engine.camera);
     layer.dataset.position = `${engine.avatar.group.position.x.toFixed(2)},${engine.avatar.group.position.z.toFixed(2)}`;
     layer.dataset.moving = String(engine.movement.getState().moving); layer.dataset.seated = String(engine.avatar.getSeated?.() === true); layer.dataset.drawCalls = String(engine.renderer.info.render.calls);
-  } else { engine.visitors.hideLabels(); $('.interior-name').hidden = true; }
+  } else { engine.visitors.hideLabels(); engine.demoVisitors.hideLabels(); $('.interior-name').hidden = true; }
   frame = requestAnimationFrame(render);
 }
 function start() { if (active && engine && !frame && !document.hidden) { previous = 0; frame = requestAnimationFrame(render); } }
@@ -235,6 +276,7 @@ export async function openIljuInterior(key) {
     if (disposed || !accepted || !latest.joined || latest.roomKey !== key) return false;
   }
   if (active?.room.key === key) { updatePresence(); if (!dialogOpen()) $('#interiorTitle').focus({preventScroll:true}); return true; }
+  demo.close();
   const first = !active; ++roomVersion;
   if (first) { opener = document.activeElement; outsideTitle = document.title; oldInert = Boolean(sanctuary?.inert); if (sanctuary) sanctuary.inert = true; }
   active = data; activeSeat = null; pendingExit = false; muralView = false;
@@ -280,6 +322,7 @@ listen(layer, 'click', async event => {
     if (connectedHere()) document.dispatchEvent(new CustomEvent('sowon:social-open'));
     else if (active) { const version = roomVersion, key = active.room.key; await enterSocialRoom(key); if (version === roomVersion && active?.room.key === key) updatePresence(); }
   } else if (button.hasAttribute('data-interior-seat')) chooseSeat(button.dataset.interiorSeat);
+  else if (button.hasAttribute('data-interior-demo-toggle')) { demoEnabled = !demoEnabled; updateDemo(); }
   else if (button.hasAttribute('data-interior-seats')) toggleSeats($('#interiorSeats').hidden);
   else if (button.hasAttribute('data-interior-seats-close')) toggleSeats(false);
   else if (button.hasAttribute('data-interior-mural')) { toggleSeats(false); setView(muralView ? 'overview' : 'mural'); }
@@ -313,6 +356,6 @@ listen(window, 'keydown', event => {
 });
 listen(window, 'resize', resize);
 listen(document, 'visibilitychange', () => { if (document.hidden) { cancelAnimationFrame(frame); frame = 0; engine?.movement.setEnabled(false); } else start(); });
-listen(window, 'pagehide', event => { cancelAnimationFrame(frame); frame = 0; if (event.persisted) return; closeRoom(); disposed = true; cleanup.splice(0).forEach(fn => fn()); layer.remove(); });
+listen(window, 'pagehide', event => { cancelAnimationFrame(frame); frame = 0; if (event.persisted) { demo.close(); return; } closeRoom(); demo.dispose(); disposed = true; cleanup.splice(0).forEach(fn => fn()); layer.remove(); });
 listen(window, 'pageshow', start);
 const initial = getSocialRoomState(); if (initial.joined && initial.roomKey !== 'courtyard') openIljuInterior(initial.roomKey);

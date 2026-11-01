@@ -10,7 +10,7 @@ export function publicVisitor(raw) {
   return {id:raw.id,nickname:nickname||'이웃 나그네',x:raw.x,z:raw.z,heading:Number.isFinite(raw.heading)?raw.heading%(Math.PI*2):0,outfit:getAvatarPalette(raw.outfit)?.id||'sage',...(safeIlju(raw.ilju)?{ilju:safeIlju(raw.ilju)}:{})};
 }
 
-export function createVisitors({scene,world,camera,host,onSelect}) {
+export function createVisitors({scene,world,camera,host,onSelect,demo=false}) {
   const group=new THREE.Group(); group.name='Present travellers';scene.add(group);
   const peers=new Map();
   const projected=new THREE.Vector3();
@@ -28,6 +28,7 @@ export function createVisitors({scene,world,camera,host,onSelect}) {
     const shadow=mesh('shadow','shadow',0,.02,0);shadow.rotation.x=-Math.PI/2;
     model.position.set(data.x,world.heightAt(data.x,data.z),data.z);model.rotation.y=data.heading;group.add(model);
     const label=host.ownerDocument.createElement('button');label.className='visitor-name';label.type='button';label.hidden=true;label.dataset.visitorId=data.id;
+    if(demo)label.dataset.virtual='true';
     const select=()=>onSelect?.(data.id);label.addEventListener('click',select);host.append(label);
     return {model,label,materials,data,select};
   }
@@ -37,7 +38,7 @@ export function createVisitors({scene,world,camera,host,onSelect}) {
     const safe=(Array.isArray(visitors)?visitors:[]).map(publicVisitor).filter(value=>value&&value.id!==selfId).slice(0,24);
     const ids=new Set(safe.map(value=>value.id));
     for(const[id,peer]of peers)if(!ids.has(id)){remove(peer);peers.delete(id);}
-    for(const data of safe){let peer=peers.get(data.id);if(!peer){peer=make(data);peers.set(data.id,peer);}peer.data=data;peer.label.textContent=data.ilju?data.ilju+' 일주\n'+data.nickname:data.nickname+' · 궁합';peer.label.setAttribute('aria-label',data.nickname+(data.ilju?' · '+data.ilju+' 일주':'')+'님에게 궁합 요청하기');const palette=getAvatarPalette(data.outfit);peer.materials.cloth.color.set(palette.colors.cream);peer.materials.pants.color.set(palette.colors.sage);}
+    for(const data of safe){let peer=peers.get(data.id);if(!peer){peer=make(data);peers.set(data.id,peer);}peer.data=data;peer.label.textContent=demo?data.nickname+' · 체험':data.ilju?data.ilju+' 일주\n'+data.nickname:data.nickname+' · 궁합';peer.label.setAttribute('aria-label',demo?'가상 나그네 '+data.nickname+', 이야기하기':data.nickname+(data.ilju?' · '+data.ilju+' 일주':'')+'님에게 궁합 요청하기');const palette=getAvatarPalette(data.outfit);peer.materials.cloth.color.set(palette.colors.cream);peer.materials.pants.color.set(palette.colors.sage);}
   }
   function update(delta,{exploring,modalOpen,position}){
     if(disposed)return;
