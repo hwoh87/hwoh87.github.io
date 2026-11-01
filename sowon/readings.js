@@ -1,7 +1,7 @@
 import { ENGINE_URL } from '../calc/panels/manifest.js';
 import { mountBirth, mountTimeCompare, mountJourney } from '../calc/panels/helpers.js';
 import { profileSearch } from './profile-core.js?v=20261101-freepath4';
-import { refreshCalculatorVisuals } from './calculator-visuals.js?v=20261101-report-visual1';
+import { refreshCalculatorVisuals } from './calculator-visuals.js?v=20261101-report-visual2';
 
 const modules = {
   saju: () => import('../calc/panels/saju.js'),
@@ -300,8 +300,8 @@ export async function mountReading(container, kind, options = {}) {
     }
     const style = document.createElement('style'); style.textContent = view.styles; root.appendChild(style);
     const polish = document.createElement('link'); polish.rel = 'stylesheet'; polish.href = '/sowon/readings.css?v=20261101-freepath4'; root.appendChild(polish);
-    const theme = document.createElement('link'); theme.rel='stylesheet';theme.href='/sowon/reading-theme.css?v=20261101-report-visual1';root.appendChild(theme);
-    const charts = document.createElement('link'); charts.rel='stylesheet';charts.href='/sowon/reading-visuals.css?v=20261101-report-visual1';root.appendChild(charts);
+    const theme = document.createElement('link'); theme.rel='stylesheet';theme.href='/sowon/reading-theme.css?v=20261101-report-visual2';root.appendChild(theme);
+    const charts = document.createElement('link'); charts.rel='stylesheet';charts.href='/sowon/reading-visuals.css?v=20261101-report-visual2';root.appendChild(charts);
     const template = document.createElement('template');
     template.innerHTML = view.markup;
     root.appendChild(template.content.cloneNode(true));

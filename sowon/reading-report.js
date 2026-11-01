@@ -1,8 +1,8 @@
-import { loadReadingEngine, mountReading } from './readings.js?v=20261101-report-visual1';
-import { buildReadingInsight } from './reading-insight-core.js?v=20261101-report-visual1';
-import { mountReadingOffers } from './reading-offers.js?v=20261101-report-visual1';
+import { loadReadingEngine, mountReading } from './readings.js?v=20261101-report-visual2';
+import { buildReadingInsight } from './reading-insight-core.js?v=20261101-report-visual2';
+import { mountReadingOffers } from './reading-offers.js?v=20261101-report-visual2';
 import { profileSearch } from './profile-core.js?v=20261101-freepath4';
-import { renderReadingVisuals } from './reading-visuals.js?v=20261101-report-visual1';
+import { renderReadingVisuals } from './reading-visuals.js?v=20261101-report-visual2';
 
 const HOSTS = { tojeong: { name: '토정과', kind: 'saju' }, seol: { name: '설월과', kind: 'saju' }, luna: { name: '루나와', kind: 'star' } };
 const KINDS = [['saju', '사주'], ['jami', '자미두수'], ['star', '별자리']];
@@ -58,7 +58,7 @@ export function mountReadingReport(container, npc, profile, options = {}) {
     const ticket = ++version; clearNested(); kind = next; currentBirth = { ...profile.solar }; location = defaultPlace(); trueSolarTime = false;
     viewAbort = new AbortController(); const viewSignal = viewAbort.signal;
     tabNodes.forEach((node, index) => { const selected = KINDS[index][0] === kind; node.setAttribute('aria-selected', String(selected)); node.tabIndex = selected ? 0 : -1; });
-    content.setAttribute('aria-labelledby', `${id}-${kind}`); content.replaceChildren();
+    content.setAttribute('aria-labelledby', `${id}-${kind}`); content.replaceChildren(); container.scrollTop = 0;
     const intro = make('div', 'report-intro');
     const title = make('h1', 'report-title', '나의 해석을 펼치고 있어요');
     title.id = `${id}-title`; container.setAttribute('aria-labelledby', title.id); container.removeAttribute('aria-label');
@@ -73,7 +73,12 @@ export function mountReadingReport(container, npc, profile, options = {}) {
     }, viewSignal);
     typeSize.setAttribute('aria-pressed', String(container.classList.contains('is-large-text')));
     typeSize.textContent = container.classList.contains('is-large-text') ? '기본 크기' : '글자 크게';
-    readingMeta.append(length, typeSize);
+    const skipData = button('report-skip-data', '해석 먼저 읽기 ↓', () => {
+      const section = chapters.children[0];
+      section?.scrollIntoView({ block: 'start', behavior: 'auto' }); section?.querySelector?.('h2')?.focus({ preventScroll: true });
+    }, viewSignal);
+    skipData.hidden = true;
+    readingMeta.append(length, skipData, typeSize);
     intro.append(make('p', 'report-kicker', `${HOSTS[npc].name} 함께 읽는 개인 해석`), title, lead, meta, summary, readingMeta);
     const digest = make('section', 'report-digest'); digest.hidden = true; digest.setAttribute('aria-label', '먼저 읽는 핵심 요약');
     const dashboard = make('section', 'report-dashboard'); dashboard.hidden = true; dashboard.tabIndex = -1; dashboard.setAttribute('aria-label', '한눈에 보는 분석 데이터');
@@ -125,6 +130,7 @@ export function mountReadingReport(container, npc, profile, options = {}) {
         dataStart.hidden = dashboard.hidden;
         title.textContent = result.title; lead.textContent = result.headline; metadata.textContent = profileLabel(); summary.textContent = result.summary;
         length.textContent = result.sections.length ? `${result.sections.length}개 주제${result.readMinutes ? ` · 약 ${result.readMinutes}분` : ''} · 무료 해석` : '';
+        skipData.hidden = !result.sections.length;
         digest.replaceChildren();
         if (result.highlights?.length) {
           digest.append(make('h2', '', '먼저 읽는 핵심 요약'));
@@ -179,6 +185,7 @@ export function mountReadingReport(container, npc, profile, options = {}) {
         if (disposed || ticket !== version || revision !== calculation) return;
         enginePromise = null; title.textContent = '해석을 확인해 주세요'; lead.textContent = ''; summary.textContent = ''; metadata.textContent = profileLabel();
         chapters.replaceChildren(); outline.replaceChildren(); layout.hidden = true; notes.replaceChildren(); offerHost.hidden = true; readingRoute.hidden = true; digest.replaceChildren(); digest.hidden = true; dashboard.replaceChildren(); dashboard.hidden = true; length.textContent = '';
+        skipData.hidden = true;
         pending.hidden = false; pending.className = 'report-error'; pending.textContent = '기본 해석을 준비하지 못했어요. 아래에서 계산 조건을 확인하고 다시 계산해 주세요.';
       }
     }

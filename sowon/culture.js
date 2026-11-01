@@ -1,5 +1,5 @@
-import { renderReadingVisuals } from './reading-visuals.js?v=20261101-report-visual1';
-import { buildCelebrityVisuals } from './celebrity-visual-data.js?v=20261101-report-visual1';
+import { renderReadingVisuals } from './reading-visuals.js?v=20261101-report-visual2';
+import { buildCelebrityVisuals } from './celebrity-visual-data.js?v=20261101-report-visual2';
 import {CULTURE_ROLES,normalizeCultureDayPillar,culturePath,selectCulturePeople,selectCultureArticles,featuredCulturePeople,validateCultureData} from './culture-core.js?v=20261101-topceleb3';
 import {sanitizeReferenceContent} from './reference.js?v=20261101-freepath4';
 

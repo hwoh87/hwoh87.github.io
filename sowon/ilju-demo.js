@@ -1,8 +1,8 @@
-import { renderReadingVisuals } from './reading-visuals.js?v=20261101-report-visual1';
-import { buildCompatibilityVisuals } from './compatibility-visual-data.js?v=20261101-report-visual1';
+import { renderReadingVisuals } from './reading-visuals.js?v=20261101-report-visual2';
+import { buildCompatibilityVisuals } from './compatibility-visual-data.js?v=20261101-report-visual2';
 import { DEMO_SELF, DEMO_TRAVELERS, createDemoSession } from './ilju-demo-core.js?v=20261101-peerrequest1';
-import { loadReadingEngine } from './readings.js?v=20261101-report-visual1';
-import { safeResult } from './social-core.js?v=20261101-report-visual1';
+import { loadReadingEngine } from './readings.js?v=20261101-report-visual2';
+import { safeResult } from './social-core.js?v=20261101-report-visual2';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
 const actionButton = (action, label, extra = '') => `<button type="button" data-demo-action="${action}" ${extra}>${esc(label)}</button>`;

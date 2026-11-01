@@ -214,6 +214,7 @@
 .xp-personal-dialog .report-summary { max-width: 52em; color: #e3e9dc; font-size: 15px; line-height: 1.85; }
 .xp-personal-dialog .report-reading-meta { margin-top: 16px; padding-top: 10px; border-top: 1px solid #ffffff26; color: #c1cec0; }
 .xp-personal-dialog .report-type-size { color: #e5d6af; }
+.xp-personal-dialog .report-skip-data { min-height:44px; padding:6px 0; margin-left:auto; border:0; background:transparent; color:#e5d6af; font-size:13px; text-decoration:underline; text-underline-offset:4px; }
 .xp-personal-dialog .report-dashboard { margin: 0 0 30px; scroll-margin-top: 100px; }
 .xp-personal-dialog .report-dashboard[hidden] { display: none; }
 .xp-personal-dialog .report-dashboard-header { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
@@ -226,6 +227,15 @@
 .xp-personal-dialog .report-chapter>.report-takeaway { padding: 13px 16px; border-left: 3px solid #a8b79a; border-radius: 0 7px 7px 0; background: #ecefe6; font-size: 15px; }
 .xp-personal-dialog .report-reading-route .report-data-reading { color: #7d6134; }
 .xp-personal-dialog.is-large-text .report-intro .report-summary { color: #edf2e6; }
+@media(min-width:760px) {
+  .xp-personal-dialog .report-intro { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:4px 24px; padding:21px 26px 15px; }
+  .xp-personal-dialog .report-kicker { grid-column:1/-1; margin:0; }
+  .xp-personal-dialog .report-title { grid-column:1; margin:0; font-size:32px; }
+  .xp-personal-dialog .report-lead { grid-column:1; margin:0; font-size:18px; }
+  .xp-personal-dialog .report-profile { grid-column:2; grid-row:2/4; flex-direction:column; align-items:flex-end; justify-content:center; margin:0; }
+  .xp-personal-dialog .report-summary { grid-column:1/-1; margin-top:8px; font-size:14px; }
+  .xp-personal-dialog .report-reading-meta { grid-column:1/-1; margin-top:8px; padding-top:3px; }
+}
 @media(max-width:759px) {
   .xp-personal-dialog .report-content { padding: 18px 16px 28px; }
   .xp-personal-dialog .report-intro { padding: 21px 20px 16px; margin-bottom: 25px; border-radius: 11px; }
