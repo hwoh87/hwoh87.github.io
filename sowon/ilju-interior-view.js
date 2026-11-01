@@ -5,10 +5,10 @@ import { createIljuInteriorLighting } from './ilju-interior-lighting.js?v=202611
 import { interiorForRoom, interiorViewPose, applyInteriorSeat } from './ilju-interior-core.js?v=20261101-templeroom2';
 import { createAvatar } from './avatar.js?v=20261101-templeroom1';
 import { createLocomotion } from './locomotion.js?v=20261101-templeroom1';
-import { createVisitors } from './visitors.js?v=20261101-demo-walk1';
+import { createVisitors } from './visitors.js?v=20261101-demo-walk2';
 import { getDemoVisitors } from './ilju-demo-core.js?v=20261101-peerrequest1';
-import { createIljuDemo } from './ilju-demo.js?v=20261101-demo-walk1';
-import { createDemoWalk } from './ilju-demo-walk.js?v=20261101-demo-walk1';
+import { createIljuDemo } from './ilju-demo.js?v=20261101-demo-walk2';
+import { createDemoWalk } from './ilju-demo-walk.js?v=20261101-demo-walk2';
 import { getOwnProfile } from './profile.js?v=20261101-freepath4';
 import { getOwnIdentity } from './identity.js?v=20261101-freepath4';
 import { readSettings } from './experience-core.js?v=20261101-freepath4';
@@ -110,7 +110,7 @@ function setDemoRun(enabled) {
   resettingDemo = false; demoRunning = Boolean(enabled); demo.setAutoMode(demoRunning);
   updateDemoNotice();
   if (active && engine && demoEnabled && !getSocialRoomState().joined) engine.demoVisitors.sync(getDemoVisitors(), '');
-  if (enabled) message('가상 나그네가 산책을 시작했어요. 다온이 다가와 궁합을 요청해요.');
+  if (enabled) message('가상 나그네가 걸어와 궁합을 요청하거나 응답해요.');
 }
 function openDemoPeer(id) {
   const state = demo.getState(id);
