@@ -16,28 +16,28 @@ export const HALLS = Object.freeze({
 export const HALL_JOURNEYS = Object.freeze({
   myeongri: {
     title:'나를 읽는 첫 장부터',
-    description:'내 정보로 일주와 기운의 균형을 읽고, 관계와 흐름의 기본 풀이를 차례로 펼쳐보세요.',
+    description:'내 일주와 기운의 균형부터 관계·대운까지, 기본 풀이를 읽어요.',
     includes:['일주와 기질','오행과 십신','대운의 큰 흐름'],
     actions:[{label:'내 사주 무료 풀이',type:'reading',kind:'saju',npc:'tojeong'},{label:'직접 입력해 명식 보기',type:'feature',id:'saju'}],
     continuation:'기본 풀이를 읽은 뒤 더 궁금한 주제가 생기면, 풀이 아래에서 상세 리포트의 목차와 가격을 살펴볼 수 있어요.',
   },
   inyeon: {
     title:'두 사람의 결을, 먼저 무료로',
-    description:'직접 두 사람의 정보를 넣어 궁합을 보거나, 설월과 내 관계 반응부터 이야기해 보세요.',
+    description:'두 사람의 궁합을 보거나, 설월과 내 관계 반응부터 읽어보세요.',
     includes:['두 명식의 관계','관계의 강점과 조율점','서로 승인하는 나그네 궁합'],
     actions:[{label:'두 사람 무료 궁합 보기',type:'feature',id:'gunghap'},{label:'설월과 내 관계 이야기',type:'encounter',npc:'seol'}],
     continuation:'상대의 정보가 없어도 내 관계 성향은 읽을 수 있어요. 유료 궁합은 상품의 입력 조건과 목차를 확인한 뒤 선택해요.',
   },
   stars: {
     title:'태어난 하늘을 차근차근',
-    description:'별자리와 자미두수의 기본 해석을 무료로 읽어요. 처음이라면 핵심 요약부터 시작해 보세요.',
+    description:'내 별자리·자미두수의 핵심과 생활 속 의미를 무료로 읽어요.',
     includes:['태양·달과 기질','행성의 관계','자미두수의 주요 궁'],
     actions:[{label:'내 별자리 무료 풀이',type:'reading',kind:'star',npc:'luna'},{label:'내 자미두수 무료 풀이',type:'reading',kind:'jami',npc:'luna'}],
     continuation:'자미두수는 태어난 시간이 필요해요. 별자리에서 시간을 모르면 정오 기준으로 읽고 상승궁·하우스는 표시하지 않아요.',
   },
   readers: {
-    title:'한 번 이야기 나누고 고르세요',
-    description:'루나와 이야기하거나 내 기본 풀이부터 읽어보세요. 더 궁금한 주제가 생기면 리포트를 골라도 괜찮아요.',
+    title:'궁금한 것부터 물어봐요',
+    description:'루나와 무료로 대화하고, 내 기본 풀이도 읽어보세요.',
     includes:['루나와의 대화','나의 기본 해석','열두 술사의 소개'],
     actions:[{label:'루나와 무료 대화',type:'encounter',npc:'luna'},{label:'내 기본 풀이 먼저 읽기',type:'reading',kind:'saju',npc:'tojeong'}],
     continuation:'웹 상세 리포트는 구독 없이 한 권씩 구매해요. 결제 전 목차·가격·필요한 정보를 먼저 확인할 수 있어요.',

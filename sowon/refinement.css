@@ -139,6 +139,7 @@ dialog.npc-dialog .npc-message--user .npc-message-text { font-size:15px; }
   .hub-dialog .hub-hall-intro img { flex:none; width:42px; height:42px; border-width:2px; }
   .hub-dialog .hub-hall-intro h3 { font-size:18px; line-height:1.55; margin:4px 0 0; }
   .hub-dialog .hub-hall-intro p { display:none; }
+  .hub-dialog .hub-free-actions>button { min-height:48px; }
   .hub-dialog .hub-map { height:470px; }
   .hub-dialog .hub-map-place { width:91px; }
   .hub-dialog .hub-map-place strong { font-size:15px; }

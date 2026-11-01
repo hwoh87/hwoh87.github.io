@@ -1,4 +1,4 @@
-import { STEM_COUNSEL, GOD_GROUP, GROUP_COUNSEL, ELEMENT_PRACTICE } from './reading-counsel.js?v=20261101-freepath3';
+import { STEM_COUNSEL, GOD_GROUP, GROUP_COUNSEL, ELEMENT_PRACTICE } from './reading-counsel.js?v=20261101-freepath4';
 
 /**
  * A local reading from the same deterministic engine as /calc/.

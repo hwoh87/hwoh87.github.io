@@ -46,7 +46,7 @@ function currentCatalog() {
 
 async function ensureStoreCatalog() {
   if (currentCatalog()) return currentCatalog();
-  const { loadCatalog } = await import('./readings.js?v=20261101-freepath3');
+  const { loadCatalog } = await import('./readings.js?v=20261101-freepath4');
   if (typeof loadCatalog !== 'function') throw new Error('catalog_unavailable');
   await loadCatalog();
   return currentCatalog();
