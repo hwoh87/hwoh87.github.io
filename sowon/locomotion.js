@@ -182,7 +182,7 @@ export function findPath(start, target, world, options = {}) {
 }
 
 /** Navigation owns avatar animation. The avatar faces local +Z. */
-export function createLocomotion({ camera, domElement, avatar, world, orbitControls, onMove, onArrival, onPick }) {
+export function createLocomotion({ camera, domElement, avatar, world, orbitControls, onMove, onArrival, onPick, controls, follow = true }) {
   const player = avatar.group;
   const initialPosition = { x: player.position.x, z: player.position.z };
   const speed = 3.2;
@@ -213,9 +213,9 @@ export function createLocomotion({ camera, domElement, avatar, world, orbitContr
   marker.visible = false;
   if (player.parent) player.parent.add(marker);
 
-  const stick = document.getElementById('moveStick');
-  const thumb = document.getElementById('moveThumb');
-  const directionButtons = Array.from(document.querySelectorAll('[data-move]'));
+  const stick = controls ? controls.stick : document.getElementById('moveStick');
+  const thumb = controls ? controls.thumb : document.getElementById('moveThumb');
+  const directionButtons = Array.from(controls ? controls.directionButtons || [] : document.querySelectorAll('[data-move]'));
   const interactive = () => Boolean(document.querySelector('dialog[open]') || document.activeElement && document.activeElement.matches('input,textarea,select,[contenteditable="true"]'));
   const canMove = () => enabled && !disposed && !document.hidden && !interactive();
   const floorHeight = (x, z) => {
@@ -279,6 +279,7 @@ export function createLocomotion({ camera, domElement, avatar, world, orbitContr
   function goTo(point, callback) { return planJourney(point, callback, 'path'); }
 
   function followPlayer(dx, dz) {
+    if (!follow) return;
     if (!Number.isFinite(dx) || !Number.isFinite(dz)) return;
     camera.position.x += dx; camera.position.z += dz;
     if (orbitControls && orbitControls.target) { orbitControls.target.x += dx; orbitControls.target.z += dz; }
@@ -434,7 +435,7 @@ export function createLocomotion({ camera, domElement, avatar, world, orbitContr
     listen(button, 'pointerdown', press); listen(button, 'keydown', press);
     ['pointerup', 'pointercancel', 'lostpointercapture', 'keyup', 'blur'].forEach(type => listen(button, type, release));
   });
-  listen(document.getElementById('returnToGate'), 'click', event => {
+  listen(controls ? controls.reset : document.getElementById('returnToGate'), 'click', event => {
     if (!canMove()) return;
     event.preventDefault(); reset(); announceMove('manual');
   });

@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
 import { createWorld } from './world.js?v=20261101-celebhouse1';
-import { createAvatar } from './avatar.js?v=20261101-freepath4';
+import { createAvatar } from './avatar.js?v=20261101-templeroom1';
 import { getSocialRoomState } from './social.js?v=20261101-pairpaths4';
 import { getOwnIdentity } from './identity.js?v=20261101-freepath4';
 import { getOwnProfile } from './profile.js?v=20261101-freepath4';
-import { createLocomotion, isWalkable } from './locomotion.js?v=20261101-freepath4';
+import { createLocomotion, isWalkable } from './locomotion.js?v=20261101-templeroom1';
 import { readJourney } from './hub-core.js?v=20261101-freepath4';
 import { readSettings, normalizeSettings, effectiveQuality, nearestInteraction, pickedInteraction, interactionDistance } from './experience-core.js?v=20261101-freepath4';
 import { createWayfinder } from './wayfinder.js?v=20261101-celebhouse1';
@@ -186,8 +186,9 @@ function setup() {
     const room=detail.roomKey || 'courtyard';
     world.setRoomIdentity?.(room);
     host.dataset.room=room;
+    if(room!=='courtyard')return;
     if(detail.previousRoomKey===room)return;
-    const point=room==='courtyard'?{x:0,z:14}:{x:-11,z:14};
+    const point={x:0,z:14};
     if(!isWalkable(point,world))return;
     activeJourney=null;cameraTransition=null;movement.cancel();
     avatar.group.position.set(point.x,world.heightAt(point.x,point.z),point.z);
@@ -199,9 +200,11 @@ function setup() {
   listen(document,'sowon:room-change',event=>applyRoom(event.detail));
   listen(document,'sowon:social-presence',event=>visitors.sync(event.detail?.visitors,event.detail?.selfId));
   listen(document,'sowon:capture-social',event=>{
+    if(body.classList.contains('ilju-interior-open'))return;
     event.detail.snapshot={x:avatar.group.position.x,z:avatar.group.position.z,heading:avatar.group.rotation.y,outfit:preferences.outfit};
   });
   listen(document,'sowon:social-walk',event=>{
+    if(body.classList.contains('ilju-interior-open'))return;
     const id=event.detail?.visitorId,point=visitors.getPoint(id);
     if(!point){status('그 나그네가 지금은 자리를 옮겼어요. 함께 걷기에서 다시 확인해 주세요.',3500);return;}
     if(document.querySelector('dialog[open]'))return;
@@ -367,7 +370,7 @@ function setup() {
     if (!running) return;
     const delta = previousTime ? Math.min((time - previousTime) / 1000, .05) : 0;
     previousTime = time;
-    const modalOpen = Boolean(document.querySelector('dialog[open]'));
+    const modalOpen = Boolean(document.querySelector('dialog[open]')) || body.classList.contains('ilju-interior-open');
     body.classList.toggle('world-modal-open', modalOpen);
     if (modalOpen && activeJourney) { activeJourney = null; status('', 0); }
     movement.setEnabled(!modalOpen);
@@ -441,6 +444,7 @@ function setup() {
 
   const actionLabels = { wish: '소원 등불이 있는 신당', breath: '바람이 머무는 명상터', blessing: '마음을 전하는 소원나무', myeongri: '토정이 기다리는 명리전', inyeon: '설월이 기다리는 인연정', stars: '태어난 하늘을 펼치는 별마루', readers: '루나와 술사들이 있는 술사각', archive: '이야기가 쌓이는 서고', rooms: '같은 일주가 만나는 일주마당', celeb: '공개 명식을 읽는 연예인 사주관' };
   function walkToAction(action) {
+    if(body.classList.contains('ilju-interior-open'))return;
     if (body.classList.contains('world-failed') || !world.destinations[action] || document.querySelector('dialog[open]')) return;
     const personalHost=(world.interactions||[]).find(item=>item.type==='npc'&&item.hall===action);
     if(personalHost){approachInteraction(personalHost);return;}

@@ -8,8 +8,12 @@ export function createAvatar() {
   let disposed = false;
   let appearance = 'sage';
   let gender = null;
+  let seated = false;
+  let seatHeight = 0.17;
   group.userData.appearance = appearance;
+  group.userData.seated = seated;
   const figure = new THREE.Group();
+  figure.name = 'TravellerFigure';
   group.add(figure);
   const materials = {};
   const material = (name, color, extra = {}) => {
@@ -44,6 +48,7 @@ export function createAvatar() {
 
   // Compact rounded shoulders and a wrap jacket, with a sewn collar at the front.
   const torso = mesh(new THREE.CylinderGeometry(0.18, 0.225, 0.34, 24), materials.cream, figure, [0, 0.79, 0]);
+  torso.name = 'TravellerTorso';
   sphere(0.2, materials.cream, figure, [0, 0.88, 0], [1.08, 0.58, 0.85]);
   const hem = mesh(new THREE.CylinderGeometry(0.22, 0.265, 0.13, 28), materials.cream, figure, [0, 0.64, 0]);
   hem.scale.z = 0.78;
@@ -64,10 +69,12 @@ export function createAvatar() {
   const waist = mesh(new THREE.CylinderGeometry(0.205, 0.245, 0.19, 24), materials.sage, figure, [0, 0.535, -0.012]);
   waist.scale.z = 0.78;
   const skirt=mesh(new THREE.CylinderGeometry(.215,.37,.44,24),materials.sage,figure,[0,.43,0]);
+  skirt.name = 'TravellerSkirt';
   skirt.scale.z=.86;skirt.visible=false;
   const leftLeg = new THREE.Group();
   const rightLeg = new THREE.Group();
   [leftLeg, rightLeg].forEach((leg, index) => {
+    leg.name = index ? 'TravellerRightLeg' : 'TravellerLeftLeg';
     leg.position.set(index ? 0.115 : -0.115, 0.48, 0);
     figure.add(leg);
     capsule(0.105, 0.18, materials.sage, leg, [0, -0.135, 0], [1, 1, 0.96]);
@@ -76,9 +83,34 @@ export function createAvatar() {
     sphere(0.047, materials.cream, leg, [0, -0.339, 0.139], [1.5, 0.45, 0.45]);
   });
 
+  // Folded thighs and crossed shins sit on top of a cushion. They share the
+  // standing outfit's materials, and add no draw calls while the group is hidden.
+  const seatedLegs = new THREE.Group();
+  seatedLegs.name = 'TravellerSeatedLegs';
+  seatedLegs.visible = false;
+  group.add(seatedLegs);
+  function foldedSegment(start, end, radius, mat) {
+    const from = new THREE.Vector3(...start);
+    const to = new THREE.Vector3(...end);
+    const direction = to.clone().sub(from);
+    const item = mesh(new THREE.CapsuleGeometry(radius, Math.max(0, direction.length() - radius * 2), 4, 8), mat, seatedLegs);
+    item.position.copy(from.add(to).multiplyScalar(0.5));
+    item.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
+    return item;
+  }
+  [-1, 1].forEach(side => {
+    const knee = [side * 0.30, 0.12, 0.16];
+    foldedSegment([side * 0.09, 0.16, -0.015], knee, 0.10, materials.sage);
+    foldedSegment(knee, [-side * 0.14, side < 0 ? 0.10 : 0.08, 0.29], 0.072, materials.sageShade);
+    const shoe = mesh(new THREE.SphereGeometry(0.085, 12, 8), materials.shoe, seatedLegs,
+      [-side * 0.145, side < 0 ? 0.078 : 0.06, 0.29], [1.02, 0.57, 1.25]);
+    shoe.rotation.y = side * 0.7;
+  });
+
   const leftArm = new THREE.Group();
   const rightArm = new THREE.Group();
   [leftArm, rightArm].forEach((arm, index) => {
+    arm.name = index ? 'TravellerRightArm' : 'TravellerLeftArm';
     const side = index ? 1 : -1;
     arm.position.set(side * 0.226, 0.9, 0);
     arm.rotation.z = side * 0.14;
@@ -140,6 +172,33 @@ export function createAvatar() {
   let gestureTime = 0;
   let blinkUntil = 2.8;
 
+  function applyPosture() {
+    leftLeg.visible = rightLeg.visible = !seated;
+    seatedLegs.visible = seated;
+    seatedLegs.position.y = seatHeight;
+    figure.position.y = seated ? -0.43 + seatHeight : -0.065;
+    figure.rotation.x = 0;
+    torso.rotation.z = 0;
+    leftLeg.rotation.x = rightLeg.rotation.x = 0;
+    leftArm.rotation.x = rightArm.rotation.x = seated ? -0.67 : 0;
+    leftArm.rotation.z = seated ? -0.30 : -0.14;
+    rightArm.rotation.z = seated ? 0.30 : 0.14;
+    skirt.position.y = seated ? 0.61 : 0.43;
+    skirt.scale.set(seated ? 1.13 : 1, seated ? 0.52 : 1, seated ? 0.9632 : 0.86);
+    skirt.visible = gender === 'F';
+  }
+
+  function setSeated(value, surfaceHeight = 0.17) {
+    if (disposed || typeof value !== 'boolean') return false;
+    seated = value;
+    seatHeight = Number.isFinite(surfaceHeight) ? Math.max(0, Math.min(0.5, surfaceHeight)) : 0.17;
+    group.userData.seated = seated;
+    walkBlend = 0;
+    if (seated) { gesture = null; gestureTime = 0; }
+    applyPosture();
+    return true;
+  }
+
   function setGesture(kind) {
     if (disposed || !['wish', 'greet', 'arrival', 'bow'].includes(kind)) return false;
     gesture = kind;
@@ -160,6 +219,7 @@ export function createAvatar() {
     gender=value;skirt.visible=value==='F';
     hairBun.scale.set(1,value==='M'?.63:.86,.97);
     hairpin.visible=value!=='M';hairpinEnd.visible=value!=='M';bunTie.visible=value!=='M';
+    if (seated) applyPosture();
     group.userData.gender=gender;return true;
   }
 
@@ -167,16 +227,18 @@ export function createAvatar() {
     if (disposed) return;
     const dt = Math.max(0, Math.min(0.1, Number.isFinite(delta) ? delta : 0));
     const isMoving = typeof moving === 'object' ? Boolean(moving.moving) : Boolean(moving);
+    if (isMoving && seated) setSeated(false);
     time += dt;
     walkBlend = THREE.MathUtils.damp(walkBlend, isMoving ? 1 : 0, 12, dt);
     const stride = Math.sin(time * 9.2) * 0.46 * walkBlend;
     leftLeg.rotation.x = stride;
     rightLeg.rotation.x = -stride;
-    leftArm.rotation.x = -stride * 0.78;
-    rightArm.rotation.x = stride * 0.78;
-    leftArm.rotation.z = -0.14;
-    rightArm.rotation.z = 0.14;
-    figure.position.y = -0.065 + Math.abs(Math.sin(time * 9.2)) * 0.033 * walkBlend + Math.sin(time * 1.8) * 0.009 * (1 - walkBlend);
+    leftArm.rotation.x = seated ? -0.67 : -stride * 0.78;
+    rightArm.rotation.x = seated ? -0.67 : stride * 0.78;
+    leftArm.rotation.z = seated ? -0.30 : -0.14;
+    rightArm.rotation.z = seated ? 0.30 : 0.14;
+    figure.position.y = seated ? -0.43 + seatHeight + Math.sin(time * 1.8) * 0.004
+      : -0.065 + Math.abs(Math.sin(time * 9.2)) * 0.033 * walkBlend + Math.sin(time * 1.8) * 0.009 * (1 - walkBlend);
     figure.rotation.x = 0;
     torso.rotation.z = Math.sin(time * 4.6) * 0.015 * walkBlend;
     head.rotation.z = Math.sin(time * 2.1) * 0.023 * (1 - walkBlend);
@@ -226,5 +288,5 @@ export function createAvatar() {
     group.removeFromParent();
   }
 
-  return { group, update, setGesture, setAppearance, setGender, getGender:()=>gender, getAppearance: () => appearance, dispose };
+  return { group, update, setGesture, setAppearance, setGender, setSeated, getSeated: () => seated, getGender:()=>gender, getAppearance: () => appearance, dispose };
 }

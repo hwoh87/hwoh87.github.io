@@ -1,9 +1,10 @@
 import { getOwnProfile } from './profile.js?v=20261101-freepath4';
 import { getOwnIdentity } from './identity.js?v=20261101-freepath4';
 import { configureSocial } from './social.js?v=20261101-pairpaths4';
-import './ilju-rooms.js?v=20261101-pairpaths4';
+import './ilju-rooms.js?v=20261101-templeroom1';
+import './ilju-interior-view.js?v=20261101-templeroom1';
 
-configureSocial({getRoomPosition:roomKey=>roomKey==='courtyard'?{x:0,z:14,heading:Math.PI}:{x:-11,z:14,heading:Math.PI}});
+configureSocial({getRoomPosition:roomKey=>roomKey==='courtyard'?{x:0,z:14,heading:Math.PI}:{x:0,z:8,heading:Math.PI}});
 const shell=document.querySelector('.sanctuary');
 const nav=document.createElement('nav');nav.className='sanctuary-destinations';nav.setAttribute('aria-label','나의 해석과 새 공간');
 let pendingOwnReport=false;
