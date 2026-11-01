@@ -40,6 +40,28 @@ export function selectCultureArticles(data,{query='',topic='all'}={}){
     .filter(article=>cultureMatches([article.name,article.title,article.summary,article.topic,article.occupation,article.search].join(' '),query));
 }
 export function featuredCulturePeople(people,count=3){return FEATURED_IDS.map(id=>people.find(person=>person.id===id)).filter(Boolean).slice(0,count);}
+const PORTRAIT_CACHE='https://sidxbzpbesbaiokxrqsf.supabase.co/storage/v1/object/public/celeb-cache/feed/';
+function portraitLicense(name){
+  if(name==='CC0')return 'https://creativecommons.org/publicdomain/zero/1.0/';
+  const match=/^CC (BY(?:-SA)?) (1\.0|2\.0|2\.5|3\.0|4\.0)(?: ([a-z]{2,3}))?$/.exec(name);
+  return match?'https://creativecommons.org/licenses/'+match[1].toLowerCase()+'/'+match[2]+'/'+(match[3]?match[3]+'/':''):null;
+}
+export function validateCulturePortrait(portrait,personId){
+  if(!portrait||!Number.isSafeInteger(portrait.id)||portrait.id<=0)return false;
+  if(!['src','sourceUrl','author','licenseName','licenseUrl'].every(key=>typeof portrait[key]==='string'&&portrait[key].length>0&&portrait[key].length<3000))return false;
+  if(/[<>\u0000-\u001f]/.test(portrait.author)||portrait.licenseUrl!==portraitLicense(portrait.licenseName))return false;
+  try{
+    const source=new URL(portrait.sourceUrl),src=new URL(portrait.src);
+    if(source.origin!=='https://commons.wikimedia.org'||source.username||source.password||source.search||source.hash||!source.pathname.startsWith('/wiki/File:'))return false;
+    const file=decodeURIComponent(source.pathname.slice('/wiki/File:'.length));
+    if(!file.trim()||/[\\/\u0000-\u001f]/.test(file))return false;
+    if(src.username||src.password||src.hash)return false;
+    if(['jpg','png','webp'].some(ext=>portrait.src===PORTRAIT_CACHE+personId+'.'+ext))return true;
+    return src.origin==='https://commons.wikimedia.org'&&src.pathname.startsWith('/wiki/Special:FilePath/')
+      &&decodeURIComponent(src.pathname.slice('/wiki/Special:FilePath/'.length)).replaceAll('_',' ')===file.replaceAll('_',' ')
+      &&src.search==='?width=500';
+  }catch(_){return false;}
+}
 export function validateCultureData(data){
   if(!data||data.version!==1||!Array.isArray(data.people)||!Array.isArray(data.articles)||data.people.length>10000||data.articles.length>100)return false;
   const ids=new Set(),paths=new Set();
@@ -49,6 +71,7 @@ export function validateCultureData(data){
     if(person.birthNote!==undefined&&(typeof person.birthNote!=='string'||person.birthNote.length>3000))return false;
     if(!normalizeCultureDayPillar(person.dayPillar)||!['木','火','土','金','水'].includes(person.element))return false;
     if(!/^\/assets\/art\/ilju\/[a-z]+@t\.webp$/.test(person.image)||!/^\/ilju\/[a-z]+\/$/.test(person.iljuPath))return false;
+    if(person.portrait!==undefined&&!validateCulturePortrait(person.portrait,person.id))return false;
     if(!Array.isArray(person.sources)||person.sources.some(source=>{try{const url=new URL(source.url);return url.protocol!=='https:'||Boolean(url.username||url.password)||typeof source.label!=='string';}catch(_){return true;}}))return false;
     ids.add(person.id);paths.add(person.path);
   }
