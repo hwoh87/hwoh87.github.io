@@ -5,14 +5,14 @@ import { createIljuInteriorLighting } from './ilju-interior-lighting.js?v=202611
 import { interiorForRoom, interiorViewPose, applyInteriorSeat } from './ilju-interior-core.js?v=20261101-templeroom2';
 import { createAvatar } from './avatar.js?v=20261101-templeroom1';
 import { createLocomotion } from './locomotion.js?v=20261101-templeroom1';
-import { createVisitors } from './visitors.js?v=20261101-demo-walk4';
+import { createVisitors } from './visitors.js?v=20261101-realtime3';
 import { getDemoVisitors } from './ilju-demo-core.js?v=20261101-peerrequest1';
-import { createIljuDemo } from './ilju-demo.js?v=20261101-report-visual3';
-import { createDemoWalk } from './ilju-demo-walk.js?v=20261101-demo-walk4';
+import { createIljuDemo } from './ilju-demo.js?v=20261101-realtime3';
+import { createDemoWalk } from './ilju-demo-walk.js?v=20261101-realtime3';
 import { getOwnProfile } from './profile.js?v=20261101-report-visual3';
 import { getOwnIdentity } from './identity.js?v=20261101-report-visual3';
 import { readSettings } from './experience-core.js?v=20261101-freepath4';
-import { enterSocialRoom, getSocialRoomState } from './social.js?v=20261101-report-visual3';
+import { enterSocialRoom, getSocialRoomState } from './social.js?v=20261101-realtime3';
 
 const layer = document.createElement('section');
 layer.id = 'iljuInterior'; layer.className = 'ilju-interior'; layer.hidden = true;
@@ -39,6 +39,7 @@ const canvasHost = $('.interior-canvas');
 let active = null, engine = null, opener = null, pendingExit = false, activeSeat = null;
 let frame = 0, previous = 0, muralVersion = 0, muralTexture = null, transition = null, muralView = false;
 let presence = null, oldInert = false, disposed = false, roomVersion = 0;
+let requestStates = [];
 let outsideTitle = '';
 let latestSettings = null;
 let demoEnabled = true;
@@ -55,12 +56,13 @@ function updatePresence() {
   const state = getSocialRoomState(), here = state.joined && state.roomKey === active.room.key;
   const count = here && state.connected ? Math.max(1, state.roomCounts[active.room.key] || 1) : 0;
   $('.interior-presence').dataset.connected = String(here && state.connected);
-  $('[data-interior-presence]').textContent = here ? state.connected ? `같은 방에 ${count}명 머무는 중` : '나그네와 다시 연결하는 중' : '혼자 조용히 둘러보는 중';
+  $('[data-interior-presence]').textContent = here ? state.connected ? `같은 방에 ${count}명${state.realtime ? ' · 실시간' : ' 머무는 중'}` : '나그네와 다시 연결하는 중' : '혼자 조용히 둘러보는 중';
   $('[data-interior-social]').textContent = here ? '나그네 보기' : '함께 머물기';
   $('[data-interior-social]').disabled = state.busy;
   $('[data-interior-back]').disabled = pendingExit || state.busy;
   const valid = here && presence?.roomKey === active.room.key && state.connected;
   engine?.visitors.sync(valid ? presence.visitors : [], valid ? presence.selfId : '');
+  engine?.visitors.setRequestStates(valid ? requestStates : []);
   updateDemo();
 }
 function updateDemo() {
@@ -401,7 +403,14 @@ listen(document, 'sowon:room-change', event => {
   if (key === 'courtyard') { if (active) closeRoom(); }
   else if (getSocialRoomState().joined) openIljuInterior(key);
 });
-listen(document, 'sowon:social-presence', event => { presence = event.detail; updatePresence(); });
+listen(document, 'sowon:social-presence', event => {
+  presence = event.detail;
+  if (presence?.motionOnly) {
+    const valid = active && connectedHere() && presence.roomKey === active.room.key;
+    engine?.visitors.sync(valid ? presence.visitors : [], valid ? presence.selfId : '');
+  } else updatePresence();
+});
+listen(document, 'sowon:social-requests', event => { requestStates = event.detail?.states || []; engine?.visitors.setRequestStates(connectedHere() ? requestStates : []); });
 listen(document, 'sowon:social-state', updatePresence);
 listen(document, 'sowon:profile-change', applyAppearance); listen(document, 'sowon:identity-change', applyAppearance); listen(document, 'sowon:preferences', applyAppearance);
 listen(document, 'sowon:capture-social', event => { if (active && connectedHere() && engine) event.detail.snapshot = {x: engine.avatar.group.position.x, z: engine.avatar.group.position.z, heading: engine.avatar.group.rotation.y, outfit: engine.avatar.getAppearance()}; });

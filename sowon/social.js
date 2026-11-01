@@ -1,7 +1,8 @@
 import { renderReadingVisuals } from './reading-visuals.js?v=20261101-report-visual3';
 import { buildCompatibilityVisuals } from './compatibility-visual-data.js?v=20261101-report-visual3';
 import { getOwnProfile } from './profile.js?v=20261101-report-visual3';
-import { RELATION_KINDS, safePosition, serverProfile, safeVisitors, safeRequests, availableActions, safeResult, socialError, cleanText, createSocialClient, safeIlju, roomForKey, safeRoomCounts, validId } from './social-core.js?v=20261101-report-visual3';
+import { RELATION_KINDS, safePosition, serverProfile, safeVisitors, safeRequests, availableActions, safeResult, socialError, cleanText, createSocialClient, safeIlju, roomForKey, safeRoomCounts, validId } from './social-core.js?v=20261101-realtime3';
+import { createRealtimeClient } from './realtime-client.js?v=20261101-realtime3';
 
 let storage;
 try { storage = sessionStorage; } catch (_) {}
@@ -9,19 +10,31 @@ const client = createSocialClient({ storage });
 const dialog = document.createElement('dialog');
 dialog.id = 'socialDialog'; dialog.className = 'social-dialog'; dialog.setAttribute('aria-labelledby', 'socialTitle');
 document.body.appendChild(dialog);
-const state = { joined: false, joining: false, busy: false, stale: false, selfId: '', visitors: [], requests: [], tab: 'visitors', selected: null, kind: 'FRIEND', deleteArmed: false, confirm: null, result: null, resultId: null, error: '', status: '', roomKey: 'courtyard', ownIlju: null, presenceEpoch: null, roomCounts: {}, switchingRoom: false, deletionPending: false };
+const state = { joined: false, joining: false, busy: false, stale: false, realtime: false, selfId: '', visitors: [], requests: [], tab: 'visitors', selected: null, kind: 'FRIEND', deleteArmed: false, confirm: null, result: null, resultId: null, error: '', status: '', roomKey: 'courtyard', ownIlju: null, presenceEpoch: null, roomCounts: {}, switchingRoom: false, deletionPending: false };
 let opener, timer, refreshPromise, operation = 0, resultVersion = 0, visibilityVersion = 0, lastProfile = '';
 let config = {}, pendingRoom = null, leavePromise = null, leaveRemoves = false;
+let realtime = null, realtimeGeneration = 0, socialRefreshQueued = false, heartbeatPromise = null, lastRequestStamp;
 // Clicking an avatar keeps this dialog scoped to that one public identity.
 let focusedPeerId = null, focusedPeer = null, focusedRoom = null, encounterVersion = 0;
 const isPeerFocus = () => focusedPeerId !== null;
 const focusedVisitor = () => state.joined && !state.stale && state.roomKey === focusedRoom ? state.visitors.find(visitor => visitor.id === focusedPeerId) : null;
 const peerRequest = () => state.requests.find(request => request.peer.id === focusedPeerId && ['pending', 'approved'].includes(request.status)) || state.requests.find(request => request.peer.id === focusedPeerId);
-export function getSocialRoomState() { return { joined: state.joined, connected: state.joined && !state.stale, busy: state.busy || state.switchingRoom || state.joining || state.deletionPending || Boolean(leavePromise), roomKey: state.roomKey, ownIlju: state.ownIlju, roomCounts: { ...state.roomCounts } }; }
+export function getSocialRoomState() { return { joined: state.joined, connected: state.joined && !state.stale, realtime: state.joined && !state.stale && state.realtime, busy: state.busy || state.switchingRoom || state.joining || state.deletionPending || Boolean(leavePromise), roomKey: state.roomKey, ownIlju: state.ownIlju, roomCounts: { ...state.roomCounts } }; }
 const controllers = new Set();
 const announcedRequests = new Set();
+const seenApprovals = new Set();
 const liveAnnouncement = document.createElement('p');
 liveAnnouncement.className = 'social-live-announcement'; liveAnnouncement.setAttribute('role', 'status'); liveAnnouncement.setAttribute('aria-live', 'polite'); liveAnnouncement.setAttribute('aria-atomic', 'true'); document.body.appendChild(liveAnnouncement);
+const requestNotice = document.createElement('aside');
+requestNotice.className = 'social-request-notice'; requestNotice.hidden = true; requestNotice.setAttribute('aria-label', '내 궁합 소식'); document.body.appendChild(requestNotice);
+requestNotice.addEventListener('click', event => {
+  const id = event.target.closest?.('[data-notice-peer]')?.dataset.noticePeer;
+  if (!id || !state.joined || state.stale) return;
+  const request = state.requests.find(item => item.peer.id === id && ['pending', 'approved'].includes(item.status));
+  if (!request) return;
+  if (request.status === 'approved') seenApprovals.add(request.id);
+  open(id); updateLauncher();
+});
 export function configureSocial(options = {}) { config = { ...config, ...options }; }
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const button = (action, label, extra = '') => `<button type="button" data-social-action="${action}" ${extra}>${label}</button>`;
@@ -37,6 +50,15 @@ function presencePayload(position, roomKey = state.roomKey) {
 }
 function updateLauncher() {
   const pending = state.requests.filter(request => request.direction === 'incoming' && request.status === 'pending');
+  const visible = state.joined && !state.stale;
+  const approved = state.requests.filter(request => request.status === 'approved' && !seenApprovals.has(request.id));
+  const notice = visible ? pending[0] || approved[0] : null;
+  requestNotice.hidden = !notice;
+  if (notice) {
+    const incoming = notice.status === 'pending';
+    requestNotice.innerHTML = `<span class="social-notice-mark" aria-hidden="true">${incoming ? '♡' : '✓'}</span><div><strong>${esc(notice.peer.nickname)}님${incoming ? '에게서 궁합 요청이 왔어요' : '과 궁합이 열렸어요'}</strong><p>${incoming ? '서로 승인한 뒤 두 사람만 볼 수 있어요.' : '상대가 승인했어요. 두 사람의 해석을 확인해 보세요.'}${pending.length > 1 ? ` · 받은 요청 ${pending.length}개` : ''}</p></div><button type="button" data-notice-peer="${esc(notice.peer.id)}">${incoming ? '요청 확인' : '궁합 보기'}</button>`;
+  }
+  document.dispatchEvent(new CustomEvent('sowon:social-requests', {detail: {states: visible ? state.requests.filter(request => ['pending', 'approved'].includes(request.status)).map(request => ({peerId:request.peer.id,phase:request.status === 'approved' ? 'approved' : `pending-${request.direction}`})) : []}}));
   document.querySelectorAll('[data-open-social]').forEach(launcher => {
     let badge = launcher.querySelector('.social-launcher-badge');
     if (!badge) { badge = document.createElement('span'); badge.className = 'social-launcher-badge'; badge.setAttribute('aria-hidden', 'true'); launcher.appendChild(badge); }
@@ -48,13 +70,14 @@ function updateLauncher() {
   const fresh = pending.filter(request => !announcedRequests.has(request.id));
   pending.forEach(request => announcedRequests.add(request.id));
   if (fresh.length) {
-    const message = fresh.length === 1 ? `${fresh[0].peer.nickname}에게서 새 궁합 요청이 왔어요. 함께 걷기에서 확인해 주세요.` : `새 궁합 요청 ${fresh.length}개가 왔어요. 함께 걷기에서 확인해 주세요.`;
+    const message = fresh.length === 1 ? `${fresh[0].peer.nickname}님에게서 새 궁합 요청이 왔어요. 요청 확인을 눌러 주세요.` : `새 궁합 요청 ${fresh.length}개가 왔어요. 요청 확인을 눌러 주세요.`;
     liveAnnouncement.replaceChildren(document.createTextNode(message));
   }
 }
-function emitPresence() {
-  updateLauncher();
-  document.dispatchEvent(new CustomEvent('sowon:social-presence', { detail: { selfId: state.selfId, roomKey: state.roomKey, ownIlju: state.ownIlju, visitors: state.joined && !state.stale ? state.visitors.map(v => ({ ...v })) : [] } }));
+function emitPresence({ motionOnly = false } = {}) {
+  if (!motionOnly) updateLauncher();
+  document.dispatchEvent(new CustomEvent('sowon:social-presence', { detail: { selfId: state.selfId, roomKey: state.roomKey, ownIlju: state.ownIlju, motionOnly, visitors: state.joined && !state.stale ? state.visitors.map(v => ({ ...v })) : [] } }));
+  if (motionOnly) return;
   const incoming = state.requests.filter(r => r.direction === 'incoming' && r.status === 'pending').length;
   document.dispatchEvent(new CustomEvent('sowon:social-state', { detail: { ...getSocialRoomState(), count: state.visitors.length, incoming } }));
 }
@@ -111,7 +134,7 @@ function render() {
   const focused = isPeerFocus();
   if (focused) dialog.classList.add('social-peer-dialog'); else dialog.classList.remove('social-peer-dialog');
   if (focused && state.result) dialog.classList.add('social-peer-result'); else dialog.classList.remove('social-peer-result');
-  const content = focused ? (state.joined ? state.confirm ? confirmMarkup() : state.result ? resultMarkup() : peerMarkup() : `${peerMarkup()}${consentMarkup()}`) : state.joined ? `<div class="social-connected"><span class="social-live-dot ${state.stale ? 'social-disconnected' : ''}" aria-hidden="true"></span><span>${state.stale ? '다시 연결하고 있어요' : '실제 나그네와 연결되어 있어요'}</span>${button('refresh', '새로고침', state.busy ? 'disabled' : '')}</div><div class="social-current-room"><strong>${esc(roomForKey(state.roomKey)?.label || '신당 마당')}</strong>${state.ownIlju ? `<span>내 일주 ${esc(state.ownIlju)}</span>` : ''}${button('rooms', '일주방 둘러보기')}</div><nav class="social-tabs" aria-label="만남과 궁합"><button type="button" data-social-action="visitors" aria-pressed="${state.tab === 'visitors'}">만난 나그네 <span>${state.visitors.length}</span></button><button type="button" data-social-action="news" aria-pressed="${state.tab === 'news'}">궁합 소식 ${count ? `<span class="social-count">${count}</span>` : ''}</button></nav>${state.confirm ? confirmMarkup() : state.result ? resultMarkup() : state.tab === 'visitors' ? `<p class="social-lead">${state.stale ? '연결이 회복되면 다시 현재 나그네를 보여드려요.' : '캐릭터를 누르거나 이 목록에서 인연을 청해 보세요.'}</p><div class="social-people">${!state.stale && state.visitors.length ? state.visitors.map(visitorCard).join('') : `<p class="social-empty">${state.stale ? '아직 만남 정보를 확인하지 못했어요.' : '아직 다른 나그네가 없어요. 마당을 산책하며 기다려 보세요.'}</p>`}</div>` : `<p class="social-lead">승인 전에는 결과가 열리지 않아요. 서로의 동의는 언제든 거둘 수 있어요.</p><div class="social-requests">${state.requests.length ? state.requests.map(requestCard).join('') : '<p class="social-empty">아직 주고받은 궁합 요청이 없어요.</p>'}</div>`}<footer class="social-session-actions">${button('leave', '마당의 만남 잠시 끄기')}${deleteButton()}</footer>` : `${consentMarkup()}${client.hasSession() ? `<footer class="social-session-actions">${deleteButton()}</footer>` : ''}`;
+  const content = focused ? (state.joined ? state.confirm ? confirmMarkup() : state.result ? resultMarkup() : peerMarkup() : `${peerMarkup()}${consentMarkup()}`) : state.joined ? `<div class="social-connected"><span class="social-live-dot ${state.stale ? 'social-disconnected' : ''}" aria-hidden="true"></span><span>${state.stale ? '다시 연결하고 있어요' : state.realtime ? '실시간으로 함께 걷고 있어요' : '나그네와 함께 머물고 있어요 · 위치를 주기적으로 확인해요'}</span>${button('refresh', '새로고침', state.busy ? 'disabled' : '')}</div><div class="social-current-room"><strong>${esc(roomForKey(state.roomKey)?.label || '신당 마당')}</strong>${state.ownIlju ? `<span>내 일주 ${esc(state.ownIlju)}</span>` : ''}${button('rooms', '일주방 둘러보기')}</div><nav class="social-tabs" aria-label="만남과 궁합"><button type="button" data-social-action="visitors" aria-pressed="${state.tab === 'visitors'}">만난 나그네 <span>${state.visitors.length}</span></button><button type="button" data-social-action="news" aria-pressed="${state.tab === 'news'}">궁합 소식 ${count ? `<span class="social-count">${count}</span>` : ''}</button></nav>${state.confirm ? confirmMarkup() : state.result ? resultMarkup() : state.tab === 'visitors' ? `<p class="social-lead">${state.stale ? '연결이 회복되면 다시 현재 나그네를 보여드려요.' : '캐릭터를 누르거나 이 목록에서 인연을 청해 보세요.'}</p><div class="social-people">${!state.stale && state.visitors.length ? state.visitors.map(visitorCard).join('') : `<p class="social-empty">${state.stale ? '아직 만남 정보를 확인하지 못했어요.' : '아직 다른 나그네가 없어요. 마당을 산책하며 기다려 보세요.'}</p>`}</div>` : `<p class="social-lead">승인 전에는 결과가 열리지 않아요. 서로의 동의는 언제든 거둘 수 있어요.</p><div class="social-requests">${state.requests.length ? state.requests.map(requestCard).join('') : '<p class="social-empty">아직 주고받은 궁합 요청이 없어요.</p>'}</div>`}<footer class="social-session-actions">${button('leave', '마당의 만남 잠시 끄기')}${deleteButton()}</footer>` : `${consentMarkup()}${client.hasSession() ? `<footer class="social-session-actions">${deleteButton()}</footer>` : ''}`;
   dialog.innerHTML = `<header class="social-header"><div><p>${focused ? 'FELLOW TRAVELER' : 'MEET A FELLOW TRAVELER'}</p><h2 id="socialTitle">${focused ? '궁합 보기' : '마당의 인연'}</h2></div>${button('close', '×', 'class="social-close" aria-label="마당의 인연 닫기"')}</header><div class="social-body">${state.error ? `<p class="social-error" role="alert">${esc(state.error)}</p>` : ''}${state.status ? `<p class="social-status" role="status">${esc(state.status)}</p>` : ''}${content}</div><footer class="social-footer">${focused ? '<span>서로 승인한 궁합만 함께 볼 수 있어요.</span>' : `<div>${button('direct', '직접 입력해 궁합 보기')}</div><span>닉네임·캐릭터·위치·일주 공개 · 출생 원문은 비공개</span>`}</footer>`;
   const visualHost = dialog.querySelector('[data-social-result-visuals]');
   if (visualHost && state.result) visualHost.replaceChildren(renderReadingVisuals(buildCompatibilityVisuals(state.result), { document, compact: true }));
@@ -124,20 +147,99 @@ function render() {
   }
 }
 function stopPolling() { clearTimeout(timer); timer = null; }
-function schedule() { stopPolling(); if (state.joined && !document.hidden) timer = setTimeout(() => refresh(), 10000); }
+function schedule() { stopPolling(); if (state.joined && !document.hidden) timer = setTimeout(() => state.realtime ? heartbeat() : refresh(), state.realtime ? 20000 : 10000); }
+function stopRealtime() {
+  ++realtimeGeneration; const old = realtime; realtime = null; state.realtime = false; socialRefreshQueued = false; lastRequestStamp = undefined;
+  old?.dispose();
+}
+function queueSocialRefresh() {
+  socialRefreshQueued = true;
+  if (!refreshPromise) queueMicrotask(() => {
+    if (!socialRefreshQueued || !state.joined || document.hidden || state.switchingRoom || state.joining) return;
+    socialRefreshQueued = false; void refresh();
+  });
+}
+function startRealtime() {
+  if (realtime || !state.joined || state.stale || state.switchingRoom || document.hidden || !Number.isInteger(state.presenceEpoch)) return;
+  if (!config.createRealtimeClient && typeof window.WebSocket !== 'function') return;
+  const generation = ++realtimeGeneration, version = operation, visibility = visibilityVersion;
+  const identity = {selfId:state.selfId,roomKey:state.roomKey,presenceEpoch:state.presenceEpoch};
+  const valid = () => generation === realtimeGeneration && version === operation && visibility === visibilityVersion && state.joined && !document.hidden && !state.switchingRoom && state.roomKey === identity.roomKey && state.presenceEpoch === identity.presenceEpoch;
+  const factory = config.createRealtimeClient || createRealtimeClient;
+  const transport = factory({
+    WebSocket:window.WebSocket,
+    getTicket:() => api('realtime_ticket'), getPosition:snapshot,
+    onReady() { if (!valid()) return; state.realtime = true; state.stale = false; emitPresence(); render(); schedule(); },
+    onFrame(frame) {
+      if (!valid() || !state.realtime || frame.roomKey !== state.roomKey) return;
+      state.visitors = safeVisitors(frame.visitors,state.selfId);
+      const oldCount = state.roomCounts[state.roomKey];
+      if (Number.isInteger(frame.onlineCount) && frame.onlineCount >= 0) state.roomCounts[state.roomKey] = frame.onlineCount;
+      emitPresence({motionOnly:oldCount === state.roomCounts[state.roomKey]});
+    },
+    onNotify(event) {
+      if (!valid()) return;
+      // Never use a socket hint as authority to show an approved result.
+      if (event.invalidateResult && state.result && (!event.requestId || event.requestId === state.resultId)) { resetResult(); render(); }
+      queueSocialRefresh();
+    },
+    onStatus(status) {
+      if (!valid() || status === 'ready') return;
+      const wasLive = state.realtime; state.realtime = false; lastRequestStamp = undefined; if (wasLive || !timer) schedule();
+      if (wasLive) { emitPresence(); render(); }
+      if (status === 'reconnecting' && wasLive) queueSocialRefresh();
+    },
+    onFatal(error) {
+      if (!valid()) return;
+      stopRealtime(); stopPolling(); state.joined = false; state.stale = true; state.visitors = []; resetResult();
+      if (['session_expired','invalid_session'].includes(error?.code)) client.clear();
+      state.error = socialError(error); emitPresence(); render();
+    },
+  });
+  realtime = transport;
+  if (!transport.start(identity)) { realtime = null; transport.dispose(); }
+}
+function heartbeat() {
+  if (!state.joined || !state.realtime || state.joining || state.switchingRoom || document.hidden) return;
+  if (heartbeatPromise) return heartbeatPromise;
+  if (refreshPromise) { schedule(); return; }
+  const version = operation, visibleVersion = visibilityVersion;
+  const task = (async () => {
+  try {
+    const ack = await api('heartbeat',presencePayload(snapshot()));
+    if (version !== operation || visibleVersion !== visibilityVersion || !state.joined || document.hidden) return;
+    if (ack?.ok !== true || ack.self_id !== state.selfId || ack.room_key !== state.roomKey || ack.presence_epoch !== state.presenceEpoch) throw Object.assign(new Error('presence_changed'),{code:'presence_changed'});
+    if (typeof ack.requests_stamp === 'string' && ack.requests_stamp.length <= 1024) {
+      if (ack.requests_stamp !== lastRequestStamp) {
+        // A missed socket hint must not leave a private result shared forever.
+        if (lastRequestStamp !== undefined && state.result) { resetResult(); render(); }
+        lastRequestStamp = ack.requests_stamp; queueSocialRefresh();
+      }
+    } else queueSocialRefresh();
+  } catch(error) {
+    if (version !== operation || visibleVersion !== visibilityVersion || !state.joined || document.hidden) return;
+    stopRealtime(); state.stale = true; state.visitors = []; resetResult(); state.error = socialError(error);
+    if (['invalid_session','session_expired','presence_changed'].includes(error?.code)) { state.joined = false; stopPolling(); if (error.code !== 'presence_changed') client.clear(); }
+    emitPresence(); render();
+  } finally { if (heartbeatPromise === task) heartbeatPromise = null; if (version === operation && state.joined) schedule(); }
+  })(); heartbeatPromise = task; return task;
+}
 async function api(action, params = {}) {
   const abort = new AbortController(); controllers.add(abort);
   const timeout = setTimeout(() => abort.abort(), 18000);
-  try { return await client.call(action, params, { signal: abort.signal }); }
+  const body = state.realtime && (action === 'request' || (action === 'respond' && params.decision === 'approve')) ? {...params,realtime:true} : params;
+  try { return await client.call(action, body, { signal: abort.signal }); }
   finally { clearTimeout(timeout); controllers.delete(abort); }
 }
 function adopt(data) {
   const previousRoom = state.roomKey;
+  const keepLiveMovement = state.realtime && data.room_key === state.roomKey;
+  if (state.realtime && data.room_key !== state.roomKey) stopRealtime();
   state.roomKey = roomForKey(data.room_key)?.key || 'courtyard';
   state.ownIlju = safeIlju(data.own_ilju) || state.ownIlju;
   state.roomCounts = safeRoomCounts(data.room_counts);
   state.selfId = cleanText(data.self_id, 80) || state.selfId;
-  state.visitors = safeVisitors(data.visitors, state.selfId);
+  if (!keepLiveMovement) state.visitors = safeVisitors(data.visitors, state.selfId);
   if (isPeerFocus() && focusedVisitor()) focusedPeer = { ...focusedVisitor() };
   state.requests = safeRequests(data.requests);
   state.stale = false;
@@ -152,13 +254,14 @@ async function refresh() {
   if (!state.joined || state.joining || state.switchingRoom || refreshPromise) return refreshPromise;
   const version = operation;
   const task = (async () => {
-    try { const data = await api('presence', presencePayload(snapshot())); if (state.joined && version === operation && !document.hidden) adopt(data); }
+    try { const data = await api(state.realtime ? 'poll' : 'presence', state.realtime ? {} : presencePayload(snapshot())); if (state.joined && version === operation && !document.hidden) adopt(data); }
     catch (error) {
       if (!state.joined || version !== operation) return;
+      if (state.realtime) stopRealtime();
       state.stale = true; state.visitors = []; resetResult(); state.error = socialError(error); emitPresence(); render();
       if (['invalid_session', 'session_expired'].includes(error?.code)) { state.joined = false; stopPolling(); client.clear(); emitPresence(); render(); }
       if (error?.code === 'presence_changed') { state.joined = false; state.presenceEpoch = null; stopPolling(); emitPresence(); render(); }
-    } finally { if (refreshPromise === task) refreshPromise = null; if (version === operation) schedule(); }
+    } finally { if (refreshPromise === task) refreshPromise = null; if (version === operation) { schedule(); startRealtime(); if (socialRefreshQueued) queueSocialRefresh(); } }
   })(); refreshPromise = task; return task;
 }
 async function join() {
@@ -189,7 +292,7 @@ async function join() {
       pendingRoom = null; adopt(data); schedule();
     }
   } catch (error) { if (version === operation) { state.joined = false; if (['invalid_session', 'session_expired'].includes(error?.code)) client.clear(); state.error = socialError(error); } }
-  finally { clearTimeout(timeout); controllers.delete(abort); if (version === operation) { state.joining = false; render(); if (visibilityInterrupted && state.joined && !document.hidden) refresh(); } }
+  finally { clearTimeout(timeout); controllers.delete(abort); if (version === operation) { state.joining = false; render(); if (visibilityInterrupted && state.joined && !document.hidden) refresh(); else startRealtime(); } }
 }
 async function mutate(action, params, message) {
   if (state.busy || !state.joined) return;
@@ -212,7 +315,7 @@ async function showResult(id) {
     if (data.request?.status !== 'approved' || data.request.id !== id) throw Object.assign(new Error('result_revoked'), { code: 'result_revoked' });
     const result = safeResult(data.result);
     if (!result) throw new Error('bad_result');
-    state.result = result; state.resultId = id; state.confirm = null; state.tab = 'news'; render(); dialog.querySelector('.social-body')?.scrollTo({ top: 0 });
+    state.result = result; state.resultId = id; state.confirm = null; state.tab = 'news'; seenApprovals.add(id); updateLauncher(); render(); dialog.querySelector('.social-body')?.scrollTo({ top: 0 });
   } catch (error) { if (version === operation && resultRequestVersion === resultVersion && (!isPeerFocus() || request.peer.id === focusedPeerId)) { state.error = socialError(error); state.result = null; state.resultId = null; await refresh(); render(); } }
 }
 async function leave({ remove = false } = {}) {
@@ -224,7 +327,7 @@ async function leave({ remove = false } = {}) {
     return pending;
   }
   remove = remove || state.deletionPending;
-  const version = ++operation; ++resultVersion; stopPolling(); for (const abort of controllers) abort.abort(); refreshPromise = null;
+  const version = ++operation; ++resultVersion; stopRealtime(); stopPolling(); for (const abort of controllers) abort.abort(); refreshPromise = null;
   state.joined = false; state.joining = false; state.busy = true; state.visitors = []; state.requests = []; state.selfId = ''; state.ownIlju = null; state.presenceEpoch = null; state.roomCounts = {}; state.switchingRoom = false; pendingRoom = null;
   if (remove) state.deletionPending = true;
   resetTransient(); emitPresence(); state.error = '';
@@ -260,10 +363,11 @@ export async function enterSocialRoom(key) {
   if (room.key === state.roomKey && !state.stale) return true;
   const version = ++operation, visibleVersion = visibilityVersion;
   let visibilityInterrupted = false;
-  state.switchingRoom = true; state.busy = true; state.error = ''; stopPolling(); emitPresence(); render();
+  state.switchingRoom = true; state.busy = true; state.error = ''; stopRealtime(); stopPolling(); emitPresence(); render();
   try {
     // The old heartbeat must finish writing before the new room can be committed.
     if (refreshPromise) await refreshPromise;
+    if (heartbeatPromise) await heartbeatPromise;
     if (version !== operation || !state.joined) return false;
     const position = config.getRoomPosition ? safePosition({ ...snapshot(), ...config.getRoomPosition(room.key) }) : snapshot();
     const data = await api('presence', presencePayload(position, room.key));
@@ -280,7 +384,7 @@ export async function enterSocialRoom(key) {
     if (version === operation) { state.error = socialError(error); document.dispatchEvent(new CustomEvent('sowon:room-error', { detail: { message: state.error } })); }
     return false;
   } finally {
-    if (version === operation) { state.switchingRoom = false; state.busy = false; emitPresence(); render(); schedule(); if (visibilityInterrupted && !document.hidden) refresh(); }
+    if (version === operation) { state.switchingRoom = false; state.busy = false; emitPresence(); render(); schedule(); if (visibilityInterrupted && !document.hidden) refresh(); else startRealtime(); }
   }
 }
 function open(visitorId) {
@@ -311,7 +415,7 @@ dialog.addEventListener('click', async event => {
   if (action === 'profile') { close(); document.dispatchEvent(new CustomEvent('sowon:profile-open')); return; }
   if (state.busy) return;
   if (action === 'join') return join();
-  if (action === 'refresh') { state.error = ''; return refresh(); }
+  if (action === 'refresh') { state.error = ''; if (!state.realtime) stopRealtime(); return refresh(); }
   if (action === 'visitors' || action === 'news') { state.tab = action; resetResult(); render(); dialog.querySelector('.social-body')?.scrollTo({ top: 0 }); return; }
   if (action === 'approach') { const visitorId = target.dataset.visitorId; if (!state.visitors.some(v => v.id === visitorId) || (isPeerFocus() && !focusedVisitor())) return; close(); document.dispatchEvent(new CustomEvent('sowon:social-walk', { detail: { visitorId } })); return; }
   if (action === 'choose') { if (state.visitors.some(visitor => visitor.id === target.dataset.visitorId)) open(target.dataset.visitorId); return; }
@@ -351,7 +455,7 @@ document.addEventListener('visibilitychange', async () => {
   const version = ++visibilityVersion;
   if (!state.joined) return;
   if (document.hidden) {
-    stopPolling(); state.deleteArmed = false; resetResult(); state.visitors = []; state.stale = true; emitPresence(); render();
+    stopRealtime(); stopPolling(); state.deleteArmed = false; resetResult(); state.visitors = []; state.stale = true; emitPresence(); render();
     if (refreshPromise) await refreshPromise;
     if (state.joined && document.hidden && version === visibilityVersion) client.call('leave', { temporary: true }).catch(() => {});
   } else {
@@ -360,7 +464,13 @@ document.addEventListener('visibilitychange', async () => {
     if (state.joined && !document.hidden && version === visibilityVersion) refresh();
   }
 });
-window.addEventListener('pagehide', () => { stopPolling(); if (state.joined) client.call('leave', { temporary: true }, { keepalive: true }).catch(() => {}); });
+window.addEventListener('pagehide', () => {
+  stopRealtime(); stopPolling();
+  if (state.joined) {
+    state.deleteArmed = false; resetResult(); state.visitors = []; state.stale = true; emitPresence(); render();
+    client.call('leave', { temporary: true }, { keepalive: true }).catch(() => {});
+  }
+});
 
 window.addEventListener('pageshow', event => { if (event.persisted && state.joined && !document.hidden) refresh(); });
 

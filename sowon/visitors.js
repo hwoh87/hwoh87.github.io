@@ -54,19 +54,21 @@ export function createVisitors({scene,world,camera,host,onSelect,demo=false}) {
     return {model,label,materials,data,select,arms,legs,stride:0,walkBlend:0};
   }
   function describe(peer){
-    const {data,label}=peer,phase=demo?requestStates.get(data.id):null;
+    const {data,label}=peer,phase=requestStates.get(data.id);
     if(demo){
       const status={'pending-incoming':'요청 도착','pending-outgoing':'승인 대기',approved:'궁합 보기'}[phase]||'체험';
       label.textContent=data.nickname+' · '+status;
       label.dataset.requestPhase=phase||'idle';
       label.setAttribute('aria-label','가상 나그네 '+data.nickname+'님'+(phase==='pending-incoming'?'의 궁합 요청 확인하기':phase==='pending-outgoing'?'의 궁합 승인 기다리는 중':phase==='approved'?'과 궁합 결과 보기':'에게 궁합 요청하기'));
     }else{
-      label.textContent=data.ilju?data.ilju+' 일주\n'+data.nickname:data.nickname+' · 궁합';
-      label.setAttribute('aria-label',data.nickname+(data.ilju?' · '+data.ilju+' 일주':'')+'님에게 궁합 요청하기');
+      const status={'pending-incoming':'요청 도착','pending-outgoing':'승인 대기',approved:'궁합 보기'}[phase];
+      label.textContent=(data.ilju?data.ilju+' 일주\n':'')+data.nickname+(status?' · '+status:data.ilju?'':' · 궁합');
+      label.dataset.requestPhase=status?phase:'idle';
+      label.setAttribute('aria-label',data.nickname+(data.ilju?' · '+data.ilju+' 일주':'')+'님'+(phase==='pending-incoming'?'의 궁합 요청 확인하기':phase==='pending-outgoing'?'의 궁합 승인 기다리는 중':phase==='approved'?'과 궁합 결과 보기':'에게 궁합 요청하기'));
     }
   }
   function setRequestStates(states){
-    if(disposed||!demo)return;
+    if(disposed)return;
     requestStates.clear();
     for(const state of Array.isArray(states)?states:[]){
       const id=state?.peerId||state?.id;
@@ -80,12 +82,12 @@ export function createVisitors({scene,world,camera,host,onSelect,demo=false}) {
     const safe=(Array.isArray(visitors)?visitors:[]).map(publicVisitor).filter(value=>value&&value.id!==selfId).slice(0,24);
     const ids=new Set(safe.map(value=>value.id));
     for(const[id,peer]of peers)if(!ids.has(id)){remove(peer);peers.delete(id);}
-    for(const data of safe){let peer=peers.get(data.id);if(!peer){peer=make(data);peers.set(data.id,peer);}peer.data=data;describe(peer);const palette=getAvatarPalette(data.outfit);peer.materials.cloth.color.set(palette.colors.cream);peer.materials.pants.color.set(palette.colors.sage);}
+    for(const data of safe){let peer=peers.get(data.id);const fresh=!peer,changed=peer&&(peer.data.nickname!==data.nickname||peer.data.ilju!==data.ilju),outfitChanged=fresh||peer.data.outfit!==data.outfit;if(!peer){peer=make(data);peers.set(data.id,peer);}peer.data=data;if(fresh||changed)describe(peer);if(outfitChanged){const palette=getAvatarPalette(data.outfit);peer.materials.cloth.color.set(palette.colors.cream);peer.materials.pants.color.set(palette.colors.sage);}}
   }
   function update(delta,{exploring,modalOpen,position}){
     if(disposed)return;
     for(const peer of peers.values()){
-      const {model,data,label}=peer;const dt=Number.isFinite(delta)?Math.max(0,Math.min(delta,.1)):0;const blend=demo?1:1-Math.exp(-dt*4);
+      const {model,data,label}=peer;const dt=Number.isFinite(delta)?Math.max(0,Math.min(delta,.1)):0;const blend=demo?1:1-Math.exp(-dt*12);
       const oldX=model.position.x,oldZ=model.position.z;
       model.position.x=THREE.MathUtils.lerp(model.position.x,data.x,blend);model.position.z=THREE.MathUtils.lerp(model.position.z,data.z,blend);
       const travelled=Math.hypot(model.position.x-oldX,model.position.z-oldZ),walking=dt>0&&travelled/dt>.035;

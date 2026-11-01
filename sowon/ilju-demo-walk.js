@@ -1,5 +1,5 @@
 import { findPath, isWalkable, segmentClear, stepWithCollisions } from './locomotion.js?v=20261101-templeroom1';
-import { publicVisitor } from './visitors.js?v=20261101-demo-walk4';
+import { publicVisitor } from './visitors.js?v=20261101-realtime3';
 
 const SPEED = 1.08;
 const REQUEST_AFTER = 5;

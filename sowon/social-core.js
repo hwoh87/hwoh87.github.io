@@ -1,6 +1,13 @@
 import { safeIlju, roomForKey, safeRoomCounts } from './ilju-room-core.js?v=20261101-freepath4';
 export { safeIlju, roomForKey, safeRoomCounts };
 export const SOCIAL_ENDPOINT = 'https://sidxbzpbesbaiokxrqsf.supabase.co/functions/v1/shrine-social';
+// The isolated preview may opt into its own same-origin API, only on loopback.
+export function socialEndpoint(location = globalThis.location, document = globalThis.document) {
+  if (!['localhost', '127.0.0.1', '[::1]'].includes(location?.hostname)) return SOCIAL_ENDPOINT;
+  const path = document?.querySelector?.('meta[name="sowon-social-endpoint"]')?.content;
+  if (typeof path !== 'string' || !path.startsWith('/__local/') || path.includes('\\') || path.includes('?') || path.includes('#')) return SOCIAL_ENDPOINT;
+  try { const value = new URL(path, location.origin); return value.origin === location.origin ? value.href : SOCIAL_ENDPOINT; } catch (_) { return SOCIAL_ENDPOINT; }
+}
 export const SOCIAL_SESSION_KEY = 'samra.sowon.social.session.v1';
 export const RELATION_KINDS = Object.freeze({ COUPLE: '연인·부부', FRIEND: '친구', FAMILY: '가족', BUSINESS: '동업·동료' });
 const STATES = ['pending', 'approved', 'declined', 'cancelled', 'revoked', 'expired'];
@@ -75,7 +82,7 @@ export function socialError(error) {
   const messages = { presence_changed: '만남 상태가 바뀌었어요. 공개 범위를 확인하고 다시 참여해 주세요.', invalid_room: '이 일주방을 찾을 수 없어요. 방 목록에서 다시 골라 주세요.', room_unavailable: '일주방 연결을 아직 준비하고 있어요. 현재 공간에 계속 머물러요.', peer_not_nearby: '같은 공간에서 서로 조금 더 가까이 다가간 뒤 다시 시도해 주세요.', profile_changed: '내 정보가 바뀌었어요. 다시 참여해 주세요.', decision_forbidden: '이 선택은 해당 궁합의 참여자만 할 수 있어요.', consent_required: '아직 두 사람의 승인이 모이지 않았어요.', request_limit: '궁합 요청이 잠시 몰렸어요. 조금 뒤에 다시 청해 주세요.', not_found: '이 궁합 소식을 찾을 수 없어요. 만료되었거나 공유가 지워졌을 수 있어요.', relation_unavailable: '이 관계로는 궁합을 볼 수 없어요. 친구·가족 관계로 만나 주세요.', unavailable: '만남 연결을 잠시 준비하고 있어요. 조금 뒤에 다시 참여해 주세요.', profile_required: '내 출생 정보를 먼저 준비해 주세요.', target_unavailable: '그 나그네가 잠시 자리를 비웠어요. 새로고침 후 다시 만나 주세요.', target_offline: '그 나그네가 잠시 자리를 비웠어요.', too_far: '서로 조금 더 가까이 다가간 뒤 요청해 주세요.', target_too_far: '서로 조금 더 가까이 다가간 뒤 요청해 주세요.', request_exists: '이미 같은 나그네와 나누고 있는 궁합 소식이 있어요.', duplicate_request: '이미 보낸 요청이 있어요. 궁합 소식을 확인해 주세요.', request_expired: '요청의 유효 시간이 지났어요. 다시 만나 새로 요청해 주세요.', session_expired: '만남 시간이 끝났어요. 다시 참여하면 새롭게 만날 수 있어요.', invalid_session: '만남 시간이 끝났어요. 다시 참여해 주세요.', not_approved: '아직 두 사람의 승인이 모이지 않았어요.', forbidden: '이 궁합은 두 참여자만 열 수 있어요.', result_revoked: '한 참여자가 공유를 철회했어요.', minor_blocked: '미성년자가 포함된 연인·부부 궁합은 제공하지 않아요. 친구·가족 관계를 골라 주세요.', rate_limited: '요청이 잠시 몰렸어요. 조금 뒤에 다시 시도해 주세요.', bad_inputs: '입력한 정보를 다시 확인해 주세요.', service_unavailable: '만남 연결을 아직 준비하고 있어요. 내 술사 해석은 계속 이용할 수 있어요.' };
   return messages[code] || '만남 연결이 잠시 고르지 않아요. 잠시 후 새로고침해 주세요.';
 }
-export function createSocialClient({ endpoint = SOCIAL_ENDPOINT, fetcher = globalThis.fetch, storage, now = () => Date.now() } = {}) {
+export function createSocialClient({ endpoint = socialEndpoint(), fetcher = globalThis.fetch, storage, now = () => Date.now() } = {}) {
   let session = readSocialSession(storage, now());
   let bootstrapPromise;
   async function post(body, token, signal, keepalive = false) {

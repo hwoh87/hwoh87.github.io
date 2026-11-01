@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
 import { createWorld } from './world.js?v=20261101-celebhouse1';
 import { createAvatar } from './avatar.js?v=20261101-templeroom1';
-import { getSocialRoomState } from './social.js?v=20261101-report-visual3';
+import { getSocialRoomState } from './social.js?v=20261101-realtime3';
 import { getOwnIdentity } from './identity.js?v=20261101-report-visual3';
 import { getOwnProfile } from './profile.js?v=20261101-report-visual3';
 import { createLocomotion, isWalkable } from './locomotion.js?v=20261101-templeroom1';
@@ -10,7 +10,7 @@ import { readJourney } from './hub-core.js?v=20261101-freepath4';
 import { readSettings, normalizeSettings, effectiveQuality, nearestInteraction, pickedInteraction, interactionDistance } from './experience-core.js?v=20261101-freepath4';
 import { createWayfinder } from './wayfinder.js?v=20261101-celebhouse1';
 import { HALLS, getFeature } from './hub-core.js?v=20261101-freepath4';
-import { createVisitors } from './visitors.js?v=20261101-demo-walk4';
+import { createVisitors } from './visitors.js?v=20261101-realtime3';
 import { createConversationFocus } from './conversation-focus.js?v=20261101-freepath4';
 import { portraitHallView } from './portrait-hall-view.js?v=20261101-celebhouse2';
 
@@ -199,6 +199,7 @@ function setup() {
   }
   listen(document,'sowon:room-change',event=>applyRoom(event.detail));
   listen(document,'sowon:social-presence',event=>visitors.sync(event.detail?.visitors,event.detail?.selfId));
+  listen(document,'sowon:social-requests',event=>visitors.setRequestStates(event.detail?.states));
   listen(document,'sowon:capture-social',event=>{
     if(body.classList.contains('ilju-interior-open'))return;
     event.detail.snapshot={x:avatar.group.position.x,z:avatar.group.position.z,heading:avatar.group.rotation.y,outfit:preferences.outfit};
