@@ -214,7 +214,7 @@ export async function openIljuInterior(key) {
     const latest = getSocialRoomState();
     if (disposed || !accepted || !latest.joined || latest.roomKey !== key) return false;
   }
-  if (active?.room.key === key) { updatePresence(); return true; }
+  if (active?.room.key === key) { updatePresence(); if (!dialogOpen()) $('#interiorTitle').focus({preventScroll:true}); return true; }
   const first = !active; ++roomVersion;
   if (first) { opener = document.activeElement; outsideTitle = document.title; oldInert = Boolean(sanctuary?.inert); if (sanctuary) sanctuary.inert = true; }
   active = data; activeSeat = null; pendingExit = false; muralView = false;
