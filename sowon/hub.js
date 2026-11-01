@@ -1,5 +1,6 @@
-import { getOwnIdentity } from './identity.js?v=20261101-sanctuary2';
-import { FEATURES, HALLS, getFeature, getHall, parseView, viewHash, internalDestination, readJourney, writeJourney } from './hub-core.js?v=20261101-sanctuary2';
+import { getOwnIdentity } from './identity.js?v=20261101-freepath1';
+import { getActiveProfile } from './profile-core.js?v=20261101-freepath1';
+import { FEATURES, HALLS, HALL_JOURNEYS, getFeature, getHall, parseView, viewHash, internalDestination, readJourney, writeJourney } from './hub-core.js?v=20261101-freepath1';
 
 const dialog = document.createElement('dialog');
 dialog.className = 'hub-dialog';
@@ -83,9 +84,24 @@ function renderHall(id) {
   const hall = getHall(id);
   const intro = el('section', 'hub-hall-intro');
   intro.innerHTML = `<img src="/store/art/readers/${hall.reader}.webp" alt="" width="88" height="88"><div><span>${hall.guide}의 안내</span><h3>${hall.line}</h3><p>${hall.description}</p></div>`;
+  content.append(intro);
+  const journey=HALL_JOURNEYS[id];
+  if(journey){
+    const start=el('section','hub-free-start');start.setAttribute('aria-label',hall.name+' 무료로 시작하기');
+    start.append(el('p','hub-free-label','먼저, 무료로 읽기'),el('h3','',journey.title),el('p','hub-free-description',journey.description));
+    const includes=el('ul','hub-free-includes');journey.includes.forEach(text=>includes.append(el('li','',text)));start.append(includes);
+    const actions=el('div','hub-free-actions');
+    journey.actions.forEach((action,index)=>{
+      const button=el('button',index===0?'hub-primary':'hub-free-secondary',action.label);button.type='button';
+      if(action.type==='reading'){button.dataset.hubReading=action.kind;button.dataset.hubNpc=action.npc;}
+      else if(action.type==='encounter')button.dataset.hubEncounter=action.npc;
+      else button.dataset.hubFeature=action.id;
+      actions.append(button);
+    });
+    start.append(actions,el('p','hub-free-continuation',journey.continuation));content.append(start,el('h3','hub-tools-title',id==='readers'?'술사와 상세 리포트':'함께 쓰는 도구와 읽을거리'));
+  }
   const grid = el('div', 'hub-feature-grid'); hall.features.forEach(key => grid.appendChild(featureCard(key)));
-  content.append(intro, grid);
-  if (id === 'readers') content.append(el('p', 'hub-note', '술사 소개와 상품 둘러보기는 무료예요. 리포트는 가격과 내용을 확인한 뒤 별도로 구매해요.'));
+  content.append(grid);
 }
 function renderMap() {
   const lead = el('div', 'hub-map-lead'); lead.append(el('h3', '', '오늘은 어디에 머물까요?'), el('p', '', '장소를 고르면 나그네가 천천히 걸어가요. 바로 열기로 곧장 이용할 수도 있어요.'));
@@ -150,14 +166,14 @@ async function render(view) {
   try {
     let result;
     if(item.kind==='reading') {
-      const module=await import('./readings.js?v=20261101-sanctuary2'); if(version!==generation)return;
+      const module=await import('./readings.js?v=20261101-freepath1'); if(version!==generation)return;
       result=await module.mountReading(mount,item.value,{navigate,signal:viewAbort.signal,...readingOptions.get(item.value)});
     } else if(item.kind==='culture') {
-      const module=await import('./culture.js?v=20261101-sanctuary2');if(version!==generation)return;
+      const module=await import('./culture.js?v=20261101-freepath1');if(version!==generation)return;
       result=await module.mountCulture(mount,item.value,{navigate,signal:viewAbort.signal,dayPillar:getOwnIdentity().ilju});
     } else {
-      const module=await import('./collection.js?v=20261101-sanctuary2');if(version!==generation)return;
-      result=await module.mountCollection(mount,item.value,{navigate,onView:()=>{},signal:viewAbort.signal});
+      const module=await import('./collection.js?v=20261101-freepath1');if(version!==generation)return;
+      result=await module.mountCollection(mount,item.value,{navigate,onView:()=>{},onFreeReading:()=>beginOwnReading('saju','tojeong'),signal:viewAbort.signal});
     }
     if(version!==generation){if(typeof result==='function')result();else result?.dispose?.();return;}
     disposeView=result;loading.remove();
@@ -191,7 +207,7 @@ async function showReference(path) {
   referenceDialog.querySelector('#referenceTitle').textContent='함께 읽기';
   referenceDialog.showModal();
   try {
-    const module=await import('./reference.js?v=20261101-sanctuary2');if(version!==referenceVersion)return;
+    const module=await import('./reference.js?v=20261101-freepath1');if(version!==referenceVersion)return;
     const result=await module.mountReference(host,path,{navigate,signal:referenceAbort.signal});
     if(version!==referenceVersion){result?.();return;}referenceCleanup=result;
   }catch(_){if(version!==referenceVersion)return;host.textContent='글을 불러오지 못했어요. ';const link=el('a','hub-fallback-link','기존 삼라 화면에서 열기 ↗');link.href=path;link.onclick=event=>{event.preventDefault();navigate(path,{canonical:true});};host.append(link);}
@@ -229,7 +245,25 @@ function walk(id) {
   };
   if(dialog.open)close(begin);else begin();
 }
+function beginOwnReading(kind,npc) {
+  if(!['saju','jami','star'].includes(kind)||!['tojeong','seol','luna'].includes(npc))return;
+  const show=()=>document.dispatchEvent(new CustomEvent('sowon:personal-reading',{detail:{kind,npc}}));
+  close(()=>{
+    if(getActiveProfile()){show();return;}
+    // Keep only the chosen reading kind in memory while the profile form is
+    // open. The form's close event runs after save or cancel; a cancelled form
+    // never starts an empty report, and a saved form keeps the chosen tab.
+    const profile=document.getElementById('ownProfileDialog');
+    if(!profile){show();return;}
+    profile.addEventListener('close',()=>{if(getActiveProfile())queueMicrotask(show);},{once:true});
+    document.dispatchEvent(new CustomEvent('sowon:profile-open'));
+  });
+}
 document.addEventListener('click',event=>{
+  const reading=event.target.closest?.('[data-hub-reading]');
+  if(reading){event.preventDefault();beginOwnReading(reading.dataset.hubReading,reading.dataset.hubNpc);return;}
+  const encounter=event.target.closest?.('[data-hub-encounter]');
+  if(encounter&&['tojeong','seol','luna'].includes(encounter.dataset.hubEncounter)){event.preventDefault();close(()=>document.dispatchEvent(new CustomEvent('sowon:encounter',{detail:{npc:encounter.dataset.hubEncounter}})));return;}
   if(event.target.closest?.('[data-hub-social]')){event.preventDefault();close(()=>document.dispatchEvent(new CustomEvent('sowon:social-open')));return;}
   const button=event.target.closest?.('[data-hub-view],[data-hub-feature],[data-hub-hall],[data-hub-walk],[data-hub-ritual]');
   if(!button)return;

@@ -63,6 +63,15 @@
 .xp-personal-dialog .report-digest-items p { margin: 7px 0 0; color: #53614f; font-size: 12px; line-height: 1.85; word-break: keep-all; overflow-wrap: anywhere; }
 .xp-personal-dialog .report-layout { display: grid; grid-template-columns: minmax(0,1fr) 160px; align-items: start; gap: 40px; }
 .xp-personal-dialog .report-layout[hidden] { display: none; }
+.xp-personal-dialog .report-reading-route { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 22px; margin: 0 0 24px; padding: 0 0 20px; border-bottom: 1px solid var(--report-line); }
+.xp-personal-dialog .report-reading-route[hidden] { display: none; }
+.xp-personal-dialog .report-free-scope { flex-basis: 100%; margin: 0 0 5px; color: #52604f; font-size: 14px; line-height: 1.85; word-break: keep-all; overflow-wrap: anywhere; }
+.xp-personal-dialog .report-reading-route button { min-height: 44px; padding: 7px 0; border: 0; background: transparent; color: #52674e; font-size: 14px; line-height: 1.7; text-decoration: underline; text-underline-offset: 5px; }
+.xp-personal-dialog .report-reading-route .report-start-reading { color: #304b37; font-weight: 600; }
+.xp-personal-dialog .report-offer-host { scroll-margin-top: 104px; }
+.xp-personal-dialog .report-return-conversation { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 20px; margin-top: 28px; padding: 20px 0; border-top: 1px solid var(--report-line); }
+.xp-personal-dialog .report-return-conversation p { margin: 0; color: var(--report-muted); font-size: 14px; line-height: 1.85; }
+.xp-personal-dialog .report-return-conversation button { min-height: 44px; padding: 9px 14px; border: 1px solid #b8c6af; border-radius: 5px; background: transparent; color: #36533d; font-size: 14px; line-height: 1.7; }
 .xp-personal-dialog .report-outline { position: sticky; top: 110px; display: flex; flex-direction: column; gap: 1px; padding: 0 0 0 18px; border-left: 1px solid var(--report-line); }
 .xp-personal-dialog .report-outline :is(p,h2,h3,.report-outline-title) { margin: 0 0 10px; color: #6b7667; font-family: inherit; font-size: 12px; font-weight: 400; line-height: 1.7; letter-spacing: 0; }
 .xp-personal-dialog .report-outline :is(a,button) { display: flex; align-items: center; min-height: 44px; padding: 9px 0; border: 0; border-radius: 0; background: transparent; color: #687561; font-size: 12px; line-height: 1.7; text-align: left; text-decoration: none; word-break: keep-all; }
@@ -78,12 +87,12 @@
 .xp-personal-dialog .report-chapter>p { max-width: 40em; font-size: 17px; line-height: 1.95; }
 .xp-personal-dialog .report-practice { margin: 22px 0 0; padding: 4px 0 4px 18px; border-left: 3px solid #a0ae94; }
 .xp-personal-dialog .report-practice h3 { margin: 0 0 8px; color: #435a44; font-family: inherit; font-size: 12px; font-weight: 600; line-height: 1.8; }
-.xp-personal-dialog .report-practice p { margin: 0 0 7px; color: #3c4c3e; font-size: 15px; line-height: 1.9; word-break: keep-all; overflow-wrap: anywhere; }
+.xp-personal-dialog .report-practice p { margin: 0 0 7px; color: #3c4c3e; font-size: 16px; line-height: 1.9; word-break: keep-all; overflow-wrap: anywhere; }
 .xp-personal-dialog .report-practice p:last-child { margin: 0; }
 .xp-personal-dialog .report-evidence { margin-top: 22px; padding-top: 3px; border-top: 1px solid #e0e4da; color: var(--report-muted); }
 .xp-personal-dialog .report-evidence>summary { min-height: 44px; padding: 10px 0; color: #52684d; font-size: 13px; line-height: 1.8; cursor: pointer; }
 .xp-personal-dialog .report-evidence>summary::marker { font-size: 10px; }
-.xp-personal-dialog .report-evidence>p { margin: 11px 0 0; font-size: 13px; line-height: 1.9; word-break: keep-all; overflow-wrap: anywhere; }
+.xp-personal-dialog .report-evidence>p { margin: 11px 0 0; font-size: 14px; line-height: 1.9; word-break: keep-all; overflow-wrap: anywhere; }
 .xp-personal-dialog .report-evidence .report-signals { margin-top: 0; }
 .xp-personal-dialog .report-balance { margin: 24px 0; padding: 18px 20px; background: #edf0e8; border-radius: 4px; }
 .xp-personal-dialog .report-balance figcaption { margin-bottom: 15px; color: #435644; font-size: 12px; line-height: 1.8; }

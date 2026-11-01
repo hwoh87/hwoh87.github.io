@@ -1,17 +1,17 @@
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
-import { createWorld } from './world.js?v=20261101-sanctuary2';
-import { createAvatar } from './avatar.js?v=20261101-sanctuary2';
-import { getSocialRoomState } from './social.js?v=20261101-sanctuary2';
-import { getOwnIdentity } from './identity.js?v=20261101-sanctuary2';
-import { getOwnProfile } from './profile.js?v=20261101-sanctuary2';
-import { createLocomotion, isWalkable } from './locomotion.js?v=20261101-sanctuary2';
-import { readJourney } from './hub-core.js?v=20261101-sanctuary2';
-import { readSettings, normalizeSettings, effectiveQuality, nearestInteraction, pickedInteraction, interactionDistance } from './experience-core.js?v=20261101-sanctuary2';
-import { createWayfinder } from './wayfinder.js?v=20261101-sanctuary2';
-import { HALLS, getFeature } from './hub-core.js?v=20261101-sanctuary2';
-import { createVisitors } from './visitors.js?v=20261101-sanctuary2';
-import { createConversationFocus } from './conversation-focus.js?v=20261101-sanctuary2';
+import { createWorld } from './world.js?v=20261101-freepath1';
+import { createAvatar } from './avatar.js?v=20261101-freepath1';
+import { getSocialRoomState } from './social.js?v=20261101-freepath1';
+import { getOwnIdentity } from './identity.js?v=20261101-freepath1';
+import { getOwnProfile } from './profile.js?v=20261101-freepath1';
+import { createLocomotion, isWalkable } from './locomotion.js?v=20261101-freepath1';
+import { readJourney } from './hub-core.js?v=20261101-freepath1';
+import { readSettings, normalizeSettings, effectiveQuality, nearestInteraction, pickedInteraction, interactionDistance } from './experience-core.js?v=20261101-freepath1';
+import { createWayfinder } from './wayfinder.js?v=20261101-freepath1';
+import { HALLS, getFeature } from './hub-core.js?v=20261101-freepath1';
+import { createVisitors } from './visitors.js?v=20261101-freepath1';
+import { createConversationFocus } from './conversation-focus.js?v=20261101-freepath1';
 
 const host = document.getElementById('worldViewport');
 const body = document.body;
@@ -349,6 +349,7 @@ function setup() {
     event.detail.snapshot = { position: avatar.group.position.toArray(), rotation: avatar.group.rotation.y, camera: beforeConversation?.position || camera.position.toArray(), target: beforeConversation?.target || orbit.target.toArray(), entered: exploring };
   });
 
+  let frameSampleStart = 0, frameSampleCount = 0;
   function render(time) {
     if (!running) return;
     const delta = previousTime ? Math.min((time - previousTime) / 1000, .05) : 0;
@@ -358,6 +359,7 @@ function setup() {
     if (modalOpen && activeJourney) { activeJourney = null; status('', 0); }
     movement.setEnabled(!modalOpen);
     if (modalOpen) {
+      frameSampleStart = 0; frameSampleCount = 0; host.dataset.fps = '';
       name.hidden = true;
       visitors.hideLabels();
       nearCard.hidden=true;caption.hidden=true;npcButtons.forEach(({button})=>{button.hidden=true;});
@@ -400,6 +402,13 @@ function setup() {
       if (inFrame) { button.style.left = ((placePosition.x + 1) / 2 * 100) + '%'; button.style.top = ((1 - placePosition.y) / 2 * 100) + '%'; }
     });
     renderer.render(scene, camera);
+    // An observed frame rate, independent of the clamped movement delta. Modal
+    // pauses and background gaps never count as slow rendering samples.
+    if (!frameSampleStart || time - frameSampleStart > 2500) { frameSampleStart = time; frameSampleCount = 0; }
+    else if (++frameSampleCount && time - frameSampleStart >= 1000) {
+      host.dataset.fps = String(Math.round(frameSampleCount * 1000 / (time - frameSampleStart)));
+      frameSampleStart = time; frameSampleCount = 0;
+    }
     host.dataset.ready = 'true';
     const playerPosition = avatar.group.position;
     // Visible DOM diagnostics keep accessibility and manual QA independent of renderer internals.
@@ -416,7 +425,7 @@ function setup() {
   });
   listen(renderer.domElement, 'pointerdown', () => { cameraTransition = null; });
 
-  const actionLabels = { wish: '소원 등불이 있는 신당', breath: '바람이 머무는 명상터', blessing: '마음을 전하는 소원나무', myeongri: '토정이 기다리는 명리전', inyeon: '설월이 기다리는 인연정', stars: '태어난 하늘을 펼치는 별마루', readers: '루나와 술사들이 있는 술사각', archive: '이야기가 쌓이는 서고' };
+  const actionLabels = { wish: '소원 등불이 있는 신당', breath: '바람이 머무는 명상터', blessing: '마음을 전하는 소원나무', myeongri: '토정이 기다리는 명리전', inyeon: '설월이 기다리는 인연정', stars: '태어난 하늘을 펼치는 별마루', readers: '루나와 술사들이 있는 술사각', archive: '이야기가 쌓이는 서고', rooms: '같은 일주가 만나는 일주마당', celeb: '공개 명식을 읽는 연예인 사주관' };
   function walkToAction(action) {
     if (body.classList.contains('world-failed') || !world.destinations[action] || document.querySelector('dialog[open]')) return;
     const personalHost=(world.interactions||[]).find(item=>item.type==='npc'&&item.hall===action);

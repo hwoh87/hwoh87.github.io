@@ -1,5 +1,5 @@
-import { readSettings, writeSettings, normalizeSettings } from './experience-core.js?v=20261101-sanctuary2';
-import { getOwnProfile } from './profile.js?v=20261101-sanctuary2';
+import { readSettings, writeSettings, normalizeSettings } from './experience-core.js?v=20261101-freepath1';
+import { getOwnProfile } from './profile.js?v=20261101-freepath1';
 
 let storage;
 try { storage = localStorage; } catch (_) {}
@@ -42,6 +42,7 @@ async function openEncounter(npc, {reading=false, kind}={}) {
   const active = document.activeElement;
   if (active && active !== document.body && !active.closest?.('dialog')) encounterOpener = active;
   encounterCleanup?.(); encounterCleanup = null;
+  encounterDialog.removeAttribute('aria-labelledby'); encounterDialog.setAttribute('aria-label','해석과 대화 준비');
   encounterDialog.classList.add('xp-loading-dialog');
   encounterDialog.innerHTML='<div class="xp-loading-content" role="status"><span class="xp-loading-mark" aria-hidden="true"></span><p>삼라 소원당</p><h2>당신의 이야기를 펼치고 있어요</h2><span>술사의 안내와 읽기 화면을 준비하고 있어요.</span><button type="button" aria-label="준비 중인 해석 닫기">신당으로 돌아가기</button></div>';
   encounterDialog.querySelector('button').onclick=closeEncounter;
@@ -58,7 +59,7 @@ async function openEncounter(npc, {reading=false, kind}={}) {
   try {
     let result;
     if (profile && reading) {
-      const module = await import('./personal-encounter.js?v=20261101-sanctuary2');
+      const module = await import('./personal-encounter.js?v=20261101-freepath1');
       if (version !== encounterVersion || !encounterDialog.open) return;
       encounterDialog.classList.remove('xp-loading-dialog');
       result = module.mountPersonalEncounter(encounterDialog,npc,{
@@ -66,7 +67,7 @@ async function openEncounter(npc, {reading=false, kind}={}) {
         onGuide: () => { closeEncounter(); queueMicrotask(() => openEncounter(npc)); },
       });
     } else {
-      const module = await import('./npc-dialog.js?v=20261101-sanctuary2');
+      const module = await import('./npc-dialog.js?v=20261101-freepath1');
       if (version !== encounterVersion || !encounterDialog.open) return;
       encounterDialog.classList.remove('xp-loading-dialog');
       result = module.mountNpcDialogue(encounterDialog,npc,{
@@ -84,6 +85,7 @@ async function openEncounter(npc, {reading=false, kind}={}) {
   } catch (_) {
     if (version !== encounterVersion || !encounterDialog.open) return;
     encounterDialog.classList.remove('npc-dialog','xp-personal-dialog','xp-loading-dialog');
+    encounterDialog.removeAttribute('aria-labelledby'); encounterDialog.setAttribute('aria-label','이야기 연결 안내');
     document.dispatchEvent(new CustomEvent('sowon:conversation-focus',{detail:{open:false}}));
     encounterDialog.innerHTML = '<div class="xp-failed"><h2>이야기를 잠시 불러오지 못했어요.</h2><p>전체 기능에서 같은 해석과 안내를 열 수 있어요.</p><button type="button">풍경으로 돌아가기</button></div>';
     encounterDialog.querySelector('button').onclick=closeEncounter;

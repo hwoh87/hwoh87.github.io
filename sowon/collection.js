@@ -30,7 +30,7 @@ export function getCollectionResources(query = '') { return RESOURCES.filter(ite
 
 function catalogData() {
   if (typeof PRODUCTS === 'undefined' || typeof READERS === 'undefined' || typeof CATS === 'undefined') return null;
-  return {products:PRODUCTS,readers:READERS,categories:CATS,bySlug:PRODUCT_BY_SLUG,price:priceOf,won,select:selectStoreProducts};
+  return {products:PRODUCTS,readers:READERS,categories:CATS,bySlug:PRODUCT_BY_SLUG,inputs:typeof STORE_INPUT==='undefined'?{}:STORE_INPUT,price:priceOf,won,select:selectStoreProducts};
 }
 export function selectCollectionProducts({query='',category='all',reader='all',sort='recommended',now=Date.now()}={}) {
   const data=catalogData();
@@ -67,19 +67,30 @@ function searchField(label,placeholder){const wrap=el('label','sc-search',label)
 function selectField(label,options){const wrap=el('label','sc-select',label),select=el('select');options.forEach(([value,text])=>{const option=el('option','',text);option.value=value;select.append(option);});wrap.append(select);return{wrap,select};}
 function cover(product){const image=el('img','sc-cover');image.src='/store/art/covers/'+product.slug+'.webp';image.alt='';image.width=120;image.height=150;image.loading='lazy';return image;}
 function productCard(product,data){
-  const card=link('','/store/product.html?id='+encodeURIComponent(product.slug),'sc-product','product');
-  const copy=el('div','sc-product-copy');copy.append(el('span','sc-category',data.categories[product.catId||product.cat]?.label||'리포트'),el('h3','',product.title),el('p','sc-product-summary',product.bullets));
-  const reader=data.readers[product.reader];copy.append(el('p','sc-meta',`${reader?.name||'삼라'} · ${product.chaptersN}장 · 약 ${product.readMin}분`),el('strong','sc-price',data.won(data.price(product.slug))));
-  card.append(cover(product),copy,el('span','sc-card-arrow','↗'));return card;
+  const card=link('','/store/product.html?id='+encodeURIComponent(product.slug)+'#report-preview','sc-product','product');
+  const copy=el('div','sc-product-copy');copy.append(el('span','sc-category',(data.categories[product.catId||product.cat]?.label||'리포트')+' · 유료 상세'),el('h3','',product.title),el('p','sc-product-summary',product.bullets));
+  const reader=data.readers[product.reader];copy.append(el('p','sc-meta',`${reader?.name||'삼라'} · ${product.chaptersN}장 · 약 ${product.readMin}분`));
+  const input={solo:'내 생년월일로 읽어요',pair:'두 사람의 생년월일이 필요해요',pet:'내 생년월일과 반려동물 정보가 필요해요'}[data.inputs[product.slug]];
+  if(input)copy.append(el('p','sc-product-input',input));
+  const price=el('div','sc-product-bottom');price.append(el('strong','sc-price',data.won(data.price(product.slug))),el('span','sc-one-time','한 번 구매'));
+  copy.append(price,el('span','sc-product-preview','목차·구성 살펴보기 →'));
+  card.append(cover(product),copy);return card;
 }
 
 /** Mount one panel. Navigation receives the canonical URL; metadata never contains private tokens. */
-export async function mountCollection(container, view, {navigate,onView,signal}={}) {
+export async function mountCollection(container, view, {navigate,onView,onFreeReading,signal}={}) {
   if(!container||!['readers','catalog','archive','library'].includes(view))throw new Error('Unknown collection view');
   const token={};mounts.set(container,token);let disposed=false;
   const root=el('section','sc-root sc-'+view);container.replaceChildren(root);
   const controller=new AbortController();const active=()=>!disposed&&mounts.get(container)===token;
   const listen=(node,type,fn)=>node.addEventListener(type,fn,{signal:controller.signal});
+  function freeStarter(){
+    const intro=el('section','sc-free-start');intro.setAttribute('aria-label','무료 기본 풀이부터 읽기');
+    intro.append(el('span','sc-section-label','무료로 먼저'),el('h3','','기본 풀이를 읽고, 더 궁금해질 때'),el('p','','사주·자미두수·별자리의 기본 해석은 신당에서 무료로 읽을 수 있어요. 자세히 알고 싶은 주제가 생기면 아래에서 한 권을 골라보세요.'));
+    if(onFreeReading){const start=button('내 무료 기본 풀이 읽기','sc-outline-button');listen(start,'click',()=>{if(active())onFreeReading();});intro.append(start);}
+    else intro.append(link('무료로 내 명식부터 보기','/calc/','sc-outline-button','calculator'));
+    root.append(intro);
+  }
   const cleanup=()=>{disposed=true;controller.abort();signal?.removeEventListener('abort',cleanup);root.remove();if(mounts.get(container)===token)mounts.delete(container);};
   signal?.addEventListener('abort',cleanup,{once:true});
   if(signal?.aborted){cleanup();return cleanup;}
@@ -98,37 +109,41 @@ export async function mountCollection(container, view, {navigate,onView,signal}=
     listen(search.input,'input',render);render();onView?.(view,{count:RESOURCES.length});return cleanup;
   }
   root.append(el('p','sc-status','서가를 여는 중이에요…'));
-  try{await script('/store/catalog.js',catalogData);}catch(_){if(active()){root.replaceChildren();heading(root,'SAMRA COLLECTION','서가를 열지 못했어요','연결을 확인한 뒤 다시 열어주세요.');root.append(link('기존 리포트 서가 열기','/store/','sc-button','fallback'));}return cleanup;}
+  try{await script('/store/catalog.js',catalogData);}catch(_){if(active()){root.replaceChildren();heading(root,'SAMRA COLLECTION','서가를 열지 못했어요','연결을 확인한 뒤 다시 열어주세요.');if(view==='catalog'||view==='readers')freeStarter();root.append(link('기존 리포트 서가 열기','/store/','sc-button','fallback'));}return cleanup;}
   if(!active())return cleanup;
   const data=catalogData();root.replaceChildren();
   if(!data)throw new Error('Catalog unavailable');
 
   if(view==='readers'){
-    heading(root,'TWELVE VOICES OF SAMRA','어떤 목소리로 만나볼까요?','술사마다 말투와 이야기를 풀어내는 결이 달라요. 소개와 담당 리포트를 살펴보세요.');
+    heading(root,'TWELVE VOICES OF SAMRA','어떤 목소리로 만나볼까요?','이름을 누르면 이야기를 풀어내는 방식과 담당 리포트를 살펴볼 수 있어요.');
+    freeStarter();
     const search=searchField('술사 찾기','이름, 다정한 위로, 차분한 분석…');root.append(search.wrap);
     const notice=status(root),grid=el('div','sc-reader-grid'),detail=el('section','sc-reader-detail');detail.hidden=true;root.append(grid,detail);
     function showReader(id,opener){
       const reader=data.readers[id];detail.replaceChildren();detail.hidden=false;
       const top=el('div','sc-reader-detail-top'),image=el('img','sc-reader-portrait');image.src='/store/art/readers/'+id+'.webp';image.alt=reader.name;image.width=110;image.height=138;
       const copy=el('div');const title=el('h3','',reader.title+' '+reader.name);title.tabIndex=-1;copy.append(el('p','sc-kicker','MEET YOUR READER'),title,el('p','',reader.tag),el('p','sc-meta',reader.spec));top.append(image,copy);detail.append(top);
-      const products=selectCollectionProducts({reader:id});detail.append(el('h4','sc-subtitle',products.length?'이 술사가 들려주는 이야기':'삼라의 목소리'));
+      const products=selectCollectionProducts({reader:id});detail.append(el('h4','sc-subtitle',products.length?'이 술사의 상세 리포트 · 유료':'삼라의 목소리'));
       const shelf=el('div','sc-product-grid');products.forEach(product=>shelf.append(productCard(product,data)));detail.append(shelf);
       if(!products.length)detail.append(el('p','sc-note','현재 담당 리포트가 없어요. 다른 술사의 이야기도 둘러보세요.'));
       const close=button('소개 접기','sc-text-button');listen(close,'click',()=>{detail.hidden=true;if(opener.isConnected)opener.focus();});detail.append(close);title.focus({preventScroll:true});detail.scrollIntoView?.({behavior:'smooth',block:'nearest'});
     }
-    function render(){grid.replaceChildren();const readers=Object.entries(data.readers).filter(([,reader])=>matches([reader.name,reader.title,reader.tag,reader.spec].join(' '),search.input.value));notice.textContent=readers.length+'명의 술사';readers.forEach(([id,reader])=>{const card=button('','sc-reader');const image=el('img');image.src='/store/art/readers/'+id+'.webp';image.alt='';image.width=96;image.height=120;image.loading='lazy';card.append(image,el('span','sc-category',reader.title),el('strong','',reader.name),el('span','sc-reader-spec',reader.spec),el('span','sc-reader-more','이야기 만나기 →'));listen(card,'click',()=>showReader(id,card));grid.append(card);});if(!readers.length)grid.append(el('p','sc-empty','다른 이름이나 분위기로 찾아보세요.'));}
+    function render(){grid.replaceChildren();const readers=Object.entries(data.readers).filter(([,reader])=>matches([reader.name,reader.title,reader.tag,reader.spec].join(' '),search.input.value));notice.textContent=readers.length+'명의 술사';readers.forEach(([id,reader])=>{const card=button('','sc-reader');const image=el('img');image.src='/store/art/readers/'+id+'.webp';image.alt='';image.width=96;image.height=120;image.loading='lazy';card.append(image,el('span','sc-category',reader.title),el('strong','',reader.name),el('span','sc-reader-spec',reader.spec),el('span','sc-reader-more','소개와 리포트 보기 →'));listen(card,'click',()=>showReader(id,card));grid.append(card);});if(!readers.length)grid.append(el('p','sc-empty','다른 이름이나 분위기로 찾아보세요.'));}
     listen(search.input,'input',render);render();onView?.(view,{count:Object.keys(data.readers).length});return cleanup;
   }
 
   if(view==='catalog'){
-    heading(root,'A BOOK FOR YOUR QUESTION','지금의 질문에, 한 권의 이야기','고민으로 골라보거나, 주제와 술사로 나에게 맞는 리포트를 찾아보세요.');
+    heading(root,'A BOOK FOR YOUR QUESTION','지금의 질문에, 한 권의 이야기','무료 풀이에서 더 궁금해진 한 가지를, 상세 리포트로 깊이 읽어보세요.');
+    freeStarter();
+    const guide=el('p','sc-purchase-guide');guide.append(el('strong','','상세 리포트는 구독 없이 단건 구매해요.'),el('span','','목차·구성과 가격 확인 → 필요한 정보 입력 → 결제 순서로 이어져요.'));root.append(guide);
     const finder=el('section','sc-finder'),finderHost=el('div');finder.append(finderHost);root.append(finder);
+    root.append(el('h3','sc-shelf-title','모든 상세 리포트 · 유료'));
     const controls=el('div','sc-controls'),search=searchField('리포트 찾기','질문, 제목, 술사 검색');
     const category=selectField('주제',[['all','모든 주제'],...Object.entries(data.categories).map(([id,item])=>[id,item.label])]);
     const reader=selectField('술사',[['all','모든 술사'],...Object.entries(data.readers).map(([id,item])=>[id,item.name])]);
     const sort=selectField('순서',[['recommended','편집 추천순'],['reading','짧게 읽는 순']]);controls.append(search.wrap,category.wrap,reader.wrap,sort.wrap);root.append(controls);
     const notice=status(root),grid=el('div','sc-product-grid');root.append(grid,el('p','sc-note','목차와 입력 조건은 상품 소개에서 확인할 수 있어요. 추천은 고른 질문과 구성을 기준으로 한 편집 안내예요.'));
-    function render(){const products=selectCollectionProducts({query:search.input.value,category:category.select.value,reader:reader.select.value,sort:sort.select.value});grid.replaceChildren();products.forEach(product=>grid.append(productCard(product,data)));notice.textContent=products.length+'권의 리포트';if(!products.length)grid.append(el('p','sc-empty','조건에 맞는 리포트가 없어요. 주제나 술사를 바꿔보세요.'));}
+    function render(){const products=selectCollectionProducts({query:search.input.value,category:category.select.value,reader:reader.select.value,sort:sort.select.value});grid.replaceChildren();products.forEach(product=>grid.append(productCard(product,data)));notice.textContent=products.length+'권의 상세 리포트';if(!products.length)grid.append(el('p','sc-empty','조건에 맞는 리포트가 없어요. 주제나 술사를 바꿔보세요.'));}
     listen(search.input,'input',render);[category.select,reader.select,sort.select].forEach(node=>listen(node,'change',render));render();
     finderQueue=finderQueue.catch(()=>{}).then(async()=>{
       if(!active())return;

@@ -1,7 +1,7 @@
-import { createDialogueSession, getNpcPersona } from './dialogue-core.js?v=20261101-sanctuary2';
-import { createShrineChatClient } from './chat-client.js?v=20261101-sanctuary2';
-import { loadReadingEngine } from './readings.js?v=20261101-sanctuary2';
-import { buildReadingInsight } from './reading-insight-core.js?v=20261101-sanctuary2';
+import { createDialogueSession, getNpcPersona } from './dialogue-core.js?v=20261101-freepath1';
+import { createShrineChatClient } from './chat-client.js?v=20261101-freepath1';
+import { loadReadingEngine } from './readings.js?v=20261101-freepath1';
+import { buildReadingInsight } from './reading-insight-core.js?v=20261101-freepath1';
 
 const mounts = new WeakMap();
 let sequence = 0;

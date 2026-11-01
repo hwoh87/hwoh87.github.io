@@ -1,6 +1,6 @@
-import { getOwnProfile } from './profile.js?v=20261101-sanctuary2';
-import { loadReadingEngine } from './readings.js?v=20261101-sanctuary2';
-import { createIdentityTracker } from './identity-core.js?v=20261101-sanctuary2';
+import { getOwnProfile } from './profile.js?v=20261101-freepath1';
+import { loadReadingEngine } from './readings.js?v=20261101-freepath1';
+import { createIdentityTracker } from './identity-core.js?v=20261101-freepath1';
 
 const identity=createIdentityTracker({getProfile:getOwnProfile,loadEngine:loadReadingEngine,
   announce:detail=>document.dispatchEvent(new CustomEvent('sowon:identity-change',{detail}))});

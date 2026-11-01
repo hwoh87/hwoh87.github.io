@@ -1,5 +1,5 @@
-import { getOwnProfile } from './profile.js?v=20261101-sanctuary2';
-import { RELATION_KINDS, safePosition, serverProfile, safeVisitors, safeRequests, availableActions, safeResult, socialError, cleanText, createSocialClient, safeIlju, roomForKey, safeRoomCounts } from './social-core.js?v=20261101-sanctuary2';
+import { getOwnProfile } from './profile.js?v=20261101-freepath1';
+import { RELATION_KINDS, safePosition, serverProfile, safeVisitors, safeRequests, availableActions, safeResult, socialError, cleanText, createSocialClient, safeIlju, roomForKey, safeRoomCounts } from './social-core.js?v=20261101-freepath1';
 
 let storage;
 try { storage = sessionStorage; } catch (_) {}

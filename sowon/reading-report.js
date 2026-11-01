@@ -1,7 +1,7 @@
-import { loadReadingEngine, mountReading } from './readings.js?v=20261101-sanctuary2';
-import { buildReadingInsight } from './reading-insight-core.js?v=20261101-sanctuary2';
-import { mountReadingOffers } from './reading-offers.js?v=20261101-sanctuary2';
-import { profileSearch } from './profile-core.js?v=20261101-sanctuary2';
+import { loadReadingEngine, mountReading } from './readings.js?v=20261101-freepath1';
+import { buildReadingInsight } from './reading-insight-core.js?v=20261101-freepath1';
+import { mountReadingOffers } from './reading-offers.js?v=20261101-freepath1';
+import { profileSearch } from './profile-core.js?v=20261101-freepath1';
 
 const HOSTS = { tojeong: { name: '토정과', kind: 'saju' }, seol: { name: '설월과', kind: 'saju' }, luna: { name: '루나와', kind: 'star' } };
 const KINDS = [['saju', '사주'], ['jami', '자미두수'], ['star', '별자리']];
@@ -58,6 +58,7 @@ export function mountReadingReport(container, npc, profile, options = {}) {
     content.setAttribute('aria-labelledby', `${id}-${kind}`); content.replaceChildren();
     const intro = make('div', 'report-intro');
     const title = make('h1', 'report-title', '나의 해석을 펼치고 있어요');
+    title.id = `${id}-title`; container.setAttribute('aria-labelledby', title.id); container.removeAttribute('aria-label');
     const lead = make('p', 'report-lead');
     const meta = make('div', 'report-profile'), metadata = make('p', '', profileLabel());
     meta.append(metadata, button('', '내 정보 수정', () => options.onProfile?.(), viewSignal));
@@ -79,11 +80,26 @@ export function mountReadingReport(container, npc, profile, options = {}) {
     const rawBody = make('div', 'report-technical-body');
     technical.append(technicalTitle, make('p', 'report-technical-note', '조건을 바꿔 다시 계산하면 이 탭의 기본 해석에 반영돼요. 다른 탭은 캐릭터의 출생정보로 시작해요. 캐릭터 정보 자체를 바꾸려면 ‘내 정보 수정’을 눌러 주세요.'), rawBody);
     const offerHost = make('div', 'report-offer-host'); offerHost.hidden = true;
-    content.append(intro, pending, digest, layout, notes, technical, offerHost, make('p', 'report-footnote', '삼라 앱과 같은 계산 엔진의 결과를 바탕으로 읽었어요. 별자리·자미두수의 풀이는 앱의 기본 해석과 같은 출처이며, 사주의 생활 안내는 계산된 일간·십신·격국·강약을 풀어 썼어요. NPC의 AI 대화와 유료 심층 리포트는 별도의 해석이에요.'));
+    const readingRoute = make('nav', 'report-reading-route'); readingRoute.hidden = true; readingRoute.setAttribute('aria-label', '무료 풀이와 다음 읽기');
+    const freeScope = make('p', 'report-free-scope');
+    const readStart = button('report-start-reading', '무료 풀이 읽기 ↓', () => {
+      const heading = chapters.children[0]?.querySelector?.('h2');
+      chapters.children[0]?.scrollIntoView({ block: 'start', behavior: 'auto' }); heading?.focus({ preventScroll: true });
+    }, viewSignal);
+    const moreReading = button('report-more-reading', '심층 리포트 안내', () => {
+      if (offerHost.hidden) return;
+      offerHost.scrollIntoView({ block: 'start', behavior: 'auto' }); offerHost.focus({ preventScroll: true });
+    }, viewSignal);
+    offerHost.tabIndex = -1;
+    readingRoute.append(freeScope, readStart, moreReading);
+    const returnConversation = make('div', 'report-return-conversation');
+    if (options.onGuide) returnConversation.append(make('p', '', '읽다가 궁금해진 대목이 있나요?'), button('', options.guideLabel === '대화 이어가기' ? `${HOSTS[npc].name} 대화 이어가기` : (options.guideLabel || '공간 안내'), () => options.onGuide?.(), viewSignal));
+    content.append(intro, pending, digest, readingRoute, layout, notes, technical, offerHost, returnConversation, make('p', 'report-footnote', '삼라 앱과 같은 계산 엔진의 결과를 바탕으로 읽었어요. 별자리·자미두수의 풀이는 앱의 기본 해석과 같은 출처이며, 사주의 생활 안내는 계산된 일간·십신·격국·강약을 풀어 썼어요. NPC의 AI 대화와 유료 심층 리포트는 별도의 해석이에요.'));
     let calculation = 0, inputCalendar = profile.birth?.calendar;
     async function refresh() {
       const revision = ++calculation;
       offerHost.hidden = true;
+      readingRoute.hidden = true;
       outlineAbort?.abort(); outlineAbort = new AbortController(); const outlineSignal = outlineAbort.signal;
       try {
         enginePromise ||= Promise.resolve().then(loadEngine);
@@ -130,13 +146,15 @@ export function mountReadingReport(container, npc, profile, options = {}) {
         });
         layout.hidden = result.sections.length === 0;
         offerHost.hidden = result.requiresTime || result.sections.length === 0;
+        readingRoute.hidden = offerHost.hidden;
+        freeScope.textContent = `아래 ${result.sections.length}개 주제는 끝까지 무료예요. 더 깊은 해석은 필요할 때 선택하세요.`;
         notes.replaceChildren(...result.notes.map(note => make('p', '', note)));
         if (inputCalendar && inputCalendar !== 'S') notes.append(make('p', '', '입력한 음력 생일을 양력으로 바꿔 계산했어요.'));
         if (result.requiresTime) { pending.hidden = false; pending.replaceChildren(button('report-time-button', '태어난 시간 입력하기', () => options.onProfile?.(), viewSignal)); }
       } catch (_) {
         if (disposed || ticket !== version || revision !== calculation) return;
         enginePromise = null; title.textContent = '해석을 확인해 주세요'; lead.textContent = ''; summary.textContent = ''; metadata.textContent = profileLabel();
-        chapters.replaceChildren(); outline.replaceChildren(); layout.hidden = true; notes.replaceChildren(); offerHost.hidden = true; digest.replaceChildren(); digest.hidden = true; length.textContent = '';
+        chapters.replaceChildren(); outline.replaceChildren(); layout.hidden = true; notes.replaceChildren(); offerHost.hidden = true; readingRoute.hidden = true; digest.replaceChildren(); digest.hidden = true; length.textContent = '';
         pending.hidden = false; pending.className = 'report-error'; pending.textContent = '기본 해석을 준비하지 못했어요. 아래에서 계산 조건을 확인하고 다시 계산해 주세요.';
       }
     }
@@ -165,6 +183,6 @@ export function mountReadingReport(container, npc, profile, options = {}) {
     offerCleanup = mountOffers(offerHost, { npc, kind, onNavigate: navigate, signal: lifetime.signal });
     void refresh();
   }
-  const dispose = () => { if (disposed) return; disposed = true; version++; lifetime.abort(); clearNested(); container.replaceChildren(); container.classList.remove('xp-personal-dialog'); container.classList.remove('is-large-text'); };
+  const dispose = () => { if (disposed) return; disposed = true; version++; lifetime.abort(); clearNested(); container.replaceChildren(); container.removeAttribute('aria-labelledby'); container.classList.remove('xp-personal-dialog'); container.classList.remove('is-large-text'); };
   select(kind); return dispose;
 }
