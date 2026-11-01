@@ -1,5 +1,5 @@
-import { getOwnProfile } from './profile.js?v=20261101-freepath2';
-import { mountReadingReport } from './reading-report.js?v=20261101-freepath2';
+import { getOwnProfile } from './profile.js?v=20261101-freepath3';
+import { mountReadingReport } from './reading-report.js?v=20261101-freepath3';
 
 export function mountPersonalEncounter(container, npc, options = {}) {
   const profile = getOwnProfile();

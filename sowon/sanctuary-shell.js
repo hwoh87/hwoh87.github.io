@@ -1,7 +1,7 @@
-import { getOwnProfile } from './profile.js?v=20261101-freepath2';
-import { getOwnIdentity } from './identity.js?v=20261101-freepath2';
-import { configureSocial } from './social.js?v=20261101-freepath2';
-import './ilju-rooms.js?v=20261101-freepath2';
+import { getOwnProfile } from './profile.js?v=20261101-freepath3';
+import { getOwnIdentity } from './identity.js?v=20261101-freepath3';
+import { configureSocial } from './social.js?v=20261101-freepath3';
+import './ilju-rooms.js?v=20261101-freepath3';
 
 configureSocial({getRoomPosition:roomKey=>roomKey==='courtyard'?{x:0,z:14,heading:Math.PI}:{x:-11,z:14,heading:Math.PI}});
 const shell=document.querySelector('.sanctuary');

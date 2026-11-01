@@ -1,5 +1,5 @@
-import {CULTURE_ROLES,CULTURE_TOPICS,normalizeCultureDayPillar,culturePath,selectCulturePeople,selectCultureArticles,featuredCulturePeople,validateCultureData} from './culture-core.js?v=20261101-freepath2';
-import {sanitizeReferenceContent} from './reference.js?v=20261101-freepath2';
+import {CULTURE_ROLES,CULTURE_TOPICS,normalizeCultureDayPillar,culturePath,selectCulturePeople,selectCultureArticles,featuredCulturePeople,validateCultureData} from './culture-core.js?v=20261101-freepath3';
+import {sanitizeReferenceContent} from './reference.js?v=20261101-freepath3';
 
 const mounts=new WeakMap();
 const PAGE_SIZE=24;

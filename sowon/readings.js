@@ -1,6 +1,6 @@
 import { ENGINE_URL } from '../calc/panels/manifest.js';
 import { mountBirth, mountTimeCompare, mountJourney } from '../calc/panels/helpers.js';
-import { profileSearch } from './profile-core.js?v=20261101-freepath2';
+import { profileSearch } from './profile-core.js?v=20261101-freepath3';
 
 const modules = {
   saju: () => import('../calc/panels/saju.js'),
@@ -298,11 +298,25 @@ export async function mountReading(container, kind, options = {}) {
       link.rel = 'stylesheet'; link.href = href; root.appendChild(link);
     }
     const style = document.createElement('style'); style.textContent = view.styles; root.appendChild(style);
-    const polish = document.createElement('link'); polish.rel = 'stylesheet'; polish.href = '/sowon/readings.css?v=20261101-freepath2'; root.appendChild(polish);
-    const theme = document.createElement('link'); theme.rel='stylesheet';theme.href='/sowon/reading-theme.css?v=20261101-freepath2';root.appendChild(theme);
+    const polish = document.createElement('link'); polish.rel = 'stylesheet'; polish.href = '/sowon/readings.css?v=20261101-freepath3'; root.appendChild(polish);
+    const theme = document.createElement('link'); theme.rel='stylesheet';theme.href='/sowon/reading-theme.css?v=20261101-freepath3';root.appendChild(theme);
     const template = document.createElement('template');
     template.innerHTML = view.markup;
     root.appendChild(template.content.cloneNode(true));
+    if (kind === 'gunghap') {
+      // The shared calculator keeps its engine and result visibility. In the
+      // shrine, let visitors read the free relationship before the paid shelf.
+      const result = root.getElementById('result'), offers = root.getElementById('xsell');
+      if (result && offers) result.insertBefore(offers, result.querySelector('.cta-box'));
+      const hero = result?.querySelector('.verdict-hero');
+      if (hero) {
+        const scope = document.createElement('nav'); scope.className = 'shrine-free-reading'; scope.setAttribute('aria-label','무료 궁합 읽는 순서');
+        const note = document.createElement('p'); note.textContent = '아래 원국·관계 풀이와 올해 흐름은 무료예요. 점수보다 강점과 조율점을 함께 읽어보세요.';
+        const read = document.createElement('a'); read.href = '#pairkw'; read.textContent = '강점과 조율점부터 읽기 ↓';
+        const more = document.createElement('a'); more.href = '#xsell'; more.textContent = '유료 상세 구성 살펴보기';
+        scope.append(note, read, more); hero.after(scope);
+      }
+    }
     if(options.autoScroll===false){const result=root.getElementById('result');if(result)result.scrollIntoView=()=>{};}
     root.querySelectorAll('form').forEach(form => form.addEventListener('submit', event => event.preventDefault()));
     env = createEnvironment(root, kind, readingFormOptions(options, kind));

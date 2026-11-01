@@ -1,5 +1,5 @@
-import { ILJU_ROOMS, COURTYARD, roomForIlju, roomForKey, safeIlju } from './ilju-room-core.js?v=20261101-freepath2';
-import { enterSocialRoom, getSocialRoomState } from './social.js?v=20261101-freepath2';
+import { ILJU_ROOMS, COURTYARD, roomForIlju, roomForKey, safeIlju } from './ilju-room-core.js?v=20261101-freepath3';
+import { enterSocialRoom, getSocialRoomState } from './social.js?v=20261101-freepath3';
 
 const dialog = document.createElement('dialog');
 dialog.id = 'iljuRoomsDialog'; dialog.className = 'ilju-rooms-dialog'; dialog.setAttribute('aria-labelledby', 'iljuRoomsTitle');

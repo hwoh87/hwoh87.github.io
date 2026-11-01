@@ -1,6 +1,6 @@
-import { getOwnIdentity } from './identity.js?v=20261101-freepath2';
-import { getActiveProfile } from './profile-core.js?v=20261101-freepath2';
-import { FEATURES, HALLS, HALL_JOURNEYS, getFeature, getHall, parseView, viewHash, internalDestination, readJourney, writeJourney } from './hub-core.js?v=20261101-freepath2';
+import { getOwnIdentity } from './identity.js?v=20261101-freepath3';
+import { getActiveProfile } from './profile-core.js?v=20261101-freepath3';
+import { FEATURES, HALLS, HALL_JOURNEYS, getFeature, getHall, parseView, viewHash, internalDestination, readJourney, writeJourney } from './hub-core.js?v=20261101-freepath3';
 
 const dialog = document.createElement('dialog');
 dialog.className = 'hub-dialog';
@@ -166,13 +166,13 @@ async function render(view) {
   try {
     let result;
     if(item.kind==='reading') {
-      const module=await import('./readings.js?v=20261101-freepath2'); if(version!==generation)return;
+      const module=await import('./readings.js?v=20261101-freepath3'); if(version!==generation)return;
       result=await module.mountReading(mount,item.value,{navigate,signal:viewAbort.signal,...readingOptions.get(item.value)});
     } else if(item.kind==='culture') {
-      const module=await import('./culture.js?v=20261101-freepath2');if(version!==generation)return;
+      const module=await import('./culture.js?v=20261101-freepath3');if(version!==generation)return;
       result=await module.mountCulture(mount,item.value,{navigate,signal:viewAbort.signal,dayPillar:getOwnIdentity().ilju});
     } else {
-      const module=await import('./collection.js?v=20261101-freepath2');if(version!==generation)return;
+      const module=await import('./collection.js?v=20261101-freepath3');if(version!==generation)return;
       result=await module.mountCollection(mount,item.value,{navigate,onView:()=>{},onFreeReading:()=>beginOwnReading('saju','tojeong'),signal:viewAbort.signal});
     }
     if(version!==generation){if(typeof result==='function')result();else result?.dispose?.();return;}
@@ -207,7 +207,7 @@ async function showReference(path) {
   referenceDialog.querySelector('#referenceTitle').textContent='함께 읽기';
   referenceDialog.showModal();
   try {
-    const module=await import('./reference.js?v=20261101-freepath2');if(version!==referenceVersion)return;
+    const module=await import('./reference.js?v=20261101-freepath3');if(version!==referenceVersion)return;
     const result=await module.mountReference(host,path,{navigate,signal:referenceAbort.signal});
     if(version!==referenceVersion){result?.();return;}referenceCleanup=result;
   }catch(_){if(version!==referenceVersion)return;host.textContent='글을 불러오지 못했어요. ';const link=el('a','hub-fallback-link','기존 삼라 화면에서 열기 ↗');link.href=path;link.onclick=event=>{event.preventDefault();navigate(path,{canonical:true});};host.append(link);}
