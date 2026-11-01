@@ -12,6 +12,7 @@ import { createWayfinder } from './wayfinder.js?v=20261101-celebhouse1';
 import { HALLS, getFeature } from './hub-core.js?v=20261101-freepath4';
 import { createVisitors } from './visitors.js?v=20261101-freepath4';
 import { createConversationFocus } from './conversation-focus.js?v=20261101-freepath4';
+import { portraitHallView } from './portrait-hall-view.js?v=20261101-celebhouse2';
 
 const host = document.getElementById('worldViewport');
 const body = document.body;
@@ -123,6 +124,7 @@ function setup() {
 
   const conversationFocus = createConversationFocus({ camera, orbit, world, avatar });
   let conversationNpc = null, conversationOverview = false;
+  let galleryViewActive = false;
   function releaseConversation() {
     const restored = conversationFocus.restore();
     conversationNpc = null;
@@ -149,7 +151,7 @@ function setup() {
 
   movement = createLocomotion({
     camera, domElement: renderer.domElement, avatar, world, orbitControls: orbit,
-    onMove: source => { enter(); if (activeJourney && source !== 'path') { activeJourney = null; status('마음이 가는 곳으로 천천히 걸어보세요.', 2500); } },
+    onMove: source => { enter(); if(source!=='path')galleryViewActive=false; if (activeJourney && source !== 'path') { activeJourney = null; status('마음이 가는 곳으로 천천히 걸어보세요.', 2500); } },
     onArrival: () => {},
     onPick: raycaster => {
       const hits=raycaster.intersectObjects([...world.group.children,...visitors.group.children],true);
@@ -256,13 +258,22 @@ function setup() {
     body.dataset.mood=preferences.mood;host.dataset.quality=quality;host.dataset.outfit=preferences.outfit;
     if(document.querySelector('dialog[open]'))renderer.render(scene,camera);
   }
-  function setCameraMode(mode) {
+  function setCameraMode(mode, framing = null) {
+    galleryViewActive=Boolean(framing);
     setOverviewState(mode==='overview');
-    cameraTransition={elapsed:0,camera:camera.position.clone(),target:orbit.target.clone(),overview};
+    cameraTransition={elapsed:0,camera:camera.position.clone(),target:orbit.target.clone(),overview,framing};
+  }
+  function galleryFraming() { return portraitHallView({width:innerWidth,height:innerHeight}); }
+  function applyGalleryView() {
+    const framing=galleryFraming();cameraTransition=null;setOverviewState(false);
+    camera.position.copy(avatar.group.position).add(new THREE.Vector3(...framing.cameraOffset));
+    orbit.target.copy(avatar.group.position).add(new THREE.Vector3(...framing.targetOffset));orbit.update();
   }
   function activateInteraction(item) {
     if(!item||document.querySelector('dialog[open]'))return;
     activeJourney=null;movement.cancel();status('',0);
+    galleryViewActive=item.id==='object-celebrity-gallery';
+    if(galleryViewActive){applyGalleryView();renderer.render(scene,camera);}
     const point=item.anchor3d||{...item.point,y:1};
     avatar.group.rotation.y=Math.atan2(point.x-avatar.group.position.x,point.z-avatar.group.position.z);
     if(item.type==='npc'){
@@ -276,7 +287,8 @@ function setup() {
     if(document.querySelector('dialog[open]'))return;
     enter();movement.setEnabled(true);
     if(interactionDistance(item.point,avatar.group.position)<=item.radius){activateInteraction(item);return;}
-    activeJourney=item.id;setCameraMode('walk');status(item.type==='npc'?npcName(item)+'에게 다가가고 있어요.':'선택한 물건을 살펴보러 가고 있어요.',0);
+    const gallery=item.id==='object-celebrity-gallery';
+    activeJourney=item.id;setCameraMode('walk',gallery?galleryFraming():null);status(item.type==='npc'?npcName(item)+'에게 다가가고 있어요.':gallery?'연예인 사주관으로 가고 있어요.':'선택한 물건을 살펴보러 가고 있어요.',0);
     const accepted=movement.goTo(item.point,()=>{if(activeJourney===item.id)activateInteraction(item);});
     if(!accepted){activeJourney=null;status('조금 더 가까운 바닥을 눌러 다가가 보세요.',3000);}
   }
@@ -316,6 +328,7 @@ function setup() {
     camera.fov = width < 760 ? 60 : exploring ? 54 : 48;
     camera.updateProjectionMatrix();
     if (conversationNpc) focusConversation(conversationNpc);
+    else if(galleryViewActive)applyGalleryView();
   }
   resizeObserver = new ResizeObserver(resize);
   resizeObserver.observe(host);
@@ -378,6 +391,7 @@ function setup() {
       const progress = reducedMotion.matches ? 1 : Math.min(1, cameraTransition.elapsed / 1.05);
       const ease = progress * progress * (3 - 2 * progress);
       if(cameraTransition.overview){tweenCamera.set(28,25,45);tweenTarget.set(0,2,-2);}
+      else if(cameraTransition.framing){tweenCamera.copy(avatar.group.position).add(new THREE.Vector3(...cameraTransition.framing.cameraOffset));tweenTarget.copy(avatar.group.position).add(new THREE.Vector3(...cameraTransition.framing.targetOffset));}
       else{tweenCamera.copy(avatar.group.position).add(cameraOffset);tweenTarget.copy(avatar.group.position).add(targetOffset);}
       camera.position.lerpVectors(cameraTransition.camera, tweenCamera, ease);
       orbit.target.lerpVectors(cameraTransition.target, tweenTarget, ease);
@@ -423,7 +437,7 @@ function setup() {
     event.preventDefault(); event.stopPropagation(); enter();
     renderer.domElement.focus({ preventScroll: true });
   });
-  listen(renderer.domElement, 'pointerdown', () => { cameraTransition = null; });
+  listen(renderer.domElement, 'pointerdown', () => { cameraTransition = null;galleryViewActive=false; });
 
   const actionLabels = { wish: '소원 등불이 있는 신당', breath: '바람이 머무는 명상터', blessing: '마음을 전하는 소원나무', myeongri: '토정이 기다리는 명리전', inyeon: '설월이 기다리는 인연정', stars: '태어난 하늘을 펼치는 별마루', readers: '루나와 술사들이 있는 술사각', archive: '이야기가 쌓이는 서고', rooms: '같은 일주가 만나는 일주마당', celeb: '공개 명식을 읽는 연예인 사주관' };
   function walkToAction(action) {
@@ -466,6 +480,7 @@ function setup() {
 
   listen(document.getElementById('returnToGate'), 'click', () => {
     activeJourney = null;
+    galleryViewActive = false;
     cameraTransition = null;
     setOverviewState(false);
     movement.reset();
