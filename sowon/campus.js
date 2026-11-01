@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { makeHangulGeometry } from './atmosphere.js?v=20261101-freepath4';
+import { makeHangulGeometry } from './atmosphere.js?v=20261101-celebhouse1';
 
 /** Five quiet side gardens. Repeated architectural detail is batched by material. */
 export function createCampus() {
@@ -90,16 +90,16 @@ export function createCampus() {
     geometry.translate(...start.add(end).multiplyScalar(0.5).toArray());
     addGeometry(key, geometry);
   }
-  function plaque(text, x, y, z, width = 2.12) {
+  function plaque(text, x, y, z, width = 2.12, facing = 1) {
     box('woodDark', width, 0.5, 0.11, x, y, z);
-    box('woodLight', width - 0.1, 0.39, 0.025, x, y, z + 0.064);
-    box('woodDark', width - 0.18, 0.32, 0.025, x, y, z + 0.08);
+    box('woodLight', width - 0.1, 0.39, 0.025, x, y, z + facing * 0.064);
+    box('woodDark', width - 0.18, 0.32, 0.025, x, y, z + facing * 0.08);
     for (const side of [-1, 1]) {
-      box('gold', width - 0.1, 0.012, 0.014, x, y + side * 0.198, z + 0.084);
-      box('gold', 0.012, 0.4, 0.014, x + side * (width / 2 - 0.05), y, z + 0.084);
+      box('gold', width - 0.1, 0.012, 0.014, x, y + side * 0.198, z + facing * 0.084);
+      box('gold', 0.012, 0.4, 0.014, x + side * (width / 2 - 0.05), y, z + facing * 0.084);
       cylinder('gold', 0.012, 0.012, 0.21, x + side * width * 0.34, y + 0.34, z, 5);
     }
-    addGeometry('gold', makeHangulGeometry(text, 0.31), [x, y, z + 0.105]);
+    addGeometry('gold', makeHangulGeometry(text, 0.31), [x, y, z + facing * 0.105], [0, facing < 0 ? Math.PI : 0, 0]);
   }
   function hangingLantern(key, x, y, z, square = false) {
     if (square) box(key, 0.31, 0.48, 0.28, x, y, z);
@@ -195,8 +195,9 @@ export function createCampus() {
     addGeometry('tileRib', new THREE.TubeGeometry(new THREE.CatmullRomCurve3(ridge), 20, 0.085, 6, false));
   }
   const floors = [];
-  function pavilion({ id, label, x, z, width, depth, open = false, roofHeight = 4.5 }) {
+  function pavilion({ id, label, x, z, width, depth, open = false, roofHeight = 4.5, facing = 1 }) {
     const front = z + depth / 2, back = z - depth / 2, left = x - width / 2, right = x + width / 2;
+    const entrance = facing > 0 ? front : back, rear = facing > 0 ? back : front;
     box('stoneDark', width + 0.3, 0.12, depth + 0.3, x, 0.025, z);
     const floor = new THREE.Mesh(new THREE.BoxGeometry(width, 0.065, depth), materials.woodLight);
     floor.position.set(x, 0.08, z); floor.receiveShadow = true; floor.name = `Walkable ${id} floor`;
@@ -215,27 +216,29 @@ export function createCampus() {
     box('wood', 0.18, 0.18, depth, left + 0.2, 2.99, z);
     box('wood', 0.18, 0.18, depth, right - 0.2, 2.99, z);
     if (!open) {
-      box('plaster', width - 0.3, 2.55, 0.14, x, 1.43, back + 0.12);
+      box('plaster', width - 0.3, 2.55, 0.14, x, 1.43, rear + facing * 0.12);
       box('plaster', 0.14, 2.55, depth - 0.3, left + 0.12, 1.43, z);
       box('plaster', 0.14, 2.55, depth - 0.3, right - 0.12, 1.43, z);
-      collider(left, right, back - 0.05, back + 0.28);
+      collider(left, right, Math.min(rear - facing * 0.05, rear + facing * 0.28), Math.max(rear - facing * 0.05, rear + facing * 0.28));
       collider(left - 0.04, left + 0.28, back, front);
       collider(right - 0.28, right + 0.04, back, front);
       const panelWidth = width / 2 - 1.2;
       for (const side of [-1, 1]) {
         const px = x + side * (1.2 + panelWidth / 2);
-        box('wood', panelWidth, 2.45, 0.1, px, 1.39, front - 0.16);
-        box('paper', panelWidth - 0.15, 2.23, 0.03, px, 1.43, front - 0.092);
-        for (let q = -panelWidth / 2 + 0.11; q < panelWidth / 2; q += 0.22) box('woodDark', 0.02, 2.27, 0.025, px + q, 1.43, front - 0.068);
-        for (let q = 0.34; q < 2.55; q += 0.24) box('woodDark', panelWidth - 0.1, 0.02, 0.025, px, q, front - 0.066);
+        box('wood', panelWidth, 2.45, 0.1, px, 1.39, entrance - facing * 0.16);
+        box('paper', panelWidth - 0.15, 2.23, 0.03, px, 1.43, entrance - facing * 0.092);
+        for (let q = -panelWidth / 2 + 0.11; q < panelWidth / 2; q += 0.22) box('woodDark', 0.02, 2.27, 0.025, px + q, 1.43, entrance - facing * 0.068);
+        for (let q = 0.34; q < 2.55; q += 0.24) box('woodDark', panelWidth - 0.1, 0.02, 0.025, px, q, entrance - facing * 0.066);
       }
-      collider(left, x - 1.2, front - 0.25, front + 0.04);
-      collider(x + 1.2, right, front - 0.25, front + 0.04);
+      const panelMin = Math.min(entrance - facing * 0.25, entrance + facing * 0.04);
+      const panelMax = Math.max(entrance - facing * 0.25, entrance + facing * 0.04);
+      collider(left, x - 1.2, panelMin, panelMax);
+      collider(x + 1.2, right, panelMin, panelMax);
     }
     roof(x, z, width + 1.1, depth + 1.4, 3.22, roofHeight);
-    plaque(label, x, 2.77, front + 0.06, label.length === 2 ? 1.82 : 2.12);
+    plaque(label, x, 2.77, entrance + facing * 0.06, Math.max(label.length === 2 ? 1.82 : 2.12, label.length * 0.33 + 0.35), facing);
     const lanternKey = label === '인연정' ? 'paperRose' : label === '서고' ? 'paperBlue' : 'paper';
-    for (const side of [-1, 1]) hangingLantern(lanternKey, x + side * width * 0.34, 2.46, front - 0.24, label === '서고');
+    for (const side of [-1, 1]) hangingLantern(lanternKey, x + side * width * 0.34, 2.46, entrance - facing * 0.24, label === '서고');
     return { x, z, front, back, left, right };
   }
 
@@ -440,7 +443,7 @@ export function createCampus() {
     if (i) beam('gold', stars[i - 1], stars[i], 0.008, 4);
   }
 
-  // Two new open-air destinations on the southern promenade.
+  // The gathering garden and portrait hall sit along the southern promenade.
   const roomDeck=new THREE.Mesh(new THREE.CylinderGeometry(3.2,3.3,.08,48),materials.stoneLight);
   roomDeck.position.set(-15,-.02,18);roomDeck.receiveShadow=true;group.add(roomDeck);groundMeshes.push(roomDeck);
   for(const r of [1.4,2.7])addGeometry('gold',new THREE.TorusGeometry(r,.018,4,48),[-15,.032,18],[Math.PI/2,0,0]);
@@ -461,18 +464,21 @@ export function createCampus() {
     const label=/^ilju:[가-힣]{2}$/.test(roomKey)?roomKey.slice(5)+'일주방':'공용마당';
     roomInscription.geometry.dispose();roomInscription.geometry=makeHangulGeometry(label,.28);
   }
-  box('woodDark',5.8,.13,2.3,15,.12,19.5);
+  // Face the courtyard: visitors can walk through the north doorway without
+  // circling behind the outer wall. A second plaque identifies the hall at arrival.
+  pavilion({id:'Celebrity portrait hall',label:'연예인 사주관',x:15,z:18.6,width:7.2,depth:4.4,roofHeight:4.65,facing:-1});
+  path({x:9,z:15.8},destinations.celeb,1.8);
+  plaque('연예인 사주관',15,2.77,20.86,2.9);
   for(const [index,x] of [13,15,17].entries()){
-    box('woodLight',1.65,2.6,.18,x,1.52,20.25);
-    box(['bookSage','bookBlue','bookRose'][index],1.42,2.32,.035,x,1.52,20.36);
-    sphere('paper',.27,x,1.98,20.44,[1,1.18,.3]);
-    sphere('darkPaper',.55,x,1.18,20.44,[1.05,1,.2]);
-    box('paper',1.2,.055,.025,x,.6,20.46);
+    box('woodDark',1.48,1.92,.1,x,1.56,20.48);
+    box('gold',1.36,1.8,.025,x,1.56,20.415);
+    box(['bookSage','bookBlue','bookRose'][index],1.27,1.71,.025,x,1.56,20.39);
+    sphere('paper',.23,x,1.9,20.34,[1,1.18,.3]);
+    sphere('darkPaper',.44,x,1.25,20.34,[1.05,1,.2]);
+    box('paper',.85,.04,.025,x,.86,20.32);
   }
-  collider(12,18,20.05,20.45);
-  plaque('사주관',15,3.24,20.25,2.6);
-  for(const x of [11.7,18.3])hangingLantern('paperBlue',x,2.4,20.15);
-  objectInteraction({id:'object-celebrity-gallery',hall:'celeb',feature:'celeb',label:'연예인의 사주 이야기',point:destinations.celeb,anchor3d:{x:15,y:1.8,z:20.2},size:[3.2,2.7,.6]});
+  collider(12.15,17.85,20.25,20.58);
+  objectInteraction({id:'object-celebrity-gallery',hall:'celeb',feature:'celeb',label:'연예인 사주관 들어가기',point:destinations.celeb,anchor3d:{x:15,y:1.6,z:16.4},size:[2.4,2.7,.5]});
 
   // Shrubs and small boundary pines frame the new places without blocking paths.
   for (const [x, z, scale] of [[-21.5, -13, 0.95], [21.5, -14.3, 1.1], [-21.4, 11.8, 0.9], [21.4, 10.4, 1.05], [-10.5, -22.3, 0.9], [10.5, -22.3, 0.95]]) {

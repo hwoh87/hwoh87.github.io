@@ -31,6 +31,7 @@ const vowels = {
   0: [[0.38, 0, 0.38, 1], [0.38, 0.5, 1, 0.5]],
   4: [[0.62, 0, 0.62, 1], [0, 0.5, 0.62, 0.5]],
   6: [[0.62, 0, 0.62, 1], [0, 0.32, 0.62, 0.32], [0, 0.68, 0.62, 0.68]],
+  7: [[0.36, 0, 0.36, 1], [0.84, 0, 0.84, 1], [0, 0.32, 0.36, 0.32], [0, 0.68, 0.36, 0.68]],
   8: [[0, 0.2, 1, 0.2], [0.5, 0.2, 0.5, 1]],
   13: [[0, 0.8, 1, 0.8], [0.5, 0, 0.5, 0.8]],
   18: [[0, 0.5, 1, 0.5]],
@@ -74,10 +75,12 @@ export function makeHangulGeometry(text, height = 0.34) {
     if ([8, 13, 18].includes(vowel)) {
       draw(initial, [0.1, hasFinal ? 0.61 : 0.5, 0.8, hasFinal ? 0.34 : 0.45], x);
       draw(vowel, [0.08, bottom, 0.84, hasFinal ? 0.19 : 0.35], x, true);
-    } else if (vowel === 14) {
-      draw(initial, [0.03, 0.62, 0.55, 0.33], x);
-      draw(13, [0.02, bottom, 0.56, 0.19], x, true);
-      draw(4, [0.64, bottom, 0.32, 0.6], x, true);
+    } else if (vowel === 9 || vowel === 14) {
+      // ㅘ and ㅝ wrap around the initial: a horizontal vowel below it,
+      // with the vertical vowel to its right. A final keeps its own lower row.
+      draw(initial, [0.03, hasFinal ? 0.62 : 0.5, 0.55, hasFinal ? 0.33 : 0.45], x);
+      draw(vowel === 9 ? 8 : 13, [0.02, bottom, 0.56, hasFinal ? 0.19 : 0.35], x, true);
+      draw(vowel === 9 ? 0 : 4, [0.64, bottom, 0.32, 0.97 - bottom], x, true);
     } else {
       draw(initial, [0.02, bottom, 0.56, 0.96 - bottom], x);
       draw(vowel, [0.65, bottom, 0.33, 0.96 - bottom], x, true);

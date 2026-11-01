@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
-import { createWorld } from './world.js?v=20261101-freepath4';
+import { createWorld } from './world.js?v=20261101-celebhouse1';
 import { createAvatar } from './avatar.js?v=20261101-freepath4';
 import { getSocialRoomState } from './social.js?v=20261101-pairpaths4';
 import { getOwnIdentity } from './identity.js?v=20261101-freepath4';
@@ -8,7 +8,7 @@ import { getOwnProfile } from './profile.js?v=20261101-freepath4';
 import { createLocomotion, isWalkable } from './locomotion.js?v=20261101-freepath4';
 import { readJourney } from './hub-core.js?v=20261101-freepath4';
 import { readSettings, normalizeSettings, effectiveQuality, nearestInteraction, pickedInteraction, interactionDistance } from './experience-core.js?v=20261101-freepath4';
-import { createWayfinder } from './wayfinder.js?v=20261101-walk6';
+import { createWayfinder } from './wayfinder.js?v=20261101-celebhouse1';
 import { HALLS, getFeature } from './hub-core.js?v=20261101-freepath4';
 import { createVisitors } from './visitors.js?v=20261101-freepath4';
 import { createConversationFocus } from './conversation-focus.js?v=20261101-freepath4';
@@ -430,6 +430,8 @@ function setup() {
     if (body.classList.contains('world-failed') || !world.destinations[action] || document.querySelector('dialog[open]')) return;
     const personalHost=(world.interactions||[]).find(item=>item.type==='npc'&&item.hall===action);
     if(personalHost){approachInteraction(personalHost);return;}
+    const galleryEntrance=action==='celeb'&&(world.interactions||[]).find(item=>item.id==='object-celebrity-gallery');
+    if(galleryEntrance){approachInteraction(galleryEntrance);return;}
     enter();
     // A map can close and request travel before the next animation frame has
     // resumed movement. Re-enable here instead of treating that pause as no path.
