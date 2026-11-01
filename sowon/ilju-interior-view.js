@@ -5,10 +5,10 @@ import { createIljuInteriorLighting } from './ilju-interior-lighting.js?v=202611
 import { interiorForRoom, interiorViewPose, applyInteriorSeat } from './ilju-interior-core.js?v=20261101-templeroom2';
 import { createAvatar } from './avatar.js?v=20261101-templeroom1';
 import { createLocomotion } from './locomotion.js?v=20261101-templeroom1';
-import { createVisitors } from './visitors.js?v=20261101-demo-walk2';
+import { createVisitors } from './visitors.js?v=20261101-demo-walk3';
 import { getDemoVisitors } from './ilju-demo-core.js?v=20261101-peerrequest1';
-import { createIljuDemo } from './ilju-demo.js?v=20261101-demo-walk2';
-import { createDemoWalk } from './ilju-demo-walk.js?v=20261101-demo-walk2';
+import { createIljuDemo } from './ilju-demo.js?v=20261101-demo-walk3';
+import { createDemoWalk } from './ilju-demo-walk.js?v=20261101-demo-walk3';
 import { getOwnProfile } from './profile.js?v=20261101-freepath4';
 import { getOwnIdentity } from './identity.js?v=20261101-freepath4';
 import { readSettings } from './experience-core.js?v=20261101-freepath4';
@@ -70,7 +70,7 @@ function updateDemo() {
   $('[data-interior-demo-label]').textContent = visible ? '가상 나그네 3명' : '가상 나그네 체험';
   $('[data-interior-demo-toggle]').textContent = visible ? '숨기기' : '불러오기';
   $('[data-interior-demo-toggle]').setAttribute('aria-pressed', String(visible));
-  if (!visible && demoRunning) setDemoRun(false);
+  if (!visible && (demoRunning || demo.getStates().some(state => state.phase !== 'idle'))) setDemoRun(false);
   if (!demoRunning) engine?.demoVisitors.sync(visible ? getDemoVisitors() : [], '');
   layer.dataset.demoVisitors = String(visible ? getDemoVisitors().length : 0);
   if (!visible) demo.close();

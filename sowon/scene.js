@@ -10,7 +10,7 @@ import { readJourney } from './hub-core.js?v=20261101-freepath4';
 import { readSettings, normalizeSettings, effectiveQuality, nearestInteraction, pickedInteraction, interactionDistance } from './experience-core.js?v=20261101-freepath4';
 import { createWayfinder } from './wayfinder.js?v=20261101-celebhouse1';
 import { HALLS, getFeature } from './hub-core.js?v=20261101-freepath4';
-import { createVisitors } from './visitors.js?v=20261101-demo-walk2';
+import { createVisitors } from './visitors.js?v=20261101-demo-walk3';
 import { createConversationFocus } from './conversation-focus.js?v=20261101-freepath4';
 import { portraitHallView } from './portrait-hall-view.js?v=20261101-celebhouse2';
 
