@@ -17,7 +17,7 @@ export const HALL_JOURNEYS = Object.freeze({
   myeongri: {
     title:'나를 읽는 첫 장부터',
     description:'내 정보로 일주와 기운의 균형을 읽고, 관계와 흐름의 기본 풀이를 차례로 펼쳐보세요.',
-    includes:['일주와 기질','오행과 십신','대운·세운의 흐름'],
+    includes:['일주와 기질','오행과 십신','대운의 큰 흐름'],
     actions:[{label:'내 사주 무료 풀이',type:'reading',kind:'saju',npc:'tojeong'},{label:'직접 입력해 명식 보기',type:'feature',id:'saju'}],
     continuation:'기본 풀이를 읽은 뒤 더 궁금한 주제가 생기면, 풀이 아래에서 상세 리포트의 목차와 가격을 살펴볼 수 있어요.',
   },
@@ -37,7 +37,7 @@ export const HALL_JOURNEYS = Object.freeze({
   },
   readers: {
     title:'한 번 이야기 나누고 고르세요',
-    description:'루나와 무료로 이야기를 나누거나, 내 기본 풀이를 읽어보세요. 더 길게 읽고 싶은 질문이 생겼을 때 리포트를 골라도 괜찮아요.',
+    description:'루나와 이야기하거나 내 기본 풀이부터 읽어보세요. 더 궁금한 주제가 생기면 리포트를 골라도 괜찮아요.',
     includes:['루나와의 대화','나의 기본 해석','열두 술사의 소개'],
     actions:[{label:'루나와 무료 대화',type:'encounter',npc:'luna'},{label:'내 기본 풀이 먼저 읽기',type:'reading',kind:'saju',npc:'tojeong'}],
     continuation:'웹 상세 리포트는 구독 없이 한 권씩 구매해요. 결제 전 목차·가격·필요한 정보를 먼저 확인할 수 있어요.',

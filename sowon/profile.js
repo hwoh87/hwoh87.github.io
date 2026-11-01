@@ -1,5 +1,5 @@
-import { PROFILE_KEY, createProfile, readProfile, writeProfile, clearStoredProfile, setActiveProfile, getActiveProfile, getActiveBirth, profileSearch } from './profile-core.js?v=20261101-freepath1';
-import { loadReadingEngine, clearOwnPersonMemory } from './readings.js?v=20261101-freepath1';
+import { PROFILE_KEY, createProfile, readProfile, writeProfile, clearStoredProfile, setActiveProfile, getActiveProfile, getActiveBirth, profileSearch } from './profile-core.js?v=20261101-freepath2';
+import { loadReadingEngine, clearOwnPersonMemory } from './readings.js?v=20261101-freepath2';
 
 export { profileSearch };
 export const getOwnProfile = getActiveProfile;

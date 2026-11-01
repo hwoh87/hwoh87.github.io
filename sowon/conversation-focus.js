@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { isWalkable } from './locomotion.js?v=20261101-freepath1';
+import { isWalkable } from './locomotion.js?v=20261101-freepath2';
 
 const finite3 = value => value && ['x','y','z'].every(key => Number.isFinite(value[key]));
 const finite2 = value => value && ['x','z'].every(key => Number.isFinite(value[key]));

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { getAvatarPalette } from './avatar-palettes.js?v=20261101-freepath1';
+import { getAvatarPalette } from './avatar-palettes.js?v=20261101-freepath2';
 
 /** A small, original hanbok traveller. Its face points toward local +Z. */
 export function createAvatar() {

@@ -1,4 +1,4 @@
-import { createEncounterSession, isEncounterAction } from './encounter-core.js?v=20261101-freepath1';
+import { createEncounterSession, isEncounterAction } from './encounter-core.js?v=20261101-freepath2';
 
 const mounts = new WeakMap();
 
@@ -6,7 +6,7 @@ function ensureStyles(document, root) {
   const styleRoot = root?.host ? root : document.head;
   if (styleRoot.querySelector('link[data-sowon-encounters]')) return;
   const link = document.createElement('link');
-  link.rel = 'stylesheet'; link.href = '/sowon/encounters.css?v=20261101-freepath1';
+  link.rel = 'stylesheet'; link.href = '/sowon/encounters.css?v=20261101-freepath2';
   link.setAttribute('data-sowon-encounters', '');
   styleRoot.appendChild(link);
 }

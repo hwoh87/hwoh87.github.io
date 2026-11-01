@@ -1,7 +1,7 @@
-import { loadReadingEngine, mountReading } from './readings.js?v=20261101-freepath1';
-import { buildReadingInsight } from './reading-insight-core.js?v=20261101-freepath1';
-import { mountReadingOffers } from './reading-offers.js?v=20261101-freepath1';
-import { profileSearch } from './profile-core.js?v=20261101-freepath1';
+import { loadReadingEngine, mountReading } from './readings.js?v=20261101-freepath2';
+import { buildReadingInsight } from './reading-insight-core.js?v=20261101-freepath2';
+import { mountReadingOffers } from './reading-offers.js?v=20261101-freepath2';
+import { profileSearch } from './profile-core.js?v=20261101-freepath2';
 
 const HOSTS = { tojeong: { name: '토정과', kind: 'saju' }, seol: { name: '설월과', kind: 'saju' }, luna: { name: '루나와', kind: 'star' } };
 const KINDS = [['saju', '사주'], ['jami', '자미두수'], ['star', '별자리']];
@@ -13,6 +13,8 @@ const defaultPlace = () => ({ name: '서울', lat: 37.5665, lon: 126.978, houseS
 export function mountReadingReport(container, npc, profile, options = {}) {
   if (!Object.hasOwn(HOSTS, npc) || !profile?.solar) throw new TypeError('내 정보를 먼저 입력해 주세요.');
   const document = container.ownerDocument, lifetime = new AbortController(), id = `personal-report-${++reportSequence}`;
+  const conversationSubject = npc === 'tojeong' ? '사주' : npc === 'seol' ? '관계·별자리' : '별자리';
+  const guideText = options.guideLabel === '대화 이어가기' ? `${conversationSubject} 대화` : (options.guideLabel || '공간 안내');
   const loadEngine = options.loadEngine || loadReadingEngine, interpret = options.buildInsight || buildReadingInsight;
   const mountCalculator = options.mountCalculator || mountReading, mountOffers = options.mountOffers || mountReadingOffers;
   let disposed = false, version = 0, kind = KINDS.some(item => item[0] === options.initialKind) ? options.initialKind : HOSTS[npc].kind, currentBirth, location, trueSolarTime;
@@ -30,7 +32,7 @@ export function mountReadingReport(container, npc, profile, options = {}) {
   const header = make('header', 'report-header'), brand = make('div', 'report-brand');
   brand.append(make('strong', '', '소원당'), make('span', '', '/ 나의 해석'));
   const utilities = make('nav', 'report-utilities'); utilities.setAttribute('aria-label', '신당에서 함께하기');
-  utilities.append(button('', options.guideLabel || '공간 안내', () => options.onGuide?.()), button('', '궁합 요청', () => options.onSocial?.()));
+  utilities.append(button('', guideText, () => options.onGuide?.()), button('', '궁합 요청', () => options.onSocial?.()));
   const close = button('report-close', '×', () => options.onClose?.()); close.setAttribute('aria-label', '해석을 닫고 신당으로 돌아가기');
   header.append(brand, utilities, close);
   const tabs = make('div', 'report-tabs'); tabs.setAttribute('role', 'tablist'); tabs.setAttribute('aria-label', '해석의 관점');
@@ -93,7 +95,7 @@ export function mountReadingReport(container, npc, profile, options = {}) {
     offerHost.tabIndex = -1;
     readingRoute.append(freeScope, readStart, moreReading);
     const returnConversation = make('div', 'report-return-conversation');
-    if (options.onGuide) returnConversation.append(make('p', '', '읽다가 궁금해진 대목이 있나요?'), button('', options.guideLabel === '대화 이어가기' ? `${HOSTS[npc].name} 대화 이어가기` : (options.guideLabel || '공간 안내'), () => options.onGuide?.(), viewSignal));
+    if (options.onGuide) returnConversation.append(make('p', '', options.guideLabel === '대화 이어가기' ? `술사와의 대화는 캐릭터에 저장한 정보의 ${conversationSubject} 기본 풀이로 이어져요.${npc === 'tojeong' ? '' : ' 별자리는 서울 기준이에요.'}` : '읽다가 궁금해진 대목이 있나요?'), button('', options.guideLabel === '대화 이어가기' ? `${HOSTS[npc].name} ${conversationSubject} 이야기` : guideText, () => options.onGuide?.(), viewSignal));
     content.append(intro, pending, digest, readingRoute, layout, notes, technical, offerHost, returnConversation, make('p', 'report-footnote', '삼라 앱과 같은 계산 엔진의 결과를 바탕으로 읽었어요. 별자리·자미두수의 풀이는 앱의 기본 해석과 같은 출처이며, 사주의 생활 안내는 계산된 일간·십신·격국·강약을 풀어 썼어요. NPC의 AI 대화와 유료 심층 리포트는 별도의 해석이에요.'));
     let calculation = 0, inputCalendar = profile.birth?.calendar;
     async function refresh() {
@@ -116,7 +118,14 @@ export function mountReadingReport(container, npc, profile, options = {}) {
           digest.append(items);
         }
         digest.hidden = !result.highlights?.length;
-        pending.hidden = true; pending.className = 'report-pending'; chapters.replaceChildren(); outline.replaceChildren(make('p', '', '읽고 싶은 주제로'));
+        pending.hidden = true; pending.className = 'report-pending'; chapters.replaceChildren(); outline.replaceChildren(make('p', '', '읽고 싶은 주제로')); outline.classList.remove('is-expanded');
+        const outlineToggle = button('report-outline-toggle', `주제 목차 ${result.sections.length}개 펼치기 ＋`, () => {
+          const expanded = !outline.classList.contains('is-expanded');
+          outline.classList[expanded ? 'add' : 'remove']('is-expanded');
+          outlineToggle.setAttribute('aria-expanded', String(expanded));
+          outlineToggle.textContent = expanded ? '주제 목차 접기 −' : `주제 목차 ${result.sections.length}개 펼치기 ＋`;
+        }, outlineSignal);
+        outlineToggle.setAttribute('aria-expanded', 'false'); outline.append(outlineToggle);
         result.sections.forEach((chapter, index) => {
           const section = make('section', 'report-chapter'), heading = make('h2', '', chapter.title); section.id = `${id}-${kind}-${chapter.id}`; heading.tabIndex = -1;
           section.append(make('span', 'report-chapter-number', String(index + 1).padStart(2, '0')), heading);

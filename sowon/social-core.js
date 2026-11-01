@@ -1,4 +1,4 @@
-import { safeIlju, roomForKey, safeRoomCounts } from './ilju-room-core.js?v=20261101-freepath1';
+import { safeIlju, roomForKey, safeRoomCounts } from './ilju-room-core.js?v=20261101-freepath2';
 export { safeIlju, roomForKey, safeRoomCounts };
 export const SOCIAL_ENDPOINT = 'https://sidxbzpbesbaiokxrqsf.supabase.co/functions/v1/shrine-social';
 export const SOCIAL_SESSION_KEY = 'samra.sowon.social.session.v1';

@@ -1,5 +1,5 @@
-import { getEncounter } from './encounter-core.js?v=20261101-freepath1';
-import { getFeature } from './hub-core.js?v=20261101-freepath1';
+import { getEncounter } from './encounter-core.js?v=20261101-freepath2';
+import { getFeature } from './hub-core.js?v=20261101-freepath2';
 
 export const MAX_DIALOGUE_MESSAGES = 20;
 export const MAX_DIALOGUE_QUESTION_LENGTH = 160;
