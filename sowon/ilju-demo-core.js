@@ -37,7 +37,7 @@ export const DEMO_TRAVELERS = freezeTree([
   },
   {
     id: 'demo-traveler-yunseul', nickname: '윤슬', outfit: 'dawn',
-    x: 5.2, z: -.7, heading: -Math.PI * .65,
+    x: -5.2, z: -2.95, heading: Math.PI * .65,
     birth: { y: 1996, mo: 2, d: 3, h: 18, mi: 0, g: 'F' },
     greeting: '안녕하세요. 윤슬이에요. 여기 빛이 참 편안하죠? 천천히 둘러봐요.',
     topics: [
