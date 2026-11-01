@@ -169,7 +169,7 @@ async function render(view) {
       const module=await import('./readings.js?v=20261101-freepath4'); if(version!==generation)return;
       result=await module.mountReading(mount,item.value,{navigate,signal:viewAbort.signal,...readingOptions.get(item.value)});
     } else if(item.kind==='culture') {
-      const module=await import('./culture.js?v=20261101-portraits1');if(version!==generation)return;
+      const module=await import('./culture.js?v=20261101-compact2');if(version!==generation)return;
       result=await module.mountCulture(mount,item.value,{navigate,signal:viewAbort.signal,dayPillar:getOwnIdentity().ilju});
     } else {
       const module=await import('./collection.js?v=20261101-freepath4');if(version!==generation)return;

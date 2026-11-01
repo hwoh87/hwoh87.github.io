@@ -4,7 +4,7 @@ export const CULTURE_ROLES=Object.freeze([
   {id:'all',label:'전체'}, {id:'idol',label:'아이돌'}, {id:'actor',label:'배우'},
   {id:'music',label:'가수·음악인'}, {id:'screen',label:'방송·코미디'}, {id:'creator',label:'크리에이터'},
 ]);
-export const CULTURE_TOPICS=Object.freeze([{id:'all',label:'전체 읽기'},{id:'people',label:'인물 풀이'},{id:'guides',label:'사주 입문'}]);
+export const CULTURE_TOPICS=Object.freeze([{id:'guides',label:'사주 지식'},{id:'people',label:'연예인 이야기'}]);
 const ROLE_WORDS={idol:/아이돌/,actor:/배우/,music:/가수|래퍼|음악|싱어송라이터|작곡/,screen:/방송|진행|코미디|희극/,creator:/유튜버|크리에이터|vlogger/i};
 const FEATURED_IDS=[63,12,45,49,66,30];
 function words(value){return String(value||'').normalize('NFKC').toLocaleLowerCase('ko-KR').trim().split(/\s+/).filter(Boolean);}
@@ -33,10 +33,10 @@ export function selectCulturePeople(people,{query='',role='all',element='',dayPi
     return(ai<0?1000:ai)-(bi<0?1000:bi)||a.name.localeCompare(b.name,'ko-KR')||a.id-b.id;
   });
 }
-export function selectCultureArticles(data,{query='',topic='all'}={}){
+export function selectCultureArticles(data,{query='',topic='guides'}={}){
   const guides=data.articles.map(article=>({...article,kind:'guide'}));
   const people=selectCulturePeople(data.people).map(person=>({...person,kind:'person',topic:'인물 풀이'}));
-  return(topic==='guides'?guides:topic==='people'?people:[...guides.slice(0,3),...people,...guides.slice(3)])
+  return(topic==='people'?people:guides)
     .filter(article=>cultureMatches([article.name,article.title,article.summary,article.topic,article.occupation,article.search].join(' '),query));
 }
 export function featuredCulturePeople(people,count=3){return FEATURED_IDS.map(id=>people.find(person=>person.id===id)).filter(Boolean).slice(0,count);}
