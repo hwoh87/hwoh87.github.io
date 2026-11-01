@@ -22,11 +22,14 @@ export const HALL_JOURNEYS = Object.freeze({
     continuation:'기본 풀이를 읽은 뒤 더 궁금한 주제가 생기면, 풀이 아래에서 상세 리포트의 목차와 가격을 살펴볼 수 있어요.',
   },
   inyeon: {
-    title:'두 사람의 결을, 먼저 무료로',
-    description:'두 사람의 궁합을 보거나, 설월과 내 관계 반응부터 읽어보세요.',
+    title:'어떤 인연을 살펴볼까요?',
+    description:'신당에서 만난 나그네와 함께 보거나, 두 사람의 정보를 직접 입력해 궁합을 읽어보세요.',
     includes:['두 명식의 관계','관계의 강점과 조율점','서로 승인하는 나그네 궁합'],
-    actions:[{label:'두 사람 무료 궁합 보기',type:'feature',id:'gunghap'},{label:'설월과 내 관계 이야기',type:'encounter',npc:'seol'}],
-    continuation:'상대의 정보가 없어도 내 관계 성향은 읽을 수 있어요. 유료 궁합은 상품의 입력 조건과 목차를 확인한 뒤 선택해요.',
+    actions:[
+      {label:'만난 나그네와 궁합',type:'social',hint:'같은 공간의 나그네에게 요청하고, 서로 승인한 뒤 함께 읽어요.',step:'나그네 선택 → 요청 → 승인'},
+      {label:'직접 입력해 궁합 보기',type:'feature',id:'gunghap',hint:'알고 있는 두 사람의 출생정보를 입력해 바로 비교해요.',step:'출생정보 입력 → 기본 궁합'},
+    ],
+    continuation:'두 방식 모두 기본 궁합을 무료로 볼 수 있어요. 더 자세한 리포트는 입력 조건·목차·가격을 확인한 뒤 선택해요.',
   },
   stars: {
     title:'태어난 하늘을 차근차근',

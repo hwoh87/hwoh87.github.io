@@ -1,6 +1,6 @@
 import { getOwnIdentity } from './identity.js?v=20261101-freepath4';
 import { getActiveProfile } from './profile-core.js?v=20261101-freepath4';
-import { FEATURES, HALLS, HALL_JOURNEYS, getFeature, getHall, parseView, viewHash, internalDestination, readJourney, writeJourney } from './hub-core.js?v=20261101-freepath4';
+import { FEATURES, HALLS, HALL_JOURNEYS, getFeature, getHall, parseView, viewHash, internalDestination, readJourney, writeJourney } from './hub-core.js?v=20261101-pairpaths4';
 
 const dialog = document.createElement('dialog');
 dialog.className = 'hub-dialog';
@@ -84,21 +84,28 @@ function renderHall(id) {
   const hall = getHall(id);
   const intro = el('section', 'hub-hall-intro');
   intro.innerHTML = `<img src="/store/art/readers/${hall.reader}.webp" alt="" width="88" height="88"><div><span>${hall.guide}의 안내</span><h3>${hall.line}</h3><p>${hall.description}</p></div>`;
-  content.append(intro);
+  if(id!=='inyeon')content.append(intro);
   const journey=HALL_JOURNEYS[id];
   if(journey){
-    const start=el('section','hub-free-start');start.setAttribute('aria-label',hall.name+' 무료로 시작하기');
-    start.append(el('p','hub-free-label','먼저, 무료로 읽기'),el('h3','',journey.title),el('p','hub-free-description',journey.description));
+    const pair=id==='inyeon',start=el('section','hub-free-start'+(pair?' hub-pair-start':''));start.setAttribute('aria-label',hall.name+' 무료로 시작하기');
+    start.append(el('p','hub-free-label',pair?'두 사람의 궁합 · 무료로 시작하기':'먼저, 무료로 읽기'),el('h3','',journey.title),el('p','hub-free-description',journey.description));
     const includes=el('ul','hub-free-includes');journey.includes.forEach(text=>includes.append(el('li','',text)));
-    const actions=el('div','hub-free-actions');
+    const actions=el('div',pair?'hub-free-actions hub-pair-choices':'hub-free-actions');
     journey.actions.forEach((action,index)=>{
-      const button=el('button',index===0?'hub-primary':'hub-free-secondary',action.label);button.type='button';
+      const button=el('button',pair?'hub-pair-choice':index===0?'hub-primary':'hub-free-secondary',pair?undefined:action.label);button.type='button';
+      if(pair){const hint=el('span','',action.hint);hint.id='hub-pair-hint-'+index;button.setAttribute('aria-label',action.label);button.setAttribute('aria-describedby',hint.id);button.append(el('strong','',action.label),hint,el('small','',action.step));}
       if(action.type==='reading'){button.dataset.hubReading=action.kind;button.dataset.hubNpc=action.npc;}
       else if(action.type==='encounter')button.dataset.hubEncounter=action.npc;
+      else if(action.type==='social')button.dataset.hubSocial='';
       else button.dataset.hubFeature=action.id;
       actions.append(button);
     });
-    start.append(actions,includes,el('p','hub-free-continuation',journey.continuation));content.append(start,el('h3','hub-tools-title',id==='readers'?'술사와 상세 리포트':'함께 쓰는 도구와 읽을거리'));
+    start.append(actions,includes,el('p','hub-free-continuation',journey.continuation));content.append(start);
+    if(pair){
+      const talk=el('button','hub-pair-talk','설월과 내 관계 이야기');talk.type='button';talk.dataset.hubEncounter='seol';
+      intro.querySelector('div')?.append(talk);content.append(intro);
+    }
+    content.append(el('h3','hub-tools-title',id==='readers'?'술사와 상세 리포트':'함께 쓰는 도구와 읽을거리'));
   }
   const grid = el('div', 'hub-feature-grid'); hall.features.forEach(key => grid.appendChild(featureCard(key)));
   content.append(grid);

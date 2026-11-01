@@ -41,7 +41,23 @@ export function mountNpcDialogue(container, npcId, options = {}) {
   heading.append(make('p', 'npc-eyebrow', `${withNpc}의 대화`), title, status);
   const close = button('×', 'npc-close', () => leave(options.onClose)); close.setAttribute('aria-label', `${withNpc}의 대화 닫기`); header.append(heading, close);
   const toolbar = make('nav', 'npc-toolbar'); toolbar.setAttribute('aria-label', '대화와 함께 보기');
-  toolbar.append(button(hasProfile ? '전체 해석' : '내 정보 입력', '', () => leave(() => hasProfile ? options.onReading?.(npc.readingKind) : options.onProfile?.())), button('나그네와 궁합', '', () => leave(options.onSocial)), button('공간 둘러보기', '', () => leave(() => options.onHall?.(npcId === 'tojeong' ? 'myeongri' : npcId === 'seol' ? 'inyeon' : 'readers'))));
+  toolbar.append(button(hasProfile ? '전체 해석' : '내 정보 입력', '', () => leave(() => hasProfile ? options.onReading?.(npc.readingKind) : options.onProfile?.())));
+  if (npcId !== 'seol') toolbar.append(button('나그네와 궁합', '', () => leave(options.onSocial)));
+  toolbar.append(button('공간 둘러보기', '', () => leave(() => options.onHall?.(npcId === 'tojeong' ? 'myeongri' : npcId === 'seol' ? 'inyeon' : 'readers'))));
+  const pairActions = npcId === 'seol' ? make('nav', 'npc-pair-actions') : null;
+  if (pairActions) {
+    pairActions.setAttribute('aria-label', '궁합 보는 방법');
+    [
+      ['social', '만난 나그네와 궁합', '상대가 승인하면 함께 봐요', options.onSocial],
+      ['direct', '직접 입력해 궁합 보기', '두 사람의 출생정보를 입력해요', () => options.onFeature?.('gunghap')],
+    ].forEach(([mode, label, description, callback]) => {
+      const action = button('', 'npc-pair-action', () => leave(callback)); action.dataset.pairMode = mode;
+      const name = make('span', 'npc-pair-action-name', label), hint = make('small', 'npc-pair-action-hint', description);
+      name.id = `${id}-pair-${mode}`; hint.id = `${name.id}-hint`;
+      action.setAttribute('aria-labelledby', name.id); action.setAttribute('aria-describedby', hint.id);
+      action.append(name, hint); pairActions.append(action);
+    });
+  }
   const messages = make('ol', 'npc-messages'); messages.setAttribute('role', 'log'); messages.setAttribute('aria-label', `${withNpc} 나눈 이야기`); messages.setAttribute('aria-live', 'polite'); messages.setAttribute('aria-relevant', 'additions'); messages.tabIndex = 0;
   const composer = make('div', 'npc-composer'), prompt = make('p', 'npc-prompt', '이렇게 물어봐도 좋아요'), choices = make('div', 'npc-choices'); choices.id = `${id}-choices`; choices.setAttribute('role', 'group'); choices.setAttribute('aria-label', '이어서 물어볼 질문');
   const more = button('질문 더 보기', 'npc-more-questions', () => { expandedChoices = !expandedChoices; showChoices(); }); more.setAttribute('aria-controls', choices.id); more.setAttribute('aria-expanded', 'false');
@@ -78,7 +94,7 @@ export function mountNpcDialogue(container, npcId, options = {}) {
   const disclosure = make('small', 'npc-disclosure', chatClient ? 'Gemini Flash Lite · 출생정보 원문·닉네임은 보내지 않아요. ' : '주제에 맞는 준비된 안내와 내 계산 해석을 들려줘요. 이 페이지에서만 이어져요.');
   if (chatClient) { const privacy=make('a','','정보 처리 안내'); privacy.href='/legal/privacy/#sowon-ai'; privacy.target='_blank'; privacy.rel='noopener noreferrer'; disclosure.append(privacy); }
   footer.append(historyActions,disclosure);
-  composer.append(prompt, choices, more, form, footer); conversation.append(header, toolbar, messages, composer); container.replaceChildren(stage, conversation);
+  composer.append(prompt, choices, more, form, footer); conversation.append(header, toolbar); if (pairActions) conversation.append(pairActions); conversation.append(messages, composer); container.replaceChildren(stage, conversation);
   listen(container,'cancel',()=>abortPending());
 
   function abortPending(restoreDraft = false) {

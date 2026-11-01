@@ -232,6 +232,13 @@ dialog.xp-dialog.npc-dialog::backdrop {
 }
 .npc-dialog .npc-toolbar :is(button,a):hover { color: #233f2d; text-decoration: underline; text-underline-offset: 5px; }
 
+/* Seol keeps both compatibility routes visible before a conversation starts. */
+.npc-dialog .npc-pair-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); flex-shrink: 0; gap: 8px; min-width: 0; margin: 11px 28px 0; }
+.npc-dialog .npc-pair-action { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 4px; min-width: 0; min-height: 68px; margin: 0; padding: 10px 12px; border: 1px solid #cbd5c5; border-radius: 7px; background: #fafbf6; color: #354d3a; line-height: 1.55; text-align: left; word-break: keep-all; overflow-wrap: anywhere; }
+.npc-dialog .npc-pair-action:hover { border-color: #94ab86; background: #edf2e7; color: #233c2a; }
+.npc-dialog .npc-pair-action-name { font-size: 12px; font-weight: 600; }
+.npc-dialog .npc-pair-action-hint { color: #677261; font-size: 10px; font-weight: 400; }
+
 /* Only the message history scrolls; the next available choices remain in place. */
 .npc-dialog .npc-messages {
   display: flex;
@@ -364,6 +371,7 @@ dialog.xp-dialog.npc-dialog::backdrop {
   .npc-scene-focused .npc-dialog .npc-dialog-header { padding: 13px 23px 5px; }
   .npc-scene-focused .npc-dialog .npc-dialog-title { font-size: 18px; }
   .npc-scene-focused .npc-dialog .npc-toolbar { margin: 0 24px; }
+  .npc-scene-focused .npc-dialog .npc-pair-actions { margin-right: 24px; margin-left: 24px; }
   .npc-scene-focused .npc-dialog .npc-messages { padding: 22px 24px; }
   .npc-scene-focused .npc-dialog .npc-composer { padding: 12px 24px 8px; }
 }
@@ -405,6 +413,9 @@ dialog.xp-dialog.npc-dialog::backdrop {
   .npc-dialog .npc-close { margin: -4px -6px 0 0; }
   .npc-dialog .npc-toolbar { gap: 0 15px; margin: 0 18px; padding-bottom: 4px; }
   .npc-dialog .npc-toolbar :is(button,a) { min-height: 40px; padding: 6px 0; font-size: 11px; }
+  .npc-dialog .npc-pair-actions { gap: 7px; margin: 9px 18px 0; }
+  .npc-dialog .npc-pair-action { min-height: 68px; padding: 9px 10px; }
+  .npc-dialog .npc-pair-action-name { font-size: 11px; }
   .npc-dialog .npc-messages { gap: 22px; padding: 21px 18px 22px; scrollbar-gutter: auto; }
   .npc-dialog .npc-message-text, .npc-dialog .npc-message-body>p:not([class]) { font-size: 15px; line-height: 1.9; }
   .npc-dialog .npc-message--user .npc-message-body { padding: 10px 13px; }
@@ -426,6 +437,8 @@ dialog.xp-dialog.npc-dialog::backdrop {
   .npc-dialog .npc-dialog-header { padding: 12px 13px 5px; }
   .npc-dialog .npc-dialog-title { font-size: 17px; }
   .npc-dialog .npc-toolbar { gap: 0 12px; margin: 0 14px; }
+  .npc-dialog .npc-pair-actions { margin-right: 14px; margin-left: 14px; }
+  .npc-dialog .npc-pair-action { padding-right: 8px; padding-left: 8px; }
   .npc-dialog .npc-messages { padding: 17px 14px 19px; }
   .npc-dialog .npc-composer { padding-right: 13px; padding-left: 13px; }
   .npc-dialog .npc-choice { padding: 8px 9px; font-size: 11px; }
@@ -495,6 +508,9 @@ dialog.xp-dialog.npc-dialog::backdrop {
 
 /* A short visual viewport leaves room for the keyboard and the last reply. */
 @media (max-height: 500px) {
+  .npc-dialog .npc-pair-actions { margin-top: 5px; gap: 6px; }
+  .npc-dialog .npc-pair-action { min-height: 44px; padding: 6px 9px; }
+  .npc-dialog .npc-pair-action-hint { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .npc-dialog .npc-composer { min-height: 0; padding-top: 4px; padding-bottom: 4px; }
   .npc-dialog .npc-prompt { display: none; }
   .npc-dialog .npc-more-questions { min-height: 44px; padding-top: 3px; padding-bottom: 3px; }
@@ -507,6 +523,6 @@ dialog.xp-dialog.npc-dialog::backdrop {
 }
 @media (forced-colors: active) {
   dialog.xp-dialog.npc-dialog { border: 2px solid CanvasText; }
-  .npc-dialog .npc-choice, .npc-dialog .npc-message-action { border-color: ButtonText; }
+  .npc-dialog .npc-choice, .npc-dialog .npc-message-action, .npc-dialog .npc-pair-action { border-color: ButtonText; }
   .npc-dialog :is(button,a):focus-visible { outline-color: Highlight; }
 }

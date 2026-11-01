@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
 import { createWorld } from './world.js?v=20261101-freepath4';
 import { createAvatar } from './avatar.js?v=20261101-freepath4';
-import { getSocialRoomState } from './social.js?v=20261101-freepath4';
+import { getSocialRoomState } from './social.js?v=20261101-pairpaths4';
 import { getOwnIdentity } from './identity.js?v=20261101-freepath4';
 import { getOwnProfile } from './profile.js?v=20261101-freepath4';
 import { createLocomotion, isWalkable } from './locomotion.js?v=20261101-freepath4';

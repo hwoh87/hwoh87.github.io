@@ -67,7 +67,7 @@ async function openEncounter(npc, {reading=false, kind}={}) {
         onGuide: () => { closeEncounter(); queueMicrotask(() => openEncounter(npc)); },
       });
     } else {
-      const module = await import('./npc-dialog.js?v=20261101-freepath4');
+      const module = await import('./npc-dialog.js?v=20261101-pairpaths4');
       if (version !== encounterVersion || !encounterDialog.open) return;
       encounterDialog.classList.remove('xp-loading-dialog');
       result = module.mountNpcDialogue(encounterDialog,npc,{
