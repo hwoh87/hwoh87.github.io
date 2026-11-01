@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
 import { createIljuInterior } from './ilju-interior.js?v=20261101-templeroom1';
-import { interiorForRoom, interiorViewPose } from './ilju-interior-core.js?v=20261101-templeroom1';
+import { interiorForRoom, interiorViewPose, applyInteriorSeat } from './ilju-interior-core.js?v=20261101-templeroom2';
 import { createAvatar } from './avatar.js?v=20261101-templeroom1';
 import { createLocomotion } from './locomotion.js?v=20261101-templeroom1';
 import { createVisitors } from './visitors.js?v=20261101-freepath4';
@@ -185,7 +185,7 @@ function render(time) {
   const modal = dialogOpen(); engine.movement.setEnabled(!modal && !pendingExit);
   if (!modal) {
     engine.movement.update(dt);
-    if (activeSeat) engine.avatar.group.rotation.y = activeSeat.heading;
+    applyInteriorSeat(engine.avatar, activeSeat);
     if (transition) {
       transition.time += dt; const t = Math.min(1, transition.time / .8), eased = t * t * (3 - 2 * t);
       engine.camera.position.lerpVectors(transition.from, new THREE.Vector3(...transition.pose.position), eased);
@@ -199,7 +199,7 @@ function render(time) {
     if (!name.hidden) { name.style.left = `${(point.x + 1) * 50}%`; name.style.top = `${(1 - point.y) * 50}%`; }
     engine.renderer.render(engine.scene, engine.camera);
     layer.dataset.position = `${engine.avatar.group.position.x.toFixed(2)},${engine.avatar.group.position.z.toFixed(2)}`;
-    layer.dataset.moving = String(engine.movement.getState().moving); layer.dataset.seated = String(Boolean(activeSeat)); layer.dataset.drawCalls = String(engine.renderer.info.render.calls);
+    layer.dataset.moving = String(engine.movement.getState().moving); layer.dataset.seated = String(engine.avatar.getSeated?.() === true); layer.dataset.drawCalls = String(engine.renderer.info.render.calls);
   } else { engine.visitors.hideLabels(); $('.interior-name').hidden = true; }
   frame = requestAnimationFrame(render);
 }

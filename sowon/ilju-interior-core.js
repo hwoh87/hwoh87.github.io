@@ -97,3 +97,12 @@ export function interiorViewPose({width = 1280, height = 720, mode = 'overview'}
     fov: portrait ? 62 : 48,
   };
 }
+
+// Arrival callbacks run before the movement controller's final avatar update.
+// Apply the resting pose after that update so its last walking step cannot undo it.
+export function applyInteriorSeat(avatar, seat) {
+  if (!seat) return false;
+  avatar.group.rotation.y = seat.heading;
+  if (!avatar.getSeated?.()) avatar.setSeated?.(true, seat.surfaceY ?? .17);
+  return avatar.getSeated?.() === true;
+}
