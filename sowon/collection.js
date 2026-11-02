@@ -46,7 +46,7 @@ function script(path, ready, repeat=false) {
   if(path==='/store/catalog.js'&&window.__samraCatalogReady)return window.__samraCatalogReady;
   if(!repeat&&loads.has(path))return loads.get(path);
   const promise=new Promise((resolve,reject)=>{
-    const node=document.createElement('script');node.src=path;node.async=true;
+    const node=document.createElement('script');node.src=path==='/store/catalog.js'?path+'?v=20261103-paid1':path;node.async=true;
     let settled=false;let timeout;
     const finish=error=>{if(settled)return;settled=true;clearTimeout(timeout);node.onload=null;node.onerror=null;if(error){node.remove();loads.delete(path);if(path==='/store/catalog.js')window.__samraCatalogReady=null;reject(new Error('collection_load'));}else{if(repeat)node.remove();resolve();}};
     node.onload=()=>finish(ready&&!ready());
@@ -65,7 +65,7 @@ function heading(root,kicker,title,description){root.append(el('p','sc-kicker',k
 function status(root){const node=el('p','sc-status');node.setAttribute('role','status');node.setAttribute('aria-live','polite');root.append(node);return node;}
 function searchField(label,placeholder){const wrap=el('label','sc-search',label),input=el('input');input.type='search';input.placeholder=placeholder;input.autocomplete='off';wrap.append(input);return{wrap,input};}
 function selectField(label,options){const wrap=el('label','sc-select',label),select=el('select');options.forEach(([value,text])=>{const option=el('option','',text);option.value=value;select.append(option);});wrap.append(select);return{wrap,select};}
-function cover(product){const image=el('img','sc-cover');image.src='/store/art/covers/'+product.slug+'.webp';image.alt='';image.width=120;image.height=150;image.loading='lazy';return image;}
+function cover(product){const image=el('img','sc-cover');image.src=product.cover||'/store/art/covers/'+product.slug+'.webp';image.alt='';image.width=120;image.height=150;image.loading='lazy';return image;}
 function productCard(product,data){
   const card=link('','/store/product.html?id='+encodeURIComponent(product.slug)+'#report-preview','sc-product','product');
   const copy=el('div','sc-product-copy');copy.append(el('span','sc-category',(data.categories[product.catId||product.cat]?.label||'리포트')+' · 유료 상세'),el('h3','',product.title),el('p','sc-product-summary',product.bullets));

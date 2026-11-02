@@ -7,7 +7,7 @@
 // 웹도 같은 값으로 판다(토스페이먼츠). 두 채널이 같은 상품을 다른 값에 파는 일을 막으려고
 // 한곳에서만 쓴다. 여기 숫자를 바꿀 때는 Play 콘솔 가격·appPrice() 를 함께 바꿔야 세 곳이 안 어긋난다.
 // (서버는 이 파일에서 생성된 store-catalog.gen.ts 를 읽으므로 export 스크립트 재실행 필수.)
-const STORE_CATALOG_VERSION = "2026-11-01-annual-life-v1";
+const STORE_CATALOG_VERSION = "2026-11-03-grand-web-v1";
 
 const PRICING = {
   solo: 9900,       // 나 혼자 보는 상품
@@ -31,6 +31,7 @@ const subj = name => {
 
 // 카테고리 — 색은 레퍼런스의 카테고리 악센트 체계를 따른다.
 const CATS = {
+  fusion: { emoji: "◌", label: "그랜드 리포트", color: "#9db6a0", group: "세 체계로 읽는 나의 이야기", desc: "사주·자미두수·별자리를 함께 읽는 심층 해석" },
   love:    { emoji: "💘", label: "연애·썸",   color: "#ec4899",
              group: "이번엔 진짜 연애 좀 해보자", desc: "연애 살부터 밀당, 매력 포인트까지" },
   night:   { emoji: "🌙", label: "속마음·심야", color: "#d946ef",
@@ -746,11 +747,69 @@ PRODUCTS.unshift(...[
   }
 ]);
 
+// The existing app grand report has a separate Play SKU; this entry is web only.
+PRODUCTS.unshift({
+  "slug": "grand-report",
+  "cat": "fusion",
+  "badge": "그랜드",
+  "reader": "tojeong",
+  "featured": true,
+  "webOnly": true,
+  "cover": "/store/art/covers/grand-report.svg",
+  "title": "나의 그랜드 리포트",
+  "bullets": "사주·자미두수·별자리 융합 · 18장 심층 해석 · PDF 보관",
+  "axes": "사주 원국 · 격국 · 용신 · 대운 · 자미두수 12궁 · 별자리 출생 차트",
+  "chaptersN": 18,
+  "basisN": 6,
+  "readMin": 35,
+  "kicker": "세 체계로 함께 읽는 나",
+  "headline": "나를 읽는 세 시선,\n한 권으로 이어지는 이야기",
+  "pitch": "무료 풀이에서 만난 나의 기질과 흐름을 사주·자미두수·별자리로 함께 살펴봐요. 일과 재물, 관계와 생활의 균형부터 다가오는 12개월과 10년의 흐름까지 열여덟 장으로 읽습니다. 한국 출생·한국 표준시 기준이며 정확한 출생시간과 도시가 필요해요.",
+  "greeting": "토정입니다. 서로 다른 세 시선이 당신의 삶에서 어떻게 만나는지, 계산한 글자와 별을 놓고 차분히 읽어보겠습니다.",
+  "came": [
+    "무료 풀이보다 내 사주를 깊게 이해하고 싶어요",
+    "사주·자미두수·별자리의 공통점과 차이가 궁금해요",
+    "앞으로의 일과 관계를 함께 살펴보고 싶어요",
+    "긴 해석을 PDF로 보관하며 다시 읽고 싶어요"
+  ],
+  "deliver": "같은 출생정보로 세 체계를 계산하고 앱 그랜드 리포트와 공유하는 해석 지침을 바탕으로 18장을 구성해요. 웹 구매는 웹 서재에 보관되며 12개월 열람과 PDF 저장을 제공합니다. 앱 구매 권한과는 자동 연동되지 않아요.",
+  "chapters": [
+    "한눈에 보기",
+    "내 에너지 구조",
+    "일주가 빚어내는 나",
+    "세 체계가 겹치는 자리",
+    "격국이 그리는 무대",
+    "십신 패턴",
+    "재물과 풍요",
+    "일과 사업",
+    "연애와 결혼",
+    "건강과 몸",
+    "나를 돕는 귀인",
+    "인생 4구간 흐름",
+    "지금 운의 계절",
+    "다가오는 12개월",
+    "앞으로 10년의 지도",
+    "자미두수 심층",
+    "별자리 심층",
+    "현실 조언"
+  ],
+  "notes": {
+    "4": "세 체계가 함께 가리키는 점과 서로 다르게 보는 점을 구분해요.",
+    "14": "달별 흐름은 계산 자료에서 확인되는 범위만 읽어요."
+  },
+  "related": [
+    "midnight-self",
+    "three-months",
+    "money-bowl"
+  ]
+});
+
 // ── 스토어 파이프라인 메타 — 체크아웃(웹)과 store-report(서버)가 함께 쓴다 ──────────
 // input: solo(나만) | pair(나+상대 생년월일) | pet(나+반려동물 이름·종·출생연도)
 // pair 상품의 관계 kind 는 전부 COUPLE(연인·부부·전연인·짝사랑 상대) — 궁합 엔진·미성년 가드 기준.
 // 상품 추가 시 STORE_INPUT/STORE_ANGLES 에 같이 추가할 것 — export_store_catalog 가 누락이면 실패한다.
 const STORE_INPUT = {
+  "grand-report": "solo",
   "year-2027": "solo",
   "money-2027": "solo",
   "career-2027": "solo",
@@ -779,6 +838,7 @@ const STORE_EXTRA_FIELDS = {
 // 서버 AI 지침(각도) — 이 상품이 payload 의 어떤 계산을 어떤 순서로 쓰는지. 술사 말투와 별개로
 // '사실의 각도'만 적는다. 여기 없는 명리를 지어내지 말라는 가드가 서버 프롬프트에 함께 붙는다.
 const STORE_ANGLES = {
+  "grand-report": "fusion의 실제 사주·자미두수·별자리와 12개월·10년 계산을 함께 읽는다. 세 체계의 교차점과 차이를 설명하고 주어진 계산에 없는 인물·사건·시기를 만들지 않는다.",
   "year-2027": "대상 기간은 반드시 2027년 1~12월이다. months의 해당 연도 열두 달과 years의 2027년 세운만 사용하라. 쉬운 생활 언어로 답부터 말하고 계산 근거는 뒤에서 짧게 설명하라. 연애·재물·취업과 직장·건강과 생활관리 네 분야를 연간과 매월 모두 다루며 종합 상품 안에서 기본 답을 완결하라. 각 월의 실제 ganji·stemSipsin·branchSipsin·tone과 원국을 근거로 분야별 장면과 행동을 구분하라. 종합 길흉을 네 분야의 독립 점수로 복제하거나 질병·사고·장기 위험으로 바꾸지 마라. 현재 직업·교제·건강 상태는 입력되지 않았으므로 솔로/교제 중, 구직/재직은 조건부로 제시하라. 구체적인 준비·대화·비교·기록 행동을 제안하되 매달 서류 점검과 정리만 반복하지 마라. now 이전 월은 회고, 현재·미래 월은 계획으로 구분하라. 월운에 없는 합충·날짜·주간 길흉, 실제 만남·합격·수익·건강 예측을 만들지 마라.",
   "money-2027": "대상 기간은 반드시 2027년 1~12월이다. months의 해당 연도 열두 달과 years의 2027년 세운만 사용하라. 각 월 장은 그 달의 실제 ganji·stemSipsin·branchSipsin·tone에 근거해 차별화하라. now 이전 월은 회고, 현재·미래 월은 계획으로 구분하라. 월운에 없는 합충·특정 날짜·주간 길흉을 만들지 마라. 정재·편재와 식상 구조로 수입·지출의 결을 읽어라. 금액·수익률 예측, 투자 종목 추천과 매매 지시는 금지한다.",
   "career-2027": "대상 기간은 반드시 2027년 1~12월이다. months의 해당 연도 열두 달과 years의 2027년 세운만 사용하라. 각 월 장은 그 달의 실제 ganji·stemSipsin·branchSipsin·tone에 근거해 차별화하라. now 이전 월은 회고, 현재·미래 월은 계획으로 구분하라. 월운에 없는 합충·특정 날짜·주간 길흉을 만들지 마라. 격국·관성·식상 근거로 조직 생활과 역량 개발을 읽어라. 퇴사·이직을 지시하거나 합격·승진을 보장하지 마라.",
@@ -826,3 +886,5 @@ function selectStoreProducts({ query = "", category = "all", sort = "recommended
     .sort((a, b) => (sort === "reading" ? a.p.readMin - b.p.readMin : Number(!!b.p.featured) - Number(!!a.p.featured)) || a.index - b.index)
     .map(({ p }) => p);
 }
+
+function coverOf(product) { return product.cover || "/store/art/covers/" + product.slug + ".webp"; }

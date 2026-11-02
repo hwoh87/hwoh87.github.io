@@ -42,7 +42,7 @@
     const h=shell('선택 완료','이 고민에는 이 리포트부터');
     host.append(el('p','finder-note','선택한 질문: '+answer));
     const card=el('div','finder-result');
-    const img=el('img');img.src='/store/art/covers/'+p.slug+'.webp';img.alt='';img.width=100;img.height=140;img.loading='lazy';card.append(img);
+    const img=el('img');img.src=(p.cover || '/store/art/covers/'+p.slug+'.webp');img.alt='';img.width=100;img.height=140;img.loading='lazy';card.append(img);
     const copy=el('div');copy.append(el('h3','',p.title),el('p','',p.bullets),el('strong','finder-price',won(priceOf(p.slug))+' · '+p.chaptersN+'장'));
     const needs=STORE_INPUT[slug]==='pair'?'두 사람의 생년월일이 필요해요.':STORE_INPUT[slug]==='pet'?'내 생년월일과 반려동물 정보가 필요해요.':'내 생년월일로 읽는 리포트예요.';
     copy.append(el('p','finder-note',needs+' 구독 없이 단건 구매예요.'));

@@ -1,3 +1,4 @@
+import { mountReadingOffers } from './reading-offers.js?v=20261103-paid1';
 import { ENGINE_URL } from '../calc/panels/manifest.js';
 import { mountBirth, mountTimeCompare, mountJourney } from '../calc/panels/helpers.js';
 import { profileSearch } from './profile-core.js?v=20261101-freepath4';
@@ -108,7 +109,7 @@ export function loadReadingEngine() {
 export function loadCatalog() {
   if (typeof PRODUCT_BY_SLUG !== 'undefined') return Promise.resolve();
   if (!window.__samraCatalogReady) {
-    window.__samraCatalogReady = loadScript('/store/catalog.js', () => typeof PRODUCT_BY_SLUG !== 'undefined');
+    window.__samraCatalogReady = loadScript('/store/catalog.js?v=20261103-paid1', () => typeof PRODUCT_BY_SLUG !== 'undefined');
     window.__samraCatalogReady.catch(() => { window.__samraCatalogReady = null; });
   }
   return window.__samraCatalogReady;
@@ -292,6 +293,7 @@ export async function mountReading(container, kind, options = {}) {
   let env;
   let disposed = false;
   let removeLinks = () => {};
+  let paidHost = null, paidCleanup = null;
   let removePersonTracking = () => {};
   let captureOwnPerson = () => {};
   const personRevision = ownPersonMemory.revision();
@@ -299,6 +301,7 @@ export async function mountReading(container, kind, options = {}) {
   function dispose() {
     if (disposed) return;
     captureOwnPerson();
+    paidCleanup?.();
     disposed = true; env?.dispose(); removeLinks(); removePersonTracking(); host.remove();
     options.signal?.removeEventListener('abort', abort);
     if (activeMounts.get(container)?.dispose === dispose) activeMounts.delete(container);
@@ -317,6 +320,7 @@ export async function mountReading(container, kind, options = {}) {
     const style = document.createElement('style'); style.textContent = view.styles; root.appendChild(style);
     const polish = document.createElement('link'); polish.rel = 'stylesheet'; polish.href = '/sowon/readings.css?v=20261101-freepath4'; root.appendChild(polish);
     const theme = document.createElement('link'); theme.rel='stylesheet';theme.href='/sowon/reading-theme.css?v=20261103-hour2';root.appendChild(theme);
+    const offersStyle = document.createElement('link'); offersStyle.rel='stylesheet';offersStyle.href='/sowon/reading-offers.css?v=20261103-paid1';root.appendChild(offersStyle);
     const charts = document.createElement('link'); charts.rel='stylesheet';charts.href='/sowon/reading-visuals.css?v=20261101-report-visual3';root.appendChild(charts);
     const analysisStyle = document.createElement('link'); analysisStyle.rel='stylesheet';analysisStyle.href='/sowon/analysis-loading.css?v=20261102-loading1';root.appendChild(analysisStyle);
     const template = document.createElement('template');
@@ -327,6 +331,10 @@ export async function mountReading(container, kind, options = {}) {
       // shrine, let visitors read the free relationship before the paid shelf.
       const result = root.getElementById('result'), offers = root.getElementById('xsell');
       if (result && offers) result.insertBefore(offers, result.querySelector('.cta-box'));
+      if (result && offers) {
+        offers.style.display='none';
+        paidHost=document.createElement('div');paidHost.className='shrine-paid-continuation';paidHost.hidden=true;offers.after(paidHost);
+      }
       const hero = result?.querySelector('.verdict-hero');
       if (hero) {
         const scope = document.createElement('nav'); scope.className = 'shrine-free-reading'; scope.setAttribute('aria-label','무료 궁합 읽는 순서');
@@ -346,6 +354,7 @@ export async function mountReading(container, kind, options = {}) {
         const result = root.getElementById('result'), heading = result?.querySelector('h2,h3') || result;
         if (heading) { heading.tabIndex = -1; heading.focus({ preventScroll: true }); }
       }
+      if (paidHost && !paidCleanup) { paidHost.hidden=false;paidCleanup=mountReadingOffers(paidHost,{kind:'gunghap',onNavigate:options.navigate}); }
       options.onCalculated?.(input,context);
     }});
     mountBirth(env);
@@ -357,7 +366,7 @@ export async function mountReading(container, kind, options = {}) {
       if (!anchor || event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       const raw = anchor.getAttribute('href');
       if (raw?.startsWith('#')) {
-        const target = root.getElementById(raw.slice(1));
+        const target = raw === '#xsell' && paidHost ? paidHost : root.getElementById(raw.slice(1));
         if (target) {
           event.preventDefault();
           const heading = raw === '#pairkw' && /^H[1-6]$/.test(target.previousElementSibling?.tagName || '') ? target.previousElementSibling : target;

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800">
+  <rect width="600" height="800" fill="#173b36"/><path d="M36 0v800M45 0v800" stroke="#8ba18a" stroke-opacity=".35"/>
+  <rect x="70" y="40" width="490" height="720" rx="2" fill="none" stroke="#b4bc98" stroke-opacity=".6"/>
+  <g fill="none" stroke="#c9d4b4" stroke-width="1.5"><circle cx="315" cy="435" r="120"/><circle cx="245" cy="510" r="120"/><circle cx="385" cy="510" r="120"/><circle cx="315" cy="484" r="174" stroke-opacity=".28"/></g>
+  <g fill="#f2eedc" text-anchor="middle" font-family="AppleMyungjo,serif"><text x="315" y="123" font-size="20" letter-spacing="4">삼라만상</text><text x="315" y="210" font-size="49">나의 그랜드</text><text x="315" y="274" font-size="49">리포트</text><text x="315" y="704" font-size="21">사주 · 자미두수 · 별자리</text></g>
+  <circle cx="315" cy="484" r="6" fill="#e1ce9d"/>
+</svg>

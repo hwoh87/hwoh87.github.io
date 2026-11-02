@@ -1,6 +1,7 @@
+import { mountReadingOffers } from './reading-offers.js?v=20261103-paid1';
 import { renderReadingVisuals } from './reading-visuals.js?v=20261101-report-visual3';
 import { buildCompatibilityVisuals } from './compatibility-visual-data.js?v=20261101-report-visual3';
-import { getOwnProfile } from './profile.js?v=20261103-hour2';
+import { getOwnProfile } from './profile.js?v=20261103-paid1';
 import { RELATION_KINDS, safePosition, serverProfile, safeVisitors, safeRequests, availableActions, safeResult, socialError, cleanText, createSocialClient, safeIlju, roomForKey, safeRoomCounts, validId } from './social-core.js?v=20261103-hour1';
 import { createRealtimeClient } from './realtime-client.js?v=20261103-hour1';
 
@@ -14,7 +15,7 @@ const state = { joined: false, joining: false, busy: false, stale: false, realti
 let opener, timer, refreshPromise, operation = 0, resultVersion = 0, visibilityVersion = 0, lastProfile = '';
 let config = {}, pendingRoom = null, leavePromise = null, leaveRemoves = false;
 let realtime = null, realtimeGeneration = 0, socialRefreshQueued = false, heartbeatPromise = null, lastRequestStamp;
-let pendingAnalysis = null;
+let pendingAnalysis = null, paidOffersCleanup = null, paidOffersHost = null, paidOffersResultId = null;
 // Clicking an avatar keeps this dialog scoped to that one public identity.
 let focusedPeerId = null, focusedPeer = null, focusedRoom = null, encounterVersion = 0;
 const isPeerFocus = () => focusedPeerId !== null;
@@ -107,7 +108,7 @@ function resultMarkup() {
   const names = r.names.a && r.names.b ? `${r.names.a} · ${r.names.b}` : `${profile()?.nickname || '나'} · ${request.peer.nickname}`;
   const text = value => esc(value).replace(/(^|[^A-Za-z])([AB])(?![A-Za-z])/g, (_m, pre, who) => pre + esc(who === 'A' ? r.names.a || '첫 번째 나그네' : r.names.b || '두 번째 나그네'));
   const section = (title, values, content) => values.length ? `<section class="social-result-section"><h3>${title}</h3>${values.map(content).join('')}</section>` : '';
-  return `<div class="social-result">${button('news', isPeerFocus() ? '← 돌아가기' : '← 궁합 소식으로')}<p class="social-eyebrow">${esc(RELATION_KINDS[request.kind])} · 두 사람만의 해석</p><h3 class="social-pair-names">${esc(names)}</h3><div class="social-score" style="--score:${r.totalScore}" role="img" aria-label="관계 종합 ${r.totalScore}점"><strong>${r.totalScore < 10 ? '측정 어려움' : `${r.totalScore}<small>점</small>`}</strong></div><h4 class="social-verdict">${text(r.verdict)}</h4><p class="social-result-note">${r.confidence === null ? '' : `분석 신뢰도 ${r.confidence}% · `}삼라 궁합 엔진으로 계산했어요.${r.unknownTimeA || r.unknownTimeB ? ' 시간 미상이 포함되어 시주 풀이는 제외했어요.' : ''}</p><div class="social-result-visuals" data-social-result-visuals></div>${section('두 사람을 관통하는 이야기', r.narrative, row => `<article><h4>${esc(row.icon)} ${esc(row.label)}</h4><p>${text(row.text)}</p></article>`)}${section('함께 살릴 강점', r.strengths, row => `<article><h4>${esc(row.emoji)} ${esc(row.label)}</h4><p>${text(row.sub)}</p></article>`)}${section('서로 알아둘 조율점', r.cautions, row => `<article><h4>${esc(row.emoji)} ${esc(row.label)}</h4><p>${text(row.sub)}</p></article>`)}${r.iljuPair ? `<section class="social-result-section"><h3>일주가 만나는 결</h3><article><h4>${text(r.iljuPair.headline)}</h4><p>${text(r.iljuPair.detail)}</p><p>${text(r.iljuPair.advice)}</p></article></section>` : ''}${section('관계의 바탕', r.axes, row => `<article><span class="social-axis-tone">${esc(row.name)} · ${esc(row.tone)}</span><h4>${text(row.headline)}</h4><p>${text(row.detail)}</p></article>`)}<p class="social-result-note">점수는 서로의 방식을 이해하는 참고예요. 출생 원문은 상대에게 공개하지 않아요. 한 사람이 철회하면 이 화면을 다시 열 수 없어요.</p>${button('revoke', '이 궁합의 공유 철회', `data-request-id="${request.id}"`)}</div>`;
+  return `<div class="social-result">${button('news', isPeerFocus() ? '← 돌아가기' : '← 궁합 소식으로')}<p class="social-eyebrow">${esc(RELATION_KINDS[request.kind])} · 두 사람만의 해석</p><h3 class="social-pair-names">${esc(names)}</h3><div class="social-score" style="--score:${r.totalScore}" role="img" aria-label="관계 종합 ${r.totalScore}점"><strong>${r.totalScore < 10 ? '측정 어려움' : `${r.totalScore}<small>점</small>`}</strong></div><h4 class="social-verdict">${text(r.verdict)}</h4><p class="social-result-note">${r.confidence === null ? '' : `분석 신뢰도 ${r.confidence}% · `}삼라 궁합 엔진으로 계산했어요.${r.unknownTimeA || r.unknownTimeB ? ' 시간 미상이 포함되어 시주 풀이는 제외했어요.' : ''}</p><div class="social-result-visuals" data-social-result-visuals></div>${section('두 사람을 관통하는 이야기', r.narrative, row => `<article><h4>${esc(row.icon)} ${esc(row.label)}</h4><p>${text(row.text)}</p></article>`)}${section('함께 살릴 강점', r.strengths, row => `<article><h4>${esc(row.emoji)} ${esc(row.label)}</h4><p>${text(row.sub)}</p></article>`)}${section('서로 알아둘 조율점', r.cautions, row => `<article><h4>${esc(row.emoji)} ${esc(row.label)}</h4><p>${text(row.sub)}</p></article>`)}${r.iljuPair ? `<section class="social-result-section"><h3>일주가 만나는 결</h3><article><h4>${text(r.iljuPair.headline)}</h4><p>${text(r.iljuPair.detail)}</p><p>${text(r.iljuPair.advice)}</p></article></section>` : ''}${section('관계의 바탕', r.axes, row => `<article><span class="social-axis-tone">${esc(row.name)} · ${esc(row.tone)}</span><h4>${text(row.headline)}</h4><p>${text(row.detail)}</p></article>`)}<p class="social-result-note">점수는 서로의 방식을 이해하는 참고예요. 출생 원문은 상대에게 공개하지 않아요. 한 사람이 철회하면 이 화면을 다시 열 수 없어요.</p>${button('revoke', '이 궁합의 공유 철회', `data-request-id="${request.id}"`)}<div data-social-paid-offers></div></div>`;
 }
 function deleteButton() { return button('delete', state.deleteArmed ? '한 번 더 눌러 내 정보와 모든 공유 지우기' : '서버의 내 정보와 공유 지우기', state.deleteArmed ? 'class="social-delete-confirm"' : ''); }
 function peerMarkup() {
@@ -131,6 +132,8 @@ function confirmMarkup() {
 }
 function render() {
   if (!dialog.open) return;
+  const keepPaid=Boolean(state.result && state.resultId && paidOffersHost && paidOffersResultId===state.resultId);
+  if(!keepPaid){paidOffersCleanup?.();paidOffersCleanup=null;paidOffersHost=null;paidOffersResultId=null;}
   const scrollTop = dialog.querySelector('.social-body')?.scrollTop || 0;
   const focusKind = document.activeElement?.matches?.('[data-social-kind]') === true;
   const focusAction = document.activeElement?.dataset?.socialAction;
@@ -144,6 +147,11 @@ function render() {
   dialog.innerHTML = `<header class="social-header"><div><p>${focused ? 'FELLOW TRAVELER' : 'MEET A FELLOW TRAVELER'}</p><h2 id="socialTitle">${focused ? '궁합 보기' : '마당의 인연'}</h2></div>${button('close', '×', 'class="social-close" aria-label="마당의 인연 닫기"')}</header><div class="social-body">${state.error ? `<p class="social-error" role="alert">${esc(state.error)}</p>` : ''}${state.status ? `<p class="social-status" role="status">${esc(state.status)}</p>` : ''}${analysis ? analysisLoadingMarkup() : ''}${content}</div><footer class="social-footer">${focused ? '<span>서로 승인한 궁합만 함께 볼 수 있어요.</span>' : `<div>${button('direct', '직접 입력해 궁합 보기')}</div><span>닉네임·캐릭터·위치·일주 공개 · 출생 원문은 비공개</span>`}</footer>`;
   const visualHost = dialog.querySelector('[data-social-result-visuals]');
   if (visualHost && state.result) visualHost.replaceChildren(renderReadingVisuals(buildCompatibilityVisuals(state.result), { document, compact: true }));
+  const paidHost = dialog.querySelector('[data-social-paid-offers]');
+  if (paidHost && state.result) {
+    if(keepPaid) paidHost.replaceWith(paidOffersHost);
+    else { paidOffersHost=paidHost;paidOffersResultId=state.resultId;paidOffersCleanup=mountReadingOffers(paidHost,{kind:'gunghap',onNavigate:href=>{close();document.dispatchEvent(new CustomEvent('sowon:navigate',{detail:{url:href}}));}}); }
+  }
   const body = dialog.querySelector('.social-body'); if (body) body.scrollTop = scrollTop;
   dialog.querySelectorAll('button').forEach(node => { if ((state.busy && !['close', 'direct'].includes(node.dataset.socialAction)) || (analysis && node.dataset.socialAction === 'result' && node.dataset.requestId === analysis.requestId) || (state.deletionPending && node.dataset.socialAction === 'join')) node.disabled = true; });
   if (focusKind) dialog.querySelector('[data-social-kind]')?.focus({ preventScroll: true });
@@ -415,7 +423,7 @@ function open(visitorId) {
   dialog.showModal(); document.body.classList.add('dialog-open'); render();
   if (state.joined) refresh();
 }
-function resetResult() { ++resultVersion; pendingAnalysis = null; state.result = null; state.resultId = null; state.confirm = null; }
+function resetResult() { paidOffersCleanup?.(); paidOffersCleanup=null; paidOffersHost=null; paidOffersResultId=null; ++resultVersion; pendingAnalysis = null; state.result = null; state.resultId = null; state.confirm = null; }
 function close() { ++encounterVersion; state.deleteArmed = false; resetResult(); dialog.close(); }
 dialog.addEventListener('click', async event => {
   const target = event.target.closest('[data-social-action]'); if (!target) return;

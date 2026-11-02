@@ -1,6 +1,7 @@
-import { loadReadingEngine, mountReading } from './readings.js?v=20261103-hour2';
+import { writeShrineCheckout } from '../store/shrine-handoff.js?v=20261103-paid1';
+import { loadReadingEngine, mountReading } from './readings.js?v=20261103-paid1';
 import { buildReadingInsight } from './reading-insight-core.js?v=20261101-report-visual3';
-import { mountReadingOffers } from './reading-offers.js?v=20261103-hour2';
+import { mountReadingOffers } from './reading-offers.js?v=20261103-paid1';
 import { profileSearch } from './profile-core.js?v=20261101-freepath4';
 import { renderReadingVisuals } from './reading-visuals.js?v=20261101-report-visual3';
 import { createAnalysisLoading, waitForAnalysisPaint } from './analysis-loading.js?v=20261102-loading1';
@@ -26,6 +27,10 @@ export function mountReadingReport(container, npc, profile, options = {}) {
   const button = (className, text, callback, signal = lifetime.signal) => { const node = make('button', className, text); node.type = 'button'; listen(node, 'click', callback, signal); return node; };
   const navigate = href => {
     if (disposed) return;
+    try {
+      const url=new URL(href,document.defaultView?.location?.origin || 'https://samra.cc');
+      if(url.pathname==='/store/product.html' && url.searchParams.get('id')) writeShrineCheckout(document.defaultView?.sessionStorage,url.searchParams.get('id'),currentBirth,profile.nickname);
+    } catch (_) { /* Storage is optional; the order form always remains editable. */ }
     if (options.onNavigate) options.onNavigate(href);
     else document.dispatchEvent(new CustomEvent('sowon:navigate', { detail: { url: href } }));
   };

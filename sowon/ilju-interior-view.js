@@ -7,12 +7,12 @@ import { createAvatar } from './avatar.js?v=20261101-templeroom1';
 import { createLocomotion } from './locomotion.js?v=20261101-templeroom1';
 import { createVisitors } from './visitors.js?v=20261103-hour1';
 import { getDemoVisitors } from './ilju-demo-core.js?v=20261101-peerrequest1';
-import { createIljuDemo } from './ilju-demo.js?v=20261103-hour2';
+import { createIljuDemo } from './ilju-demo.js?v=20261103-paid1';
 import { createDemoWalk } from './ilju-demo-walk.js?v=20261103-hour1';
-import { getOwnProfile } from './profile.js?v=20261103-hour2';
-import { getOwnIdentity } from './identity.js?v=20261103-hour2';
+import { getOwnProfile } from './profile.js?v=20261103-paid1';
+import { getOwnIdentity } from './identity.js?v=20261103-paid1';
 import { readSettings } from './experience-core.js?v=20261101-freepath4';
-import { enterSocialRoom, getSocialRoomState } from './social.js?v=20261103-hour2';
+import { enterSocialRoom, getSocialRoomState } from './social.js?v=20261103-paid1';
 
 const layer = document.createElement('section');
 layer.id = 'iljuInterior'; layer.className = 'ilju-interior'; layer.hidden = true;

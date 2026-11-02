@@ -70,7 +70,9 @@
 
 <div id="toast" role="status"></div>
 
-<script src="catalog.js"></script>
+<link rel="stylesheet" href="/sowon/reading-visuals.css?v=20261101-report-visual3">
+<style>.rp-grand-data{margin:24px 0 36px;border:1px solid #d4dccd;border-radius:10px;padding:0 20px;background:#f5f6ee}.rp-grand-data>summary{min-height:52px;display:flex;align-items:center;cursor:pointer;color:#34513e;font-weight:600}.rp-grand-data h3{margin:30px 0 18px;font-size:21px}.rp-grand-data .reading-visuals{margin:15px 0 30px}</style>
+<script src="catalog.js?v=20261103-paid1"></script>
 <script src="store-api.js"></script>
 <script src="report-navigation.js?v=annual-life-v1"></script>
 <script src="report-generation.js?v=annual-life-v1"></script>
@@ -380,6 +382,7 @@ function renderView(data) {
   // 0.50 이면 7색 전부 5.6:1 이상이면서 색상(hue)은 그대로 남는다.
   const chAccent = darkenHex(CAT.color, 0.50);
   let paper = reportContentsHtml(data.chapters) + sheetOpeningHtml(data);
+  if (data.slug === 'grand-report') paper += '<details class="rp-grand-data"><summary>세 체계의 계산 데이터 보기</summary><div id="grandCharts"></div></details>';
   if (!complete) paper += `<aside class="rp-progress-note" role="status"><strong>완성된 ${data.chapters.length}장을 먼저 읽어 보세요.</strong><p>전체 ${data.total}장 중 나머지는 작성 중이에요. 완성되는 장이 이곳에 이어집니다. PDF 저장과 추가질문은 전체 완성 후 이용할 수 있어요.</p></aside>`;
   if (data.context?.fixedPeriod) paper += '<p class="recovery-help">2026년 9~12월의 흐름을 다루는 리포트예요. 이미 지난달은 회고로 읽어 주세요.</p>';
   const anchors = anchorSheetVisuals(data.chapters);
@@ -439,6 +442,10 @@ function renderView(data) {
     링크는 결제일부터 12개월 동안 열 수 있어요 — 기간 안에 PDF로 저장해 두세요.</p>`;
   paper += `<section class="recovery-help"><h3>개인 복구 링크 보관</h3><p>다른 기기의 앱·웹에서 전체 리포트를 열 수 있어요. 링크를 가진 사람은 누구나 열 수 있으므로 공개 공유와 구분해 본인만 보관해 주세요.</p><button class="recovery-button" id="copyRecovery" type="button">개인 복구 링크 복사</button><p id="recoveryCopyStatus" role="status"></p></section>`;
   $("#paperIn").innerHTML = paper;
+  if(data.slug==='grand-report') {
+    const chartHost=document.getElementById('grandCharts');
+    import('./grand-report-view.js?v=20261103-paid1').then(({renderGrandCharts})=>{if(chartHost?.isConnected && !renderGrandCharts(chartHost,data.context))chartHost.textContent='계산 도표를 준비하지 못했어요. 본문은 계속 읽을 수 있어요.';}).catch(()=>{if(chartHost?.isConnected)chartHost.textContent='도표를 불러오지 못했어요. 연결을 확인하고 새로고침해 주세요.';});
+  }
 
   const askBtn = $("#askBtn");
   if (askBtn) askBtn.addEventListener("click", onAsk);
@@ -497,7 +504,7 @@ $("#pdfBtn").addEventListener("click", async () => {
   try {
     if (!window.html2canvas) await loadScript("vendor/html2canvas.min.js");
     if (!(window.jspdf && window.jspdf.jsPDF)) await loadScript("vendor/jspdf.umd.min.js");
-    if (!window.buildStoreReportPdf) await loadScript("report-pdf.js");
+    if (!window.buildStoreReportPdf) await loadScript("report-pdf.js?v=20261103-paid2");
     await window.buildStoreReportPdf(DATA, PROD, READER, CAT, pct => {
       btn.textContent = "책자를 만드는 중… " + pct + "%";
     });

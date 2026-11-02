@@ -126,24 +126,6 @@
 .xp-personal-dialog .report-footnote { margin: 32px 0 0; padding: 21px 0 0; border-top: 1px solid var(--report-line); color: var(--report-muted); font-size: 12px; line-height: 1.9; }
 
 /* Related reading is a small catalogue, separate from the free interpretation. */
-.xp-personal-dialog .report-offers { margin: 34px 0 0; padding-top: 26px; border-top: 1px solid var(--report-line); scroll-margin-top: 104px; }
-.xp-personal-dialog .report-offers>h3 { margin: 0 0 10px; color: var(--report-ink); font-family: inherit; font-size: 20px; font-weight: 600; line-height: 1.7; letter-spacing: -.025em; }
-.xp-personal-dialog .report-offers>p { margin: 0 0 18px; color: var(--report-muted); font-size: 14px; line-height: 1.9; }
-.xp-personal-dialog .report-offer-tabs { display: flex; flex-wrap: wrap; gap: 0 20px; padding: 0; margin: 0 0 21px; border-bottom: 1px solid var(--report-line); }
-.xp-personal-dialog .report-offer-tabs button { min-height: 44px; padding: 11px 0; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: transparent; color: #6b7766; font-size: 13px; line-height: 1.6; }
-.xp-personal-dialog .report-offer-tabs button[aria-pressed=true] { color: #3c5a40; border-bottom-color: #738a68; font-weight: 600; }
-.xp-personal-dialog .report-offer-detail { min-width: 0; padding: 0; background: transparent; }
-.xp-personal-dialog .report-offer-detail>.report-offer-title { margin: 0 0 12px; color: var(--report-ink); font-family: inherit; font-size: 20px; font-weight: 600; letter-spacing: -.025em; line-height: 1.65; word-break: keep-all; }
-.xp-personal-dialog .report-offer-detail>p { margin: 0 0 14px; color: #56634f; font-size: 14px; line-height: 1.9; word-break: keep-all; }
-.xp-personal-dialog .report-offer-facts { display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 16px 0; padding: 12px 0; border-top: 1px solid #e0e4da; border-bottom: 1px solid #e0e4da; color: #586951; font-size: 13px; line-height: 1.9; }
-.xp-personal-dialog .report-offer-facts :is(p,span,dt,dd) { margin: 0; font-size: inherit; line-height: inherit; }
-.xp-personal-dialog .report-offer-facts strong { color: #344c3a; font-weight: 500; }
-.xp-personal-dialog .report-offer-chapters { margin: 18px 0 22px; padding-left: 20px; color: #53614e; font-size: 14px; line-height: 1.9; }
-.xp-personal-dialog .report-offer-chapters li { padding: 3px 0 3px 3px; }
-.xp-personal-dialog .report-offer-link { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 11px 18px; border: 1px solid var(--report-green); border-radius: 6px; background: var(--report-green); color: #fff; font-size: 14px; font-weight: 500; line-height: 1.5; text-decoration: none; }
-.xp-personal-dialog .report-offer-link:hover { background: #405a44; border-color: #405a44; }
-.xp-personal-dialog .report-app-link { display: flex; align-items: center; width: fit-content; min-height: 44px; margin-top: 20px; padding: 16px 0 9px; border-top: 1px solid var(--report-line); color: var(--report-green); font-size: 14px; line-height: 1.7; text-decoration: underline; text-underline-offset: 4px; }
-.xp-personal-dialog :is(.report-offer-note,.report-app-note) { margin: 10px 0 0; color: var(--report-muted); font-size: 12px; line-height: 1.9; }
 
 @media (max-width: 759px) {
   .xp-dialog.xp-personal-dialog { width: calc(100vw - 20px); max-width: calc(100vw - 20px); height: 92dvh; max-height: 92dvh; }

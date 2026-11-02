@@ -10,6 +10,12 @@
   "use strict";
 
   const PAGE_W = 794, PAGE_H = 1123;
+  async function within(work, milliseconds) {
+    let timer;
+    try { return await Promise.race([Promise.resolve(work).then(()=>true,()=>false),new Promise(resolve=>{timer=setTimeout(()=>resolve(false),milliseconds);})]); }
+    finally {clearTimeout(timer);}
+  }
+
 
   function el(cls, html) {
     const d = document.createElement("div");
@@ -26,14 +32,15 @@
 
   window.buildStoreReportPdf = async function (data, prod, reader, cat, onPct) {
     onPct && onPct(2);
-    // 마루부리 글리프를 미리 확실히 로드 — 래스터에 폴백 세리프가 박히는 사고 방지.
+    // 글꼴 대기는 최대 4초. 외부 폰트가 멈추면 같은 시스템 폰트로 조판·렌더한다.
+    let fontsReady = false;
     try {
-      await Promise.all([
+      fontsReady = await within(Promise.all([
         document.fonts.load('600 20px "MaruBuri"', "삼라만상"),
         document.fonts.load('400 16px "MaruBuri"', "삼라만상"),
         document.fonts.load('600 20px "Noto Serif KR"', "四柱"),
         document.fonts.ready,
-      ]);
+      ]),4000);
     } catch (e) { /* 폰트 실패 시 시스템 세리프 강등 */ }
 
     const inputs = data.inputs || {};
@@ -41,6 +48,12 @@
     const dateKr = new Date(data.created_at).toLocaleDateString("ko-KR");
     const stage = el("pdfstage");
     document.body.appendChild(stage);
+    if (!fontsReady) {
+      const fallback=document.createElement('style');
+      fallback.textContent='.pdfstage,.pdfstage *{font-family:"Apple SD Gothic Neo","Malgun Gothic",sans-serif!important}.pdfstage :is(h1,h2,h3,.pdf-ch-title){font-family:AppleMyungjo,Batang,serif!important}';
+      stage.appendChild(fallback);
+    }
+
     try {
       const pages = [];
 
@@ -58,7 +71,7 @@
         <p class="pdf-cover-cat">SAMRA MANSANG · ${escHtml(cat.label)}</p>
         <h1 class="pdf-cover-title">${escHtml(prod.title)}</h1>
         <p class="pdf-cover-for"><b>${escHtml(name)}</b>님을 위한 ${data.total}장의 리딩 · ${reader.emoji} ${escHtml(reader.name)} 술사</p>
-        <img class="pdf-cover-art" src="art/covers/${prod.slug}.webp" alt="">
+        <img class="pdf-cover-art" src="${(prod.cover || '/store/art/covers/'+prod.slug+'.webp')}" alt="">
         ${data.one_liner ? `<p class="pdf-cover-sig">“ ${escHtml(data.one_liner)} ”</p>` : ""}
         <p class="pdf-cover-foot">삼 라 만 상 · ${dateKr}</p>`;
 
@@ -196,16 +209,22 @@
 
       onPct && onPct(8);
       // 커버 아트 등 이미지 로드 대기
-      await Promise.all(Array.from(stage.querySelectorAll("img")).map(img =>
+      await within(Promise.all(Array.from(stage.querySelectorAll("img")).map(img =>
         img.complete ? Promise.resolve() : new Promise(res => { img.onload = img.onerror = res; })
-      ));
+      )),6000);
 
       // ── 렌더 → PDF ───────────────────────────────────────────
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF({ unit: "mm", format: "a4", compress: true });
       for (let i = 0; i < pages.length; i++) {
         const canvas = await window.html2canvas(pages[i], {
-          scale: 2, useCORS: true, logging: false,
+          scale: 2, useCORS: true, logging: false, imageTimeout:6000,
+          ignoreElements: element => {
+            if (element.parentElement===document.body && element!==stage) return true;
+            if (fontsReady) return false;
+            if (element.tagName==='STYLE' && element.textContent.includes('@font-face')) return true;
+            return element.tagName==='LINK' && /fonts\.googleapis|fonts\.gstatic|pretendard|wanted-sans|\/assets\/hanja\.css/i.test(element.href || '');
+          },
           width: PAGE_W, height: PAGE_H, windowWidth: PAGE_W,
         });
         const img = canvas.toDataURL("image/jpeg", 0.88);

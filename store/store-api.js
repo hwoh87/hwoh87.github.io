@@ -22,6 +22,9 @@ async function storeApi(body) {
 }
 
 const STORE_ERR_KR = {
+  birth_time_required: "그랜드 리포트는 정확한 출생시간이 필요해요. 시와 분을 확인해 주세요.",
+  bad_grand_context: "그랜드 리포트의 계산 자료를 확인하지 못했어요. 출생정보와 도시를 확인해 다시 준비해 주세요.",
+  web_only: "이 상품은 웹에서 결제하고 웹 서재에서 읽는 리포트예요.",
   bad_recovery_link: "삼라만상 개인 복구 링크를 확인해 주세요.",
   original_channel_required: "이 주문을 만든 원래 결제 채널에서 결제를 이어 주세요.",
   original_channel_unknown: "과거 주문의 결제 채널을 확인할 수 없어요. 주문번호로 문의해 주세요.",

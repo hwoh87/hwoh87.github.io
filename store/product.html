@@ -70,7 +70,7 @@
 
 <div id="toast" role="status"></div>
 
-<script src="catalog.js"></script>
+<script src="catalog.js?v=20261103-paid1"></script>
 <script>
 const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 function toast(msg) {
@@ -137,6 +137,12 @@ const FAQ = [
   ["환불돼?", "리포트를 열람하기 전이면 결제일부터 7일 이내 전액 환불돼. 열람 후의 기준과 예외는 환불정책에서 확인해줘."],
 ];
 
+if (p.slug === 'grand-report') {
+  FAQ[0]=['태어난 시간을 몰라도 되나요?','그랜드 리포트는 사주·자미두수·별자리를 함께 계산하므로 정확한 출생 시·분이 필요해요. 한국 출생·한국 표준시 기준으로 출생 도시도 선택해 주세요. 시간을 모르면 신당의 무료 사주 풀이부터 이용해 주세요.'];
+  FAQ[2]=['완성까지 얼마나 걸리나요?','18장을 순서대로 작성하므로 몇 분 걸릴 수 있어요. 완성된 장부터 먼저 읽을 수 있고, 연결이 끊기면 웹 서재에서 이어서 작성할 수 있어요. 전체 완성 후 PDF 저장이 열립니다.'];
+  FAQ.push(['앱에서 산 리포트도 여기서 열리나요?','이 상품은 웹 주문과 웹 서재를 사용하는 별도 구매예요. 앱의 기존 구매 권한과 자동 연동되지 않아요. 앱에서 산 리포트는 앱의 내 리포트에서 확인해 주세요.']);
+}
+
 const badge = p.badge ? `<span class="badge" style="--bc:${p.badge === "NEW" ? "#34d399" : "#ec4899"}; position:static">${p.badge}</span>` : "";
 const chapters = p.chapters.map((t, i) => {
   const note = p.notes && p.notes[i + 1]
@@ -155,7 +161,7 @@ document.getElementById("pd").innerHTML = `
   <p class="kicker">${esc(p.kicker)}</p>
 
   <div class="pd-hero">
-    <img src="art/covers/${p.slug}.webp" alt="">
+    <img src="${coverOf(p)}" alt="">
     <div class="shade"></div>
     <div class="txt"><h2>${esc(p.headline)}</h2></div>
   </div>
@@ -253,7 +259,7 @@ if (!storeAvailable(p)) {
   if (info && !bar.querySelector(".thumb")) {
     const im = document.createElement("img");
     im.className = "thumb"; im.alt = ""; im.decoding = "async";
-    im.src = "art/covers/" + p.slug + ".webp";
+    im.src = coverOf(p);
     info.parentNode.insertBefore(im, info);
   }
   const hero = document.querySelector("#pd .pd-cta");

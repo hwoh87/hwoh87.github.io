@@ -23,12 +23,12 @@ function continuationFor(npc, kind) {
   if (kind === 'gunghap' || npc === 'seol') return {
     topics: RELATIONSHIP_TOPICS,
     title: '관계를 조금 더 깊게 읽고 싶다면',
-    note: '지금 읽은 기본 풀이는 무료예요. 아래는 두 사람의 사주를 함께 읽는 별도 유료 리포트예요.',
+    note: '지금 읽은 기본 풀이는 무료예요. 아래는 두 사람의 사주를 함께 읽는 별도 유료 리포트예요. 유료 상품은 연인·부부 관계를 기준으로 하며, 주문서에서 두 사람의 출생정보를 직접 확인해 주세요.',
   };
   return {
     topics: PERSONAL_TOPICS,
-    title: '궁금한 주제를 더 읽고 싶다면',
-    note: '지금 읽은 기본 풀이는 무료예요. 아래는 별도로 구매하는 사주 주제 리포트예요.',
+    title: '나를 더 깊이 읽고 싶다면',
+    note: '지금 읽은 기본 풀이는 무료예요. 아래는 별도로 구매하는 심층 리포트예요.',
   };
 }
 
@@ -46,7 +46,7 @@ function currentCatalog() {
 
 async function ensureStoreCatalog() {
   if (currentCatalog()) return currentCatalog();
-  const { loadCatalog } = await import('./readings.js?v=20261103-hour2');
+  const { loadCatalog } = await import('./readings.js?v=20261103-paid1');
   if (typeof loadCatalog !== 'function') throw new Error('catalog_unavailable');
   await loadCatalog();
   return currentCatalog();
@@ -117,13 +117,16 @@ export function mountReadingOffers(container, { npc, kind, onNavigate, signal, e
   );
   const content = element('div', 'report-offer-content');
   content.append(element('p', 'report-offer-note', '더 읽을 리포트를 준비하고 있어요.'));
-  const appNote = element('p', 'report-offer-note', '앱의 18장 융합 리포트는 사주·자미두수·별자리를 엮는 별도 상품이에요. 지금 본 무료 풀이를 잠금 해제하는 상품은 아니에요. 구성과 가격은 앱에서 확인할 수 있어요.');
+  const appNote = element('p', 'report-offer-note', '웹에서 구매한 리포트는 웹 서재에서 12개월 동안 읽고 PDF로 보관할 수 있어요. 앱에서 구매한 리포트와는 자동 연동되지 않아요.');
   const appLink = element('a', 'report-app-link', '삼라 앱 살펴보기');
   appLink.href = PLAY_URL;
   appLink.target = '_blank';
   appLink.rel = 'noopener noreferrer';
   appLink.referrerPolicy = 'no-referrer';
-  wrapper.append(content, appNote, appLink);
+  const grandHost = element('div', 'report-grand-host');
+  const relationship = kind === 'gunghap' || (npc === 'seol' && kind !== 'star' && kind !== 'jami');
+  wrapper.append(grandHost, content, appNote);
+  if (!relationship) wrapper.append(appLink);
   container.replaceChildren(wrapper);
 
   function cleanup() {
@@ -148,13 +151,27 @@ export function mountReadingOffers(container, { npc, kind, onNavigate, signal, e
     );
   }
 
-  cleanup.ready = Promise.resolve().then(() => disposed || !continuation.topics.length ? null : ensureCatalog()).then(data => {
+  cleanup.ready = Promise.resolve().then(() => disposed ? null : ensureCatalog()).then(data => {
     if (disposed) return;
     wrapper.removeAttribute('aria-busy');
+    if (!relationship) {
+      const grand = offersFrom(data || currentCatalog(), [{id:'grand',label:'그랜드 리포트',slug:'grand-report'}])[0];
+      if (grand) {
+        const feature = element('article', 'report-grand-feature'), image = element('img', 'report-grand-cover');
+        image.src = grand.product.cover || '/store/art/covers/grand-report.svg'; image.alt = ''; image.width=150;image.height=200;image.loading='lazy';image.decoding='async';
+        const copy = element('div', 'report-grand-copy');
+        copy.append(element('p','report-grand-kicker','세 체계로 더 깊게 읽기'),element('h4','',grand.product.title),
+          element('p','report-grand-description','사주·자미두수·별자리가 함께 가리키는 나의 기질과 삶의 흐름. 일과 재물, 관계부터 다가오는 시간까지 한 권으로 읽어요.'),
+          element('p','report-grand-facts',grand.amount+' · '+grand.product.chaptersN+'장 · PDF 보관'),
+          element('p','report-offer-note','한국 출생 기준 · 정확한 출생 시·분과 도시 필요'));
+        const link = internalLink('/store/product.html?id=grand-report','그랜드 리포트 구성 보기',{kind:'product',slug:'grand-report'});
+        link.className='report-grand-link'; copy.append(link);feature.append(image,copy);grandHost.append(feature);
+      }
+    }
     if (!continuation.topics.length) { content.replaceChildren(); return; }
     const offers = offersFrom(data || currentCatalog(), continuation.topics);
     if (!offers.length) { fallback(); return; }
-    content.replaceChildren();
+    content.replaceChildren(element('h4','report-topic-title',relationship?'두 사람의 이야기를 더 깊게':'궁금한 주제부터 골라 읽기'));
     const tabs = element('div', 'report-offer-tabs');
     tabs.setAttribute('role', 'group');
     tabs.setAttribute('aria-label', '더 읽고 싶은 주제');
@@ -168,7 +185,9 @@ export function mountReadingOffers(container, { npc, kind, onNavigate, signal, e
       const { product, amount, inputs, reader } = offer;
       const chapters = element('ol', 'report-offer-chapters');
       for (const title of product.chapters.filter(value => typeof value === 'string' && value.trim()).slice(0, 3)) chapters.appendChild(element('li', '', title));
-      detail.replaceChildren(
+      const image = element('img','report-offer-cover');image.src=product.cover || '/store/art/covers/'+product.slug+'.webp';image.alt='';image.width=144;image.height=192;image.loading='lazy';image.decoding='async';
+      const copy = element('div','report-offer-copy');
+      copy.append(
         element('p', 'report-offer-title', product.title),
         element('p', 'report-offer-context', [reader ? `${reader}의 사주 리포트` : '사주 리포트', inputs].filter(Boolean).join(' · ')),
         element('p', 'report-offer-facts', `${amount} · ${product.chaptersN}장 · 단건 유료 리포트`),
@@ -176,6 +195,7 @@ export function mountReadingOffers(container, { npc, kind, onNavigate, signal, e
         chapters,
         internalLink('/store/product.html?id=' + encodeURIComponent(product.slug), '상품 구성과 전체 목차 보기', { kind: 'product', slug: product.slug }, detailListeners),
       );
+      detail.replaceChildren(image,copy);
     }
     for (const offer of offers) {
       const button = element('button', '', offer.topic.label);
