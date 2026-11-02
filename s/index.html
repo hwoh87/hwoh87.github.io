@@ -213,7 +213,7 @@
     .trust span { display: block; font-size: 12.5px; color: rgba(255,255,255,.58); line-height: 1.55; margin-top: 2px; }
 
     /* 재공유(링크 복사) — 앱 하단 보조 버튼의 웹 대응 */
-    .sharerow { display: flex; align-items: center; gap: 10px; margin: 14px 0 0; }
+    .sharerow { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 14px 0 0; }
     .copybtn {
       padding: 10px 16px; border: 1px solid rgba(167,139,250,.55); background: rgba(139,92,246,.14); color: #c4b5fd;
       border-radius: 999px; font-size: 13.5px; font-weight: 800; cursor: pointer;
@@ -421,25 +421,33 @@
       }
       function shareRow() {
         return '<div class="sharerow"><button class="copybtn" id="copybtn" type="button">🔗 이 리포트 링크 복사</button>' +
-          '<span class="copymsg" id="copymsg">링크를 복사했어요</span></div>';
+          '<span class="copymsg" id="copymsg" role="status" aria-live="polite" aria-atomic="true"></span></div>';
       }
       function bindCopy() {
         var btn = document.getElementById('copybtn');
         if (!btn) return;
         btn.addEventListener('click', function () {
           var url = location.href;
-          var done = function () {
-            var msg = document.getElementById('copymsg');
+          var msg = document.getElementById('copymsg');
+          msg.textContent = '';
+          btn.disabled = true;
+          var finish = function (copied) {
+            msg.textContent = copied ? '링크를 복사했어요' : '복사하지 못했어요. 브라우저 주소창에서 링크를 복사해 주세요.';
             msg.classList.add('on');
-            setTimeout(function () { msg.classList.remove('on'); }, 2200);
+            btn.disabled = false;
           };
           if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(url).then(done, done);
+            try {
+              Promise.resolve(navigator.clipboard.writeText(url)).then(function () { finish(true); }, function () { finish(false); });
+            } catch (e) { finish(false); }
           } else {
             var ta = document.createElement('textarea');
             ta.value = url; document.body.appendChild(ta); ta.select();
-            try { document.execCommand('copy'); } catch (e) {}
-            document.body.removeChild(ta); done();
+            var copied = false;
+            try { copied = document.execCommand('copy') === true; } catch (e) {}
+            document.body.removeChild(ta);
+            btn.focus();
+            finish(copied);
           }
         });
       }
