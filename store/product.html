@@ -287,6 +287,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!storeAvailable(p)) return;
     if (state === "open") { document.getElementById("priceTail").textContent = "웹에서는 토스페이먼츠 카드 결제를 이용해요. 주문서에서 금액을 확인해 주세요."; return; }
     if (state !== "closed") { document.getElementById("priceTail").textContent = "결제 채널을 확인하지 못했어요. 주문서에서 다시 확인해 주세요."; return; }
+    if (p.webOnly) { document.getElementById('priceTail').textContent='현재 웹 결제를 연결하지 못했어요. 잠시 후 주문서에서 다시 확인해 주세요. 이 상품은 웹에서 구매하는 리포트예요.'; return; }
     // 앱 인계면 제공 방법·기간이 앱 쪽 조건이라 웹 제공 정보 표를 감춘다.
     const info = document.getElementById("pdInfo"); if (info) info.hidden = true;
     document.getElementById("priceTail").innerHTML =
