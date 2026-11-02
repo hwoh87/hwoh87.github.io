@@ -1,6 +1,6 @@
 import { renderReadingVisuals } from './reading-visuals.js?v=20261101-report-visual3';
 import { buildCompatibilityVisuals } from './compatibility-visual-data.js?v=20261101-report-visual3';
-import { getOwnProfile } from './profile.js?v=20261103-hour1';
+import { getOwnProfile } from './profile.js?v=20261103-hour2';
 import { RELATION_KINDS, safePosition, serverProfile, safeVisitors, safeRequests, availableActions, safeResult, socialError, cleanText, createSocialClient, safeIlju, roomForKey, safeRoomCounts, validId } from './social-core.js?v=20261103-hour1';
 import { createRealtimeClient } from './realtime-client.js?v=20261103-hour1';
 

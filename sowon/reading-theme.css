@@ -265,3 +265,8 @@
   .paper .mb .cell { padding-left: 5px; padding-right: 5px; }
   .paper .xsell .xrow { grid-template-columns: 1fr; }
 }
+
+/* Keep reading destinations below the shrine's persistent header. */
+.paper :is(h2,h3,h4,#pairkw,#xsell){scroll-margin-top:120px}
+.paper :is(.nlines li,.axline p,.deep p,.pdetail .star p,.pdetail li,.relist li){max-width:42rem;font-size:17px;line-height:1.95;word-break:keep-all;overflow-wrap:anywhere}
+@media(max-width:600px){.paper :is(.nlines li,.axline p,.deep p,.pdetail .star p,.pdetail li,.relist li){font-size:16px}}

@@ -1,5 +1,5 @@
 import { readSettings, writeSettings, normalizeSettings } from './experience-core.js?v=20261101-freepath4';
-import { getOwnProfile } from './profile.js?v=20261103-hour1';
+import { getOwnProfile } from './profile.js?v=20261103-hour2';
 
 let storage;
 try { storage = localStorage; } catch (_) {}
@@ -63,7 +63,7 @@ async function openEncounter(npc, {reading=false, kind}={}) {
   try {
     let result;
     if (profile && reading) {
-      const module = await import('./personal-encounter.js?v=20261103-hour1');
+      const module = await import('./personal-encounter.js?v=20261103-hour2');
       if (version !== encounterVersion || !encounterDialog.open) return;
       encounterDialog.classList.remove('xp-loading-dialog');
       result = module.mountPersonalEncounter(encounterDialog,npc,{
@@ -71,7 +71,7 @@ async function openEncounter(npc, {reading=false, kind}={}) {
         onGuide: () => { closeEncounter(); queueMicrotask(() => openEncounter(npc)); },
       });
     } else {
-      const module = await import('./npc-dialog.js?v=20261103-hour1');
+      const module = await import('./npc-dialog.js?v=20261103-hour2');
       if (version !== encounterVersion || !encounterDialog.open) return;
       encounterDialog.classList.remove('xp-loading-dialog');
       result = module.mountNpcDialogue(encounterDialog,npc,{

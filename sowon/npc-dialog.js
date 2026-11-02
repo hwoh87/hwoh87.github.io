@@ -1,6 +1,6 @@
 import { createDialogueSession, getNpcPersona } from './dialogue-core.js?v=20261102-hallfocus1';
 import { createShrineChatClient } from './chat-client.js?v=20261102-hallfocus1';
-import { loadReadingEngine } from './readings.js?v=20261102-loading1';
+import { loadReadingEngine } from './readings.js?v=20261103-hour2';
 import { buildReadingInsight } from './reading-insight-core.js?v=20261101-report-visual3';
 
 const mounts = new WeakMap();

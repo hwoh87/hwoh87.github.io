@@ -1,6 +1,6 @@
-import { loadReadingEngine, mountReading } from './readings.js?v=20261102-loading1';
+import { loadReadingEngine, mountReading } from './readings.js?v=20261103-hour2';
 import { buildReadingInsight } from './reading-insight-core.js?v=20261101-report-visual3';
-import { mountReadingOffers } from './reading-offers.js?v=20261102-loading1';
+import { mountReadingOffers } from './reading-offers.js?v=20261103-hour2';
 import { profileSearch } from './profile-core.js?v=20261101-freepath4';
 import { renderReadingVisuals } from './reading-visuals.js?v=20261101-report-visual3';
 import { createAnalysisLoading, waitForAnalysisPaint } from './analysis-loading.js?v=20261102-loading1';

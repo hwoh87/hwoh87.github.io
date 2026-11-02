@@ -1,6 +1,6 @@
 import { readProfileDraft } from './profile-draft.js?v=20261103-hour1';
 import { PROFILE_KEY, createProfile, readProfile, writeProfile, clearStoredProfile, setActiveProfile, getActiveProfile, getActiveBirth, profileSearch } from './profile-core.js?v=20261101-freepath4';
-import { loadReadingEngine, clearOwnPersonMemory } from './readings.js?v=20261102-loading1';
+import { loadReadingEngine, clearOwnPersonMemory } from './readings.js?v=20261103-hour2';
 
 export { profileSearch };
 export const getOwnProfile = getActiveProfile;

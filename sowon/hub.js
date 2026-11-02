@@ -1,4 +1,4 @@
-import { getOwnIdentity } from './identity.js?v=20261103-hour1';
+import { getOwnIdentity } from './identity.js?v=20261103-hour2';
 import { getActiveProfile } from './profile-core.js?v=20261101-freepath4';
 import { FEATURES, HALLS, HALL_JOURNEYS, getFeature, getHall, parseView, viewHash, internalDestination, readJourney, writeJourney } from './hub-core.js?v=20261102-hallfocus1';
 
@@ -15,7 +15,7 @@ referenceDialog.innerHTML = '<header class="hub-header"><div><p>SAMRA REFERENCE<
 document.body.appendChild(referenceDialog);
 let referencePath=null, referenceCleanup=null, referenceAbort=null, referenceVersion=0, referenceBaseDepth=0;
 const content = dialog.querySelector('#hubBody');
-const title = dialog.querySelector('#hubTitle');
+const title = dialog.querySelector('#hubTitle'); title.tabIndex=-1;
 const eyebrow = dialog.querySelector('#hubEyebrow');
 let disposeView = null, generation = 0, opener = null, currentView = null, departing = false, afterClose = null, closeInFlight = false, viewAbort = null;
 const readingOptions = new Map();
@@ -163,6 +163,7 @@ async function render(view) {
     document.dispatchEvent(new CustomEvent('sowon:panel',{detail:{open:true}}));
   }
   content.scrollTop=0;
+  if(document.activeElement===document.body||document.activeElement===dialog)title.focus({preventScroll:true});
   if(view.type==='hall') {renderHall(view.id);return;}
   if(view.type==='view') {view.id==='map'?renderMap():renderAll();return;}
   const item=getFeature(view.id);
@@ -175,7 +176,7 @@ async function render(view) {
   try {
     let result;
     if(item.kind==='reading') {
-      const module=await import('./readings.js?v=20261102-loading1'); if(version!==generation)return;
+      const module=await import('./readings.js?v=20261103-hour2'); if(version!==generation)return;
       result=await module.mountReading(mount,item.value,{navigate,signal:viewAbort.signal,...readingOptions.get(item.value)});
     } else if(item.kind==='culture') {
       const module=await import('./culture.js?v=20261103-hour1');if(version!==generation)return;

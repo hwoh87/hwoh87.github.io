@@ -316,7 +316,7 @@ export async function mountReading(container, kind, options = {}) {
     }
     const style = document.createElement('style'); style.textContent = view.styles; root.appendChild(style);
     const polish = document.createElement('link'); polish.rel = 'stylesheet'; polish.href = '/sowon/readings.css?v=20261101-freepath4'; root.appendChild(polish);
-    const theme = document.createElement('link'); theme.rel='stylesheet';theme.href='/sowon/reading-theme.css?v=20261101-report-visual3';root.appendChild(theme);
+    const theme = document.createElement('link'); theme.rel='stylesheet';theme.href='/sowon/reading-theme.css?v=20261103-hour2';root.appendChild(theme);
     const charts = document.createElement('link'); charts.rel='stylesheet';charts.href='/sowon/reading-visuals.css?v=20261101-report-visual3';root.appendChild(charts);
     const analysisStyle = document.createElement('link'); analysisStyle.rel='stylesheet';analysisStyle.href='/sowon/analysis-loading.css?v=20261102-loading1';root.appendChild(analysisStyle);
     const template = document.createElement('template');
@@ -342,6 +342,10 @@ export async function mountReading(container, kind, options = {}) {
     env = createEnvironment(root, kind, {...formOptions, onCalculated(input, context) {
       if (disposed) return;
       if (options.visuals !== false) refreshCalculatorVisuals(root,kind,input,{engine:window['engine-core']});
+      if (options.autoScroll !== false && document.activeElement === document.body) {
+        const result = root.getElementById('result'), heading = result?.querySelector('h2,h3') || result;
+        if (heading) { heading.tabIndex = -1; heading.focus({ preventScroll: true }); }
+      }
       options.onCalculated?.(input,context);
     }});
     mountBirth(env);
@@ -354,7 +358,13 @@ export async function mountReading(container, kind, options = {}) {
       const raw = anchor.getAttribute('href');
       if (raw?.startsWith('#')) {
         const target = root.getElementById(raw.slice(1));
-        if (target) { event.preventDefault(); target.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' }); }
+        if (target) {
+          event.preventDefault();
+          const heading = raw === '#pairkw' && /^H[1-6]$/.test(target.previousElementSibling?.tagName || '') ? target.previousElementSibling : target;
+          heading.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
+          if (!heading.hasAttribute('tabindex')) heading.tabIndex = -1;
+          heading.focus({ preventScroll: true });
+        }
         return;
       }
       const url = new URL(anchor.href, env.location.href);
