@@ -271,7 +271,7 @@ export function createCampus() {
   cylinder('gold', 0.3, 0.3, 0.035, -14.85, 1.27, -9.75, 28);
   addGeometry('gold', new THREE.TorusGeometry(0.29, 0.014, 5, 32), [-14.85, 1.34, -9.75], [Math.PI / 2, 0, 0]);
   beam('gold', [-14.85, 1.28, -9.75], [-14.85, 1.59, -9.85], 0.018, 5);
-  objectInteraction({ id: 'object-saju-table', hall: 'myeongri', feature: 'saju', label: '내 사주 살펴보기', point: { x: -17, z: -6.5 }, anchor3d: { x: -17, y: 1.12, z: -8.4 }, size: [2.35, 1.4, 2.35] });
+  objectInteraction({ id: 'object-saju-table', hall: 'myeongri', feature: 'saju', label: '내 사주 상세 해석', point: { x: -17, z: -6.5 }, anchor3d: { x: -17, y: 1.12, z: -8.4 }, size: [2.35, 1.4, 2.35] });
   objectInteraction({ id: 'object-time-dial', hall: 'myeongri', feature: 'time', label: '나의 출생시간 알아보기', point: { x: -14.6, z: -8.6 }, anchor3d: { x: -14.85, y: 1.4, z: -9.75 }, size: [0.72, 0.7, 0.72] });
 
   // 인연정: an open pavilion with paired seats and two flowering courtyard trees.

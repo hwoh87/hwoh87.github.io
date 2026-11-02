@@ -15,10 +15,10 @@ export const HALLS = Object.freeze({
 // These are navigation descriptors, never a promise of a paid personal result.
 export const HALL_JOURNEYS = Object.freeze({
   myeongri: {
-    title:'나를 읽는 첫 장부터',
-    description:'내 일주와 기운의 균형부터 관계·대운까지, 기본 풀이를 읽어요.',
-    includes:['일주와 기질','오행과 십신','대운의 큰 흐름'],
-    actions:[{label:'내 사주 무료 풀이',type:'reading',kind:'saju',npc:'tojeong'},{label:'직접 입력해 명식 보기',type:'feature',id:'saju'}],
+    title:'나의 사주를, 한 장씩 깊이 읽어요',
+    description:'원국과 오행을 그래프로 보고, 타고난 기질·일과 재물·가까운 관계·지금의 대운까지 상세 풀이로 이어 읽어요.',
+    includes:['사주 원국과 오행 그래프','기질·강약·십신·용신의 해석','일·재물·관계와 대운의 흐름'],
+    actions:[{label:'내 사주 상세 해석',type:'reading',kind:'saju',npc:'tojeong'},{label:'직접 입력해 명식 보기',type:'feature',id:'saju',rawCalculator:true},{label:'토정과 사주 이야기',type:'encounter',npc:'tojeong'}],
     continuation:'기본 풀이를 읽은 뒤 더 궁금한 주제가 생기면, 풀이 아래에서 상세 리포트의 목차와 가격을 살펴볼 수 있어요.',
   },
   inyeon: {
@@ -49,7 +49,7 @@ export const HALL_JOURNEYS = Object.freeze({
 export const FEATURES = Object.freeze({
   'ilju-rooms': {title:'60일주방',text:'내 일주방에서 만나고, 다른 일주방에도 들러요',kind:'rooms',hall:'rooms',badge:'나그네 모임'},
   magazine: {title:'삼라 매거진',text:'성향·관계·일과 삶을 읽는 깊이 있는 이야기',kind:'culture',value:'magazine',hall:'archive',badge:'무료 읽기'},
-  saju: { title: '나의 사주', text: '원국 · 오행 · 용신 · 대운과 세운', kind: 'reading', value: 'saju', hall: 'myeongri', badge: '무료 계산' },
+  saju: { title: '나의 사주', text: '원국·오행 그래프부터 기질·일·관계·대운의 상세 해석', kind: 'reading', value: 'saju', hall: 'myeongri', badge: '무료 해석' },
   time: { title: '태어난 시간 비교', text: '시간이 모호할 때, 분 단위로 비교', kind: 'reading', value: 'saju', anchor: 'timeCompare', hall: 'myeongri', badge: '무료 계산' },
   gunghap: { title: '우리의 궁합', text: '두 사람의 관계를 여러 방향에서', kind: 'reading', value: 'gunghap', hall: 'inyeon', badge: '무료 계산' },
   relations: { title: '나그네와 함께 보는 궁합', text: '가까이 있는 사람에게 요청하고 승인 후 함께 읽어요', kind: 'invite', hall: 'inyeon', badge: '서로 승인' },

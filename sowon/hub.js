@@ -1,6 +1,6 @@
 import { getOwnIdentity } from './identity.js?v=20261102-loading1';
 import { getActiveProfile } from './profile-core.js?v=20261101-freepath4';
-import { FEATURES, HALLS, HALL_JOURNEYS, getFeature, getHall, parseView, viewHash, internalDestination, readJourney, writeJourney } from './hub-core.js?v=20261101-pairpaths4';
+import { FEATURES, HALLS, HALL_JOURNEYS, getFeature, getHall, parseView, viewHash, internalDestination, readJourney, writeJourney } from './hub-core.js?v=20261102-hallfocus1';
 
 const dialog = document.createElement('dialog');
 dialog.className = 'hub-dialog';
@@ -52,7 +52,7 @@ export function navigate(raw, { canonical = false, kind } = {}) {
     // Cross-calculator carry remains in memory, never in the shrine's history.
     readingOptions.set(calculator, destination.search ? { search: destination.search } : {});
     const view = { type: 'feature', id: calculator };
-    if (viewHash(view) === viewHash(currentView)) render(view); else open(view);
+    if (viewHash(view) === viewHash(currentView)) render(view); else open(view,{rawCalculator:true});
     return;
   }
   if (!canonical && kind !== 'fallback' && (['/store/', '/store/index.html'].includes(destination.pathname) || destination.pathname === '/' && ['#tests', '#readers'].includes(destination.hash))) {
@@ -98,11 +98,12 @@ function renderHall(id) {
       else if(action.type==='encounter')button.dataset.hubEncounter=action.npc;
       else if(action.type==='social')button.dataset.hubSocial='';
       else button.dataset.hubFeature=action.id;
+      if(action.rawCalculator===true)button.dataset.hubRawCalculator='true';
       actions.append(button);
     });
     start.append(actions,includes,el('p','hub-free-continuation',journey.continuation));content.append(start);
     if(pair){
-      const talk=el('button','hub-pair-talk','설월과 내 관계 이야기');talk.type='button';talk.dataset.hubEncounter='seol';
+      const talk=el('button','hub-pair-talk','설월에게 궁합 물어보기');talk.type='button';talk.dataset.hubEncounter='seol';
       intro.querySelector('div')?.append(talk);content.append(intro);
     }
     content.append(el('h3','hub-tools-title',id==='readers'?'술사와 상세 리포트':'함께 쓰는 도구와 읽을거리'));
@@ -233,13 +234,17 @@ function close(callback) {
   if(depth>0&&history.state?.sowonHub===identity){closeInFlight=true;history.go(-depth);}
   else {history.replaceState({...history.state,view:null,depth:0},'',location.pathname+baseHash);depth=0;hide();const next=afterClose;afterClose=null;next?.();}
 }
-function open(view) {
+function open(view,{rawCalculator=false}={}) {
   if(!viewHash(view))return;
+  if(view.type==='feature'&&view.id==='saju'&&!rawCalculator){readingOptions.delete('saju');beginOwnReading('saju','tojeong');return;}
   if(view.type==='feature'&&getFeature(view.id).kind==='rooms'){const show=()=>document.dispatchEvent(new CustomEvent('sowon:rooms-open'));if(dialog.open)close(show);else show();return;}
   if(view.type==='feature'&&getFeature(view.id).kind==='link'){navigate(getFeature(view.id).url);return;}
   const hadReference=referenceDialog.open;
   if(hadReference)hideReference();
-  if(viewHash(view)===viewHash(currentView)&&dialog.open&&!hadReference)return;
+  if(viewHash(view)===viewHash(currentView)&&dialog.open&&!hadReference){
+    if(rawCalculator&&getFeature(view.id)?.kind==='reading')render(view);
+    return;
+  }
   depth++;
   history.pushState({sowonHub:identity,depth,view},'',location.pathname+viewHash(view));
   track(view.id);render(view);
@@ -276,7 +281,11 @@ document.addEventListener('click',event=>{
   if(!button)return;
   event.preventDefault();
   if(button.dataset.hubView)open({type:'view',id:button.dataset.hubView});
-  else if(button.dataset.hubFeature)open({type:'feature',id:button.dataset.hubFeature});
+  else if(button.dataset.hubFeature){
+    const rawCalculator=button.dataset.hubRawCalculator==='true';
+    if(rawCalculator)readingOptions.delete(button.dataset.hubFeature);
+    open({type:'feature',id:button.dataset.hubFeature},{rawCalculator});
+  }
   else if(button.dataset.hubHall)open({type:'hall',id:button.dataset.hubHall});
   else if(button.dataset.hubWalk)walk(button.dataset.hubWalk);
   else if(button.dataset.hubRitual){
@@ -285,7 +294,11 @@ document.addEventListener('click',event=>{
   }
 });
 document.addEventListener('sowon:open',event=>{if(getHall(event.detail?.action))open({type:'hall',id:event.detail.action});});
-document.addEventListener('sowon:feature',event=>{if(getFeature(event.detail?.id))open({type:'feature',id:event.detail.id});});
+document.addEventListener('sowon:feature',event=>{if(getFeature(event.detail?.id)){
+  const rawCalculator=event.detail.rawCalculator===true;
+  if(rawCalculator)readingOptions.delete(event.detail.id);
+  open({type:'feature',id:event.detail.id},{rawCalculator});
+}});
 document.addEventListener('sowon:hall',event=>{if(getHall(event.detail?.id))open({type:'hall',id:event.detail.id});});
 document.addEventListener('sowon:navigate',event=>{if(event.detail?.url)navigate(event.detail.url);});
 document.addEventListener('sowon:profile-change',()=>{

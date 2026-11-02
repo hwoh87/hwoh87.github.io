@@ -1,5 +1,5 @@
-import { createDialogueSession, getNpcPersona } from './dialogue-core.js?v=20261101-freepath4';
-import { createShrineChatClient } from './chat-client.js?v=20261101-freepath4';
+import { createDialogueSession, getNpcPersona } from './dialogue-core.js?v=20261102-hallfocus1';
+import { createShrineChatClient } from './chat-client.js?v=20261102-hallfocus1';
 import { loadReadingEngine } from './readings.js?v=20261102-loading1';
 import { buildReadingInsight } from './reading-insight-core.js?v=20261101-report-visual3';
 
@@ -19,7 +19,8 @@ export function mountNpcDialogue(container, npcId, options = {}) {
   const loadEngine = options.loadEngine || loadReadingEngine, buildInsight = options.buildInsight || buildReadingInsight;
   const chatClient = options.chatClient === false ? null : options.chatClient || createShrineChatClient();
   let disposed = false, choicesAbort, messageIds = [], messageNodes = new Map(), engineTicket = 0, composing = false;
-  let activeRequest = null, preparation, feedbackError = '', readingStatus = hasProfile ? '내 기본 해석을 준비하고 있어요' : '내 정보 없이도 궁금한 이야기를 물어보세요';
+  const pairFocus = npcId === 'seol';
+  let activeRequest = null, preparation, feedbackError = '', readingStatus = pairFocus ? '두 사람의 궁합을 보는 방법부터 살펴봐요' : hasProfile ? '내 기본 해석을 준비하고 있어요' : '내 정보 없이도 궁금한 이야기를 물어보세요';
   const compactQuestions = document.defaultView?.matchMedia?.('(max-height: 500px)');
   let expandedChoices = false, visibleChoiceCount = compactQuestions?.matches ? 0 : 2;
   const make = (tag, className, text) => { const element = document.createElement(tag); if (className) element.className = className; if (text != null) element.textContent = text; return element; };
@@ -33,7 +34,7 @@ export function mountNpcDialogue(container, npcId, options = {}) {
   const portrait = make('img', 'npc-portrait'); portrait.src = `/store/art/readers/${npcId}.webp`; portrait.alt = ''; portrait.width = 168; portrait.height = 168;
   const identity = make('div', 'npc-identity');
   identity.append(make('h2', 'npc-name', npc.name), make('p', 'npc-role', npc.role || npc.title));
-  stage.append(make('p', 'npc-stage-brand', '소원당 · 이야기'), portrait, identity, make('p', 'npc-stage-line', npc.line), make('p', 'npc-stage-meta', hasProfile ? '나의 정보로 읽는 대화' : '처음 만나는 대화'), button(hasProfile ? '내 정보 수정' : '내 정보 준비', 'npc-profile-action', () => leave(options.onProfile)));
+  stage.append(make('p', 'npc-stage-brand', pairFocus ? '인연정 · 궁합' : npcId === 'tojeong' ? '명리전 · 나의 사주' : '소원당 · 이야기'), portrait, identity, make('p', 'npc-stage-line', npc.line), make('p', 'npc-stage-meta', pairFocus ? '두 명식의 강점과 조율점을 함께 읽어요' : hasProfile ? '나의 정보로 읽는 대화' : '처음 만나는 대화'), button(hasProfile ? '내 정보 수정' : '내 정보 준비', 'npc-profile-action', () => leave(options.onProfile)));
 
   const conversation = make('div', 'npc-conversation'), header = make('header', 'npc-dialog-header');
   const heading = make('div', ''), title = make('h1', 'npc-dialog-title', npc.openerTitle || '오늘은 어떤 이야기를 나눌까요?'); title.id = `${id}-title`;
@@ -41,7 +42,7 @@ export function mountNpcDialogue(container, npcId, options = {}) {
   heading.append(make('p', 'npc-eyebrow', `${withNpc}의 대화`), title, status);
   const close = button('×', 'npc-close', () => leave(options.onClose)); close.setAttribute('aria-label', `${withNpc}의 대화 닫기`); header.append(heading, close);
   const toolbar = make('nav', 'npc-toolbar'); toolbar.setAttribute('aria-label', '대화와 함께 보기');
-  toolbar.append(button(hasProfile ? '전체 해석' : '내 정보 입력', '', () => leave(() => hasProfile ? options.onReading?.(npc.readingKind) : options.onProfile?.())));
+  if (!pairFocus) toolbar.append(button(hasProfile ? npcId === 'tojeong' ? '내 사주 상세 해석' : '내 별자리 상세 해석' : '내 정보 입력', 'npc-reading-action', () => leave(() => hasProfile ? options.onReading?.(npc.readingKind) : options.onProfile?.())));
   if (npcId !== 'seol') toolbar.append(button('나그네와 궁합', '', () => leave(options.onSocial)));
   toolbar.append(button('공간 둘러보기', '', () => leave(() => options.onHall?.(npcId === 'tojeong' ? 'myeongri' : npcId === 'seol' ? 'inyeon' : 'readers'))));
   const pairActions = npcId === 'seol' ? make('nav', 'npc-pair-actions') : null;
@@ -64,7 +65,7 @@ export function mountNpcDialogue(container, npcId, options = {}) {
   const form = make('form', 'npc-question-form'); form.setAttribute('aria-label', `${withNpc} 직접 이야기하기`);
   const inputLabel = make('label', 'npc-input-label', '궁금한 주제를 직접 적어 주세요'); inputLabel.htmlFor = `${id}-input`;
   const inputRow = make('div', 'npc-input-row'), input = make('input', 'npc-question-input'); input.id = `${id}-input`; input.type = 'text'; input.maxLength = 320; input.autocomplete = 'off'; input.enterKeyHint = 'send';
-  input.placeholder = npcId === 'tojeong' ? '예: 요즘 흐름은 어떤가요?' : npcId === 'seol' ? '예: 나는 관계에서 어떤 편인가요?' : '예: 내 마음은 어떻게 쉬나요?';
+  input.placeholder = npcId === 'tojeong' ? '예: 요즘 흐름은 어떤가요?' : npcId === 'seol' ? '예: 궁합 점수는 어떻게 읽나요?' : '예: 내 마음은 어떻게 쉬나요?';
   const send = make('button', 'npc-send', '보내기'); send.type = 'submit'; send.disabled = true;
   const inputNotice = chatClient ? '질문·최근 대화·풀이 요약을 Google Gemini로 전송해요.' : '성향·관계·흐름처럼 궁금한 주제를 적어보세요.';
   const feedback = make('p', 'npc-input-feedback', inputNotice); feedback.id = `${id}-feedback`; feedback.setAttribute('role', 'status'); input.setAttribute('aria-describedby', feedback.id);
@@ -144,7 +145,7 @@ export function mountNpcDialogue(container, npcId, options = {}) {
   function route(action) {
     if (!action || disposed) return;
     if (action.type === 'profile') options.onProfile?.();
-    else if (action.type === 'reading') options.onReading?.(action.id || npc.readingKind);
+    else if (action.type === 'reading') { if (pairFocus) options.onFeature?.('gunghap'); else options.onReading?.(action.id || npc.readingKind); }
     else if (action.type === 'social') options.onSocial?.();
     else if (action.type === 'feature') options.onFeature?.(action.id);
   }
@@ -166,7 +167,8 @@ export function mountNpcDialogue(container, npcId, options = {}) {
       item.append(body); messages.append(item); messageNodes.set(message.id, item); added.push(item);
     });
     messageIds = nextIds; choicesAbort?.abort(); choicesAbort = new AbortController(); choices.replaceChildren();
-    view.choices.forEach(choice => { const item = button(choice.label, 'npc-choice', () => {
+    const displayChoices = pairFocus && ['welcome', 'topic'].includes(view.stage) ? view.choices.filter(choice => !choice.id.startsWith('action:')) : view.choices;
+    displayChoices.forEach(choice => { const item = button(choice.label, 'npc-choice', () => {
       if (activeRequest) return;
       if (chatClient && !choice.id.startsWith('action:')) { void askAi(choice.label,choice.id); return; }
       const result = session.choose(choice.id); if (!result.accepted) return; render(true); route(result.action);
@@ -190,10 +192,10 @@ export function mountNpcDialogue(container, npcId, options = {}) {
     try {
       const engine = await loadEngine(); if (disposed || ticket !== engineTicket) return;
       const insight = buildInsight(npc.readingKind, { ...profile.solar }, { engine, year: options.year || koreanYear() });
-      session.setInsight(insight); readingStatus = `${npc.readingKind === 'star' ? '서울 기준 · ' : ''}${profile.solar.unk ? '출생시간 미상 · ' : ''}내 정보로 준비한 기본 해석`; render();
+      session.setInsight(insight); readingStatus = pairFocus ? '궁합은 두 사람의 정보를 입력하거나 서로 승인한 뒤 계산해요' : `${npc.readingKind === 'star' ? '서울 기준 · ' : ''}${profile.solar.unk ? '출생시간 미상 · ' : ''}내 정보로 준비한 기본 해석`; render();
     } catch (_) {
       if (disposed || ticket !== engineTicket) return;
-      readingStatus = '기본 해석을 준비하지 못했어요. 전체 해석에서 정보를 확인해 주세요.'; status.className = 'npc-status npc-error'; render();
+      readingStatus = pairFocus ? '기본 정보 준비가 지연되고 있어요. 궁합 요청이나 직접 입력은 계속 이용할 수 있어요.' : '기본 해석을 준비하지 못했어요. 상세 해석에서 정보를 확인해 주세요.'; status.className = 'npc-status npc-error'; render();
     }
   }
   function dispose() {

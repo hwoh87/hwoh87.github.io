@@ -231,6 +231,7 @@ dialog.xp-dialog.npc-dialog::backdrop {
   text-decoration: none;
 }
 .npc-dialog .npc-toolbar :is(button,a):hover { color: #233f2d; text-decoration: underline; text-underline-offset: 5px; }
+.npc-dialog .npc-toolbar .npc-reading-action { color: #294f3c; font-weight: 700; text-decoration: underline; text-underline-offset: 5px; text-decoration-color: #9bad9a; }
 
 /* Seol keeps both compatibility routes visible before a conversation starts. */
 .npc-dialog .npc-pair-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); flex-shrink: 0; gap: 8px; min-width: 0; margin: 11px 28px 0; }

@@ -1,5 +1,5 @@
-import { getEncounter } from './encounter-core.js?v=20261101-freepath4';
-import { getFeature } from './hub-core.js?v=20261101-freepath4';
+import { getEncounter } from './encounter-core.js?v=20261102-hallfocus1';
+import { getFeature } from './hub-core.js?v=20261102-hallfocus1';
 
 export const MAX_DIALOGUE_MESSAGES = 20;
 export const MAX_DIALOGUE_QUESTION_LENGTH = 160;
@@ -21,7 +21,7 @@ const canonical = (npc,topic) => getEncounter(npc)?.topics.find(row=>row.id===to
 
 const PERSONAS = freeze({
   tojeong:{id:'tojeong',name:'토정',role:'사주의 길을 짚는 도사',title:'산신 노도사',readingKind:'saju',openerTitle:'차 한 잔, 이야기 한 자락',line:'명식의 큰 결부터 차근차근 살펴보죠.',style:'차분한 존대. 살펴보죠·하지요를 짧게 사용한다.',greeting:'잘 오셨습니다. 오늘은 무엇이 마음에 걸리나요?',ready:'준비해 둔 명식의 기본 풀이를 살펴봤지요.',topicPrompt:'기본 결, 기운의 균형, 긴 흐름 중 어디부터 살펴볼까요?',after:'이름에 나를 맞추기보다, 일상에서 닮은 부분을 찾아보지요.',shortLead:'짧게 짚으면 이 문장이에요.',basisLead:'이번 계산에서 확인한 표시는 이렇지요.',practiceLead:'오늘은 크게 바꾸려 하지 말고, 이 한 가지를 살펴보지요.',guidePrompt:'서두르지 않아도 됩니다. 어느 길이 궁금한가요?'},
-  seol:{id:'seol',name:'설월',role:'관계의 온도를 읽는 안내자',title:'얼음 현자',readingKind:'star',openerTitle:'서로를 알아가는 시간',line:'상대 정보 없이, 먼저 나의 관계 반응을 읽어요.',style:'명료하고 차분한 존대. 강점과 조율점을 같은 무게로 말한다.',greeting:'반가워요. 관계에서 궁금했던 장면이 있나요?',ready:'상대 정보 없이, 내 관계 반응의 기본 풀이를 준비했어요.',topicPrompt:'어떤 관계 반응부터 살펴볼까요?',after:'맞는 부분은 실제 대화에서 확인해 보세요. 상대의 마음을 대신 정하는 풀이는 아니에요.',shortLead:'핵심만 남기면 이 문장이에요.',basisLead:'이 답을 읽을 때 함께 본 신호예요.',practiceLead:'실제 대화에 옮겨 볼 작은 단서를 골라볼게요.',guidePrompt:'내 반응을 읽는 것과 두 사람의 궁합은 나눠서 볼게요. 무엇이 궁금한가요?'},
+  seol:{id:'seol',name:'설월',role:'두 사람의 궁합을 읽는 안내자',title:'얼음 현자',readingKind:'star',openerTitle:'두 사람의 궁합을 살펴볼까요?',line:'두 사람의 사주에서 강점과 조율점을 함께 읽어요.',style:'명료하고 차분한 존대. 강점과 조율점을 같은 무게로 말한다.',greeting:'반가워요. 만난 나그네와 궁합을 청하거나, 두 사람의 출생정보를 직접 입력해 함께 읽어볼까요?',ready:'실제 궁합은 두 사람의 출생정보를 비교해 읽어요. 만난 나그네에게 요청하고 승인받거나, 알고 있는 정보를 직접 입력할 수 있어요.',topicPrompt:'궁합을 보는 방법과 강점·조율점 중 무엇이 궁금한가요?',after:'맞는 부분은 실제 대화에서 확인해 보세요. 상대의 마음을 대신 정하는 풀이는 아니에요.',shortLead:'핵심만 남기면 이 문장이에요.',basisLead:'이 답을 읽을 때 함께 본 신호예요.',practiceLead:'실제 대화에 옮겨 볼 작은 단서를 골라볼게요.',guidePrompt:'두 사람의 궁합을 어떻게 살펴보고 싶은가요?'},
   luna:{id:'luna',name:'루나',role:'태어난 하늘을 풀어 주는 안내자',title:'달빛 무녀',readingKind:'star',openerTitle:'하늘에서 시작하는 이야기',line:'기질과 마음의 리듬을 편하게 이야기해요.',style:'친근한 해요체. 부드럽되 과한 비유나 예언은 쓰지 않는다.',greeting:'어서 와요. 나에 대해 어떤 이야기를 나눠볼까요?',ready:'태어난 하늘의 기본 풀이를 준비했어요.',topicPrompt:'지금 가장 궁금한 이야기를 골라봐요.',after:'내 경험과 닮은 부분부터 가볍게 대조해 봐요.',shortLead:'한 문장으로 이야기하면 이래요.',basisLead:'이 이야기는 이런 배치를 보고 읽었어요.',practiceLead:'일상에 옮긴다면, 이 문장부터 살펴봐요.',guidePrompt:'풀이가 처음이어도 괜찮아요. 궁금한 것부터 물어봐요.'},
 });
 
@@ -47,21 +47,21 @@ const GUIDES = freeze({
     ]},
   ],
   seol:[
-    {id:'self',label:'상대 생일을 몰라도 내 관계 반응을 읽나요?',answer:'네. 지금의 개인 풀이는 내 출생정보로 계산한 기질과 관계 반응을 읽어요. 상대 정보가 없으니 두 사람의 점수나 상대의 마음은 추측하지 않아요. 실제 궁합은 두 사람의 정보와 동의가 갖춰졌을 때 따로 살펴봐요.',replies:[
-      {id:'prepare',label:'내 반응부터 알아보고 싶어요.',text:'내 정보를 준비하면 별자리 기본 풀이 중 관계와 표현의 결부터 이야기할 수 있어요. 관계에서 어떤 부분이 편하고 어떤 부분을 조율할지, 실제 경험과 나란히 읽어보세요.',actions:[profileAction(),reading('star','내 관계 반응의 기본 해석 보기')]},
-      {id:'two',label:'두 사람이 같이 보려면 어떻게 하나요?',text:'각자 내 출생정보를 준비한 뒤 마당의 만남에 참여해요. 가까운 나그네에게 관계 종류를 골라 궁합을 요청하면 됩니다. 상대가 승인한 뒤 두 사람이 같은 결과를 볼 수 있어요.',actions:[social()]},
-    ]},
     {id:'consent',label:'마당에서 궁합을 청하는 순서가 궁금해요.',answer:'각자 공개 범위를 확인하고 만남에 참여한 뒤, 가까운 나그네에게 요청해요. 요청을 보내는 것이 보낸 사람의 동의이고, 받은 사람이 승인해야 두 사람의 결과가 열려요. 사양하거나 요청을 취소해도 괜찮아요.',replies:[
       {id:'meet',label:'지금 같은 마당에서 만나고 싶어요.',text:'마당의 만남에서 닉네임과 캐릭터·위치를 공개할 범위를 먼저 확인하세요. 참여한 사람끼리 가까이 다가가 요청을 보낼 수 있어요. 관계 종류도 실제 인연에 맞춰 골라주세요.',actions:[social()]},
       {id:'birth',label:'상대가 내 생년월일도 보게 되나요?',text:'상대에게 출생정보 원문을 보여주는 방식은 아니에요. 만남에 참여할 때 계산을 위해 서버에 보관하며, 승인 후 두 참여자에게 계산된 결과를 보여줘요. 서버 정보와 공유를 지우는 기능도 마당의 만남 안에 있어요.',actions:[social()]},
     ]},
-    {id:'score',label:'궁합 점수는 어떻게 받아들이면 좋을까요?',answer:canonical('seol','pair'),replies:[
+    {id:'score',label:'궁합의 강점과 조율점은 어떻게 읽나요?',answer:canonical('seol','pair'),replies:[
       {id:'low',label:'점수가 낮으면 나쁜 인연인가요?',text:'점수가 관계의 결말은 아니에요. 잘 맞는 부분과 조율할 부분을 나누어 보고, 서로의 경험과 대화가 맞는지 확인해 보세요. 관계 종류에 따라서도 읽는 기준이 달라져요.',actions:[feature('gunghap','궁합 항목과 설명 살펴보기')]},
       {id:'known',label:'서로 알고 있는 정보로 직접 계산할게요.',text:'두 사람의 동의를 받은 출생정보와 실제 관계 종류를 입력해 주세요. 전체 무료 계산표에서 각 항목을 나란히 볼 수 있어요. 이 직접 입력 화면과 마당의 승인 요청은 별개의 이용 방식이에요.',actions:[feature('gunghap','두 사람 직접 입력하기')]},
     ]},
     {id:'revoke',label:'승인한 뒤 마음이 바뀌면 어떻게 하나요?',answer:'공유를 철회할 수 있어요. 한 사람이 철회하면 두 사람 모두 그 결과를 다시 열 수 없게 돼요. 다만 이미 읽은 내용이나 별도로 저장한 화면까지 되돌리는 기능은 아니에요.',replies:[
       {id:'one',label:'특정 궁합의 공유만 거두고 싶어요.',text:'마당의 만남에서 궁합 소식을 열고 해당 요청의 공유 철회를 선택하세요. 철회는 두 사람 모두에게 적용돼요. 필요하다면 나중에 다시 만나 새로운 요청으로 동의를 나눌 수 있어요.',actions:[social()]},
       {id:'all',label:'만남에 올린 내 정보를 전부 지우고 싶어요.',text:'마당의 만남에서 서버의 내 정보와 공유 지우기를 선택하세요. 마당에서 잠시 나가는 것과 서버 정보를 지우는 것은 달라요. 이 브라우저에 기억한 출생정보도 지우려면 내 정보에서 따로 삭제해 주세요.',actions:[social(),action('profile','브라우저의 내 정보 확인')]},
+    ]},
+    {id:'self',label:'나의 사주부터 자세히 읽고 싶어요.',answer:'내 사주의 기질과 균형, 일과 대운은 명리전에서 상세히 읽을 수 있어요. 인연정에서는 두 사람의 명식이 만나는 강점과 조율점에 집중해요. 상대 정보가 없으니 두 사람의 점수나 상대의 마음은 추측하지 않아요.',replies:[
+      {id:'prepare',label:'명리전에서 나를 먼저 알아볼게요.',text:'명리전에서 내 사주 상세 해석을 펼쳐보세요. 내 정보가 없다면 출생정보를 준비한 뒤 원국·오행·십신·대운과 생활 속 의미를 차례로 읽을 수 있어요.',actions:[feature('saju','명리전에서 내 사주 읽기')]},
+      {id:'two',label:'두 사람이 같이 보려면 어떻게 하나요?',text:'각자 내 출생정보를 준비한 뒤 마당의 만남에 참여해요. 가까운 나그네에게 관계 종류를 골라 궁합을 요청하면 됩니다. 상대가 승인한 뒤 두 사람이 같은 결과를 볼 수 있어요.',actions:[social(),feature('gunghap','두 사람 직접 입력하기')]},
     ]},
   ],
   luna:[
@@ -194,7 +194,11 @@ export function createDialogueSession(npcId,options={}){
   }
   function greeting(){return(nickname?nickname+'님, ':'')+npc.greeting;}
   function orderedSections(){return ORDER[npcId].map(id=>insight?.sections.find(row=>row.id===id)).filter(Boolean);}
-  function readyText(){const focus=npcId==='seol'?insight.sections.find(row=>row.id==='relationship'):null;return [npc.ready,insight.headline,sentence(focus?.paragraphs[0]||insight.summary)].filter(Boolean).join('\n\n');}
+  function readyText(){return npcId==='seol'?npc.ready:[npc.ready,insight.headline,sentence(insight.summary)].filter(Boolean).join('\n\n');}
+  // The relationship guide may retain own-chart context for a typed question,
+  // but every full-reading route belongs to two-person compatibility here.
+  function readingStep(){return npcId==='seol'?feature('gunghap','두 사람의 궁합 자세히 보기'):reading(npc.readingKind);}
+  function hostAction(value){return actionChoice(npcId==='seol'&&value.type==='reading'?readingStep():value);}
   function snapshot(){return copy({stage,activeSection,guideTopic,guideReply,guideSource,clarifying,asked,messages});}
   function remember(){history.push(snapshot());history=history.slice(-MAX_BACK_STEPS);}
   function choiceRows(){
@@ -203,30 +207,31 @@ export function createDialogueSession(npcId,options={}){
     if(stage==='ai'){
       for(const id of ['short','practice','basis','next'])rows.push({id:'followup:'+id,label:FOLLOWUPS[id]});
       rows.push({id:'topics',label:'다른 주제로 물어볼게요.'});
-      rows.push(actionChoice(insight?reading(npc.readingKind):profileAction()));
+      rows.push(hostAction(npcId==='seol'||insight?readingStep():profileAction()));
     }else if(stage==='clarify'){
       for(const id of clarifying)rows.push({id:'ask-topic:'+id,label:ASK_TOPICS[id]});
     }else if(stage==='reading'||stage==='followup'){
       for(const id of ['short','practice','basis','next'])if(!asked.includes(id))rows.push({id:'followup:'+id,label:FOLLOWUPS[id]});
       rows.push({id:'topics',label:'다른 주제로 물어볼게요.'});
-      rows.push(actionChoice(reading(npc.readingKind)));
+      rows.push(hostAction(readingStep()));
     }else if(stage==='guide'){
       const topic=GUIDES[guideSource].find(row=>row.id===guideTopic),reply=topic?.replies.find(row=>row.id===guideReply);
-      if(reply){for(const a of reply.actions.filter(isDialogueAction))rows.push(actionChoice(a));rows.push({id:'guide',label:'다른 안내도 궁금해요.'});}
+      if(reply){for(const a of reply.actions.filter(isDialogueAction))rows.push(hostAction(a));rows.push({id:'guide',label:'다른 안내도 궁금해요.'});}
       else if(topic){for(const reply of topic.replies)rows.push({id:'guide-reply:'+reply.id,label:reply.label});rows.push({id:'guide',label:'다른 안내부터 볼게요.'});}
       else for(const topic of GUIDES[npcId])rows.push({id:'guide-topic:'+topic.id,label:topic.label});
-      if(insight)rows.push({id:'topics',label:'내 이야기로 돌아갈게요.'});
+      if(insight)rows.push({id:'topics',label:npcId==='seol'?'궁합 이야기로 돌아갈게요.':'내 이야기로 돌아갈게요.'});
       else if(!hasProfile&&!reply)rows.push(actionChoice(profileAction()));
+    }else if(npcId==='seol'){
+      rows.push(actionChoice(social()),hostAction(feature('gunghap','직접 입력해 궁합 보기')));
+      for(const topic of GUIDES.seol)rows.push({id:'guide-topic:'+topic.id,label:topic.label});
     }else if(insight){
       // Keep the opening choice set short. 'Next' walks the complete reading,
       // including the deeper work, expression, life-area and structure chapters.
       for(const row of orderedSections().slice(0,4))rows.push({id:'section:'+row.id,label:QUESTIONS[npcId][row.id]||row.title});
       rows.push({id:'guide',label:'이곳을 이용하는 방법도 물어볼게요.'});
-      if(npcId==='seol')rows.push(actionChoice(social()));
     }else{
       for(const topic of GUIDES[npcId])rows.push({id:'guide-topic:'+topic.id,label:topic.label});
       rows.push(actionChoice(hasProfile?reading(npc.readingKind,'전체 기본 해석부터 볼게요.'):profileAction()));
-      if(npcId==='seol')rows.push(actionChoice(social()));
     }
     return rows.slice(0,6);
   }
@@ -242,13 +247,13 @@ export function createDialogueSession(npcId,options={}){
   function answerGuide(source,topic,prefix=''){
     const row=GUIDES[source]?.find(row=>row.id===topic);if(!row)return false;
     stage='guide';activeSection=guideReply=null;guideSource=source;guideTopic=topic;clarifying=[];asked=[];
-    const invite=!insight?'아직 개인 풀이가 준비되지 않아 이용 안내부터 드릴게요. 내 정보를 준비하면 계산된 기본 풀이로 이야기할 수 있어요.':'';
+    const invite=!insight?(npcId==='seol'?'실제 궁합을 읽으려면 두 사람의 출생정보가 필요해요. 먼저 함께 보는 방법부터 안내할게요.':'아직 개인 풀이가 준비되지 않아 이용 안내부터 드릴게요. 내 정보를 준비하면 계산된 기본 풀이로 이야기할 수 있어요.') : '';
     add('npc',[prefix,invite,row.answer].filter(Boolean).join('\n\n'));return true;
   }
   function clarify(topics,prefix=''){
     stage='clarify';activeSection=guideTopic=guideReply=null;guideSource=npcId;asked=[];
     clarifying=[...new Set(topics.length?topics:ASK_DEFAULTS[npcId])].filter(id=>Object.hasOwn(ASK_TOPICS,id)).slice(0,4);
-    const invite=!insight?'아직 내 기본 풀이가 없으니, 지금은 이용 방법을 이야기할게요. 내 정보에서 출생정보를 준비할 수 있어요.':'';
+    const invite=!insight?(npcId==='seol'?'두 사람의 정보가 있어야 실제 궁합을 읽을 수 있어요. 우선 어떤 궁합을 살펴볼지 이야기해요.':'아직 내 기본 풀이가 없으니, 지금은 이용 방법을 이야기할게요. 내 정보에서 출생정보를 준비할 수 있어요.') : '';
     add('npc',[prefix,ASK_CLARIFY[npcId],invite].filter(Boolean).join('\n\n'));
   }
   function answerTopic(category,text='',prefix=''){

@@ -38,6 +38,10 @@ function openSettings() {
 function closeEncounter() { if (encounterDialog.open) encounterDialog.close(); }
 async function openEncounter(npc, {reading=false, kind}={}) {
   if (!['tojeong','seol','luna'].includes(npc) || document.querySelector('dialog[open]')) return;
+  if (npc === 'seol' && reading) {
+    document.dispatchEvent(new CustomEvent('sowon:feature', { detail: { id: 'gunghap' } }));
+    return;
+  }
   const version = ++encounterVersion;
   const active = document.activeElement;
   if (active && active !== document.body && !active.closest?.('dialog')) encounterOpener = active;
@@ -59,7 +63,7 @@ async function openEncounter(npc, {reading=false, kind}={}) {
   try {
     let result;
     if (profile && reading) {
-      const module = await import('./personal-encounter.js?v=20261102-loading1');
+      const module = await import('./personal-encounter.js?v=20261102-hallfocus1');
       if (version !== encounterVersion || !encounterDialog.open) return;
       encounterDialog.classList.remove('xp-loading-dialog');
       result = module.mountPersonalEncounter(encounterDialog,npc,{
@@ -67,7 +71,7 @@ async function openEncounter(npc, {reading=false, kind}={}) {
         onGuide: () => { closeEncounter(); queueMicrotask(() => openEncounter(npc)); },
       });
     } else {
-      const module = await import('./npc-dialog.js?v=20261102-loading1');
+      const module = await import('./npc-dialog.js?v=20261102-hallfocus1');
       if (version !== encounterVersion || !encounterDialog.open) return;
       encounterDialog.classList.remove('xp-loading-dialog');
       result = module.mountNpcDialogue(encounterDialog,npc,{

@@ -32,9 +32,10 @@ export function mountReadingReport(container, npc, profile, options = {}) {
   const clearNested = () => { viewAbort?.abort(); outlineAbort?.abort(); rawAbort?.abort(); rawAbort = null; raw?.dispose?.(); raw = null; offerCleanup?.(); offerCleanup = null; };
   container.replaceChildren(); container.classList.add('xp-personal-dialog');
   const header = make('header', 'report-header'), brand = make('div', 'report-brand');
-  brand.append(make('strong', '', '소원당'), make('span', '', '/ 나의 해석'));
+  const reportHall = make('strong', ''), reportSubject = make('span', '');
+  brand.append(reportHall, reportSubject);
   const utilities = make('nav', 'report-utilities'); utilities.setAttribute('aria-label', '신당에서 함께하기');
-  utilities.append(button('', guideText, () => options.onGuide?.()), button('', '궁합 요청', () => options.onSocial?.()));
+  utilities.append(button('', guideText, () => options.onGuide?.()), button('', '인연정에서 궁합 보기', () => options.onHall ? options.onHall('inyeon') : options.onSocial?.()));
   const close = button('report-close', '×', () => options.onClose?.()); close.setAttribute('aria-label', '해석을 닫고 신당으로 돌아가기');
   header.append(brand, utilities, close);
   const tabs = make('div', 'report-tabs'); tabs.setAttribute('role', 'tablist'); tabs.setAttribute('aria-label', '해석의 관점');
@@ -57,6 +58,8 @@ export function mountReadingReport(container, npc, profile, options = {}) {
   function select(next) {
     if (disposed || !KINDS.some(item => item[0] === next)) return;
     const ticket = ++version; clearNested(); kind = next; currentBirth = { ...profile.solar }; location = defaultPlace(); trueSolarTime = false;
+    reportHall.textContent = kind === 'saju' ? '명리전' : '별마루';
+    reportSubject.textContent = `/ ${KINDS.find(item => item[0] === kind)[1]} 상세 해석`;
     viewAbort = new AbortController(); const viewSignal = viewAbort.signal;
     tabNodes.forEach((node, index) => { const selected = KINDS[index][0] === kind; node.setAttribute('aria-selected', String(selected)); node.tabIndex = selected ? 0 : -1; });
     content.setAttribute('aria-labelledby', `${id}-${kind}`); content.replaceChildren(); container.scrollTop = 0;
@@ -80,7 +83,7 @@ export function mountReadingReport(container, npc, profile, options = {}) {
     }, viewSignal);
     skipData.hidden = true;
     readingMeta.append(length, skipData, typeSize);
-    intro.append(make('p', 'report-kicker', `${HOSTS[npc].name} 함께 읽는 개인 해석`), title, lead, meta, summary, readingMeta);
+    intro.append(make('p', 'report-kicker', `${kind === 'saju' ? '명리전' : '별마루'} · ${HOSTS[npc].name} 함께 읽는 개인 해석`), title, lead, meta, summary, readingMeta);
     const digest = make('section', 'report-digest'); digest.hidden = true; digest.setAttribute('aria-label', '먼저 읽는 핵심 요약');
     const dashboard = make('section', 'report-dashboard'); dashboard.hidden = true; dashboard.tabIndex = -1; dashboard.setAttribute('aria-label', '한눈에 보는 분석 데이터');
     const pending = make('p', 'report-pending', '입력한 정보로 기본 해석을 계산하고 있어요.'); pending.setAttribute('role', 'status');
