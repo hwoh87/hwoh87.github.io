@@ -1,4 +1,4 @@
-import { MOTION_INTERVAL_MS, realtimePosition, movementChanged, realtimeTicket, createRealtimeFrameDecoder, validRealtimeIdentity, reconnectDelay } from './realtime-client-core.js?v=20261101-realtime3';
+import { MOTION_INTERVAL_MS, realtimePosition, movementChanged, realtimeTicket, createRealtimeFrameDecoder, validRealtimeIdentity, reconnectDelay } from './realtime-client-core.js?v=20261103-hour1';
 
 /** Authenticated socket lifetime. Credentials exist only in the auth frame. */
 export function createRealtimeClient({getTicket,getPosition,onReady,onFrame,onNotify,onStatus,onFatal,

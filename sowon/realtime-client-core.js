@@ -1,4 +1,4 @@
-import { safeVisitors, safePosition, validId, roomForKey } from './social-core.js?v=20261101-realtime3';
+import { safeVisitors, safePosition, validId, roomForKey } from './social-core.js?v=20261103-hour1';
 
 export const MOTION_INTERVAL_MS = 200;
 const finite = value => typeof value === 'number' && Number.isFinite(value);

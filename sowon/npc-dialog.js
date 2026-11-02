@@ -204,5 +204,7 @@ export function mountNpcDialogue(container, npcId, options = {}) {
     if (mounts.get(container) === dispose) mounts.delete(container);
   }
   dispose.session = session; dispose.dispose = dispose; mounts.set(container, dispose);
-  render(); preparation = prepareInsight(); return dispose;
+  render(); preparation = prepareInsight();
+  if (!document.activeElement || document.activeElement === document.body || document.activeElement === container) close.focus({ preventScroll: true });
+  return dispose;
 }

@@ -25,3 +25,9 @@ export function ownIljuFromAnalysis(analysis) {
   const day = analysis?.pillars?.day;
   return safeIlju(day && `${day.stemKr || ''}${day.branchKr || ''}`);
 }
+
+/** People commonly search using a suffix, hanja, or spacing around the day pillar. */
+export function filterIljuRooms({search='',element=''}={}) {
+  const query=String(search).normalize('NFKC').replace(/\s+/g,'').replace(/일주방|일주|방/g,'').slice(0,16);
+  return ILJU_ROOMS.filter(room=>(!element||room.element===element)&&(!query||room.ilju.includes(query)||room.ganzi.includes(query)));
+}

@@ -3,7 +3,7 @@ import { buildCompatibilityVisuals } from './compatibility-visual-data.js?v=2026
 import { DEMO_SELF, DEMO_TRAVELERS, createDemoSession } from './ilju-demo-core.js?v=20261101-peerrequest1';
 import { loadReadingEngine } from './readings.js?v=20261102-loading1';
 import { waitForAnalysisPaint } from './analysis-loading.js?v=20261102-loading1';
-import { safeResult } from './social-core.js?v=20261101-realtime3';
+import { safeResult } from './social-core.js?v=20261103-hour1';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
 const actionButton = (action, label, extra = '') => `<button type="button" data-demo-action="${action}" ${extra}>${esc(label)}</button>`;

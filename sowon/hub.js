@@ -1,4 +1,4 @@
-import { getOwnIdentity } from './identity.js?v=20261102-loading1';
+import { getOwnIdentity } from './identity.js?v=20261103-hour1';
 import { getActiveProfile } from './profile-core.js?v=20261101-freepath4';
 import { FEATURES, HALLS, HALL_JOURNEYS, getFeature, getHall, parseView, viewHash, internalDestination, readJourney, writeJourney } from './hub-core.js?v=20261102-hallfocus1';
 
@@ -6,7 +6,7 @@ const dialog = document.createElement('dialog');
 dialog.className = 'hub-dialog';
 dialog.id = 'hubDialog';
 dialog.setAttribute('aria-labelledby', 'hubTitle');
-dialog.innerHTML = `<header class="hub-header"><button class="hub-back" type="button" aria-label="이전 화면">←</button><div><p id="hubEyebrow">SAMRA SANCTUARY</p><h2 id="hubTitle">달빛 아래 삼라</h2></div><button class="hub-close" type="button" aria-label="신당으로 돌아가기">×</button></header><div class="hub-body" id="hubBody"></div><footer class="hub-footer"><span>달빛 아래, 잠시 머물러도 괜찮아요.</span><button type="button" data-hub-view="all">전체 기능</button><button type="button" data-hub-feature="library">내 서재</button></footer>`;
+dialog.innerHTML = `<header class="hub-header"><button class="hub-back" type="button" aria-label="이전 화면">←</button><div><p id="hubEyebrow">삼라 소원당</p><h2 id="hubTitle">달빛 아래 삼라</h2></div><button class="hub-close" type="button" aria-label="신당으로 돌아가기">×</button></header><div class="hub-body" id="hubBody"></div><footer class="hub-footer"><span>달빛 아래, 잠시 머물러도 괜찮아요.</span><button type="button" data-hub-view="all">전체 기능</button><button type="button" data-hub-feature="library">내 서재</button></footer>`;
 document.body.appendChild(dialog);
 const referenceDialog = document.createElement('dialog');
 referenceDialog.className = 'hub-dialog hub-reference';
@@ -132,21 +132,22 @@ function renderMap() {
 function renderAll() {
   const search = el('label', 'hub-search', '찾고 싶은 일이 있나요?');
   const input=el('input');input.type='search';input.placeholder='사주, 궁합, 리포트, 용어…';search.append(input);
-  const host=el('div','hub-all-sections');
+  const host=el('div','hub-all-sections'),searchStatus=el('p','hub-search-status');searchStatus.setAttribute('role','status');searchStatus.setAttribute('aria-live','polite');
   function update() {
     host.replaceChildren();const query=input.value.trim().normalize('NFKC').toLocaleLowerCase('ko-KR');let count=0;
-    for (const [id,hall] of Object.entries(HALLS)) {
-      const ids=hall.features.filter(key=>[FEATURES[key].title,FEATURES[key].text,hall.name].join(' ').normalize('NFKC').toLocaleLowerCase('ko-KR').includes(query));
+    for (const id of ['myeongri','inyeon','stars','rooms','celeb','readers','archive']) {
+      const hall=HALLS[id];const ids=hall.features.filter(key=>[FEATURES[key].title,FEATURES[key].text,hall.name].join(' ').normalize('NFKC').toLocaleLowerCase('ko-KR').includes(query));
       if (!ids.length) continue;
       const section=el('section','hub-all-section');const head=el('button','hub-section-link',hall.name+' ↗');head.type='button';head.dataset.hubHall=id;section.append(head);
       const grid=el('div','hub-feature-grid');ids.forEach(key=>grid.append(featureCard(key)));count+=ids.length;section.append(grid);host.append(section);
     }
     if (!query || /서재|구매|리포트|pdf|복구/i.test(query)) {host.append(featureCard('library')); count++;}
-    if (!count) host.append(el('p','hub-empty','찾는 기능이 없어요. 다른 말로 검색해 보세요.'));
+    searchStatus.textContent=query ? `${count}개 기능을 찾았어요` : '';
+    if (!count) { const empty=el('section','hub-empty');empty.append(el('p','','찾는 기능이 없어요. 다른 말로 검색해 보세요.'));const clear=el('button','hub-search-clear','검색어 지우고 전체 보기');clear.type='button';clear.addEventListener('click',()=>{input.value='';update();input.focus();});empty.append(clear);host.append(empty); }
   }
   input.addEventListener('input',update);update();
   const rituals=el('section','hub-rituals');rituals.innerHTML='<h3>소원마당에서 잠시 쉬기</h3><div><button type="button" data-hub-ritual="wish">소원 등불</button><button type="button" data-hub-ritual="breath">마음 고르기</button><button type="button" data-hub-ritual="blessing">응원 보내기</button><button type="button" data-hub-ritual="journal">내 등불 기록</button></div>';
-  content.append(search,rituals,host);
+  content.append(search,searchStatus,host,rituals);
 }
 async function render(view) {
   clearView(); const version=generation; currentView=view;
@@ -154,7 +155,7 @@ async function render(view) {
   dialog.classList.toggle('hub-is-culture',view.type==='feature'&&getFeature(view.id)?.kind==='culture');
   dialog.classList.toggle('hub-is-reading',view.type==='feature'&&getFeature(view.id)?.kind==='reading');
   title.textContent=view.type==='hall'?getHall(view.id).name:view.type==='feature'?getFeature(view.id).title:view.id==='map'?'신당 지도':'삼라의 모든 길';
-  eyebrow.textContent=view.type==='hall'?getHall(view.id).english:'SAMRA SANCTUARY';
+  eyebrow.textContent='삼라 소원당';
   dialog.querySelector('.hub-back').hidden=depth<=1;
   if(!dialog.open) {
     document.querySelectorAll('dialog[open]').forEach(other=>other.close());
@@ -177,7 +178,7 @@ async function render(view) {
       const module=await import('./readings.js?v=20261102-loading1'); if(version!==generation)return;
       result=await module.mountReading(mount,item.value,{navigate,signal:viewAbort.signal,...readingOptions.get(item.value)});
     } else if(item.kind==='culture') {
-      const module=await import('./culture.js?v=20261101-report-visual3');if(version!==generation)return;
+      const module=await import('./culture.js?v=20261103-hour1');if(version!==generation)return;
       result=await module.mountCulture(mount,item.value,{navigate,signal:viewAbort.signal,dayPillar:getOwnIdentity().ilju});
     } else {
       const module=await import('./collection.js?v=20261101-freepath4');if(version!==generation)return;

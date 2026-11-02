@@ -16,3 +16,9 @@
 .hub-pair-talk{margin-top:13px;padding:7px 0;border:0;background:transparent;color:#345b47;font:inherit;font-size:13px;font-weight:600;line-height:1.6;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
 @media(max-width:760px){.hub-pair-choices{grid-template-columns:1fr;gap:10px}.hub-pair-choice{min-height:127px;padding:16px;gap:7px}.hub-pair-choice strong{font-size:18px}.hub-pair-choice span{font-size:14px}.hub-pair-choice small{padding-top:2px;font-size:11px}}
 @media(prefers-reduced-motion:reduce){.hub-feature,.hub-map-place{transition:none}}
+
+/* Search is followed by the main reading spaces; small rituals remain below. */
+.hub-search-status{margin:0 0 16px;color:#50624f;font-size:13px}.hub-search-status:empty{display:none}
+.hub-feature-grid:has(>.hub-feature:only-child){grid-template-columns:minmax(0,1fr)}
+.hub-search-clear{min-height:44px;padding:9px 16px;border:1px solid #9bad97;border-radius:7px;background:#f0f3eb;color:#34543c;font:inherit;font-size:14px}
+@media(max-width:540px){.hub-all-section .hub-feature-grid{grid-template-columns:minmax(0,1fr)}.hub-all-section .hub-feature{min-height:0;padding:18px}.hub-all-section .hub-feature>strong{font-size:18px}.hub-all-section .hub-feature>span:not(.hub-feature-tag){font-size:13px;line-height:1.8}.hub-all-section{margin-bottom:26px}}

@@ -1,5 +1,5 @@
 // App-shared representative art: IljuMulsangArt.kt and scripts/generated/seo/ilju.json.
-import { ILJU_ROOMS, roomForKey } from './ilju-room-core.js?v=20261101-freepath4';
+import { ILJU_ROOMS, roomForKey } from './ilju-room-core.js?v=20261103-hour1';
 
 // Keep these local paths aligned with the generated public art index.
 const MURALS = Object.freeze({

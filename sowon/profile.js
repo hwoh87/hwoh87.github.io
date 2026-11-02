@@ -1,3 +1,4 @@
+import { readProfileDraft } from './profile-draft.js?v=20261103-hour1';
 import { PROFILE_KEY, createProfile, readProfile, writeProfile, clearStoredProfile, setActiveProfile, getActiveProfile, getActiveBirth, profileSearch } from './profile-core.js?v=20261101-freepath4';
 import { loadReadingEngine, clearOwnPersonMemory } from './readings.js?v=20261102-loading1';
 
@@ -19,7 +20,7 @@ dialog.innerHTML = `<header class="profile-header"><div><p>MY STORY IN SAMRA</p>
 <div class="profile-date"><label class="profile-field">달력<select id="ownCalendar" name="calendar"><option value="S">양력</option><option value="L">음력 평달</option><option value="LL">음력 윤달</option></select></label><label class="profile-field">생년월일<input id="ownBirthday" name="birthday" type="text" inputmode="numeric" autocomplete="bday" maxlength="10" placeholder="예: 19950302" aria-describedby="ownDateHelp" required /></label></div><p class="profile-help" id="ownDateHelp">1940년 이후 생년월일을 8자리로 입력해 주세요.</p>
 <fieldset class="profile-time"><legend>태어난 시간</legend><div><label class="profile-field">시<select id="ownHour" name="hour"><option value="">선택</option>${Array.from({length:24},(_,h)=>`<option value="${h}">${String(h).padStart(2,'0')}시</option>`).join('')}</select></label><label class="profile-field">분<input id="ownMinute" name="minute" type="number" inputmode="numeric" min="0" max="59" value="0" /></label></div><label class="profile-check"><input id="ownUnknown" name="unknown" type="checkbox" /> 태어난 시간을 몰라요</label></fieldset>
 <label class="profile-check profile-remember"><input id="ownRemember" name="remember" type="checkbox" /><span>이 브라우저에 출생정보 기억하기<small>선택하지 않으면 새로고침할 때 사라져요. 공용 기기에서는 선택하지 마세요.</small></span></label>
-<p class="profile-privacy">출생정보는 이 브라우저에서 관리해요. 다른 나그네와의 궁합은 별도 요청과 승인 후에만 열려요.</p><p class="profile-status" role="status" aria-live="polite"></p><button class="profile-save" type="submit">내 정보로 풀이 준비하기 ↗</button><button class="profile-delete" type="button" hidden>내 출생정보 지우기</button></form>`;
+<p class="profile-privacy">출생정보는 이 브라우저에서 관리해요. 다른 나그네와의 궁합은 별도 요청과 승인 후에만 열려요.</p><p id="ownProfileStatus" class="profile-status" role="status" aria-live="polite" tabindex="-1"></p><button class="profile-save" type="submit">내 정보로 풀이 준비하기 ↗</button><button class="profile-delete" type="button" hidden>내 출생정보 지우기</button></form>`;
 document.body.appendChild(dialog);
 const form = dialog.querySelector('form'), status = dialog.querySelector('.profile-status');
 let opener = null, returnToNpc = null, saving = false, reopenNpc = null;
@@ -39,7 +40,7 @@ function updateUnknown() {
 }
 function populate() {
   const profile = getOwnProfile(), birth = profile?.birth;
-  form.reset(); status.textContent = ''; status.classList.remove('is-error');
+  form.reset(); clearFieldErrors(); status.textContent = ''; status.classList.remove('is-error');
   form.elements.nickname.value = profile?.nickname || '';
   form.querySelectorAll('[name="gender"]').forEach(input => { input.checked = input.value === birth?.g; });
   form.elements.calendar.value = birth?.calendar || 'S';
@@ -59,17 +60,33 @@ export function openProfile({ returnToNpc: requestedNpc } = {}) {
 }
 function closeProfile() { if (!saving && dialog.open) dialog.close(); }
 function readDraft() {
-  const digits = form.elements.birthday.value.replace(/[^0-9]/g, '');
-  if (digits.length !== 8) throw new Error('생년월일을 8자리로 입력해 주세요. 예: 19950302');
-  if (!form.elements.gender.value) throw new Error('풀이에 사용할 성별을 선택해 주세요.');
-  const unk = form.elements.unknown.checked;
-  if (!unk && form.elements.hour.value === '') throw new Error('태어난 시를 선택하거나 ‘태어난 시간을 몰라요’를 골라주세요.');
-  if (!unk && form.elements.minute.value.trim() === '') throw new Error('태어난 분을 입력해 주세요. 분을 모르면 0분으로 준비할 수 있어요.');
-  return { nickname: form.elements.nickname.value, birth: { y: +digits.slice(0,4), mo: +digits.slice(4,6), d: +digits.slice(6,8), g: form.elements.gender.value, calendar: form.elements.calendar.value, unk, h: unk ? -1 : +form.elements.hour.value, mi: unk ? 0 : +form.elements.minute.value } };
+  return readProfileDraft({ nickname:form.elements.nickname.value, gender:form.elements.gender.value, calendar:form.elements.calendar.value, birthday:form.elements.birthday.value, hour:form.elements.hour.value, minute:form.elements.minute.value, unknown:form.elements.unknown.checked });
+}
+function clearFieldErrors() {
+  form.querySelector('.profile-field-error')?.remove();
+  form.querySelectorAll('[aria-invalid]').forEach(input => {
+    input.removeAttribute('aria-invalid');
+    const described = (input.getAttribute('aria-describedby') || '').split(/\s+/).filter(id => id && id !== status.id && id !== 'ownProfileFieldError');
+    if (described.length) input.setAttribute('aria-describedby', described.join(' ')); else input.removeAttribute('aria-describedby');
+  });
+}
+function showProfileError(error) {
+  status.classList.add('is-error'); status.textContent = error.message || '출생정보를 확인한 뒤 다시 시도해 주세요.';
+  const field = error.field || (/날짜|달력|생년/.test(error.message || '') ? 'birthday' : null);
+  const inputs = field ? [...form.querySelectorAll('[name="'+field+'"]')] : [];
+  const parent = field === 'gender' ? form.querySelector('.profile-gender') : inputs[0]?.closest('.profile-field');
+  if (parent) {
+    const inline = document.createElement('p'); inline.id = 'ownProfileFieldError'; inline.className = 'profile-field-error'; inline.setAttribute('role','alert'); inline.textContent = status.textContent;
+    // Keep error prose out of a label's accessible name; the field references it.
+    (field === 'gender' ? parent : parent.parentElement).append(inline); status.textContent = '';
+  }
+  inputs.forEach(input => { input.setAttribute('aria-invalid','true'); input.setAttribute('aria-describedby', [input.getAttribute('aria-describedby'),parent ? 'ownProfileFieldError' : status.id].filter(Boolean).join(' ')); });
+  const target = inputs[0] || status;
+  target.focus({preventScroll:true}); target.scrollIntoView({block:'center',behavior:'auto'});
 }
 form.addEventListener('submit', async event => {
   event.preventDefault(); if (saving) return;
-  saving = true; const button = dialog.querySelector('.profile-save'); button.disabled = true;
+  clearFieldErrors(); saving = true; const button = dialog.querySelector('.profile-save'); button.disabled = true;
   status.classList.remove('is-error'); status.textContent = '내 풀이를 준비하고 있어요…';
   try {
     const input = readDraft();
@@ -95,7 +112,7 @@ form.addEventListener('submit', async event => {
       return;
     }
     reopenNpc = returnToNpc; dialog.close();
-  } catch (error) { status.classList.add('is-error'); status.textContent = error.message || '출생정보를 확인한 뒤 다시 시도해 주세요.'; }
+  } catch (error) { showProfileError(error); }
   finally { saving = false; button.disabled = false; }
 });
 form.elements.unknown.addEventListener('change', updateUnknown);

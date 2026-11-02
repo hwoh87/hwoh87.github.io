@@ -30,7 +30,7 @@ export async function mountCulture(container,view,{navigate,signal,onView,dayPil
   const token={};mounts.set(container,token);let disposed=false,readController=null,readSequence=0,readerOpener=null;
   const controller=new AbortController(),root=el('section','culture-root culture-'+view);
   const active=()=>!disposed&&mounts.get(container)===token;
-  const listen=(node,type,handler)=>node.addEventListener(type,handler,{signal:controller.signal});
+  const listen=(node,type,handler,signal=controller.signal)=>node.addEventListener(type,handler,{signal});
   const pendingImages=new Map();
   const releaseDetachedImages=()=>{for(const[release,node]of pendingImages)if(!root.contains(node))release();};
   function image(person,cls='culture-art',onFallback){
@@ -81,6 +81,7 @@ export async function mountCulture(container,view,{navigate,signal,onView,dayPil
   if(!active())return cleanup;
   root.replaceChildren();
   const browser=el('div','culture-browser'),reader=el('section','culture-reader');reader.hidden=true;
+  const scrollHost=container.closest?.('.hub-body')||container;let browseScroll=0;
   root.append(browser,reader);
   const intro=el('header','culture-intro-block');intro.append(el('p','culture-eyebrow',view==='celeb'?'인물회랑':'삼라 매거진 · 사주 지식'),el('h2','culture-heading',view==='celeb'?'좋아하는 사람의\n명식을 만나는 곳':'한 편씩 읽으며,\n나를 알아가는 시간'),el('p','culture-intro',view==='celeb'?`${data.people.length.toLocaleString('ko-KR')}명의 공개 프로필과 명식. 이름이나 그룹으로 찾아보고, 같은 일주도 만나보세요.`:'명식 읽기의 첫걸음부터 오행·십신·대운까지. 궁금한 주제를 골라 차근차근 읽어보세요.'));
   browser.append(intro);
@@ -159,15 +160,22 @@ export async function mountCulture(container,view,{navigate,signal,onView,dayPil
   listen(more,'click',()=>{const oldCount=grid.children.length;shown+=PAGE_SIZE;render();const entry=grid.children[oldCount];(entry?.tagName==='BUTTON'?entry:entry?.querySelector('button'))?.focus({preventScroll:true});});
   function closeReader(){
     readSequence++;readController?.abort();readController=null;reader.replaceChildren();releaseDetachedImages();reader.hidden=true;browser.hidden=false;readerOpener?.focus({preventScroll:true});readerOpener=null;
+    scrollHost.scrollTop=browseScroll;
   }
   async function openReader(path,opener){
     if(!readablePath(path))return false;
     const item=data.people.find(person=>person.path===path)||data.articles.find(article=>article.path===path);if(!item)return false;
     readController?.abort();readController=new AbortController();const readSignal=readController.signal,sequence=++readSequence;
     if(opener&&browser.contains(opener))readerOpener=opener;
+    if(!browser.hidden)browseScroll=scrollHost.scrollTop||0;
     browser.hidden=true;reader.hidden=false;reader.replaceChildren();releaseDetachedImages();
-    const bar=el('div','culture-reader-bar'),back=button('← '+(view==='celeb'?'인물회랑':'삼라 매거진')+'으로','culture-text-button');listen(back,'click',closeReader);bar.append(back,el('span','culture-subtle',item.name?'인물 풀이':'사주 입문'));reader.append(bar);
+    const bar=el('div','culture-reader-bar'),back=button('← '+(view==='celeb'?'인물회랑':'삼라 매거진')+'으로','culture-text-button');listen(back,'click',closeReader,readSignal);bar.append(back,el('span','culture-subtle',item.name?'인물 풀이':'사주 입문'));reader.append(bar);
     const header=el('header','culture-article-header'),heading=el('h2','culture-article-title',item.title);heading.tabIndex=-1;
+    const controls=el('div','culture-reader-controls'),typeSize=button(reader.classList.contains('is-large-text')?'기본 크기':'글자 크게','culture-text-button'),top=button('맨 위로','culture-text-button');
+    typeSize.setAttribute('aria-pressed',String(reader.classList.contains('is-large-text')));
+    listen(typeSize,'click',()=>{const large=!reader.classList.contains('is-large-text');reader.classList.toggle('is-large-text',large);typeSize.setAttribute('aria-pressed',String(large));typeSize.textContent=large?'기본 크기':'글자 크게';},readSignal);
+    listen(top,'click',()=>{heading.scrollIntoView?.({block:'start',behavior:'auto'});heading.focus({preventScroll:true});},readSignal);
+    controls.append(typeSize,top);bar.append(controls);
     header.append(el('p','culture-eyebrow',item.name?[item.name,item.dayPillar].join(' · '):item.topic),heading);
     if(item.name){
       header.append(el('p','culture-article-meta',[item.occupation,item.birth].join(' · ')),el('p','culture-scope-notice',item.scope+' · 공개 자료를 기준으로 읽어요.'));
@@ -176,7 +184,7 @@ export async function mountCulture(container,view,{navigate,signal,onView,dayPil
         figure.append(image(item,'culture-reader-portrait',()=>{figure.className='culture-portrait-figure culture-portrait-fallback';credit.replaceChildren(el('span','',item.dayPillar+' 상징 그림 · 인물 사진이 아니에요'));}),credit);header.append(figure);
       }
     }
-    else header.append(el('p','culture-article-meta',`사주 입문 · 약 ${item.minutes}분`));
+    else header.append(el('p','culture-article-meta',`사주 입문 ${data.articles.findIndex(article=>article.path===path)+1}/${data.articles.length} · 약 ${item.minutes}분`));
     reader.append(header);const status=el('p','culture-status','원문을 펼치고 있어요.');status.setAttribute('role','status');reader.append(status);heading.focus({preventScroll:true});animateScroll(root);
     const current=()=>active()&&!readSignal.aborted&&sequence===readSequence;
     try{
@@ -195,7 +203,8 @@ export async function mountCulture(container,view,{navigate,signal,onView,dayPil
       const footer=el('footer','culture-reader-footer'),original=link('공개 원문 페이지 열기 ↗',path);original.dataset.cultureOriginal='true';footer.append(original);
       if(item.updatedAt)footer.append(el('span','culture-subtle','원문 수정 '+item.updatedAt));reader.append(footer);
       const next=el('section','culture-read-next');next.append(el('h3','','이어 읽기'));
-      const entries=item.name?[data.articles[0],data.articles.find(article=>article.id==='unknown-birth-time')]:data.articles.filter(article=>article.path!==path).slice(0,2);
+      const articleIndex=data.articles.findIndex(article=>article.path===path);
+      const entries=item.name?[data.articles[0],data.articles.find(article=>article.id==='unknown-birth-time')]:[...data.articles.slice(articleIndex+1),...data.articles.slice(0,articleIndex)].slice(0,2);
       entries.filter(Boolean).forEach(article=>next.append(guideCard(article)));reader.append(next);
       onView?.(view,{path,count:view==='celeb'?data.people.length:data.articles.length});return true;
     }catch(error){

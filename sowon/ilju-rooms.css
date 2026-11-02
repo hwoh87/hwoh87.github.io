@@ -13,3 +13,14 @@
 .ilju-room-invitation{font-size:13px;color:#365e46}
 .ilju-rooms-footer>span{display:block}
 @media(max-width:600px){.ilju-room-prepare{padding:17px;align-items:flex-start;flex-direction:column;gap:12px}.ilju-room-prepare>button{min-height:44px}.ilju-room-card{min-height:191px}.ilju-room-count{font-size:11px}}
+
+/* Room choices belong in the first screen, alongside the personal shortcut. */
+.ilju-rooms-header{padding:18px 28px}.ilju-rooms-header h2{font-size:28px;margin-top:4px}.ilju-rooms-header p{margin:0;font-size:12px}
+.ilju-rooms-body{padding:20px 28px}.ilju-rooms-intro{margin:0 0 16px;font-size:14px;line-height:1.8}
+.ilju-room-personal{padding:16px 20px}.ilju-room-personal h3{font-size:27px;margin:3px 0}.ilju-room-personal p{margin:5px 0 0;font-size:13px}
+.ilju-room-current{margin:14px 0}.ilju-room-tools{margin:18px 0 12px;gap:12px}
+.ilju-room-results{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0 12px;color:#596b60;font-size:13px}
+.ilju-room-results p{margin:0}.ilju-room-results button{min-height:44px;border:0;background:transparent;color:#345c45;text-decoration:underline;text-underline-offset:4px}
+@media(max-width:600px){.ilju-rooms-header{padding:17px 19px}.ilju-rooms-body{padding:18px}.ilju-room-personal{padding:16px;gap:12px}.ilju-room-personal>button{width:auto}.ilju-rooms-intro br{display:none}.ilju-room-tools{margin-top:15px}.ilju-room-results{font-size:12px}}
+.ilju-room-grid:has(>.ilju-room-card:only-child){grid-template-columns:minmax(0,1fr)}
+.ilju-room-grid>.ilju-room-card:only-child{min-height:150px}

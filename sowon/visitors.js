@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { getAvatarPalette } from './avatar-palettes.js?v=20261101-freepath4';
-import { safeIlju } from './ilju-room-core.js?v=20261101-freepath4';
+import { safeIlju } from './ilju-room-core.js?v=20261103-hour1';
 
 // Only the public presence projection is accepted here; birth data never enters a model or label.
 export function publicVisitor(raw) {

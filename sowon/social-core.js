@@ -1,4 +1,4 @@
-import { safeIlju, roomForKey, safeRoomCounts } from './ilju-room-core.js?v=20261101-freepath4';
+import { safeIlju, roomForKey, safeRoomCounts } from './ilju-room-core.js?v=20261103-hour1';
 export { safeIlju, roomForKey, safeRoomCounts };
 export const SOCIAL_ENDPOINT = 'https://sidxbzpbesbaiokxrqsf.supabase.co/functions/v1/shrine-social';
 // The isolated preview may opt into its own same-origin API, only on loopback.

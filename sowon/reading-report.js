@@ -35,6 +35,9 @@ export function mountReadingReport(container, npc, profile, options = {}) {
   const reportHall = make('strong', ''), reportSubject = make('span', '');
   brand.append(reportHall, reportSubject);
   const utilities = make('nav', 'report-utilities'); utilities.setAttribute('aria-label', '신당에서 함께하기');
+  let showContents = () => {};
+  const contentsButton = button('report-contents-button', '주제 목차', () => showContents()); contentsButton.disabled = true;
+  utilities.append(contentsButton);
   utilities.append(button('', guideText, () => options.onGuide?.()), button('', '인연정에서 궁합 보기', () => options.onHall ? options.onHall('inyeon') : options.onSocial?.()));
   const close = button('report-close', '×', () => options.onClose?.()); close.setAttribute('aria-label', '해석을 닫고 신당으로 돌아가기');
   header.append(brand, utilities, close);
@@ -58,6 +61,7 @@ export function mountReadingReport(container, npc, profile, options = {}) {
   function select(next) {
     if (disposed || !KINDS.some(item => item[0] === next)) return;
     const ticket = ++version; clearNested(); kind = next; currentBirth = { ...profile.solar }; location = defaultPlace(); trueSolarTime = false;
+    contentsButton.disabled = true; showContents = () => {};
     reportHall.textContent = kind === 'saju' ? '명리전' : '별마루';
     reportSubject.textContent = `/ ${KINDS.find(item => item[0] === kind)[1]} 상세 해석`;
     viewAbort = new AbortController(); const viewSignal = viewAbort.signal;
@@ -115,6 +119,7 @@ export function mountReadingReport(container, npc, profile, options = {}) {
     let calculation = 0, inputCalendar = profile.birth?.calendar;
     async function refresh() {
       const revision = ++calculation;
+      contentsButton.disabled = true;
       analysisLoading.hidden = false;
       content.classList.add('is-analyzing');
       layout.setAttribute('aria-busy', 'true');
@@ -155,6 +160,13 @@ export function mountReadingReport(container, npc, profile, options = {}) {
           outlineToggle.textContent = expanded ? '주제 목차 접기 −' : `주제 목차 ${result.sections.length}개 펼치기 ＋`;
         }, outlineSignal);
         outlineToggle.setAttribute('aria-expanded', 'false'); outline.append(outlineToggle);
+        outline.id = `${id}-contents`; contentsButton.setAttribute('aria-controls', outline.id);
+        showContents = () => {
+          outline.classList.add('is-expanded'); outlineToggle.setAttribute('aria-expanded', 'true'); outlineToggle.textContent = '주제 목차 접기 −';
+          outline.scrollIntoView({ block: 'start', behavior: 'auto' });
+          outline.children[2]?.focus({ preventScroll: true });
+        };
+        contentsButton.disabled = !result.sections.length;
         result.sections.forEach((chapter, index) => {
           const section = make('section', 'report-chapter'), heading = make('h2', '', chapter.title); section.id = `${id}-${kind}-${chapter.id}`; heading.tabIndex = -1;
           section.append(make('span', 'report-chapter-number', String(index + 1).padStart(2, '0')), heading);
@@ -179,7 +191,14 @@ export function mountReadingReport(container, npc, profile, options = {}) {
             if (chapter.signals.length) { const facts = make('dl', 'report-signals'); chapter.signals.forEach(fact => { const row = make('div', ''); row.append(make('dt', '', fact.label), make('dd', '', fact.value)); facts.append(row); }); basis.append(facts); }
             chapter.evidence?.forEach(evidence => basis.append(make('p', '', evidence))); section.append(basis);
           }
-          chapters.append(section);
+          const chapterNav = make('nav', 'report-chapter-nav'); chapterNav.setAttribute('aria-label', chapter.title + ' 읽기 이동');
+          chapterNav.append(button('', '목차로', () => showContents(), outlineSignal));
+          const following = result.sections[index + 1];
+          if (following) chapterNav.append(button('report-next-chapter', `다음: ${following.title}`, () => {
+            const nextSection = chapters.children[index + 1];
+            nextSection?.scrollIntoView({ block: 'start', behavior: 'auto' }); nextSection?.children[1]?.focus({ preventScroll: true });
+          }, outlineSignal));
+          section.append(chapterNav); chapters.append(section);
           outline.append(button('', chapter.title, () => { section.scrollIntoView({ block: 'start', behavior: 'auto' }); heading.focus({ preventScroll: true }); }, outlineSignal));
         });
         layout.hidden = result.sections.length === 0;
@@ -229,5 +248,7 @@ export function mountReadingReport(container, npc, profile, options = {}) {
     void refresh();
   }
   const dispose = () => { if (disposed) return; disposed = true; version++; lifetime.abort(); clearNested(); container.replaceChildren(); container.removeAttribute('aria-labelledby'); container.classList.remove('xp-personal-dialog'); container.classList.remove('is-large-text'); };
-  select(kind); return dispose;
+  select(kind);
+  if (!document.activeElement || document.activeElement === document.body || document.activeElement === container) close.focus({ preventScroll: true });
+  return dispose;
 }

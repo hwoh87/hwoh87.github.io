@@ -160,3 +160,16 @@
 .culture-raw-chart>summary{cursor:pointer;min-height:48px;display:flex;align-items:center;font-size:13px;font-weight:600;color:#62533e;list-style-position:inside}
 .culture-raw-chart>summary:before{content:'＋';margin-right:9px;color:#93743d}.culture-raw-chart[open]>summary:before{content:'−'}
 .culture-raw-chart>summary:focus-visible{outline:2px solid #927a48;outline-offset:3px}.culture-raw-chart .culture-chart{margin:0 0 16px}
+
+/* Keep the list return and reading controls reachable throughout a long article. */
+.culture-reader-bar{position:sticky;top:0;z-index:3;flex-wrap:wrap;margin-bottom:24px;padding:8px 0;background:var(--culture-paper,#f7f6f2)}
+.culture-reader-controls{display:flex;gap:16px;margin-left:auto}.culture-reader-controls button{min-height:44px;font-size:13px}
+.culture-article :where(h2,h3,h4),.culture-article-title{scroll-margin-top:96px}
+.culture-reader.is-large-text .culture-article{font-size:19px;line-height:2}.culture-reader.is-large-text .culture-article p{line-height:2}
+@media(max-width:540px){.culture-reader-bar{gap:4px 12px;padding:6px 0}.culture-reader-bar>.culture-subtle{display:none}.culture-reader-controls{gap:10px}.culture-reader-controls button{font-size:12px}.culture-reader.is-large-text .culture-article{font-size:18px}}
+.culture-reader .culture-article{font-size:17px}
+@media(max-width:540px){.culture-reader .culture-article{font-size:16px}}
+.culture-reader.is-large-text .culture-article{font-size:19px}
+@media(max-width:540px){.culture-reader.is-large-text .culture-article{font-size:18px}}
+.culture-reader-bar .culture-text-button{min-width:44px;min-height:44px;padding:8px 0}
+.culture-article nav a{display:inline-flex;align-items:center;min-height:44px}

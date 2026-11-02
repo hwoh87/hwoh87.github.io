@@ -254,3 +254,13 @@
   .xp-personal-dialog .report-dashboard-header { display: block; }
   .xp-personal-dialog .report-dashboard-source { display: inline-block; margin-top: 8px; }
 }
+
+/* Long readings use a comfortable text measure and an always available contents entry. */
+.xp-personal-dialog .report-chapter>p{max-width:42rem;font-size:17px;line-height:1.95;color:#293a32}
+.xp-personal-dialog .report-chapter :is(.report-evidence,.report-practice){max-width:42rem}
+.xp-personal-dialog .report-chapter-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:24px 0 0;max-width:42rem}
+.xp-personal-dialog .report-chapter-nav button{min-height:44px;padding:9px 0;border:0;background:transparent;color:#42624e;font:inherit;font-size:13px;text-align:left;word-break:keep-all;text-decoration:underline;text-underline-offset:4px}
+.xp-personal-dialog .report-chapter-nav .report-next-chapter{max-width:75%;text-align:right;font-weight:600}
+.xp-personal-dialog .report-contents-button:disabled{color:#7b857a;cursor:default;text-decoration:none}
+.xp-personal-dialog .report-outline{scroll-margin-top:104px}
+@media(max-width:759px){.xp-personal-dialog .report-utilities{gap:14px;flex-wrap:wrap}.xp-personal-dialog .report-utilities button{font-size:12px}.xp-personal-dialog .report-outline{scroll-margin-top:142px}.xp-personal-dialog .report-chapter-nav{gap:16px}}
