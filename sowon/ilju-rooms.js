@@ -4,7 +4,7 @@ import { enterSocialRoom, getSocialRoomState } from './social.js?v=20261103-hour
 const dialog = document.createElement('dialog');
 dialog.id = 'iljuRoomsDialog'; dialog.className = 'ilju-rooms-dialog'; dialog.setAttribute('aria-labelledby', 'iljuRoomsTitle');
 document.body.appendChild(dialog);
-let ownIlju = null, selectedElement = '', search = '', error = '', opener = null, entering = false, entryVersion = 0;
+let ownIlju = null, selectedElement = '', search = '', error = '', opener = null, entering = false, entryVersion = 0, composingSearch = false;
 let social = getSocialRoomState();
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const identity = () => safeIlju(social.ownIlju) || ownIlju;
@@ -14,7 +14,7 @@ function roomCard(room) {
   return `<button class="ilju-room-card${mine ? ' is-mine' : ''}${current ? ' is-current' : ''}" type="button" data-enter-room="${room.key}" ${entering || social.busy ? 'disabled' : ''} aria-label="${esc(room.label)}${mine ? ', 내 일주방' : ''}${current ? ', 현재 공간 열기' : social.joined ? ', 방으로 이동' : ', 혼자 둘러보기'}"><span class="ilju-room-hanja" aria-hidden="true">${room.ganzi}</span><span class="ilju-room-name">${esc(room.ilju)} <small>일주방</small></span><span class="ilju-room-count">${esc(occupancy(room.key))}</span><span class="ilju-room-invitation">${current ? '현재 방으로 들어가기 ↗' : social.joined ? '방으로 이동하기 ↗' : '혼자 둘러보기 ↗'}</span></button>`;
 }
 function render() {
-  if (!dialog.open) return;
+  if (!dialog.open || composingSearch) return;
   const own = roomForIlju(identity());
   const list = filterIljuRooms({ search, element: selectedElement });
   const active = roomForKey(social.roomKey) || COURTYARD;
@@ -27,7 +27,7 @@ function render() {
 }
 export function openIljuRooms() {
   if (dialog.open || document.querySelector('dialog[open]')) return false;
-  social = getSocialRoomState(); opener = document.activeElement; error = ''; search = ''; selectedElement = '';
+  social = getSocialRoomState(); opener = document.activeElement; error = ''; search = ''; selectedElement = ''; composingSearch = false;
   dialog.showModal(); document.body.classList.add('dialog-open'); render();
   document.dispatchEvent(new CustomEvent('sowon:identity-request'));
   return true;
@@ -61,8 +61,18 @@ dialog.addEventListener('click', async event => {
   }
   finally { entering = false; social = getSocialRoomState(); render(); }
 });
-dialog.addEventListener('input', event => { if (event.target.id === 'iljuRoomSearch') { search = event.target.value.trim().slice(0, 8); render(); } });
-dialog.addEventListener('close', () => { entryVersion++; if (!document.querySelector('dialog[open]')) { document.body.classList.remove('dialog-open'); if (opener?.isConnected) opener.focus({ preventScroll: true }); } });
+// Replacing the search field mid-composition interrupts Korean IME input.
+dialog.addEventListener('compositionstart', event => { if (event.target.id === 'iljuRoomSearch') composingSearch = true; });
+dialog.addEventListener('compositionend', event => {
+  if (event.target.id !== 'iljuRoomSearch') return;
+  composingSearch = false; search = event.target.value.trim().slice(0, 8); render();
+});
+dialog.addEventListener('input', event => {
+  if (event.target.id !== 'iljuRoomSearch' || event.isComposing || composingSearch) return;
+  const next = event.target.value.trim().slice(0, 8);
+  if (next !== search) { search = next; render(); }
+});
+dialog.addEventListener('close', () => { composingSearch = false; entryVersion++; if (!document.querySelector('dialog[open]')) { document.body.classList.remove('dialog-open'); if (opener?.isConnected) opener.focus({ preventScroll: true }); } });
 document.addEventListener('sowon:identity-change', event => { ownIlju = safeIlju(event.detail?.ilju); render(); });
 document.addEventListener('sowon:social-state', () => { social = getSocialRoomState(); render(); });
 document.addEventListener('sowon:room-error', event => { error = typeof event.detail?.message === 'string' ? event.detail.message : '방에 연결하지 못했어요. 현재 공간에 계속 머물러요.'; render(); });
