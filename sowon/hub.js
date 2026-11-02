@@ -1,4 +1,4 @@
-import { getOwnIdentity } from './identity.js?v=20261101-report-visual3';
+import { getOwnIdentity } from './identity.js?v=20261102-loading1';
 import { getActiveProfile } from './profile-core.js?v=20261101-freepath4';
 import { FEATURES, HALLS, HALL_JOURNEYS, getFeature, getHall, parseView, viewHash, internalDestination, readJourney, writeJourney } from './hub-core.js?v=20261101-pairpaths4';
 
@@ -173,7 +173,7 @@ async function render(view) {
   try {
     let result;
     if(item.kind==='reading') {
-      const module=await import('./readings.js?v=20261101-report-visual3'); if(version!==generation)return;
+      const module=await import('./readings.js?v=20261102-loading1'); if(version!==generation)return;
       result=await module.mountReading(mount,item.value,{navigate,signal:viewAbort.signal,...readingOptions.get(item.value)});
     } else if(item.kind==='culture') {
       const module=await import('./culture.js?v=20261101-report-visual3');if(version!==generation)return;

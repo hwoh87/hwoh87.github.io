@@ -1,8 +1,8 @@
-import { getOwnProfile } from './profile.js?v=20261101-report-visual3';
-import { getOwnIdentity } from './identity.js?v=20261101-report-visual3';
-import { configureSocial } from './social.js?v=20261101-realtime3';
-import './ilju-rooms.js?v=20261101-realtime3';
-import './ilju-interior-view.js?v=20261101-realtime3';
+import { getOwnProfile } from './profile.js?v=20261102-loading1';
+import { getOwnIdentity } from './identity.js?v=20261102-loading1';
+import { configureSocial } from './social.js?v=20261102-loading1';
+import './ilju-rooms.js?v=20261102-loading1';
+import './ilju-interior-view.js?v=20261102-loading1';
 
 configureSocial({getRoomPosition:roomKey=>roomKey==='courtyard'?{x:0,z:14,heading:Math.PI}:{x:0,z:8,heading:Math.PI}});
 const shell=document.querySelector('.sanctuary');

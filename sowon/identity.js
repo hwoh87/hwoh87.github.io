@@ -1,5 +1,5 @@
-import { getOwnProfile } from './profile.js?v=20261101-report-visual3';
-import { loadReadingEngine } from './readings.js?v=20261101-report-visual3';
+import { getOwnProfile } from './profile.js?v=20261102-loading1';
+import { loadReadingEngine } from './readings.js?v=20261102-loading1';
 import { createIdentityTracker } from './identity-core.js?v=20261101-freepath4';
 
 const identity=createIdentityTracker({getProfile:getOwnProfile,loadEngine:loadReadingEngine,

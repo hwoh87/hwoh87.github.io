@@ -23,6 +23,7 @@ function NatalCalc(){ return jsRoot().NatalCalc; }
 function GunghapCalc(){ return jsRoot().GunghapCalc; }
 /* 계산 버튼 — 엔진이 아직이면 버튼을 잠그고 기다린다. */
 function withEngine(btnId, fn){
+  if (typeof env.runAnalysis === "function") return env.runAnalysis(fn, btnId);
   var btn = document.getElementById(btnId);
   var label = btn ? btn.textContent : "";
   if (btn){ btn.disabled = true; btn.textContent = "계산 준비 중…"; }
@@ -133,7 +134,7 @@ function storeUrlWith(v){
   return STORE + encodeURIComponent("&b_" + date + "-" + time + "-" + v.g);
 }
 
-function run(){ withEngine("go", runNow); }
+function run(){ return withEngine("go", runNow); }
 function runNow(){
   var err = document.getElementById("err"); err.style.display = "none";
   if (document.getElementById("h").value === ""){

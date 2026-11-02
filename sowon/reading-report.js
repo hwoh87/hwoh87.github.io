@@ -1,8 +1,9 @@
-import { loadReadingEngine, mountReading } from './readings.js?v=20261101-report-visual3';
+import { loadReadingEngine, mountReading } from './readings.js?v=20261102-loading1';
 import { buildReadingInsight } from './reading-insight-core.js?v=20261101-report-visual3';
-import { mountReadingOffers } from './reading-offers.js?v=20261101-report-visual3';
+import { mountReadingOffers } from './reading-offers.js?v=20261102-loading1';
 import { profileSearch } from './profile-core.js?v=20261101-freepath4';
 import { renderReadingVisuals } from './reading-visuals.js?v=20261101-report-visual3';
+import { createAnalysisLoading, waitForAnalysisPaint } from './analysis-loading.js?v=20261102-loading1';
 
 const HOSTS = { tojeong: { name: '토정과', kind: 'saju' }, seol: { name: '설월과', kind: 'saju' }, luna: { name: '루나와', kind: 'star' } };
 const KINDS = [['saju', '사주'], ['jami', '자미두수'], ['star', '별자리']];
@@ -83,6 +84,7 @@ export function mountReadingReport(container, npc, profile, options = {}) {
     const digest = make('section', 'report-digest'); digest.hidden = true; digest.setAttribute('aria-label', '먼저 읽는 핵심 요약');
     const dashboard = make('section', 'report-dashboard'); dashboard.hidden = true; dashboard.tabIndex = -1; dashboard.setAttribute('aria-label', '한눈에 보는 분석 데이터');
     const pending = make('p', 'report-pending', '입력한 정보로 기본 해석을 계산하고 있어요.'); pending.setAttribute('role', 'status');
+    const analysisLoading = createAnalysisLoading(document, kind).node;
     const layout = make('div', 'report-layout'), chapters = make('div', 'report-chapters'), outline = make('nav', 'report-outline'); outline.setAttribute('aria-label', '해석 목차'); layout.append(chapters, outline);
     const notes = make('div', 'report-notes');
     const technical = make('details', 'report-technical'), technicalTitle = make('summary', '', kind === 'star' ? '차트·출생도시와 계산 조건' : '명식과 계산 조건');
@@ -106,17 +108,20 @@ export function mountReadingReport(container, npc, profile, options = {}) {
     readingRoute.append(freeScope, dataStart, readStart, moreReading);
     const returnConversation = make('div', 'report-return-conversation');
     if (options.onGuide) returnConversation.append(make('p', '', options.guideLabel === '대화 이어가기' ? `술사와의 대화는 캐릭터에 저장한 정보의 ${conversationSubject} 기본 풀이로 이어져요.${npc === 'tojeong' ? '' : ' 별자리는 서울 기준이에요.'}` : '읽다가 궁금해진 대목이 있나요?'), button('', options.guideLabel === '대화 이어가기' ? `${HOSTS[npc].name} ${conversationSubject} 이야기` : guideText, () => options.onGuide?.(), viewSignal));
-    content.append(intro, pending, dashboard, digest, readingRoute, layout, notes, technical, offerHost, returnConversation, make('p', 'report-footnote', '삼라 앱과 같은 계산 엔진의 결과를 바탕으로 읽었어요. 별자리·자미두수의 풀이는 앱의 기본 해석과 같은 출처이며, 사주의 생활 안내는 계산된 일간·십신·격국·강약을 풀어 썼어요. NPC의 AI 대화와 유료 심층 리포트는 별도의 해석이에요.'));
+    content.append(analysisLoading, intro, pending, dashboard, digest, readingRoute, layout, notes, technical, offerHost, returnConversation, make('p', 'report-footnote', '삼라 앱과 같은 계산 엔진의 결과를 바탕으로 읽었어요. 별자리·자미두수의 풀이는 앱의 기본 해석과 같은 출처이며, 사주의 생활 안내는 계산된 일간·십신·격국·강약을 풀어 썼어요. NPC의 AI 대화와 유료 심층 리포트는 별도의 해석이에요.'));
     let calculation = 0, inputCalendar = profile.birth?.calendar;
     async function refresh() {
       const revision = ++calculation;
+      analysisLoading.hidden = false;
+      content.classList.add('is-analyzing');
+      layout.setAttribute('aria-busy', 'true');
       offerHost.hidden = true;
       readingRoute.hidden = true;
       dashboard.replaceChildren(); dashboard.hidden = true;
       outlineAbort?.abort(); outlineAbort = new AbortController(); const outlineSignal = outlineAbort.signal;
       try {
         enginePromise ||= Promise.resolve().then(loadEngine);
-        const engine = await enginePromise;
+        const [engine] = await Promise.all([enginePromise, waitForAnalysisPaint(document, viewSignal)]);
         if (disposed || ticket !== version || revision !== calculation) return;
         const result = interpret(kind, currentBirth, { engine, year: options.year || yearInKorea(), location, trueSolarTime });
         const visualizations = Array.isArray(result.visualizations) ? result.visualizations : [];
@@ -187,6 +192,12 @@ export function mountReadingReport(container, npc, profile, options = {}) {
         chapters.replaceChildren(); outline.replaceChildren(); layout.hidden = true; notes.replaceChildren(); offerHost.hidden = true; readingRoute.hidden = true; digest.replaceChildren(); digest.hidden = true; dashboard.replaceChildren(); dashboard.hidden = true; length.textContent = '';
         skipData.hidden = true;
         pending.hidden = false; pending.className = 'report-error'; pending.textContent = '기본 해석을 준비하지 못했어요. 아래에서 계산 조건을 확인하고 다시 계산해 주세요.';
+      } finally {
+        if (!disposed && ticket === version && revision === calculation) {
+          analysisLoading.hidden = true;
+          content.classList.remove('is-analyzing');
+          layout.removeAttribute('aria-busy');
+        }
       }
     }
     let rawStarted = false;

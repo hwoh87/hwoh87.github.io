@@ -1,0 +1,44 @@
+/* Shared feedback for personal readings and the scoped calculator panels. */
+.analysis-loading {
+  box-sizing: border-box; display: grid; justify-items: center; align-content: center;
+  width: 100%; min-height: 360px; padding: 48px 24px; margin: 0;
+  border: 1px solid #dce2d8; border-radius: 14px; background: #f6f7f1;
+  color: #263f37; text-align: center; font-family: inherit;
+}
+.analysis-loading[hidden] { display: none !important; }
+.analysis-loading-spinner {
+  box-sizing: border-box; display: block; width: 38px; height: 38px; margin-bottom: 22px;
+  border: 2px solid #d6dfd2; border-top-color: #4d6c59; border-right-color: #4d6c59;
+  border-radius: 50%; animation: samra-analysis-spin 1s linear infinite;
+}
+.analysis-loading .analysis-loading-title {
+  margin: 0; color: #263f37; font-size: 20px; font-weight: 600; line-height: 1.6;
+  letter-spacing: -.035em; word-break: keep-all;
+}
+.analysis-loading .analysis-loading-description {
+  max-width: 28em; margin: 8px 0 0; color: #5b6c61; font-size: 14px; line-height: 1.8;
+  word-break: keep-all; overflow-wrap: anywhere;
+}
+.analysis-loading-skeleton { display: grid; gap: 9px; width: min(260px,85%); margin-top: 28px; }
+.analysis-loading-bar {
+  display: block; height: 7px; border-radius: 8px; background: #e0e6db;
+  animation: samra-analysis-breathe 1.6s ease-in-out infinite alternate;
+}
+.analysis-loading-bar:nth-child(2) { width: 82%; animation-delay: .15s; }
+.analysis-loading-bar:nth-child(3) { width: 62%; animation-delay: .3s; }
+.analysis-loading.is-compact { min-height: 190px; padding: 26px 20px; margin-top: 14px; border-radius: 10px; }
+.analysis-loading.is-compact .analysis-loading-spinner { width: 28px; height: 28px; margin-bottom: 14px; }
+.analysis-loading.is-compact .analysis-loading-title { font-size: 17px; }
+.analysis-loading.is-compact .analysis-loading-skeleton { margin-top: 18px; }
+.xp-personal-dialog .report-content.is-analyzing > :not(.analysis-loading) { display: none !important; }
+[aria-busy="true"].calc-btn { cursor: progress; opacity: .8; }
+@keyframes samra-analysis-spin { to { transform: rotate(360deg); } }
+@keyframes samra-analysis-breathe { from { opacity: .45; } to { opacity: 1; } }
+@media (max-width: 600px) {
+  .analysis-loading { min-height: 310px; padding: 38px 20px; }
+  .analysis-loading .analysis-loading-title { font-size: 19px; }
+  .analysis-loading .analysis-loading-description { font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .analysis-loading-spinner,.analysis-loading-bar { animation: none; }
+}

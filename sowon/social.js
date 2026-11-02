@@ -1,6 +1,6 @@
 import { renderReadingVisuals } from './reading-visuals.js?v=20261101-report-visual3';
 import { buildCompatibilityVisuals } from './compatibility-visual-data.js?v=20261101-report-visual3';
-import { getOwnProfile } from './profile.js?v=20261101-report-visual3';
+import { getOwnProfile } from './profile.js?v=20261102-loading1';
 import { RELATION_KINDS, safePosition, serverProfile, safeVisitors, safeRequests, availableActions, safeResult, socialError, cleanText, createSocialClient, safeIlju, roomForKey, safeRoomCounts, validId } from './social-core.js?v=20261101-realtime3';
 import { createRealtimeClient } from './realtime-client.js?v=20261101-realtime3';
 
@@ -14,6 +14,7 @@ const state = { joined: false, joining: false, busy: false, stale: false, realti
 let opener, timer, refreshPromise, operation = 0, resultVersion = 0, visibilityVersion = 0, lastProfile = '';
 let config = {}, pendingRoom = null, leavePromise = null, leaveRemoves = false;
 let realtime = null, realtimeGeneration = 0, socialRefreshQueued = false, heartbeatPromise = null, lastRequestStamp;
+let pendingAnalysis = null;
 // Clicking an avatar keeps this dialog scoped to that one public identity.
 let focusedPeerId = null, focusedPeer = null, focusedRoom = null, encounterVersion = 0;
 const isPeerFocus = () => focusedPeerId !== null;
@@ -81,7 +82,11 @@ function emitPresence({ motionOnly = false } = {}) {
   const incoming = state.requests.filter(r => r.direction === 'incoming' && r.status === 'pending').length;
   document.dispatchEvent(new CustomEvent('sowon:social-state', { detail: { ...getSocialRoomState(), count: state.visitors.length, incoming } }));
 }
-function resetTransient() { ++resultVersion; state.result = null; state.resultId = null; state.confirm = null; state.selected = null; state.deleteArmed = false; }
+function resetTransient() { resetResult(); state.selected = null; state.deleteArmed = false; }
+const currentAnalysis = () => pendingAnalysis && pendingAnalysis.operation === operation && pendingAnalysis.encounter === encounterVersion && state.joined && !state.stale ? pendingAnalysis : null;
+function analysisLoadingMarkup() {
+  return '<section class="analysis-loading is-compact" role="status" aria-live="polite" aria-atomic="true"><span class="analysis-loading-spinner" aria-hidden="true"></span><div class="analysis-loading-copy"><p class="analysis-loading-title">궁합을 분석하고 있어요</p><p class="analysis-loading-description">두 사람의 기운과 관계의 흐름을 함께 읽고 있어요.</p></div><div class="analysis-loading-skeleton" aria-hidden="true"><span class="analysis-loading-bar"></span><span class="analysis-loading-bar"></span><span class="analysis-loading-bar"></span></div></section>';
+}
 function statusText(status) { return ({ pending: '승인을 기다려요', approved: '함께 볼 수 있어요', declined: '이번에는 사양했어요', cancelled: '요청을 취소했어요', revoked: '공유가 철회됐어요', expired: '시간이 지났어요' })[status] || ''; }
 function requestActions(request) {
   const labels = { approve: '승인하고 궁합 보기', decline: '사양하기', cancel: '요청 취소', result: '궁합 보기', revoke: '공유 철회' };
@@ -132,14 +137,15 @@ function render() {
   const focusRequest = document.activeElement?.dataset?.requestId;
   const count = state.requests.filter(r => r.direction === 'incoming' && r.status === 'pending').length;
   const focused = isPeerFocus();
+  const analysis = currentAnalysis();
   if (focused) dialog.classList.add('social-peer-dialog'); else dialog.classList.remove('social-peer-dialog');
   if (focused && state.result) dialog.classList.add('social-peer-result'); else dialog.classList.remove('social-peer-result');
   const content = focused ? (state.joined ? state.confirm ? confirmMarkup() : state.result ? resultMarkup() : peerMarkup() : `${peerMarkup()}${consentMarkup()}`) : state.joined ? `<div class="social-connected"><span class="social-live-dot ${state.stale ? 'social-disconnected' : ''}" aria-hidden="true"></span><span>${state.stale ? '다시 연결하고 있어요' : state.realtime ? '실시간으로 함께 걷고 있어요' : '나그네와 함께 머물고 있어요 · 위치를 주기적으로 확인해요'}</span>${button('refresh', '새로고침', state.busy ? 'disabled' : '')}</div><div class="social-current-room"><strong>${esc(roomForKey(state.roomKey)?.label || '신당 마당')}</strong>${state.ownIlju ? `<span>내 일주 ${esc(state.ownIlju)}</span>` : ''}${button('rooms', '일주방 둘러보기')}</div><nav class="social-tabs" aria-label="만남과 궁합"><button type="button" data-social-action="visitors" aria-pressed="${state.tab === 'visitors'}">만난 나그네 <span>${state.visitors.length}</span></button><button type="button" data-social-action="news" aria-pressed="${state.tab === 'news'}">궁합 소식 ${count ? `<span class="social-count">${count}</span>` : ''}</button></nav>${state.confirm ? confirmMarkup() : state.result ? resultMarkup() : state.tab === 'visitors' ? `<p class="social-lead">${state.stale ? '연결이 회복되면 다시 현재 나그네를 보여드려요.' : '캐릭터를 누르거나 이 목록에서 인연을 청해 보세요.'}</p><div class="social-people">${!state.stale && state.visitors.length ? state.visitors.map(visitorCard).join('') : `<p class="social-empty">${state.stale ? '아직 만남 정보를 확인하지 못했어요.' : '아직 다른 나그네가 없어요. 마당을 산책하며 기다려 보세요.'}</p>`}</div>` : `<p class="social-lead">승인 전에는 결과가 열리지 않아요. 서로의 동의는 언제든 거둘 수 있어요.</p><div class="social-requests">${state.requests.length ? state.requests.map(requestCard).join('') : '<p class="social-empty">아직 주고받은 궁합 요청이 없어요.</p>'}</div>`}<footer class="social-session-actions">${button('leave', '마당의 만남 잠시 끄기')}${deleteButton()}</footer>` : `${consentMarkup()}${client.hasSession() ? `<footer class="social-session-actions">${deleteButton()}</footer>` : ''}`;
-  dialog.innerHTML = `<header class="social-header"><div><p>${focused ? 'FELLOW TRAVELER' : 'MEET A FELLOW TRAVELER'}</p><h2 id="socialTitle">${focused ? '궁합 보기' : '마당의 인연'}</h2></div>${button('close', '×', 'class="social-close" aria-label="마당의 인연 닫기"')}</header><div class="social-body">${state.error ? `<p class="social-error" role="alert">${esc(state.error)}</p>` : ''}${state.status ? `<p class="social-status" role="status">${esc(state.status)}</p>` : ''}${content}</div><footer class="social-footer">${focused ? '<span>서로 승인한 궁합만 함께 볼 수 있어요.</span>' : `<div>${button('direct', '직접 입력해 궁합 보기')}</div><span>닉네임·캐릭터·위치·일주 공개 · 출생 원문은 비공개</span>`}</footer>`;
+  dialog.innerHTML = `<header class="social-header"><div><p>${focused ? 'FELLOW TRAVELER' : 'MEET A FELLOW TRAVELER'}</p><h2 id="socialTitle">${focused ? '궁합 보기' : '마당의 인연'}</h2></div>${button('close', '×', 'class="social-close" aria-label="마당의 인연 닫기"')}</header><div class="social-body">${state.error ? `<p class="social-error" role="alert">${esc(state.error)}</p>` : ''}${state.status ? `<p class="social-status" role="status">${esc(state.status)}</p>` : ''}${analysis ? analysisLoadingMarkup() : ''}${content}</div><footer class="social-footer">${focused ? '<span>서로 승인한 궁합만 함께 볼 수 있어요.</span>' : `<div>${button('direct', '직접 입력해 궁합 보기')}</div><span>닉네임·캐릭터·위치·일주 공개 · 출생 원문은 비공개</span>`}</footer>`;
   const visualHost = dialog.querySelector('[data-social-result-visuals]');
   if (visualHost && state.result) visualHost.replaceChildren(renderReadingVisuals(buildCompatibilityVisuals(state.result), { document, compact: true }));
   const body = dialog.querySelector('.social-body'); if (body) body.scrollTop = scrollTop;
-  dialog.querySelectorAll('button').forEach(node => { if ((state.busy && !['close', 'direct'].includes(node.dataset.socialAction)) || (state.deletionPending && node.dataset.socialAction === 'join')) node.disabled = true; });
+  dialog.querySelectorAll('button').forEach(node => { if ((state.busy && !['close', 'direct'].includes(node.dataset.socialAction)) || (analysis && node.dataset.socialAction === 'result' && node.dataset.requestId === analysis.requestId) || (state.deletionPending && node.dataset.socialAction === 'join')) node.disabled = true; });
   if (focusKind) dialog.querySelector('[data-social-kind]')?.focus({ preventScroll: true });
   else if (focusAction) {
     const match = [...dialog.querySelectorAll('[data-social-action]')].find(node => node.dataset.socialAction === focusAction && (!focusRequest || node.dataset.requestId === focusRequest));
@@ -243,6 +249,7 @@ function adopt(data) {
   if (isPeerFocus() && focusedVisitor()) focusedPeer = { ...focusedVisitor() };
   state.requests = safeRequests(data.requests);
   state.stale = false;
+  if (pendingAnalysis?.phase === 'result' && !state.requests.some(item => item.id === pendingAnalysis.requestId && item.status === 'approved')) resetResult();
   if (state.resultId && !state.requests.some(item => item.id === state.resultId && item.status === 'approved')) {
     resetResult(); state.status = isPeerFocus() ? '공유 상태가 바뀌었어요. 이 나그네와의 요청을 다시 확인해 주세요.' : '공유 상태가 바뀌었어요. 궁합 소식에서 확인해 주세요.';
   }
@@ -296,27 +303,34 @@ async function join() {
 }
 async function mutate(action, params, message) {
   if (state.busy || !state.joined) return;
-  const version = operation, encounter = encounterVersion; state.busy = true; state.error = ''; state.status = ''; render();
+  const version = operation, encounter = encounterVersion;
+  const analysis = params.decision === 'approve' ? { operation: version, encounter, requestId: params.request_id, phase: 'approval' } : null;
+  if (analysis) pendingAnalysis = analysis;
+  state.busy = true; state.error = ''; state.status = ''; render();
+  if (analysis) dialog.querySelector('.social-body')?.scrollTo({ top: 0 });
   try {
     const data = await api(action, params);
     if (version !== operation) return;
-    if (encounter === encounterVersion) { resetTransient(); state.status = message; } if (refreshPromise) await refreshPromise; if (version !== operation) return; await refresh();
+    if (encounter === encounterVersion) { resetTransient(); if (analysis) pendingAnalysis = analysis; state.status = message; } if (refreshPromise) await refreshPromise; if (version !== operation) return; await refresh();
     if (encounter === encounterVersion && params.decision === 'approve' && data.request?.status === 'approved') await showResult(params.request_id);
   } catch (error) { if (version === operation && encounter === encounterVersion) state.error = socialError(error); }
-  finally { if (version === operation) { state.busy = false; render(); } }
+  finally { if (pendingAnalysis === analysis) pendingAnalysis = null; if (version === operation) { state.busy = false; render(); } }
 }
 async function showResult(id) {
   const request = state.requests.find(item => item.id === id && item.status === 'approved');
-  if (!request || (isPeerFocus() && request.peer.id !== focusedPeerId)) return;
-  const version = operation, resultRequestVersion = ++resultVersion; state.error = ''; state.status = '';
+  if (!request || (isPeerFocus() && request.peer.id !== focusedPeerId) || (currentAnalysis()?.phase === 'result' && currentAnalysis().requestId === id)) return;
+  const version = operation, resultRequestVersion = ++resultVersion;
+  const analysis = { operation: version, encounter: encounterVersion, requestId: id, phase: 'result' }; pendingAnalysis = analysis;
+  state.error = ''; state.status = ''; state.result = null; state.resultId = null; render(); dialog.querySelector('.social-body')?.scrollTo({ top: 0 });
   try {
     const data = await api('result', { request_id: id });
     if (version !== operation || resultRequestVersion !== resultVersion || (isPeerFocus() && request.peer.id !== focusedPeerId) || !state.joined || state.stale || document.hidden || !state.requests.some(item => item.id === id && item.status === 'approved')) return;
     if (data.request?.status !== 'approved' || data.request.id !== id) throw Object.assign(new Error('result_revoked'), { code: 'result_revoked' });
     const result = safeResult(data.result);
     if (!result) throw new Error('bad_result');
-    state.result = result; state.resultId = id; state.confirm = null; state.tab = 'news'; seenApprovals.add(id); updateLauncher(); render(); dialog.querySelector('.social-body')?.scrollTo({ top: 0 });
+    pendingAnalysis = null; state.result = result; state.resultId = id; state.confirm = null; state.tab = 'news'; seenApprovals.add(id); updateLauncher(); render(); dialog.querySelector('.social-body')?.scrollTo({ top: 0 });
   } catch (error) { if (version === operation && resultRequestVersion === resultVersion && (!isPeerFocus() || request.peer.id === focusedPeerId)) { state.error = socialError(error); state.result = null; state.resultId = null; await refresh(); render(); } }
+  finally { if (pendingAnalysis === analysis) { pendingAnalysis = null; render(); } }
 }
 async function leave({ remove = false } = {}) {
   // Keep every caller on the same departure. A profile change during an ordinary
@@ -401,7 +415,7 @@ function open(visitorId) {
   dialog.showModal(); document.body.classList.add('dialog-open'); render();
   if (state.joined) refresh();
 }
-function resetResult() { ++resultVersion; state.result = null; state.resultId = null; state.confirm = null; }
+function resetResult() { ++resultVersion; pendingAnalysis = null; state.result = null; state.resultId = null; state.confirm = null; }
 function close() { ++encounterVersion; state.deleteArmed = false; resetResult(); dialog.close(); }
 dialog.addEventListener('click', async event => {
   const target = event.target.closest('[data-social-action]'); if (!target) return;

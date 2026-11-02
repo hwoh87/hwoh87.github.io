@@ -2,12 +2,13 @@ import { ENGINE_URL } from '../calc/panels/manifest.js';
 import { mountBirth, mountTimeCompare, mountJourney } from '../calc/panels/helpers.js';
 import { profileSearch } from './profile-core.js?v=20261101-freepath4';
 import { refreshCalculatorVisuals } from './calculator-visuals.js?v=20261101-report-visual3';
+import { createAnalysisTask } from './analysis-loading.js?v=20261102-loading1';
 
 const modules = {
-  saju: () => import('../calc/panels/saju.js'),
-  gunghap: () => import('../calc/panels/gunghap.js'),
-  jami: () => import('../calc/panels/jami.js'),
-  star: () => import('../calc/panels/star.js'),
+  saju: () => import('../calc/panels/saju.js?v=20261102-loading1'),
+  gunghap: () => import('../calc/panels/gunghap.js?v=20261102-loading1'),
+  jami: () => import('../calc/panels/jami.js?v=20261102-loading1'),
+  star: () => import('../calc/panels/star.js?v=20261102-loading1'),
 };
 const paths = { saju: '/calc/', gunghap: '/calc/gunghap/', jami: '/calc/jami/', star: '/calc/star/' };
 const scriptLoads = new Map();
@@ -136,6 +137,14 @@ function createEnvironment(root, kind, options) {
   const listeners = [];
   let disposed = false;
   let ready = false;
+  const analysis = createAnalysisTask({ document: realDocument, kind, loadEngine: loadReadingEngine,
+    isDisposed: () => disposed,
+    onBusy(busy) { root.getElementById('result')?.setAttribute('aria-busy', String(busy)); },
+    onError() {
+      const error = root.getElementById('err');
+      if (error) { error.textContent = '분석을 준비하지 못했어요. 연결과 입력 정보를 확인한 뒤 다시 시도해 주세요.'; error.style.display = 'block'; }
+    },
+  });
   let current = new URL(paths[kind], 'https://samra.cc');
   if (options.url) {
     const requested = new URL(options.url, current);
@@ -237,11 +246,18 @@ function createEnvironment(root, kind, options) {
     IntersectionObserver: realWindow.IntersectionObserver ? TrackedIntersectionObserver : undefined,
     matchMedia: realWindow.matchMedia.bind(realWindow), getComputedStyle: realWindow.getComputedStyle.bind(realWindow),
     sessionStorage: storage, URL: ScopedURL, loadEngine: loadReadingEngine, loadCatalog,
+    runAnalysis(fn, buttonId) {
+      if (disposed) return Promise.resolve();
+      const button = root.getElementById(buttonId);
+      if (button && !analysis.node.isConnected) button.after(analysis.node);
+      return analysis.run(fn, button);
+    },
     get disposed() { return disposed; },
     fireReady() { if (disposed) return; ready = true; pendingReady.splice(0).forEach(callback => callback()); },
     dispose() {
       if (disposed) return;
       disposed = true; pendingReady.length = 0;
+      analysis.dispose();
       timers.forEach(id => realWindow.clearTimeout(id)); timers.clear();
       frames.forEach(id => realWindow.cancelAnimationFrame(id)); frames.clear();
       idles.forEach(id => realWindow.cancelIdleCallback(id)); idles.clear();
@@ -302,6 +318,7 @@ export async function mountReading(container, kind, options = {}) {
     const polish = document.createElement('link'); polish.rel = 'stylesheet'; polish.href = '/sowon/readings.css?v=20261101-freepath4'; root.appendChild(polish);
     const theme = document.createElement('link'); theme.rel='stylesheet';theme.href='/sowon/reading-theme.css?v=20261101-report-visual3';root.appendChild(theme);
     const charts = document.createElement('link'); charts.rel='stylesheet';charts.href='/sowon/reading-visuals.css?v=20261101-report-visual3';root.appendChild(charts);
+    const analysisStyle = document.createElement('link'); analysisStyle.rel='stylesheet';analysisStyle.href='/sowon/analysis-loading.css?v=20261102-loading1';root.appendChild(analysisStyle);
     const template = document.createElement('template');
     template.innerHTML = view.markup;
     root.appendChild(template.content.cloneNode(true));
@@ -385,7 +402,7 @@ export async function mountReading(container, kind, options = {}) {
     removePersonTracking = () => { for (const name of ['input', 'change', 'click']) root.removeEventListener(name, trackPersonInput); };
     return {
       kind, root, dispose,
-      async run() { await loadReadingEngine(); if (!disposed) runtime.run(); },
+      async run() { if (!disposed) await runtime.run(); },
       getShareUrl() { return env.location.href; },
       getInput() { return runtime.readForm(); },
     };
