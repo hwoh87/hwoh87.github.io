@@ -17,10 +17,10 @@ function roomListMarkup() {
   const list = filterIljuRooms({ search, element: selectedElement });
   return `<div class="ilju-room-results"><p role="status" aria-live="polite">${list.length}개 일주방${selectedElement ? ` · ${selectedElement} 기운` : ''}</p>${search || selectedElement ? '<button type="button" data-rooms-reset>전체 일주방 보기</button>' : ''}</div><div class="ilju-room-grid">${list.length ? list.map(roomCard).join('') : '<p class="ilju-room-no-results">찾는 일주가 없어요. 두 글자로 검색해 주세요.</p>'}</div>`;
 }
-function render() {
+function render(force = false) {
   if (!dialog.open || composingSearch) return;
   const region = dialog.querySelector('.ilju-room-list-region');
-  if (document.activeElement?.id === 'iljuRoomSearch' && region) {
+  if (!force && document.activeElement?.id === 'iljuRoomSearch' && region) {
     region.innerHTML = roomListMarkup();
     const notice = dialog.querySelector('.ilju-rooms-error');
     if (notice) { notice.textContent = error; notice.hidden = !error; }
@@ -38,7 +38,7 @@ function render() {
 export function openIljuRooms() {
   if (dialog.open || document.querySelector('dialog[open]')) return false;
   social = getSocialRoomState(); opener = document.activeElement; error = ''; search = ''; selectedElement = ''; composingSearch = false;
-  dialog.showModal(); document.body.classList.add('dialog-open'); render();
+  dialog.showModal(); document.body.classList.add('dialog-open'); render(true);
   document.dispatchEvent(new CustomEvent('sowon:identity-request'));
   return true;
 }
@@ -48,10 +48,10 @@ function enterInterior(key) {
 }
 dialog.addEventListener('click', async event => {
   if (event.target.closest('[data-rooms-close]')) { dialog.close(); return; }
-  if (event.target.closest('[data-rooms-reset]')) { search = ''; selectedElement = ''; render(); dialog.querySelector('#iljuRoomSearch')?.focus({preventScroll:true}); return; }
+  if (event.target.closest('[data-rooms-reset]')) { search = ''; selectedElement = ''; render(true); dialog.querySelector('#iljuRoomSearch')?.focus({preventScroll:true}); return; }
   if (event.target.closest('[data-rooms-profile]')) { dialog.close(); document.dispatchEvent(new CustomEvent('sowon:profile-open')); return; }
   const filter = event.target.closest('[data-room-element]');
-  if (filter) { selectedElement = filter.dataset.roomElement; render(); dialog.querySelector(`[data-room-element="${selectedElement}"]`)?.focus({ preventScroll: true }); return; }
+  if (filter) { selectedElement = filter.dataset.roomElement; render(true); dialog.querySelector(`[data-room-element="${selectedElement}"]`)?.focus({ preventScroll: true }); return; }
   const target = event.target.closest('[data-enter-room]');
   social = getSocialRoomState();
   if (!target || entering || social.busy || !roomForKey(target.dataset.enterRoom)) return;
