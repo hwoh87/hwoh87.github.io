@@ -5,6 +5,8 @@ const HOSTS = Object.freeze([
   { npc: 'luna', hall: 'readers', name: '루나', withName: '루나와', objectName: '루나를', hint: '하늘' },
 ]);
 const MENUS = Object.freeze([
+  ['[data-samra-home]', '삼라 홈', '삼라 메인으로 이동'],
+  ['[data-samra-reports]', '삼라 리포트', '삼라 리포트 둘러보기'],
   ['[data-open-wardrobe]', '꾸미기', '캐릭터 꾸미기'],
   ['#soundToggle', '소리', '풍경 소리 켜고 끄기'],
   ['[data-hub-view="map"]', '지도', '신당 지도'],
@@ -37,14 +39,14 @@ export function mountShrineInterface(document) {
   }
   if (nav) {
     const original = [...nav.children], primary = make('div', 'interface-primary'), secondary = make('div', 'interface-secondary');
-    secondary.id = 'shrineSecondaryTools'; secondary.hidden = true; secondary.setAttribute('role', 'group'); secondary.setAttribute('aria-label', '지도와 소리, 내 서재');
+    secondary.id = 'shrineSecondaryTools'; secondary.hidden = true; secondary.setAttribute('role', 'group'); secondary.setAttribute('aria-label', '삼라 홈과 리포트, 지도와 소리, 내 서재');
     const more = make('button', 'interface-more'); more.type = 'button'; more.setAttribute('aria-controls', secondary.id); more.setAttribute('aria-expanded', 'false'); more.setAttribute('aria-label', '지도, 소리, 내 서재 더보기');
     const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); icon.setAttribute('class', 'icon'); icon.setAttribute('viewBox', '0 0 24 24'); icon.setAttribute('aria-hidden', 'true');
     const dots = document.createElementNS('http://www.w3.org/2000/svg', 'path'); dots.setAttribute('d', 'M4 12h.01M12 12h.01M20 12h.01'); dots.setAttribute('stroke-width', '3'); dots.setAttribute('stroke-linecap', 'round'); icon.append(dots); more.append(icon, make('span', 'interface-menu-label', '더보기'));
     // Capture original sibling order before relocating the live action buttons.
     for (const node of original) relocated.push([node, nav, node.nextSibling]);
     for (const selector of ['[data-open-wardrobe]', '[data-open-profile]', '[data-open-social]']) { const node = nav.querySelector(selector); if (node) primary.append(node); }
-    for (const selector of ['[data-hub-view="all"]', '[data-hub-view="map"]', '#soundToggle', '[data-hub-feature="library"]']) { const node = nav.querySelector(selector); if (node) secondary.append(node); }
+    for (const selector of ['[data-samra-home]', '[data-samra-reports]', '[data-hub-view="all"]', '[data-hub-view="map"]', '#soundToggle', '[data-hub-feature="library"]']) { const node = nav.querySelector(selector); if (node) secondary.append(node); }
     nav.append(primary, more, secondary); owned.push(primary, more, secondary);
     function setMoreOpen(open, focus = false) { secondary.hidden = !open; more.setAttribute('aria-expanded', String(Boolean(open))); if (focus) more.focus({ preventScroll: true }); }
     listen(more, 'click', () => setMoreOpen(more.getAttribute('aria-expanded') !== 'true'));

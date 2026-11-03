@@ -58,13 +58,14 @@
   <script type="module" src="rest.js?v=20261103-benchmark2"></script>
   <script type="module" src="leisure.js?v=20261103-benchmark2"></script>
   <script type="module" src="wardrobe.js?v=20261103-benchmark2"></script>
-  <script type="module" src="interface.js?v=20261103-benchmark2"></script>
+  <script type="module" src="interface.js?v=20261104-bridge1"></script>
   <link rel="stylesheet" href="ilju-rooms.css?v=20261103-benchmark2">
   <link rel="stylesheet" href="ilju-interior.css?v=20261103-benchmark2">
   <link rel="stylesheet" href="ilju-demo.css?v=20261103-benchmark2">
   <link rel="stylesheet" href="culture.css?v=20261103-benchmark2">
   <link rel="stylesheet" href="refinement.css?v=20261103-benchmark2">
   <link rel="stylesheet" href="benchmark.css?v=20261103-benchmark2">
+  <link rel="stylesheet" href="/assets/samra-bridge.css?v=20261104-bridge1">
   <script type="module" src="sanctuary-shell.js?v=20261103-benchmark2"></script>
   <script src="/assets/track.js" defer></script>
   <script type="importmap">{"imports":{"three":"./vendor/three.module.js?v=20261103-benchmark2"}}</script>
@@ -111,6 +112,8 @@
         <span><span class="brand-name">소원당</span><span class="brand-by">by SAMRA</span></span>
       </a>
       <nav class="shrine-nav" aria-label="소원당 메뉴">
+        <a class="hub-nav-button" href="/" data-samra-home aria-label="삼라 메인으로 이동" data-cta="sowon-main-menu"><svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg><span class="hub-nav-text">삼라 홈</span></a>
+        <a class="hub-nav-button" href="/#tests" data-samra-reports aria-label="삼라 리포트 둘러보기" data-cta="sowon-reports-menu"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg><span class="hub-nav-text">삼라 리포트</span></a>
         <button class="hub-nav-button" type="button" data-open-wardrobe aria-label="캐릭터 꾸미기"><svg class="icon" aria-hidden="true"><use href="#i-outfit"/></svg><span class="hub-nav-text">꾸미기</span></button>
         <button class="sound-control" type="button" id="soundToggle" aria-pressed="false" aria-label="풍경 소리 켜기">
           <svg class="icon" aria-hidden="true"><use href="#i-sound"/></svg><span id="soundLabel">소리 끔</span>
