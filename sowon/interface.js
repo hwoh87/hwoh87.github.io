@@ -5,6 +5,7 @@ const HOSTS = Object.freeze([
   { npc: 'luna', hall: 'readers', name: '루나', withName: '루나와', objectName: '루나를', hint: '하늘' },
 ]);
 const MENUS = Object.freeze([
+  ['[data-open-wardrobe]', '꾸미기', '캐릭터 꾸미기'],
   ['#soundToggle', '소리', '풍경 소리 켜고 끄기'],
   ['[data-hub-view="map"]', '지도', '신당 지도'],
   ['[data-hub-view="all"]', '전체 기능', '삼라 전체 기능'],
@@ -42,8 +43,8 @@ export function mountShrineInterface(document) {
     const dots = document.createElementNS('http://www.w3.org/2000/svg', 'path'); dots.setAttribute('d', 'M4 12h.01M12 12h.01M20 12h.01'); dots.setAttribute('stroke-width', '3'); dots.setAttribute('stroke-linecap', 'round'); icon.append(dots); more.append(icon, make('span', 'interface-menu-label', '더보기'));
     // Capture original sibling order before relocating the live action buttons.
     for (const node of original) relocated.push([node, nav, node.nextSibling]);
-    for (const selector of ['[data-open-profile]', '[data-open-social]', '[data-hub-view="all"]']) { const node = nav.querySelector(selector); if (node) primary.append(node); }
-    for (const selector of ['[data-hub-view="map"]', '#soundToggle', '[data-hub-feature="library"]']) { const node = nav.querySelector(selector); if (node) secondary.append(node); }
+    for (const selector of ['[data-open-wardrobe]', '[data-open-profile]', '[data-open-social]']) { const node = nav.querySelector(selector); if (node) primary.append(node); }
+    for (const selector of ['[data-hub-view="all"]', '[data-hub-view="map"]', '#soundToggle', '[data-hub-feature="library"]']) { const node = nav.querySelector(selector); if (node) secondary.append(node); }
     nav.append(primary, more, secondary); owned.push(primary, more, secondary);
     function setMoreOpen(open, focus = false) { secondary.hidden = !open; more.setAttribute('aria-expanded', String(Boolean(open))); if (focus) more.focus({ preventScroll: true }); }
     listen(more, 'click', () => setMoreOpen(more.getAttribute('aria-expanded') !== 'true'));
@@ -96,7 +97,7 @@ export function mountShrineInterface(document) {
     });
     hosts.append(button);
   }
-  shell.append(hosts); owned.push(hosts);
+  (nav?.querySelector('.interface-secondary')||shell).append(hosts); owned.push(hosts);
   const controls = shell.querySelector('.move-controls'), help = shell.querySelector('#worldHelp');
   let helpButton;
   function setHelpOpen(open, focus = false) {

@@ -1,9 +1,11 @@
+import { validAppearance } from './appearance-core.js?v=20261103-benchmark2';
 export const SETTINGS_KEY = 'samra.sowon.experience.v1';
 export const DEFAULT_SETTINGS = Object.freeze({ mood: 'moon', outfit: 'sage', quality: 'auto' });
 const allowed = { mood: ['moon', 'dawn'], outfit: ['sage', 'moon', 'dawn', 'plum'], quality: ['auto', 'smooth', 'clear'] };
 export function normalizeSettings(raw) {
   const result = { ...DEFAULT_SETTINGS };
   if (raw && typeof raw === 'object') for (const key of Object.keys(allowed)) if (allowed[key].includes(raw[key])) result[key] = raw[key];
+  if (validAppearance(raw?.outfit)) result.outfit = raw.outfit;
   return result;
 }
 export function readSettings(storage) {

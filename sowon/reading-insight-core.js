@@ -1,5 +1,5 @@
-import { STEM_COUNSEL, GOD_GROUP, GROUP_COUNSEL, ELEMENT_PRACTICE } from './reading-counsel.js?v=20261101-freepath4';
-import { buildSajuVisuals, buildStarVisuals, buildJamiVisuals } from './reading-visual-data.js?v=20261101-report-visual3';
+import { STEM_COUNSEL, GOD_GROUP, GROUP_COUNSEL, ELEMENT_PRACTICE } from './reading-counsel.js?v=20261103-benchmark2';
+import { buildSajuVisuals, buildStarVisuals, buildJamiVisuals } from './reading-visual-data.js?v=20261103-benchmark2';
 
 /**
  * A local reading from the same deterministic engine as /calc/.

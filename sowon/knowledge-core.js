@@ -1,0 +1,14 @@
+// Questions are written for this experience from Samra's own introductory pages.
+export const QUESTIONS=Object.freeze([
+  {id:'day-master',topic:'명식 읽기',question:'일주가 甲子(갑자)라면, 일간은 무엇일까요?',answers:['甲(갑목) 한 글자','子(자수) 한 글자','甲子 두 글자 모두'],correct:0,explanation:'일간은 일주의 윗글자인 천간 한 글자예요. 천간과 지지를 합친 두 글자가 일주예요.',path:'/learn/read-chart/',source:'내 사주 명식, 어디부터 읽으면 될까요?'},
+  {id:'four-pillars',topic:'명식 읽기',question:'사주팔자에서 네 기둥이 나타내는 것은?',answers:['태어난 연·월·일·시','성격·직업·재물·연애','봄·여름·가을·겨울'],correct:0,explanation:'년주·월주·일주·시주에 천간과 지지가 하나씩 놓여 모두 여덟 글자가 돼요.',path:'/learn/read-chart/',source:'네 기둥과 여덟 글자'},
+  {id:'unknown-time',topic:'입력 정보',question:'태어난 시간을 정확히 모를 때는 어떻게 할까요?',answers:['시간 미상으로 두고 가능한 범위를 읽어요','잘 맞는 성격이 나오는 시간을 골라요','가장 흔한 시간으로 채워요'],correct:0,explanation:'시주를 임의로 채우지 않고 시간 미상으로 봐요. 날짜·절기 경계에서는 다른 기둥도 출생시각의 영향을 받을 수 있어요.',path:'/learn/unknown-birth-time/',source:'태어난 시간을 모를 때'},
+  {id:'five-elements',topic:'음양오행',question:'오행을 이루는 다섯 이름은 무엇일까요?',answers:['목·화·토·금·수','해·달·별·바람·구름','봄·여름·가을·겨울·밤'],correct:0,explanation:'오행은 목(木)·화(火)·토(土)·금(金)·수(水)예요. 글자의 비중만으로 명식 전체의 좋고 나쁨을 결정하지 않아요.',path:'/learn/five-elements/',source:'음양오행과 상생상극'},
+  {id:'yukhap',topic:'글자 사이의 관계',question:'육합과 삼합의 차이를 먼저 구분하면?',answers:['육합은 지지 둘, 삼합은 지지 셋의 정해진 조합','육합은 여섯 명, 삼합은 세 명의 궁합','육합은 좋고 삼합은 나쁜 관계'],correct:0,explanation:'육합은 지지 두 글자의 짝이고, 삼합은 세 글자의 조합이에요. 이름에 붙은 숫자를 참여하는 사람 수로 읽지 않아요.',path:'/term/yukhap/',source:'육합(六合) 용어사전'},
+  {id:'compatibility',topic:'관계 읽기',question:'두 사람의 글자에서 육합 한 쌍이 보이면?',answers:['전체 명식과 관계의 맥락을 함께 살펴요','두 사람의 관계가 반드시 잘돼요','다른 글자는 볼 필요가 없어요'],correct:0,explanation:'육합 표는 지지 사이의 관계를 확인하는 표예요. 한 쌍만으로 전체 궁합이나 실제 관계를 결정하지 않아요.',path:'/term/yukhap/',source:'육합 한 쌍만으로 궁합을 판단하나요?'},
+  {id:'ten-gods',topic:'십신',question:'십신은 어떤 기준에서 다른 글자와의 관계를 읽을까요?',answers:['일간','이름의 첫 글자','띠만으로'],correct:0,explanation:'일간을 기준으로 다른 천간과 지지의 관계를 읽어요. 십신 한 가지의 이름만으로 성격이나 직업을 확정하지 않아요.',path:'/learn/ten-gods/',source:'십신, 관계를 읽는 열 가지 이름'},
+  {id:'compare',topic:'명식 읽기',question:'다른 만세력과 결과가 다를 때 먼저 확인할 것은?',answers:['입력값과 시간·절기 등 계산 기준','더 좋은 풀이가 나오는 결과','화면의 색과 디자인'],correct:0,explanation:'양력·음력, 출생시각, 시간 보정과 절기 경계 등 입력과 계산 기준을 먼저 맞춰 비교해요.',path:'/learn/read-chart/',source:'입력 정보와 계산 기준 확인하기'},
+]);
+function hash(text){let n=2166136261;for(const c of String(text)){n^=c.charCodeAt(0);n=Math.imul(n,16777619);}return n>>>0;}
+export function knowledgeRound(seed){return [...QUESTIONS].sort((a,b)=>hash(seed+':'+a.id)-hash(seed+':'+b.id)).slice(0,3).map(q=>{const answers=q.answers.map((text,index)=>({text,correct:index===q.correct})).sort((a,b)=>hash(seed+':'+q.id+':'+a.text)-hash(seed+':'+q.id+':'+b.text));return {...q,answers:answers.map(x=>x.text),correct:answers.findIndex(x=>x.correct)};});}
+export function gradeAnswer(question,index){return Number.isInteger(index)&&index>=0&&index<question.answers.length?{correct:index===question.correct,answer:question.answers[question.correct],explanation:question.explanation}:null;}

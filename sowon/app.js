@@ -24,6 +24,7 @@
     var soundRequest = 0;
     var soundPlaying = false;
     var soundPending = false;
+    var audioPreferences = {master:0.3,nature:1,music:0.5};
     var openers = new WeakMap();
     var trackedLabels = ['open-wish', 'save-wish', 'open-journal', 'complete-wish', 'delete-wish', 'open-breath', 'finish-breath', 'open-blessing', 'copy-blessing', 'share-blessing', 'receive-blessing', 'sound-on', 'sound-off', 'open-about'];
 
@@ -399,6 +400,7 @@
         breathTimer = null;
         renderBreath();
         track('finish-breath');
+        document.dispatchEvent(new CustomEvent('sowon:journey-action',{detail:{id:'breath'}}));
         return;
       }
       renderBreath();
@@ -422,6 +424,7 @@
         $('soundToggle').disabled = soundPending;
       }
       setText('soundLabel', soundPlaying ? '소리 끄기' : '소리 켜기');
+      document.dispatchEvent(new CustomEvent('sowon:audio-state',{detail:{playing:soundPlaying,pending:soundPending}}));
     }
 
     function disposeSound(engine, fade) {
@@ -462,7 +465,10 @@
         var master = context.createGain();
         master.gain.value = 0;
         master.connect(context.destination);
-        engine = { context: context, gain: master, sources: [] };
+        var musicBus=context.createGain(),natureBus=context.createGain();
+        musicBus.gain.value=audioPreferences.music;natureBus.gain.value=audioPreferences.nature;
+        musicBus.connect(master);natureBus.connect(master);
+        engine = { context: context, gain: master, music:musicBus,nature:natureBus,sources: [] };
         soundEngine = engine;
         [174.61, 261.63].forEach(function (frequency, index) {
           var oscillator = context.createOscillator();
@@ -470,7 +476,7 @@
           oscillator.type = 'sine';
           oscillator.frequency.value = frequency;
           voice.gain.value = index === 0 ? 0.035 : 0.018;
-          oscillator.connect(voice); voice.connect(master); oscillator.start();
+          oscillator.connect(voice); voice.connect(musicBus); oscillator.start();
           engine.sources.push(oscillator);
         });
         var buffer = context.createBuffer(1, context.sampleRate * 3, context.sampleRate);
@@ -482,11 +488,11 @@
         wind.buffer = buffer; wind.loop = true;
         filter.type = 'lowpass'; filter.frequency.value = 330;
         windGain.gain.value = 0.05;
-        wind.connect(filter); filter.connect(windGain); windGain.connect(master); wind.start();
+        wind.connect(filter); filter.connect(windGain); windGain.connect(natureBus); wind.start();
         engine.sources.push(wind);
         await context.resume();
         if (request !== soundRequest || document.hidden) { disposeSound(engine, false); return; }
-        master.gain.linearRampToValueAtTime(0.3, context.currentTime + 1.2);
+        master.gain.linearRampToValueAtTime(audioPreferences.master, context.currentTime + 1.2);
         soundPlaying = true;
         state = store.setSound(true);
         track('sound-on');
@@ -505,6 +511,11 @@
     if ($('soundToggle')) $('soundToggle').addEventListener('click', function () {
       if (soundPlaying) { stopSound(true); track('sound-off'); }
       else startSound();
+    });
+    document.addEventListener('sowon:audio-change',function(event){
+      ['master','nature','music'].forEach(function(key){var value=event.detail&&event.detail[key];if(typeof value==='number'&&Number.isFinite(value))audioPreferences[key]=Math.max(0,Math.min(1,value));});
+      if(!soundEngine)return;var engine=soundEngine,time=engine.context.currentTime;
+      try{if(soundPlaying){engine.gain.gain.cancelScheduledValues(time);engine.gain.gain.setTargetAtTime(audioPreferences.master,time,.12);}engine.music.gain.setTargetAtTime(audioPreferences.music,time,.12);engine.nature.gain.setTargetAtTime(audioPreferences.nature,time,.12);}catch(_){}
     });
 
     function blessingUrl() {

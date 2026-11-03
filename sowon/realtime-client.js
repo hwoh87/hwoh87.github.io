@@ -1,11 +1,11 @@
-import { MOTION_INTERVAL_MS, realtimePosition, movementChanged, realtimeTicket, createRealtimeFrameDecoder, validRealtimeIdentity, reconnectDelay } from './realtime-client-core.js?v=20261103-hour1';
+import { MOTION_INTERVAL_MS, realtimePosition, movementChanged, realtimeTicket, createRealtimeFrameDecoder, validRealtimeIdentity, reconnectDelay } from './realtime-client-core.js?v=20261103-benchmark2';
 
 /** Authenticated socket lifetime. Credentials exist only in the auth frame. */
 export function createRealtimeClient({getTicket,getPosition,onReady,onFrame,onNotify,onStatus,onFatal,
   WebSocket:Socket=globalThis.WebSocket,setTimer=globalThis.setTimeout,clearTimer=globalThis.clearTimeout,
   now=()=>Date.now(),random=Math.random}={}) {
   let running=false,disposed=false,generation=0,socket=null,identity=null,connected=false,retries=0;
-  let lastSequence=-1,motionSequence=0,lastPosition=null,lastMotionAt=0,lastReceiveAt=0,lastPingAt=0,connectedAt=0,renewTimer=null;
+  let lastSequence=-1,motionSequence=0,lastPosition=null,lastReceiveAt=0,lastPingAt=0,connectedAt=0,renewTimer=null;
   const timers=new Set();
   const later=(fn,ms)=>{const id=setTimer(()=>{timers.delete(id);fn();},ms);timers.add(id);return id;};
   const cancel=id=>{if(id!==null){clearTimer(id);timers.delete(id);}};
@@ -54,11 +54,11 @@ export function createRealtimeClient({getTicket,getPosition,onReady,onFrame,onNo
   function motion(ticket) {
     if(!current(ticket)||!connected)return;
     if(now()-lastReceiveAt>12000){retry(ticket);return;}
-    if(now()-lastPingAt>=5000){if(!send({type:'ping',sentAt:now()})){retry(ticket);return;}lastPingAt=now();}
+    if(now()-lastReceiveAt>=5000&&now()-lastPingAt>=5000){if(!send({type:'ping',sentAt:now()})){retry(ticket);return;}lastPingAt=now();}
     let position;
     try {position=realtimePosition(getPosition?.());}catch(_){}
-    if(position&&(movementChanged(lastPosition,position)||now()-lastMotionAt>=10000)) {
-      if(send({type:'motion',seq:++motionSequence,...position,sentAt:now()})){lastPosition=position;lastMotionAt=now();}
+    if(position&&movementChanged(lastPosition,position)) {
+      if(send({type:'motion',seq:++motionSequence,...position,sentAt:now()})){lastPosition=position;}
       else if(socket?.bufferedAmount>131072){retry(ticket);return;}
     }
     later(()=>motion(ticket),MOTION_INTERVAL_MS);

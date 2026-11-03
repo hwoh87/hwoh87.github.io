@@ -1,7 +1,7 @@
-import { renderReadingVisuals } from './reading-visuals.js?v=20261101-report-visual3';
-import { buildCelebrityVisuals } from './celebrity-visual-data.js?v=20261101-report-visual3';
-import {CULTURE_ROLES,normalizeCultureDayPillar,culturePath,selectCulturePeople,selectCultureArticles,featuredCulturePeople,validateCultureData} from './culture-core.js?v=20261101-topceleb3';
-import {sanitizeReferenceContent} from './reference.js?v=20261101-freepath4';
+import { renderReadingVisuals } from './reading-visuals.js?v=20261103-benchmark2';
+import { buildCelebrityVisuals } from './celebrity-visual-data.js?v=20261103-benchmark2';
+import {CULTURE_ROLES,normalizeCultureDayPillar,culturePath,selectCulturePeople,selectCultureArticles,featuredCulturePeople,validateCultureData,CULTURE_LIBRARY_KEY,normalizeCultureLibrary,toggleCultureSaved,rememberCultureArticle} from './culture-core.js?v=20261103-benchmark2';
+import {sanitizeReferenceContent} from './reference.js?v=20261103-benchmark2';
 
 const mounts=new WeakMap();
 const PAGE_SIZE=24;
@@ -79,6 +79,12 @@ export async function mountCulture(container,view,{navigate,signal,onView,dayPil
     return cleanup;
   }
   if(!active())return cleanup;
+  const knownPaths=new Set([...data.people,...data.articles].map(item=>item.path)),libraryOptions={knownPaths};
+  let library=normalizeCultureLibrary(null),storageFailed=false,updateSaveControl=null;
+  function latestLibrary(){if(storageFailed)return library;try{const raw=localStorage.getItem(CULTURE_LIBRARY_KEY);return normalizeCultureLibrary(raw&&raw.length<32000?JSON.parse(raw):null,libraryOptions);}catch{storageFailed=true;return library;}}
+  library=latestLibrary();
+  let libraryDirty=false,librarySavedDirty=false;
+  function saveLibrary(next){library=next;libraryDirty=true;try{localStorage.setItem(CULTURE_LIBRARY_KEY,JSON.stringify(library));storageFailed=false;return true;}catch{storageFailed=true;libraryNote.textContent='현재는 기기에 저장할 수 없어, 이 화면을 닫으면 기록이 사라져요.';return false;}}
   root.replaceChildren();
   const browser=el('div','culture-browser'),reader=el('section','culture-reader');reader.hidden=true;
   const scrollHost=container.closest?.('.hub-body')||container;let browseScroll=0;
@@ -94,6 +100,11 @@ export async function mountCulture(container,view,{navigate,signal,onView,dayPil
   const chips=el('div','culture-chips');chips.setAttribute('role','group');chips.setAttribute('aria-label','활동 분야');
   let chosenRole='all',shown=PAGE_SIZE;
   tools.append(search.label);
+  const savedOnly=el('label','culture-saved-filter'),savedInput=el('input'),savedLabel=el('span');savedInput.type='checkbox';savedOnly.append(savedInput,savedLabel);tools.append(savedOnly);
+  const recent=el('div','culture-recent'),recentLabel=el('span','','최근 펼친 글'),recentButton=button('','culture-recent-link');recent.append(recentLabel,recentButton);tools.append(recent);
+  const libraryNote=el('p','culture-library-note','저장한 글과 최근 기록은 이 브라우저에만 남아요.');tools.append(libraryNote);
+  function updateLibrary(){const paths=view==='celeb'?data.people.map(item=>item.path):data.articles.map(item=>item.path);savedLabel.textContent='저장한 '+(view==='celeb'?'인물':'글')+'만 보기 · '+library.saved.filter(path=>paths.includes(path)).length;const last=library.recent.find(row=>paths.includes(row.path)),item=last&&[...data.people,...data.articles].find(item=>item.path===last.path);recent.hidden=!item;if(item){recentButton.textContent=item.name||item.title;recentButton.dataset.culturePath=item.path;}}
+
   const chipNodes=[];
   for(const item of view==='celeb'?CULTURE_ROLES:[]){
     const chip=button(item.label,'culture-chip');chipNodes.push([item.id,chip]);chips.append(chip);setPressed(chip,item.id==='all');
@@ -132,18 +143,19 @@ export async function mountCulture(container,view,{navigate,signal,onView,dayPil
   }
   function render(){
     if(!active())return;
-    const entries=view==='celeb'?selectCulturePeople(data.people,{query:search.input.value,role:chosenRole,element:element.select.value,sort:order.select.value,dayPillar:sameInput.checked?ownDay:''}):selectCultureArticles(data,{query:search.input.value});
+    const found=view==='celeb'?selectCulturePeople(data.people,{query:search.input.value,role:chosenRole,element:element.select.value,sort:order.select.value,dayPillar:sameInput.checked?ownDay:''}):selectCultureArticles(data,{query:search.input.value});
+    const entries=savedInput.checked?found.filter(item=>library.saved.includes(item.path)):found;updateLibrary();
     grid.replaceChildren();releaseDetachedImages();entries.slice(0,shown).forEach(entry=>grid.append(view==='celeb'?personCard(entry):guideCard(entry)));
     const noun=view==='celeb'?'명':'편';resultCount.textContent=(view==='magazine'?'사주 지식 · ':'')+entries.length.toLocaleString('ko-KR')+noun+(sameInput.checked&&ownDay?' · '+ownDay:'')+' · '+Math.min(shown,entries.length)+noun+' 보는 중';
     more.hidden=entries.length<=shown;more.textContent=`더 보기 · ${Math.max(0,entries.length-shown).toLocaleString('ko-KR')}${noun} 남음`;
-    featured.hidden=Boolean(search.input.value.trim()||chosenRole!=='all'||element.select.value||sameInput.checked);
-    reset.hidden=!search.input.value&&chosenRole==='all'&&!element.select.value&&!sameInput.checked&&order.select.value==='recommended';
+    featured.hidden=Boolean(savedInput.checked||search.input.value.trim()||chosenRole!=='all'||element.select.value||sameInput.checked);
+    reset.hidden=!savedInput.checked&&!search.input.value&&chosenRole==='all'&&!element.select.value&&!sameInput.checked&&order.select.value==='recommended';
     if(view==='magazine'){
-      reset.textContent='검색어 지우기';
+      reset.textContent=savedInput.checked?'조건 초기화':'검색어 지우기';
       scope.textContent='삼라의 공개 사주 입문 자료예요. 명식 읽기의 기초부터 오행·십신·대운까지, 궁금한 주제를 골라 읽어보세요.';
     }
     if(!entries.length){
-      const empty=el('div','culture-empty');empty.append(el('h3','',view==='magazine'?'사주 지식에서 찾지 못했어요':'조건에 맞는 인물이 없어요'),el('p','',view==='magazine'?'검색어를 짧게 입력하거나 다른 사주 용어로 찾아보세요.':'검색어를 짧게 입력하거나 다른 조건으로 찾아보세요.'));
+      const empty=el('div','culture-empty');empty.append(el('h3','',savedInput.checked?'저장한 항목이 없어요':view==='magazine'?'사주 지식에서 찾지 못했어요':'조건에 맞는 인물이 없어요'),el('p','',savedInput.checked?'본문의 ‘나중에 읽기’를 눌러 모을 수 있어요. 다른 검색 조건도 함께 적용돼요.':view==='magazine'?'검색어를 짧게 입력하거나 다른 사주 용어로 찾아보세요.':'검색어를 짧게 입력하거나 다른 조건으로 찾아보세요.'));
       if(search.input.value){const clear=button('검색어 지우기','culture-button');listen(clear,'click',()=>{search.input.value='';shown=PAGE_SIZE;render();search.input.focus();});empty.append(clear);}
       grid.append(empty);
     }
@@ -154,12 +166,18 @@ export async function mountCulture(container,view,{navigate,signal,onView,dayPil
     sameLabel.textContent=ownDay?'나와 같은 '+ownDay:'내 사주 분석 후 같은 일주 찾기';
     shown=PAGE_SIZE;render();
   };
+  if(document.defaultView)listen(document.defaultView,'storage',event=>{
+    if(event.key!==null&&event.key!==CULTURE_LIBRARY_KEY)return;
+    const previous=library.saved.join('|');storageFailed=false;library=latestLibrary();
+    updateLibrary();updateSaveControl?.();
+    if(!browser.hidden&&savedInput.checked&&previous!==library.saved.join('|')){const focusWasInGrid=grid.contains(document.activeElement);render();if(focusWasInGrid)search.input.focus({preventScroll:true});}
+  });
   listen(search.input,'input',()=>{shown=PAGE_SIZE;render();});
-  [element.select,order.select,sameInput].forEach(node=>listen(node,'change',()=>{shown=PAGE_SIZE;render();}));
-  listen(reset,'click',()=>{search.input.value='';element.select.value='';order.select.value='recommended';sameInput.checked=false;chosenRole='all';if(view==='celeb')chipNodes.forEach(([id,node])=>setPressed(node,id==='all'));shown=PAGE_SIZE;render();search.input.focus();});
+  [element.select,order.select,sameInput,savedInput].forEach(node=>listen(node,'change',()=>{shown=PAGE_SIZE;render();}));
+  listen(reset,'click',()=>{search.input.value='';element.select.value='';order.select.value='recommended';sameInput.checked=false;savedInput.checked=false;chosenRole='all';if(view==='celeb')chipNodes.forEach(([id,node])=>setPressed(node,id==='all'));shown=PAGE_SIZE;render();search.input.focus();});
   listen(more,'click',()=>{const oldCount=grid.children.length;shown+=PAGE_SIZE;render();const entry=grid.children[oldCount];(entry?.tagName==='BUTTON'?entry:entry?.querySelector('button'))?.focus({preventScroll:true});});
   function closeReader(){
-    readSequence++;readController?.abort();readController=null;reader.replaceChildren();releaseDetachedImages();reader.hidden=true;browser.hidden=false;readerOpener?.focus({preventScroll:true});readerOpener=null;
+    readSequence++;readController?.abort();readController=null;updateSaveControl=null;reader.replaceChildren();releaseDetachedImages();reader.hidden=true;browser.hidden=false;if(libraryDirty){libraryDirty=false;updateLibrary();if(savedInput.checked&&librarySavedDirty){render();readerOpener=null;search.input.focus({preventScroll:true});}librarySavedDirty=false;}readerOpener?.focus({preventScroll:true});readerOpener=null;
     scrollHost.scrollTop=browseScroll;
   }
   async function openReader(path,opener){
@@ -175,7 +193,9 @@ export async function mountCulture(container,view,{navigate,signal,onView,dayPil
     typeSize.setAttribute('aria-pressed',String(reader.classList.contains('is-large-text')));
     listen(typeSize,'click',()=>{const large=!reader.classList.contains('is-large-text');reader.classList.toggle('is-large-text',large);typeSize.setAttribute('aria-pressed',String(large));typeSize.textContent=large?'기본 크기':'글자 크게';},readSignal);
     listen(top,'click',()=>{heading.scrollIntoView?.({block:'start',behavior:'auto'});heading.focus({preventScroll:true});},readSignal);
-    controls.append(typeSize,top);bar.append(controls);
+    const save=button('','culture-save-button');function saveState(){const saved=library.saved.includes(path);save.textContent=saved?'저장 해제':'나중에 읽기';save.setAttribute('aria-pressed',String(saved));save.setAttribute('aria-label',(saved?'나중에 읽기에서 제거: ':'나중에 읽기에 저장: ')+(item.name||item.title));}updateSaveControl=saveState;saveState();listen(save,'click',()=>{if(!active()||readSignal.aborted||sequence!==readSequence)return;librarySavedDirty=true;const persisted=saveLibrary(toggleCultureSaved(latestLibrary(),path,libraryOptions));saveState();libraryNote.textContent=persisted?'저장한 글과 최근 기록은 이 브라우저에만 남아요.':'현재는 기기에 저장할 수 없어, 이 화면을 닫으면 기록이 사라져요.';saveFeedback.textContent=persisted?(library.saved.includes(path)?'이 브라우저에 저장했어요.':'저장 목록에서 뺐어요.'):'이 화면에서만 기억해요. 기기에 저장하지 못했어요.';},readSignal);
+    const saveFeedback=el('p','culture-save-feedback');saveFeedback.setAttribute('role','status');
+    controls.append(typeSize,top,save);bar.append(controls);reader.append(saveFeedback);
     header.append(el('p','culture-eyebrow',item.name?[item.name,item.dayPillar].join(' · '):item.topic),heading);
     if(item.name){
       header.append(el('p','culture-article-meta',[item.occupation,item.birth].join(' · ')),el('p','culture-scope-notice',item.scope+' · 공개 자료를 기준으로 읽어요.'));
@@ -206,6 +226,8 @@ export async function mountCulture(container,view,{navigate,signal,onView,dayPil
       const articleIndex=data.articles.findIndex(article=>article.path===path);
       const entries=item.name?[data.articles[0],data.articles.find(article=>article.id==='unknown-birth-time')]:[...data.articles.slice(articleIndex+1),...data.articles.slice(0,articleIndex)].slice(0,2);
       entries.filter(Boolean).forEach(article=>next.append(guideCard(article)));reader.append(next);
+      saveLibrary(rememberCultureArticle(latestLibrary(),path,libraryOptions));
+      document.dispatchEvent(new CustomEvent('sowon:journey-action',{detail:{id:item.name?'celebrity':'article'}}));
       onView?.(view,{path,count:view==='celeb'?data.people.length:data.articles.length});return true;
     }catch(error){
       if(!current()||error?.name==='AbortError')return false;

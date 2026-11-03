@@ -1,5 +1,5 @@
 // App-shared representative art: IljuMulsangArt.kt and scripts/generated/seo/ilju.json.
-import { ILJU_ROOMS, roomForKey } from './ilju-room-core.js?v=20261103-hour1';
+import { ILJU_ROOMS, roomForKey } from './ilju-room-core.js?v=20261103-benchmark2';
 
 // Keep these local paths aligned with the generated public art index.
 const MURALS = Object.freeze({
@@ -91,6 +91,7 @@ export function interiorForRoom(key) {
 export function interiorViewPose({width = 1280, height = 720, mode = 'overview'} = {}) {
   const aspect = Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0 ? width / height : 16 / 9;
   const portrait = aspect < .85, scale = portrait ? Math.max(1, (390 / 844) / aspect) : 1;
+  if(mode==='near')return {position:[0,4.4,18],target:[0,2.2,-4],fov:50};
   return {
     position: mode === 'mural' ? [0, 4.15, portrait ? 6 * scale : -2.2] : [0, portrait ? 6.6 : 5.8, portrait ? 29 * scale : 20],
     target: mode === 'mural' ? [0, 4.1, -11.5] : [0, 2.2, -2.1],

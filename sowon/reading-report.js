@@ -1,10 +1,10 @@
 import { writeShrineCheckout } from '../store/shrine-handoff.js?v=20261103-paid1';
-import { loadReadingEngine, mountReading } from './readings.js?v=20261103-paid1';
-import { buildReadingInsight } from './reading-insight-core.js?v=20261101-report-visual3';
-import { mountReadingOffers } from './reading-offers.js?v=20261103-paid1';
-import { profileSearch } from './profile-core.js?v=20261101-freepath4';
-import { renderReadingVisuals } from './reading-visuals.js?v=20261101-report-visual3';
-import { createAnalysisLoading, waitForAnalysisPaint } from './analysis-loading.js?v=20261102-loading1';
+import { loadReadingEngine, mountReading } from './readings.js?v=20261103-benchmark2';
+import { buildReadingInsight } from './reading-insight-core.js?v=20261103-benchmark2';
+import { mountReadingOffers } from './reading-offers.js?v=20261103-benchmark2';
+import { profileSearch } from './profile-core.js?v=20261103-benchmark2';
+import { renderReadingVisuals } from './reading-visuals.js?v=20261103-benchmark2';
+import { createAnalysisLoading, waitForAnalysisPaint } from './analysis-loading.js?v=20261103-benchmark2';
 
 const HOSTS = { tojeong: { name: '토정과', kind: 'saju' }, seol: { name: '설월과', kind: 'saju' }, luna: { name: '루나와', kind: 'star' } };
 const KINDS = [['saju', '사주'], ['jami', '자미두수'], ['star', '별자리']];
@@ -212,6 +212,7 @@ export function mountReadingReport(container, npc, profile, options = {}) {
         freeScope.textContent = `아래 ${result.sections.length}개 주제는 끝까지 무료예요. 더 깊은 해석은 필요할 때 선택하세요.`;
         notes.replaceChildren(...result.notes.map(note => make('p', '', note)));
         if (inputCalendar && inputCalendar !== 'S') notes.append(make('p', '', '입력한 음력 생일을 양력으로 바꿔 계산했어요.'));
+        if(!result.requiresTime&&result.sections.length)document.dispatchEvent(new CustomEvent('sowon:journey-action',{detail:{id:'reading:'+kind}}));
         if (result.requiresTime) { pending.hidden = false; pending.replaceChildren(button('report-time-button', '태어난 시간 입력하기', () => options.onProfile?.(), viewSignal)); }
       } catch (_) {
         if (disposed || ticket !== version || revision !== calculation) return;

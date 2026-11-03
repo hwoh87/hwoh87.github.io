@@ -1,20 +1,21 @@
-import { getOwnProfile } from './profile.js?v=20261103-paid1';
-import { getOwnIdentity } from './identity.js?v=20261103-paid1';
-import { configureSocial } from './social.js?v=20261103-paid1';
-import './ilju-rooms.js?v=20261103-paid1';
-import './ilju-interior-view.js?v=20261103-paid1';
+import { getOwnProfile } from './profile.js?v=20261103-benchmark2';
+import { getOwnIdentity } from './identity.js?v=20261103-benchmark2';
+import { configureSocial } from './social.js?v=20261103-benchmark2';
+import './ilju-rooms.js?v=20261103-benchmark2';
+import './ilju-interior-view.js?v=20261103-benchmark2';
 
 configureSocial({getRoomPosition:roomKey=>roomKey==='courtyard'?{x:0,z:14,heading:Math.PI}:{x:0,z:8,heading:Math.PI}});
 const shell=document.querySelector('.sanctuary');
 const nav=document.createElement('nav');nav.className='sanctuary-destinations';nav.setAttribute('aria-label','나의 해석과 새 공간');
 let pendingOwnReport=false;
-const items=[['personal','내 해석','나의 사주·하늘·흐름'],['rooms','일주방','같은 일주의 나그네'],['celeb','연예인 사주','공개 명식과 인물 이야기'],['magazine','삼라 매거진','사주 지식과 명리 읽기']];
+const items=[['personal','내 해석','나의 사주·하늘·흐름'],['rooms','일주방','같은 일주의 나그네'],['celeb','연예인 사주','공개 명식과 인물 이야기'],['magazine','삼라 매거진','사주 지식과 명리 읽기'],['journal','산책 기록','내가 남긴 발자국']];
 for(const [id,title,description] of items){
   const button=document.createElement('button');button.type='button';button.dataset.destination=id;
   const label=document.createElement('strong');label.textContent=title;
   const hint=document.createElement('span');hint.textContent=description;
   button.append(label,hint);
   if(id==='rooms')button.dataset.openIljuRooms='';
+  else if(id==='journal')button.addEventListener('click',()=>document.dispatchEvent(new CustomEvent('sowon:journal-open')));
   else if(id!=='personal')button.dataset.hubFeature=id;
   else button.addEventListener('click',()=>{
     if(getOwnProfile())document.dispatchEvent(new CustomEvent('sowon:personal-reading',{detail:{npc:'tojeong',kind:'saju'}}));

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { createCampus } from './campus.js?v=20261102-hallfocus1';
-import { createAtmosphere, makeHangulGeometry } from './atmosphere.js?v=20261101-celebhouse1';
+import { createCampus } from './campus.js?v=20261103-benchmark2';
+import { createAtmosphere, makeHangulGeometry } from './atmosphere.js?v=20261103-benchmark2';
 
 /** A walkable Korean courtyard with five adjoining gardens and halls. */
 export function createWorld() {

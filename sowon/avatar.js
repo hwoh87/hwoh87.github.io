@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { getAvatarPalette } from './avatar-palettes.js?v=20261101-freepath4';
+import { getAvatarPalette } from './avatar-palettes.js?v=20261103-benchmark2';
+import { decodeAppearance, validAppearance, SKIN_COLORS, HAIR_COLORS } from './appearance-core.js?v=20261103-benchmark2';
 
 /** A small, original hanbok traveller. Its face points toward local +Z. */
 export function createAvatar() {
@@ -7,6 +8,7 @@ export function createAvatar() {
   group.name = 'SamraTraveller';
   let disposed = false;
   let appearance = 'sage';
+  let style = decodeAppearance(appearance);
   let gender = null;
   let seated = false;
   let seatHeight = 0.17;
@@ -33,6 +35,7 @@ export function createAvatar() {
   material('shoe', '#555b56');
   material('eye', '#3b3735');
   material('glint', '#fff6df');
+  material('gat', '#292f2d', {roughness:.95});
 
   function mesh(geometry, mat, parent, position, scale) {
     const item = new THREE.Mesh(geometry, mat);
@@ -126,7 +129,7 @@ export function createAvatar() {
   sphere(0.278, materials.skin, head, [0, 0, 0.015], [1, 1.04, 0.94]);
   sphere(0.062, materials.skin, head, [-0.267, -0.025, 0.005], [0.65, 1, 0.73]);
   sphere(0.062, materials.skin, head, [0.267, -0.025, 0.005], [0.65, 1, 0.73]);
-  const hairCap = mesh(new THREE.SphereGeometry(0.291, 28, 20, 0, Math.PI * 2, 0, Math.PI * 0.55), materials.hair, head, [0, 0.016, -0.007]);
+  const hairCap = mesh(new THREE.SphereGeometry(0.291, 28, 20, 0, Math.PI * 2, 0, Math.PI * 0.47), materials.hair, head, [0, 0.016, -0.007]);
   hairCap.scale.set(1.02, 1.04, 1.01);
   sphere(0.223, materials.hair, head, [0, 0.035, -0.14], [1.05, 1.1, 0.70]);
   [-1, 1].forEach(side => {
@@ -140,6 +143,23 @@ export function createAvatar() {
   const hairpin = capsule(0.012, 0.29, materials.ribbon, head, [0, 0.29, -0.098]);
   hairpin.rotation.z = Math.PI / 2 + 0.08;
   const hairpinEnd=sphere(0.031, materials.sage, head, [0.17, 0.275, -0.098], [1, 0.8, 1]);
+  const bob = sphere(.244, materials.hair, head, [0,-.078,-.145], [1.07,1.17,.72]);
+  const longHair = capsule(.19,.30,materials.hair,head,[0,-.23,-.18],[1.23,1,.45]);
+  const pony = capsule(.09,.28,materials.hair,head,[0,-.12,-.28]);
+  pony.rotation.x = -.32;
+  const headwear = new THREE.Group(); headwear.name='TravellerHeadwear'; head.add(headwear);
+  const hats = [];
+  const gat = new THREE.Group(); headwear.add(gat); hats.push(gat);
+  mesh(new THREE.CylinderGeometry(.38,.38,.012,28),materials.gat,gat,[0,.30,0]);
+  mesh(new THREE.CylinderGeometry(.135,.17,.25,24),materials.gat,gat,[0,.43,0]);
+  for(const side of [-1,1]){const cord=new THREE.CatmullRomCurve3([new THREE.Vector3(side*.30,.29,.02),new THREE.Vector3(side*.26,-.04,.13),new THREE.Vector3(side*.07,-.29,.14)]);mesh(new THREE.TubeGeometry(cord,12,.006,4,false),materials.gat,gat);}
+  const flower = new THREE.Group(); headwear.add(flower); hats.push(flower);
+  for(let i=0;i<5;i++){const a=i*Math.PI*2/5;sphere(.036,materials.collar,flower,[.235+Math.cos(a)*.038,.15+Math.sin(a)*.038,.14],[1,1,.4]);}
+  sphere(.022,materials.ribbon,flower,[.235,.15,.16]);
+  const band = new THREE.Group();headwear.add(band);hats.push(band);
+  const bandRing=mesh(new THREE.TorusGeometry(.287,.022,6,24),materials.sage,band,[0,.10,0]);bandRing.rotation.x=Math.PI/2;
+  const bow = new THREE.Group();headwear.add(bow);hats.push(bow);
+  [-1,1].forEach(side=>{const wing=sphere(.075,materials.sage,bow,[side*.055,.29,.03],[1,.55,.4]);wing.rotation.z=side*.4;});
 
   const eyes = [];
   [-1, 1].forEach(side => {
@@ -157,8 +177,20 @@ export function createAvatar() {
   // A tiny travel pouch gives the back a readable silhouette while walking away.
   const strap = capsule(0.019, 0.42, materials.sageShade, figure, [0, 0.79, -0.17]);
   strap.rotation.z = -0.48;
-  sphere(0.12, materials.ribbon, figure, [0.132, 0.6, -0.177], [0.82, 1, 0.48]);
-  sphere(0.035, materials.cream, figure, [0.13, 0.64, -0.236], [1, 0.36, 0.3]);
+  const pouch=sphere(0.12, materials.ribbon, figure, [0.132, 0.6, -0.177], [0.82, 1, 0.48]);
+  const pouchTie=sphere(0.035, materials.cream, figure, [0.13, 0.64, -0.236], [1, 0.36, 0.3]);
+  const handProps=[];
+  const lantern=new THREE.Group();rightArm.add(lantern);handProps.push(lantern);lantern.position.set(.025,-.44,.065);
+  mesh(new THREE.CylinderGeometry(.07,.065,.14,12),materials.collar,lantern,[0,-.035,0]);
+  mesh(new THREE.CylinderGeometry(.078,.078,.018,12),materials.ribbon,lantern,[0,.04,0]);
+  mesh(new THREE.CylinderGeometry(.078,.078,.018,12),materials.ribbon,lantern,[0,-.11,0]);
+  mesh(new THREE.TorusGeometry(.045,.007,4,14),materials.ribbon,lantern,[0,.08,0]);
+  const book=new THREE.Group();rightArm.add(book);handProps.push(book);book.position.set(.025,-.30,.11);book.rotation.x=-.3;
+  mesh(new THREE.BoxGeometry(.16,.20,.045),materials.sage,book,[0,0,0]);
+  mesh(new THREE.BoxGeometry(.135,.17,.047),materials.collar,book,[.005,0,0]);
+  const cup=new THREE.Group();rightArm.add(cup);handProps.push(cup);cup.position.set(.025,-.32,.12);
+  mesh(new THREE.CylinderGeometry(.055,.039,.075,12),materials.collar,cup,[0,0,0]);
+  mesh(new THREE.CylinderGeometry(.046,.046,.003,12),materials.ribbon,cup,[0,.038,0]);
 
   const shadow = new THREE.Mesh(new THREE.CircleGeometry(0.41, 36), new THREE.MeshBasicMaterial({ color: '#111b20', transparent: true, opacity: 0.22, depthWrite: false }));
   shadow.rotation.x = -Math.PI / 2;
@@ -184,8 +216,8 @@ export function createAvatar() {
     leftArm.rotation.z = seated ? -0.30 : -0.14;
     rightArm.rotation.z = seated ? 0.30 : 0.14;
     skirt.position.y = seated ? 0.61 : 0.43;
-    skirt.scale.set(seated ? 1.13 : 1, seated ? 0.52 : 1, seated ? 0.9632 : 0.86);
-    skirt.visible = gender === 'F';
+    skirt.scale.set(seated ? 1.13 : style.cut===2?.77:1, seated ? 0.52 : style.cut===2?1.4:1, seated ? 0.9632 : 0.86);
+    skirt.visible = style.customized ? style.cut !== 0 : gender === 'F';
   }
 
   function setSeated(value, surfaceHeight = 0.17) {
@@ -207,18 +239,31 @@ export function createAvatar() {
   }
 
   function setAppearance(id) {
-    const palette = getAvatarPalette(id);
-    if (disposed || !palette) return false;
+    if (disposed || !validAppearance(id)) return false;
+    style=decodeAppearance(id);
+    const palette = getAvatarPalette(style.palette);
     for (const [name, color] of Object.entries(palette.colors)) materials[name].color.set(color);
-    appearance = palette.id;
+    materials.skin.color.set(SKIN_COLORS[style.skin]);
+    materials.hair.color.set(HAIR_COLORS[style.ink]);
+    hairBun.visible=style.hair===0;
+    bob.visible=style.hair===2;
+    longHair.visible=style.hair===3;
+    pony.visible=style.hair===4;
+    const traditional=style.hair===0&&style.hat===0;
+    hairpin.visible=hairpinEnd.visible=bunTie.visible=traditional;
+    hats.forEach((hat,index)=>{hat.visible=style.hat===index+1;});
+    handProps.forEach((prop,index)=>{prop.visible=style.prop===index+1;});
+    strap.visible=pouch.visible=pouchTie.visible=style.prop===0;
+    appearance = id;
     group.userData.appearance = appearance;
+    applyPosture();
     return true;
   }
   function setGender(value){
     if(disposed||!['M','F',null].includes(value))return false;
-    gender=value;skirt.visible=value==='F';
+    gender=value;skirt.visible=style.customized?style.cut!==0:value==='F';
     hairBun.scale.set(1,value==='M'?.63:.86,.97);
-    hairpin.visible=value!=='M';hairpinEnd.visible=value!=='M';bunTie.visible=value!=='M';
+    if(!style.customized){hairpin.visible=value!=='M';hairpinEnd.visible=value!=='M';bunTie.visible=value!=='M';}
     if (seated) applyPosture();
     group.userData.gender=gender;return true;
   }
@@ -288,5 +333,6 @@ export function createAvatar() {
     group.removeFromParent();
   }
 
+  setAppearance(appearance);
   return { group, update, setGesture, setAppearance, setGender, setSeated, getSeated: () => seated, getGender:()=>gender, getAppearance: () => appearance, dispose };
 }

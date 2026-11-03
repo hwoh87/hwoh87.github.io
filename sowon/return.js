@@ -1,4 +1,4 @@
-import { readJourney } from './hub-core.js?v=20261102-hallfocus1';
+import { readJourney } from './hub-core.js?v=20261103-benchmark2';
 
 // This explicit return link carries no report, birthday or return URL. It only
 // appears after a visitor leaves the sanctuary from this browser tab.

@@ -203,7 +203,7 @@
 .axline .tone.t길{background:rgba(111,207,151,.16);color:#6FCF97}
 .axline .tone.t중립{background:rgba(139,92,246,.16);color:rgba(255,255,255,.65)}
 .axline .tone.t흉{background:rgba(236,72,153,.16);color:#f9a8d4}
-.axline p{margin:7px 0 0;font-size:13px;color:rgba(255,255,255,.65);line-height:1.65}
+.axline p{margin:7px 0 0;font-size:14px;color:rgba(255,255,255,.75);line-height:1.95;white-space:pre-line}
 .flowrow{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;margin:0 0 6px}
 .flowcell{flex:0 0 auto;min-width:104px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;
   padding:10px 12px;text-align:center}
@@ -378,7 +378,7 @@ function loadEngine(){
     var s = document.createElement("script");
     /* ⚠️ 파일명이 고정이라 엔진을 고쳐 배포해도 돌아온 방문자는 캐시된 구버전을 계속 쓴다
        (예전 '본원 오표기' 수정도 이런 식으로 늦게 도착했다). 내용 해시를 붙여 강제로 새로 받게 한다. */
-    s.src = "/calc/saju-engine.js?v=4cadb1f5c1";
+    s.src = "/calc/saju-engine.js?v=c16ca4d582";
     s.onload = function(){ res(window["engine-core"]); };
     s.onerror = function(){ __engP = null; rej(new Error("engine")); };
     document.head.appendChild(s);

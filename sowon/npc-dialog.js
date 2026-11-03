@@ -1,7 +1,7 @@
-import { createDialogueSession, getNpcPersona } from './dialogue-core.js?v=20261102-hallfocus1';
-import { createShrineChatClient } from './chat-client.js?v=20261102-hallfocus1';
-import { loadReadingEngine } from './readings.js?v=20261103-paid1';
-import { buildReadingInsight } from './reading-insight-core.js?v=20261101-report-visual3';
+import { createDialogueSession, getNpcPersona } from './dialogue-core.js?v=20261103-benchmark2';
+import { createShrineChatClient } from './chat-client.js?v=20261103-benchmark2';
+import { loadReadingEngine } from './readings.js?v=20261103-benchmark2';
+import { buildReadingInsight } from './reading-insight-core.js?v=20261103-benchmark2';
 
 const mounts = new WeakMap();
 let sequence = 0;
@@ -20,7 +20,7 @@ export function mountNpcDialogue(container, npcId, options = {}) {
   const chatClient = options.chatClient === false ? null : options.chatClient || createShrineChatClient();
   let disposed = false, choicesAbort, messageIds = [], messageNodes = new Map(), engineTicket = 0, composing = false;
   const pairFocus = npcId === 'seol';
-  let activeRequest = null, preparation, feedbackError = '', readingStatus = pairFocus ? '두 사람의 궁합을 보는 방법부터 살펴봐요' : hasProfile ? '내 기본 해석을 준비하고 있어요' : '내 정보 없이도 궁금한 이야기를 물어보세요';
+  let activeRequest = null, preparation, feedbackError = '', localContinuing=['reading','followup','guide'].includes(session.view().stage), readingStatus = pairFocus ? '두 사람의 궁합을 보는 방법부터 살펴봐요' : hasProfile ? '내 기본 해석을 준비하고 있어요' : '내 정보 없이도 궁금한 이야기를 물어보세요';
   const compactQuestions = document.defaultView?.matchMedia?.('(max-height: 500px)');
   let expandedChoices = false, visibleChoiceCount = compactQuestions?.matches ? 0 : 2;
   const make = (tag, className, text) => { const element = document.createElement(tag); if (className) element.className = className; if (text != null) element.textContent = text; return element; };
@@ -69,7 +69,11 @@ export function mountNpcDialogue(container, npcId, options = {}) {
   const send = make('button', 'npc-send', '보내기'); send.type = 'submit'; send.disabled = true;
   const inputNotice = chatClient ? '질문·최근 대화·풀이 요약을 Google Gemini로 전송해요.' : '성향·관계·흐름처럼 궁금한 주제를 적어보세요.';
   const feedback = make('p', 'npc-input-feedback', inputNotice); feedback.id = `${id}-feedback`; feedback.setAttribute('role', 'status'); input.setAttribute('aria-describedby', feedback.id);
-  inputRow.append(input, send); form.append(inputLabel, inputRow, feedback);
+  const localFallback=button('삼라 기본 풀이로 먼저 보기','npc-local-fallback',()=>{
+    if(disposed||activeRequest)return;const text=String(input.value||'').trim();if(!text)return;
+    const result=session.ask(text);if(!result.accepted)return;localContinuing=true;feedbackError='';input.value='';render(true);
+  });localFallback.hidden=true;
+  inputRow.append(input, send); form.append(inputLabel, inputRow, feedback,localFallback);
   listen(input, 'compositionstart', () => { composing = true; }); listen(input, 'compositionend', () => { composing = false; updateDraft(); });
   function updateDraft() {
     const length = Array.from(input.value || '').length; send.disabled = Boolean(activeRequest) || !String(input.value || '').trim() || length > 160;
@@ -77,6 +81,7 @@ export function mountNpcDialogue(container, npcId, options = {}) {
     input.setAttribute('aria-invalid', String(length > 160));
     const message = length > 160 ? '질문은 160자 안으로 적어 주세요.' : activeRequest ? `${npc.name}${npcId === 'luna' ? '가' : '이'} 답변을 준비하고 있어요.` : feedbackError || inputNotice;
     feedback.classList.toggle('is-error', Boolean(feedbackError));
+    localFallback.hidden=!feedbackError||Boolean(activeRequest)||!String(input.value||'').trim();
     if (feedback.textContent !== message) feedback.textContent = message;
   }
   listen(input, 'input', () => { feedbackError = ''; updateDraft(); });
@@ -89,7 +94,7 @@ export function mountNpcDialogue(container, npcId, options = {}) {
     input.value = ''; updateDraft(); render(true); input.focus({ preventScroll: true });
   });
   const footer = make('div', 'npc-dialog-footer'), back = button('이전 질문', 'npc-back', () => { if (session.back()) render(true); });
-  const restart = button('처음부터', 'npc-back', () => { abortPending(); session.reset(); feedbackError = ''; input.value = ''; render(true); });
+  const restart = button('처음부터', 'npc-back', () => { abortPending(); session.reset(); localContinuing=false;feedbackError = ''; input.value = ''; render(true); });
   const cancel = button('응답 취소', 'npc-back npc-cancel', () => { abortPending(true); feedbackError = '응답을 취소했어요. 질문을 고쳐 다시 보낼 수 있어요.'; render(); input.focus({preventScroll:true}); }); cancel.hidden = true;
   const historyActions = make('div','npc-history-actions'); historyActions.append(back,restart,cancel);
   const disclosure = make('small', 'npc-disclosure', chatClient ? 'Gemini Flash Lite · 출생정보 원문·닉네임은 보내지 않아요. ' : '주제에 맞는 준비된 안내와 내 계산 해석을 들려줘요. 이 페이지에서만 이어져요.');
@@ -106,6 +111,7 @@ export function mountNpcDialogue(container, npcId, options = {}) {
   function leave(callback) { abortPending(); callback?.(); }
   async function askAi(text, choiceId) {
     if (disposed || activeRequest) return;
+    localContinuing=false;
     const started = session.beginAiQuestion(text, {choiceId});
     if (!started.accepted) return;
     feedbackError = ''; input.value = '';
@@ -137,10 +143,11 @@ export function mountNpcDialogue(container, npcId, options = {}) {
   function showChoices() {
     Array.from(choices.children).forEach((node, index) => { node.hidden = !expandedChoices && index >= visibleChoiceCount; });
     more.hidden = choices.children.length <= visibleChoiceCount;
-    more.textContent = expandedChoices ? '질문 접기' : visibleChoiceCount === 0 ? `추천 질문 ${choices.children.length}개 보기` : `다른 질문 ${Math.max(0, choices.children.length - visibleChoiceCount)}개`;
+    more.textContent = expandedChoices ? '질문 접기' : visibleChoiceCount === 0 ? `${compactQuestions?.matches?'추천 질문':'이어서 물어볼 질문'} ${choices.children.length}개 보기` : `다른 질문 ${Math.max(0, choices.children.length - visibleChoiceCount)}개`;
     more.setAttribute('aria-expanded', String(expandedChoices));
   }
-  if (compactQuestions) listen(compactQuestions,'change',()=>{ visibleChoiceCount = compactQuestions.matches ? 0 : 2; expandedChoices = false; showChoices(); });
+  const choiceLimit=()=>compactQuestions?.matches||!['welcome','topic'].includes(session.view().stage)?0:2;
+  if (compactQuestions) listen(compactQuestions,'change',()=>{ visibleChoiceCount = choiceLimit(); expandedChoices = false; showChoices(); });
 
   function route(action) {
     if (!action || disposed) return;
@@ -161,6 +168,7 @@ export function mountNpcDialogue(container, npcId, options = {}) {
       const item = make('li', `npc-message npc-message--${message.role === 'user' ? 'user' : 'npc'}`); item.tabIndex = -1;
       item.append(make('span', 'npc-speaker', message.role === 'user' ? '나' : npc.name + (message.source === 'gemini' ? ' · AI' : '')));
       const body = make('div', 'npc-message-body');
+      if(message.chapter||message.signals?.length)body.append(make('small','npc-reading-source',message.source==='gemini'?'AI와 나눈 이야기':'삼라 계산에 따른 기본 풀이'));
       if (message.chapter) body.append(make('h3', 'npc-message-chapter', message.chapter));
       String(message.text || '').split(/\n\s*\n/).filter(Boolean).forEach(text => body.append(make('p', 'npc-message-text', text)));
       if (message.signals?.length) { const facts = make('dl', 'npc-message-signals'); message.signals.forEach(fact => { const row = make('div', ''); row.append(make('dt', '', fact.label), make('dd', '', fact.value)); facts.append(row); }); body.append(facts); }
@@ -170,17 +178,18 @@ export function mountNpcDialogue(container, npcId, options = {}) {
     const displayChoices = pairFocus && ['welcome', 'topic'].includes(view.stage) ? view.choices.filter(choice => !choice.id.startsWith('action:')) : view.choices;
     displayChoices.forEach(choice => { const item = button(choice.label, 'npc-choice', () => {
       if (activeRequest) return;
-      if (chatClient && !choice.id.startsWith('action:')) { void askAi(choice.label,choice.id); return; }
+      if (chatClient && !localContinuing && !['guide','topics'].includes(choice.id) && !choice.id.startsWith('action:')) { void askAi(choice.label,choice.id); return; }
       const result = session.choose(choice.id); if (!result.accepted) return; render(true); route(result.action);
     }, choicesAbort.signal); item.dataset.dialogueChoice = choice.id; item.disabled = Boolean(activeRequest); choices.append(item); });
-    visibleChoiceCount = compactQuestions?.matches ? 0 : 2; expandedChoices = false; showChoices();
+    visibleChoiceCount = choiceLimit(); expandedChoices = false; showChoices();
+    composer.classList.toggle('is-reading-reply',!['welcome','topic','clarify'].includes(view.stage));
     back.hidden = Boolean(activeRequest) || !view.canBack; back.disabled = Boolean(activeRequest); more.disabled = Boolean(activeRequest); cancel.hidden = !activeRequest;
     composer.setAttribute('aria-busy',String(Boolean(activeRequest)));
-    status.textContent = activeRequest ? 'Gemini Flash Lite가 답변을 준비하고 있어요' : readingStatus;
+    status.textContent = activeRequest ? 'Gemini Flash Lite가 답변을 준비하고 있어요' : localContinuing ? '삼라 기본 풀이로 대화 중 · 직접 질문은 AI로 이어져요' : readingStatus;
     prompt.textContent = view.stage === 'clarify' ? '어느 이야기에 가까운가요?' : ['reading','followup','ai'].includes(view.stage) ? '이어서 이렇게 물어봐도 좋아요' : '이야기를 시작해 볼까요?';
     updateDraft();
     const latest = added.at(-1);
-    if (focus && latest) { latest.focus({ preventScroll: true }); (added.find(node => node.classList.contains('npc-message--user')) || latest).scrollIntoView({ block: 'start', behavior: 'auto' }); }
+    if (focus && latest) { latest.focus({ preventScroll: true }); latest.scrollIntoView({ block: 'start', behavior: 'auto' }); }
     else {
       if (focusedChoice) (Array.from(choices.children).find(node => !node.hidden && node.dataset.dialogueChoice === focusedChoice) || Array.from(choices.children).find(node => !node.hidden) || more).focus({ preventScroll: true });
       if (wasAtEnd && latest && messageIds.length > 1) latest.scrollIntoView({ block: 'nearest', behavior: 'auto' });

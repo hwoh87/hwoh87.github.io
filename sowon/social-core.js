@@ -1,4 +1,5 @@
-import { safeIlju, roomForKey, safeRoomCounts } from './ilju-room-core.js?v=20261103-hour1';
+import { validAppearance } from './appearance-core.js?v=20261103-benchmark2';
+import { safeIlju, roomForKey, safeRoomCounts } from './ilju-room-core.js?v=20261103-benchmark2';
 export { safeIlju, roomForKey, safeRoomCounts };
 export const SOCIAL_ENDPOINT = 'https://sidxbzpbesbaiokxrqsf.supabase.co/functions/v1/shrine-social';
 // The isolated preview may opt into its own same-origin API, only on loopback.
@@ -11,12 +12,12 @@ export function socialEndpoint(location = globalThis.location, document = global
 export const SOCIAL_SESSION_KEY = 'samra.sowon.social.session.v1';
 export const RELATION_KINDS = Object.freeze({ COUPLE: '연인·부부', FRIEND: '친구', FAMILY: '가족', BUSINESS: '동업·동료' });
 const STATES = ['pending', 'approved', 'declined', 'cancelled', 'revoked', 'expired'];
-const OUTFITS = ['sage', 'moon', 'dawn', 'plum'];
 export const cleanText = (value, max = 120) => typeof value === 'string' ? value.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, max) : '';
+const cleanProse = (value,max=1600) => typeof value==='string'?value.replace(/\r\n?/g,'\n').replace(/[\u0000-\u0009\u000b-\u001f\u007f]/g,'').trim().slice(0,max):'';
 export const validId = value => typeof value === 'string' && /^[a-zA-Z0-9_-]{1,80}$/.test(value);
 export function safePosition(raw = {}) {
   const clamp = (value, min, max) => Math.min(max, Math.max(min, Number.isFinite(value) ? value : 0));
-  return { x: clamp(raw.x, -23, 23), z: clamp(raw.z, -25, 22), heading: clamp(raw.heading, -Math.PI, Math.PI), outfit: OUTFITS.includes(raw.outfit) ? raw.outfit : 'sage' };
+  return { x: clamp(raw.x, -23, 23), z: clamp(raw.z, -25, 22), heading: clamp(raw.heading, -Math.PI, Math.PI), outfit: validAppearance(raw.outfit) ? raw.outfit : 'sage' };
 }
 export function serverProfile(profile) {
   const value = profile?.solar;
@@ -62,7 +63,7 @@ export function writeSocialSession(storage, value) {
 }
 const score = value => Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : null;
 function textRows(value, fields) {
-  return Array.isArray(value) ? value.slice(0, 20).map(row => Object.fromEntries(fields.map(key => [key, cleanText(row?.[key], key === 'detail' || key === 'text' || key === 'sub' ? 1600 : 220)]))).filter(row => Object.values(row).some(Boolean)) : [];
+  return Array.isArray(value) ? value.slice(0, 20).map(row => Object.fromEntries(fields.map(key => [key, ['detail','text','sub'].includes(key)?cleanProse(row?.[key]):cleanText(row?.[key],220)]))).filter(row => Object.values(row).some(Boolean)) : [];
 }
 /** Only the engine's public interpretation is retained. Never adopt birth/profile data from a response. */
 export function safeResult(raw) {
@@ -72,8 +73,8 @@ export function safeResult(raw) {
   const subScores = Object.fromEntries(['bond', 'stability', 'growth', 'consumption'].map(key => [key, score(r.subScores?.[key])]));
   return { totalScore: score(r.totalScore), verdict: cleanText(r.verdict, 1600), confidence: score(r.confidence), unknownTimeA: r.unknownTimeA === true, unknownTimeB: r.unknownTimeB === true,
     subScores, narrative: textRows(r.narrative, ['icon', 'label', 'text']), strengths: textRows(r.strengths, ['emoji', 'label', 'sub']), cautions: textRows(r.cautions, ['emoji', 'label', 'sub']),
-    axes: (Array.isArray(r.axes) ? r.axes : []).slice(0, 20).map(row => ({ ...Object.fromEntries(['name', 'tone', 'headline', 'detail'].map(key => [key, cleanText(row?.[key], key === 'detail' ? 1600 : 220)])), key: cleanText(row?.key, 80), score: score(row?.score) })).filter(row => row.name || row.headline || row.detail),
-    iljuPair: r.iljuPair ? Object.fromEntries(['tone', 'headline', 'detail', 'advice'].map(key => [key, cleanText(r.iljuPair[key], 1600)])) : null,
+    axes: (Array.isArray(r.axes) ? r.axes : []).slice(0, 20).map(row => ({ ...Object.fromEntries(['name', 'tone', 'headline', 'detail'].map(key => [key, key==='detail'?cleanProse(row?.[key]):cleanText(row?.[key],220)])), key: cleanText(row?.key, 80), score: score(row?.score) })).filter(row => row.name || row.headline || row.detail),
+    iljuPair: r.iljuPair ? Object.fromEntries(['tone', 'headline', 'detail', 'advice'].map(key => [key, ['detail','advice'].includes(key)?cleanProse(r.iljuPair[key]):cleanText(r.iljuPair[key],220)])) : null,
     names: { a: cleanText(raw.names?.a || raw.nameA, 12), b: cleanText(raw.names?.b || raw.nameB, 12) },
   };
 }

@@ -1,5 +1,5 @@
-import { getEncounter } from './encounter-core.js?v=20261102-hallfocus1';
-import { getFeature } from './hub-core.js?v=20261102-hallfocus1';
+import { getEncounter } from './encounter-core.js?v=20261103-benchmark2';
+import { getFeature } from './hub-core.js?v=20261103-benchmark2';
 
 export const MAX_DIALOGUE_MESSAGES = 20;
 export const MAX_DIALOGUE_QUESTION_LENGTH = 160;

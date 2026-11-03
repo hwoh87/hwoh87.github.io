@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { makeHangulGeometry } from './atmosphere.js?v=20261101-celebhouse1';
+import { makeHangulGeometry } from './atmosphere.js?v=20261103-benchmark2';
 
 /** Five quiet side gardens. Repeated architectural detail is batched by material. */
 export function createCampus() {

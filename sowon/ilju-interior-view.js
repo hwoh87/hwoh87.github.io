@@ -1,18 +1,18 @@
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
-import { createIljuInterior } from './ilju-interior.js?v=20261101-templewarm1';
-import { createIljuInteriorLighting } from './ilju-interior-lighting.js?v=20261101-templewarm1';
-import { interiorForRoom, interiorViewPose, applyInteriorSeat } from './ilju-interior-core.js?v=20261103-hour1';
-import { createAvatar } from './avatar.js?v=20261101-templeroom1';
-import { createLocomotion } from './locomotion.js?v=20261101-templeroom1';
-import { createVisitors } from './visitors.js?v=20261103-hour1';
-import { getDemoVisitors } from './ilju-demo-core.js?v=20261101-peerrequest1';
-import { createIljuDemo } from './ilju-demo.js?v=20261103-paid1';
-import { createDemoWalk } from './ilju-demo-walk.js?v=20261103-hour1';
-import { getOwnProfile } from './profile.js?v=20261103-paid1';
-import { getOwnIdentity } from './identity.js?v=20261103-paid1';
-import { readSettings } from './experience-core.js?v=20261101-freepath4';
-import { enterSocialRoom, getSocialRoomState } from './social.js?v=20261103-paid1';
+import { createIljuInterior } from './ilju-interior.js?v=20261103-benchmark2';
+import { createIljuInteriorLighting } from './ilju-interior-lighting.js?v=20261103-benchmark2';
+import { interiorForRoom, interiorViewPose, applyInteriorSeat } from './ilju-interior-core.js?v=20261103-benchmark2';
+import { createAvatar } from './avatar.js?v=20261103-benchmark2';
+import { createLocomotion } from './locomotion.js?v=20261103-benchmark2';
+import { createVisitors } from './visitors.js?v=20261103-benchmark2';
+import { getDemoVisitors } from './ilju-demo-core.js?v=20261103-benchmark2';
+import { createIljuDemo } from './ilju-demo.js?v=20261103-benchmark2';
+import { createDemoWalk } from './ilju-demo-walk.js?v=20261103-benchmark2';
+import { getOwnProfile } from './profile.js?v=20261103-benchmark2';
+import { getOwnIdentity } from './identity.js?v=20261103-benchmark2';
+import { readSettings } from './experience-core.js?v=20261103-benchmark2';
+import { enterSocialRoom, getSocialRoomState } from './social.js?v=20261103-benchmark2';
 
 const layer = document.createElement('section');
 layer.id = 'iljuInterior'; layer.className = 'ilju-interior'; layer.hidden = true;
@@ -28,7 +28,7 @@ layer.innerHTML = `<div class="interior-canvas" aria-label="일주방의 넓은 
   <aside class="interior-mural-caption"><span data-interior-ganzi></span><h2 data-interior-mural-title></h2><p>나의 일주를 담은 물상 벽화</p></aside>
   <p class="interior-status" role="status" aria-live="polite">마음에 드는 자리를 골라 잠시 쉬어가세요.</p>
   <div class="interior-stick" role="group" aria-label="방 안에서 이동"><div class="interior-stick-thumb"></div></div>
-  <nav class="interior-tools" aria-label="일주방에서 머물기"><button type="button" data-interior-seats aria-expanded="false" aria-controls="interiorSeats"><span aria-hidden="true">▧</span> 자리 고르기</button><button type="button" data-interior-mural aria-pressed="false"><span aria-hidden="true">▥</span> 벽화 감상</button><button type="button" data-interior-overview>방 전체 보기</button><button type="button" data-interior-stand hidden>일어나기</button></nav>
+  <nav class="interior-tools" aria-label="일주방에서 머물기"><button type="button" data-interior-seats aria-expanded="false" aria-controls="interiorSeats"><span aria-hidden="true">▧</span> 자리 고르기</button><button type="button" data-interior-mural aria-pressed="false"><span aria-hidden="true">▥</span> 벽화 감상</button><button type="button" data-interior-overview>방 전체 보기</button><button type="button" data-interior-invite>방 링크</button><button type="button" data-interior-stand hidden>일어나기</button></nav>
   <section class="interior-seats" id="interiorSeats" aria-label="앉을 자리 선택" hidden><div><h2>어디에 앉을까요?</h2><button type="button" data-interior-seats-close aria-label="자리 선택 닫기">×</button></div><p>앞쪽에는 빈 단상, 가운데에는 넓은 통로가 있어요.</p><div class="interior-seat-list"></div></section>
   <div class="interior-loading" role="status"><span></span><p>목조 방에 빛을 들이고 있어요.</p></div>
   <div class="interior-fallback" hidden><img alt=""><h2>벽화를 마주하는 시간</h2><p>이 기기에서는 그림과 함께 잠시 쉬어가세요.</p><button type="button" data-interior-retry>입체 공간 다시 열기</button></div>`;
@@ -37,12 +37,13 @@ const $ = selector => layer.querySelector(selector);
 const sanctuary = document.querySelector('.sanctuary');
 const canvasHost = $('.interior-canvas');
 let active = null, engine = null, opener = null, pendingExit = false, activeSeat = null;
-let frame = 0, previous = 0, muralVersion = 0, muralTexture = null, transition = null, muralView = false;
+let frame = 0, previous = 0, muralVersion = 0, muralTexture = null, transition = null, muralView = false, viewMode = 'overview';
 let presence = null, oldInert = false, disposed = false, roomVersion = 0;
 let requestStates = [];
 let outsideTitle = '';
 let latestSettings = null;
-let demoEnabled = true;
+const mediaFrames=new Set();
+let demoEnabled = false;
 let demoRunning = false, resettingDemo = false, demoNotice = null;
 const seenDemoResults = new Set();
 const demo = createIljuDemo({onApproach: approachDemo, onChange: demoChanged});
@@ -181,13 +182,15 @@ function resize() {
   engine.renderer.setSize(width, height, false);
   applyLightingQuality();
   engine.camera.aspect = width / height; engine.camera.fov = width / height < .85 ? 62 : 48; engine.camera.updateProjectionMatrix();
-  setView(muralView ? 'mural' : 'overview', true);
+  setView(viewMode, true);
 }
 function viewPose(mode) {
   return interiorViewPose({width:innerWidth,height:innerHeight,mode});
 }
 function setView(mode, immediate = false) {
   if (!engine) return;
+  viewMode = mode; layer.dataset.view=mode;
+  $('[data-interior-overview]').textContent=mode==='overview'?'가까이 보기':'방 전체 보기';
   muralView = mode === 'mural';
   $('[data-interior-mural]').setAttribute('aria-pressed', String(muralView));
   const pose = viewPose(mode);
@@ -196,7 +199,7 @@ function setView(mode, immediate = false) {
   // through the open camera side of the room.
   engine.orbit.minAzimuthAngle = -.48; engine.orbit.maxAzimuthAngle = .48;
   engine.orbit.minPolarAngle = .65; engine.orbit.maxPolarAngle = Math.PI * .49;
-  if (immediate || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  if (immediate || (matchMedia('(prefers-reduced-motion: reduce)').matches||document.body.dataset.motion==='calm')) {
     engine.camera.position.fromArray(pose.position); engine.orbit.target.fromArray(pose.target); engine.orbit.update(); transition = null;
   } else transition = {time: 0, from: engine.camera.position.clone(), target: engine.orbit.target.clone(), pose};
 }
@@ -311,19 +314,20 @@ function render(time) {
   if (!modal || demoModal) {
     applyInteriorSeat(engine.avatar, activeSeat);
     if (transition) {
-      transition.time += dt; const t = Math.min(1, transition.time / .8), eased = t * t * (3 - 2 * t);
+      transition.time += dt; const t = document.body.dataset.motion==='calm'?1:Math.min(1, transition.time / .8), eased = t * t * (3 - 2 * t);
       engine.camera.position.lerpVectors(transition.from, new THREE.Vector3(...transition.pose.position), eased);
       engine.orbit.target.lerpVectors(transition.target, new THREE.Vector3(...transition.pose.target), eased);
       if (t === 1) transition = null;
     }
-    engine.orbit.update(); engine.world.update(time / 1000, dt);
-    engine.lighting.update(matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : time / 1000);
+    engine.orbit.update(); const calm=matchMedia('(prefers-reduced-motion: reduce)').matches||document.body.dataset.motion==='calm';engine.world.update(calm?0:time / 1000,calm?0:dt);
+    engine.lighting.update((matchMedia('(prefers-reduced-motion: reduce)').matches||document.body.dataset.motion==='calm') ? 0 : time / 1000);
     engine.visitors.update(dt, {exploring: true, modalOpen: modal, position: engine.avatar.group.position});
     engine.demoVisitors.update(dt, {exploring: true, modalOpen: modal, position: engine.avatar.group.position});
     const point = engine.avatar.group.position.clone().add(new THREE.Vector3(0, activeSeat ? 1.35 : 1.8, 0)).project(engine.camera);
     const name = $('.interior-name'); name.hidden = modal || point.z > 1 || Math.abs(point.x) > .9 || Math.abs(point.y) > .8;
     if (!name.hidden) { name.style.left = `${(point.x + 1) * 50}%`; name.style.top = `${(1 - point.y) * 50}%`; }
     engine.renderer.render(engine.scene, engine.camera);
+    mediaFrames.forEach(fn=>fn(time));
     layer.dataset.position = `${engine.avatar.group.position.x.toFixed(2)},${engine.avatar.group.position.z.toFixed(2)}`;
     layer.dataset.moving = String(engine.movement.getState().moving); layer.dataset.seated = String(engine.avatar.getSeated?.() === true); layer.dataset.drawCalls = String(engine.renderer.info.render.calls);
   } else { engine.visitors.hideLabels(); engine.demoVisitors.hideLabels(); $('.interior-name').hidden = true; }
@@ -344,7 +348,7 @@ export async function openIljuInterior(key) {
   setDemoRun(false); demo.close();
   const first = !active; ++roomVersion;
   if (first) { opener = document.activeElement; outsideTitle = document.title; oldInert = Boolean(sanctuary?.inert); if (sanctuary) sanctuary.inert = true; }
-  active = data; activeSeat = null; pendingExit = false; muralView = false;
+  active = data; activeSeat = null; pendingExit = false; muralView = false; viewMode=innerWidth/innerHeight<.85?'near':'overview';
   layer.hidden = false; layer.dataset.room = key; layer.dataset.muralReady = 'false'; layer.dataset.seated = 'false';
   layer.dataset.renderMode = 'loading'; document.title = `${data.room.label} — 삼라 소원당`;
   layer.style.setProperty('--room-accent', data.accent); document.body.classList.add('ilju-interior-open');
@@ -356,7 +360,7 @@ export async function openIljuInterior(key) {
   try {
     if (!engine) createEngine();
     else { engine.movement.cancel(); engine.avatar.setSeated?.(false); engine.avatar.group.position.set(engine.world.spawn.x, 0, engine.world.spawn.z); engine.avatar.group.rotation.y = Math.PI; }
-    engine.world.setRoom(data.room, null); layer.dataset.renderMode = '3d'; setView('overview', true); resize(); loadMural(data); applyAppearance(); updatePresence(); start();
+    engine.world.setRoom(data.room, null); layer.dataset.renderMode = '3d'; setView(viewMode, true); resize(); loadMural(data); applyAppearance(); updatePresence(); start();
   } catch (error) { console.warn('일주방 입체 공간을 준비하지 못했습니다.', error); showFallback(); }
   if (engine) message('마음에 드는 자리를 골라 잠시 쉬어가세요.'); $('#interiorTitle').focus({preventScroll: true});
   return true;
@@ -386,18 +390,20 @@ listen(layer, 'click', async event => {
   else if (button.hasAttribute('data-interior-social')) {
     if (connectedHere()) document.dispatchEvent(new CustomEvent('sowon:social-open'));
     else if (active) { const version = roomVersion, key = active.room.key; await enterSocialRoom(key); if (version === roomVersion && active?.room.key === key) updatePresence(); }
-  } else if (button.hasAttribute('data-interior-seat')) chooseSeat(button.dataset.interiorSeat);
+  } else if (button.hasAttribute('data-interior-invite')&&active) document.dispatchEvent(new CustomEvent('sowon:room-link',{detail:{roomKey:active.room.key}}));
+  else if (button.hasAttribute('data-interior-seat')) chooseSeat(button.dataset.interiorSeat);
   else if (button.hasAttribute('data-interior-demo-run')) setDemoRun(!demoRunning);
   else if (button.hasAttribute('data-interior-demo-notice')) { if (demoNotice && !dialogOpen()) openDemoPeer(demoNotice.peerId); }
   else if (button.hasAttribute('data-interior-demo-toggle')) { if (demoEnabled) setDemoRun(false); demoEnabled = !demoEnabled; updateDemo(); }
   else if (button.hasAttribute('data-interior-seats')) toggleSeats($('#interiorSeats').hidden);
   else if (button.hasAttribute('data-interior-seats-close')) toggleSeats(false);
   else if (button.hasAttribute('data-interior-mural')) { toggleSeats(false); setView(muralView ? 'overview' : 'mural'); }
-  else if (button.hasAttribute('data-interior-overview')) setView('overview');
+  else if (button.hasAttribute('data-interior-overview')) setView(viewMode==='overview'?'near':'overview');
   else if (button.hasAttribute('data-interior-stand')) { stand(); message('일어났어요. 다른 자리로 걸어가도 좋아요.'); }
   else if (button.hasAttribute('data-interior-retry') && active) { const key = active.room.key; closeRoom(); await openIljuInterior(key); }
 });
 listen(document, 'sowon:ilju-interior-open', event => openIljuInterior(event.detail?.roomKey));
+listen(document,'sowon:interior-greet',()=>{if(active&&engine){engine.avatar.setGesture('greet');message('같은 방의 나그네에게 가볍게 인사했어요.');}});
 listen(document, 'sowon:room-change', event => {
   const key = event.detail?.roomKey;
   if (key === 'courtyard') { if (active) closeRoom(); }
@@ -414,6 +420,7 @@ listen(document, 'sowon:social-requests', event => { requestStates = event.detai
 listen(document, 'sowon:social-state', updatePresence);
 listen(document, 'sowon:profile-change', applyAppearance); listen(document, 'sowon:identity-change', applyAppearance); listen(document, 'sowon:preferences', applyAppearance);
 listen(document, 'sowon:capture-social', event => { if (active && connectedHere() && engine) event.detail.snapshot = {x: engine.avatar.group.position.x, z: engine.avatar.group.position.z, heading: engine.avatar.group.rotation.y, outfit: engine.avatar.getAppearance()}; });
+listen(document, 'sowon:scene-source', event => { if(active&&engine)event.detail.source={canvas:engine.renderer.domElement,label:active.room.label||active.room.key.replace('ilju:','')+'일주방',draw:()=>engine.renderer.render(engine.scene,engine.camera),subscribe:fn=>{mediaFrames.add(fn);return()=>mediaFrames.delete(fn);}}; });
 listen(document, 'sowon:social-walk', event => {
   if (!active || !engine || dialogOpen()) return;
   const point = engine.visitors.getPoint(event.detail?.visitorId); if (!point) return;

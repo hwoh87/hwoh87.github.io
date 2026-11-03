@@ -1,4 +1,4 @@
-import { createEncounterSession, isEncounterAction } from './encounter-core.js?v=20261102-hallfocus1';
+import { createEncounterSession, isEncounterAction } from './encounter-core.js?v=20261103-benchmark2';
 
 const mounts = new WeakMap();
 

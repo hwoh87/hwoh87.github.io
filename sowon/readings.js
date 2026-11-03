@@ -1,15 +1,15 @@
-import { mountReadingOffers } from './reading-offers.js?v=20261103-paid1';
-import { ENGINE_URL } from '../calc/panels/manifest.js';
+import { mountReadingOffers } from './reading-offers.js?v=20261103-benchmark2';
+import { ENGINE_URL } from '../calc/panels/manifest.js?v=c16ca4d582';
 import { mountBirth, mountTimeCompare, mountJourney } from '../calc/panels/helpers.js';
-import { profileSearch } from './profile-core.js?v=20261101-freepath4';
-import { refreshCalculatorVisuals } from './calculator-visuals.js?v=20261101-report-visual3';
-import { createAnalysisTask } from './analysis-loading.js?v=20261102-loading1';
+import { profileSearch } from './profile-core.js?v=20261103-benchmark2';
+import { refreshCalculatorVisuals } from './calculator-visuals.js?v=20261103-benchmark2';
+import { createAnalysisTask } from './analysis-loading.js?v=20261103-benchmark2';
 
 const modules = {
-  saju: () => import('../calc/panels/saju.js?v=20261102-loading1'),
-  gunghap: () => import('../calc/panels/gunghap.js?v=20261102-loading1'),
-  jami: () => import('../calc/panels/jami.js?v=20261102-loading1'),
-  star: () => import('../calc/panels/star.js?v=20261102-loading1'),
+  saju: () => import('../calc/panels/saju.js?v=c16ca4d582'),
+  gunghap: () => import('../calc/panels/gunghap.js?v=c16ca4d582'),
+  jami: () => import('../calc/panels/jami.js?v=c16ca4d582'),
+  star: () => import('../calc/panels/star.js?v=c16ca4d582'),
 };
 const paths = { saju: '/calc/', gunghap: '/calc/gunghap/', jami: '/calc/jami/', star: '/calc/star/' };
 const scriptLoads = new Map();

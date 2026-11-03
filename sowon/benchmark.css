@@ -1,0 +1,147 @@
+/* A single place for the benchmark iteration's shell changes. */
+.interface-shell .shrine-nav { border-radius:14px; padding:4px; }
+.interface-shell .interface-primary { gap:3px; }
+.interface-shell .shrine-nav :is(.hub-nav-button,.sound-control,.interface-more) { padding:9px 14px; }
+.interface-shell .interface-secondary { width:226px; max-height:calc(100dvh - 110px); overflow:auto; padding:8px; border-radius:13px; }
+.interface-shell .interface-secondary .interface-hosts { position:static; display:grid; grid-template-columns:1fr; width:auto; margin:6px 0 0; padding:12px 2px 2px; background:transparent; border:0; border-top:1px solid #dce2d6; border-radius:0; gap:2px; }
+.interface-shell .interface-secondary .interface-hosts-label { display:block; padding:0 10px 7px; color:#6c7967; font-size:11px; }
+.interface-shell .interface-secondary .interface-host { display:flex; justify-content:flex-start; align-items:center; min-height:44px; padding:9px 10px; gap:12px; border-radius:7px; font-size:14px; }
+.interface-shell .interface-secondary .interface-host:hover { background:#eaf0e4; }
+.interface-shell .interface-secondary .interface-host-hint { display:inline; font-size:12px; }
+.sanctuary-destinations { width:404px; grid-template-columns:repeat(3,minmax(0,1fr)); padding:4px; border-radius:13px; }
+.sanctuary-destinations :is([data-destination=celeb],[data-destination=magazine]) { display:none; }
+.sanctuary-destinations button { min-height:55px; padding:9px 13px; }
+.sanctuary-destinations strong { font-size:14px; font-weight:600; }
+.sanctuary-destinations button>span { font-size:11px; color:#64705d; }
+.sanctuary-room-status { top:94px; border:1px solid #b9ccc14d; background:#152b2abf; border-radius:11px; }
+.sanctuary-room-status button { min-height:36px; }
+.interface-shell .world-wayfinder { top:174px; }
+.interface-shell .ritual-dock.hub-dock { width:min(920px,calc(100% - 310px)); bottom:24px; background:#faf9f5f7; }
+.interface-shell .hub-world-rituals { bottom:116px; }
+.leisure-launcher { bottom:24px; }
+.is-exploring .interface-shell .experience-tools { display:none!important; }
+.leisure-launcher button { font-size:13px; min-height:44px; border-radius:11px; }
+.leisure-grid span,.leisure-note,.leisure-record p,.leisure-save-note { color:#66735e; }
+.leisure-grid span { font-size:13px; }
+.leisure-dialog header>div>p { font-size:12px; color:#6f7b66; }
+.leisure-dialog>header { position:sticky; top:0; z-index:2; background:#faf9f5; }
+.wardrobe-dialog>header { position:sticky; top:0; z-index:3; background:#faf9f5; }
+.walk-journal-dialog .journal-stamp-grid small { font-size:11px; }
+.leisure-dialog button:hover:not(:disabled) { border-color:#91a182; }
+.leisure-dialog button.leisure-primary:hover { background:#3d5b46; color:white; }
+.leisure-grid>button[hidden],.leisure-moment[hidden] { display:none; }
+.leisure-grid:has([data-leisure=walk][hidden]) [data-leisure=knowledge] { grid-column:1/-1; }
+.interface-shell .interface-more:focus-visible,.sanctuary-destinations button:focus-visible,.sanctuary-room-status button:focus-visible,.journal-reference button:focus-visible { outline:3px solid #738e65; outline-offset:3px; }
+body.ilju-interior-open .interface-secondary .interface-hosts { visibility:visible; }
+body.ilju-interior-open:not(.dialog-open):not(.leisure-quiet) .leisure-launcher { visibility:visible; }
+body.ilju-interior-open .leisure-launcher { z-index:80; bottom:104px; }
+.room-invite-symbol { margin:3px 0 23px; text-align:center; font:56px/1.4 var(--serif,serif); color:#586d49; letter-spacing:.15em; }
+.room-invite-description { font-size:16px; line-height:1.9; color:#52624b; }
+.room-invite-dialog .leisure-primary { width:100%; margin:22px 0 10px; }
+.room-invite-stay { width:100%; border:0!important; background:transparent!important; font-size:13px!important; }
+.room-invite-link { display:block; font-size:12px; color:#6a785f; margin-top:24px; }
+.room-invite-link input { margin-top:10px; font-size:14px; color:#3e5436; }
+.room-invite-feedback { font-size:13px; color:#57734a; line-height:1.8; }
+.xp-calm-effects { display:flex; gap:12px; margin-top:20px; padding-top:18px; border-top:1px solid #dce2d6; cursor:pointer; }
+.xp-calm-effects input { flex:none; width:20px; height:20px; margin:3px 0 0; accent-color:#56714c; padding:0; }
+.xp-calm-effects strong { display:block; font-size:14px; font-weight:500; color:#3e5537; }
+.xp-calm-effects small { display:block; font-size:12px; line-height:1.8; color:#69795d; margin-top:6px; }
+body[data-motion=calm] :is(.fireflies i,.moon-halo,.lantern-aura,.scene-lantern,.floating-lantern) { animation:none!important; }
+body[data-motion=calm] :is(.sanctuary-destinations *,dialog,.wardrobe-dialog *) { scroll-behavior:auto; transition:none!important; }
+.leisure-moment { display:flex; align-items:center; justify-content:space-between; gap:18px; margin-top:25px; padding-top:23px; border-top:1px solid #dfe3d8; }
+.leisure-moment p { font-size:11px; color:#74826a; margin:0 0 8px; }
+.leisure-moment h3 { font-size:18px; font-weight:500; margin:0 0 8px; }
+.leisure-moment span { font-size:12px; color:#66775a; }
+.leisure-moment button { padding:10px 14px; white-space:nowrap; font-size:13px; }
+.leisure-momentbar { position:fixed; top:94px; left:50%; transform:translateX(-50%); z-index:30; padding:12px 19px; border:1px solid #bda57666; border-radius:12px; color:#e3c68e; background:#24322ae8; font:13px/1.6 var(--sans,sans-serif); text-align:center; pointer-events:none; }
+.leisure-momentbar[hidden],body.dialog-open .leisure-momentbar,body.ilju-interior-open .leisure-momentbar { display:none; }
+.leisure-momentbar { display:flex; align-items:center; gap:12px; padding:7px 9px 7px 16px; }
+.leisure-momentbar button { pointer-events:auto; min-height:36px; border:1px solid #8f9b7899; border-radius:7px; background:transparent; color:#e9d9af; font:12px var(--sans,sans-serif); padding:6px 10px; cursor:pointer; }
+.leisure-momentbar button[hidden] { display:none; }
+body.is-lantern-preview :is(.world-places,.npc-names,.nearby-card,.place-caption,.traveler-name) { visibility:hidden!important; }
+body.leisure-quiet :is(.nearby-card,.travel-status,.place-caption,.interior-status,.leisure-momentbar) { visibility:hidden!important; }
+.npc-local-fallback { display:block; min-height:44px; margin-top:12px; padding:10px 14px; border:1px solid #a9bba0; border-radius:9px; color:#3e5c35; background:#edf2e6; font:13px/1.7 var(--sans,sans-serif); cursor:pointer; }
+.npc-local-fallback[hidden] { display:none; }
+.npc-reading-source { display:block; margin:0 0 10px; font-size:11px; color:#74856b; letter-spacing:.01em; }
+.npc-dialog .npc-composer.is-reading-reply .npc-prompt { display:none; }
+.npc-dialog .npc-composer.is-reading-reply .npc-more-questions { margin:0 0 8px; min-height:40px; font-size:13px; }
+.npc-dialog .npc-composer.is-reading-reply { padding-top:6px; }
+.npc-dialog .npc-message-signals { grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px 12px; }
+.npc-dialog .npc-input-feedback { font-size:11px; }
+.npc-dialog .npc-composer:has(.npc-more-questions[aria-expanded=true]) { max-height:55%; overflow-y:auto; }
+.social-dialog .social-result-section .social-prose p { white-space:pre-line; font-size:16px; line-height:2; color:#506149; margin:15px 0; overflow-wrap:anywhere; }
+.social-dialog .social-result-section .social-prose p:first-child { margin-top:10px; }
+.social-dialog .social-result-section .social-prose p:last-child { margin-bottom:0; }
+.social-dialog .social-result-section h4 { font-size:17px; line-height:1.8; }
+.social-result-nav { position:sticky; top:-27px; z-index:2; display:flex; flex-wrap:wrap; gap:8px; padding:12px 0; margin:18px 0 26px; background:#f8f7f2; border-bottom:1px solid #dce2d6; }
+.social-dialog .social-result-nav button { min-height:44px; padding:9px 16px; border-radius:8px; font-size:13px; background:#edf1e7; color:#415c39; border:1px solid #d5dfcb; }
+.social-result-nav button:focus-visible { outline:3px solid #738e65; outline-offset:3px; }
+.social-role-note { padding:14px 17px; margin:22px 0; background:#edf1e7; border-left:3px solid #9aab8d; font-size:13px; line-height:1.9; color:#5e6c55; }
+[data-social-section] { scroll-margin-top:88px; }
+[data-social-section]:focus { outline:none; }
+.culture-saved-filter { display:flex; align-items:center; gap:9px; font-size:13px; color:#4c6343; margin:14px 0; cursor:pointer; }
+.culture-saved-filter input { width:18px; height:18px; accent-color:#57784a; margin:0; }
+.culture-recent { display:flex; align-items:center; flex-wrap:wrap; gap:7px 13px; padding:12px 15px; border-left:3px solid #aab69b; background:#f0f2e9; margin-top:14px; }
+.culture-recent[hidden] { display:none; }
+.culture-recent>span { color:#7b846c; font-size:11px; }
+.culture-recent-link { border:0; background:transparent; padding:4px 0; color:#3c5536; font:13px/1.7 var(--sans,sans-serif); text-align:left; cursor:pointer; }
+.culture-library-note,.culture-save-feedback { font-size:12px; line-height:1.8; color:#697860; margin:11px 0 0; }
+.culture-save-feedback:empty { display:none; }
+.culture-reader-controls { flex-wrap:wrap; }
+.culture-save-button { min-height:40px; padding:8px 12px; border:1px solid #b4c1a6; background:#f2f5eb; color:#425e36; border-radius:7px; font:12px/1.5 var(--sans,sans-serif); cursor:pointer; }
+.culture-save-button[aria-pressed=true] { background:#e3ebd8; border-color:#6d845b; }
+.culture-tools>.culture-saved-filter,.culture-tools>.culture-recent,.culture-tools>.culture-library-note { margin:0; }
+.culture-tools>.culture-saved-filter { min-height:28px; }
+.ilju-interior[data-demo-visitors="0"] .interior-demo-bar { right:auto; max-width:calc(100% - 48px); gap:12px; padding:5px 8px 5px 12px; }
+.ilju-interior[data-demo-visitors="0"] .interior-demo-bar :is(small,[data-interior-demo-run]) { display:none; }
+.ilju-interior[data-demo-visitors="0"] .interior-demo-bar>button { min-height:34px; padding:5px 10px; }
+@media(max-width:760px){.leisure-momentbar{top:180px;font-size:12px;width:max-content;max-width:calc(100vw - 40px);box-sizing:border-box;padding:10px 14px}.leisure-moment{gap:10px}.leisure-moment button{font-size:12px;padding:10px}}
+
+@media(min-width:761px) and (max-width:1050px) {
+  .sanctuary-destinations { width:330px; }
+  .sanctuary-destinations button { padding:9px 11px; }
+  .sanctuary-destinations button>span { display:none; }
+  .interface-shell .shrine-nav :is(.hub-nav-button,.sound-control,.interface-more) { padding:9px 10px; }
+}
+@media(max-width:760px) {
+  body.ilju-interior-open .leisure-launcher { bottom:calc(88px + env(safe-area-inset-bottom)); }
+  .social-result-nav { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:5px; top:-23px; }
+  .social-dialog .social-result-nav button { padding:9px 2px; font-size:12px; white-space:nowrap; }
+  .interface-shell .interface-primary { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .interface-shell .shrine-nav :is(.hub-nav-button,.sound-control,.interface-more) { padding:3px 2px; }
+  .interface-shell .interface-secondary { width:226px; max-height:calc(100dvh - 126px); }
+  .interface-shell .shrine-nav .interface-secondary :is(.hub-nav-button,.sound-control) { padding:10px; }
+  .interface-shell .interface-secondary .interface-hosts { width:auto; }
+  .interface-shell .sanctuary-destinations { top:auto; bottom:max(12px,env(safe-area-inset-bottom)); width:auto; grid-template-columns:repeat(4,minmax(0,1fr)); padding:5px 3px; }
+  .sanctuary-destinations :is([data-destination=celeb],[data-destination=magazine]) { display:flex; }
+  .sanctuary-destinations [data-destination=journal] { display:none; }
+  .sanctuary-destinations button { min-height:50px; padding:8px 3px; }
+  .sanctuary-destinations strong { font-size:12px; }
+  .sanctuary-room-status { top:119px; left:12px; max-width:calc(100% - 90px); min-height:40px; box-sizing:border-box; padding:4px 10px; gap:5px 8px; }
+  .sanctuary-room-status>span { display:none; }
+  .sanctuary-room-status button { min-height:32px; font-size:11px; }
+  .interface-shell .world-wayfinder { top:118px; }
+  .interface-shell .place-caption { top:176px; }
+  .leisure-launcher { bottom:calc(88px + env(safe-area-inset-bottom)); }
+  .leisure-launcher button { font-size:12px; min-height:42px; padding:0 12px; }
+  .leisure-launcher [data-quiet-toggle] { display:none; }
+  .leisure-grid span { font-size:12px; }
+  .leisure-dialog .leisure-note { font-size:12px!important; }
+  .interface-shell .nearby-card { bottom:calc(164px + env(safe-area-inset-bottom)); }
+  .interface-shell .travel-status { bottom:calc(164px + env(safe-area-inset-bottom)); }
+  .interface-shell .move-controls { bottom:calc(86px + env(safe-area-inset-bottom)); }
+}
+@media(max-width:760px) and (max-height:600px) {
+  .interface-shell .shrine-header { height:54px; grid-template-rows:54px; grid-template-columns:auto 1fr; gap:10px; }
+  .interface-shell .shrine-brand { width:30px; overflow:hidden; }
+  .interface-shell .shrine-brand>span { display:none; }
+  .interface-shell .shrine-nav { height:54px; }
+  .interface-shell .sanctuary-room-status,.interface-shell .world-wayfinder { top:79px; }
+  .interface-shell .interface-secondary { max-height:calc(100dvh - 91px); }
+}
+
+@media(max-width:600px) {
+  .ilju-interior .interior-mural-caption { top:96px; bottom:auto; left:12px; width:calc(100vw - 248px); max-width:160px; padding:7px 9px; }
+  .ilju-interior .interior-mural-caption>span { font-size:10px; }
+  .ilju-interior .interior-mural-caption h2 { font-size:13px; margin:4px 0 0; line-height:1.5; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+}

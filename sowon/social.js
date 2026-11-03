@@ -1,9 +1,10 @@
-import { mountReadingOffers } from './reading-offers.js?v=20261103-paid1';
-import { renderReadingVisuals } from './reading-visuals.js?v=20261101-report-visual3';
-import { buildCompatibilityVisuals } from './compatibility-visual-data.js?v=20261101-report-visual3';
-import { getOwnProfile } from './profile.js?v=20261103-paid1';
-import { RELATION_KINDS, safePosition, serverProfile, safeVisitors, safeRequests, availableActions, safeResult, socialError, cleanText, createSocialClient, safeIlju, roomForKey, safeRoomCounts, validId } from './social-core.js?v=20261103-hour1';
-import { createRealtimeClient } from './realtime-client.js?v=20261103-hour1';
+import { decodeAppearance } from './appearance-core.js?v=20261103-benchmark2';
+import { mountReadingOffers } from './reading-offers.js?v=20261103-benchmark2';
+import { renderReadingVisuals } from './reading-visuals.js?v=20261103-benchmark2';
+import { buildCompatibilityVisuals } from './compatibility-visual-data.js?v=20261103-benchmark2';
+import { getOwnProfile } from './profile.js?v=20261103-benchmark2';
+import { RELATION_KINDS, safePosition, serverProfile, safeVisitors, safeRequests, availableActions, safeResult, socialError, cleanText, createSocialClient, safeIlju, roomForKey, safeRoomCounts, validId } from './social-core.js?v=20261103-benchmark2';
+import { createRealtimeClient } from './realtime-client.js?v=20261103-benchmark2';
 
 let storage;
 try { storage = sessionStorage; } catch (_) {}
@@ -69,7 +70,8 @@ function updateLauncher() {
     launcher.title = state.joined ? state.stale ? '만남에 다시 연결하고 있어요' : `만남 참여 중 · 다른 나그네 ${state.visitors.length}명` : '함께 있는 나그네와 궁합';
     launcher.dataset.socialConnected = String(state.joined && !state.stale);
   });
-  const fresh = pending.filter(request => !announcedRequests.has(request.id));
+  if (!visible || !pending.length) liveAnnouncement.replaceChildren();
+  const fresh = visible ? pending.filter(request => !announcedRequests.has(request.id)) : [];
   pending.forEach(request => announcedRequests.add(request.id));
   if (fresh.length) {
     const message = fresh.length === 1 ? `${fresh[0].peer.nickname}님에게서 새 궁합 요청이 왔어요. 요청 확인을 눌러 주세요.` : `새 궁합 요청 ${fresh.length}개가 왔어요. 요청 확인을 눌러 주세요.`;
@@ -88,27 +90,30 @@ const currentAnalysis = () => pendingAnalysis && pendingAnalysis.operation === o
 function analysisLoadingMarkup() {
   return '<section class="analysis-loading is-compact" role="status" aria-live="polite" aria-atomic="true"><span class="analysis-loading-spinner" aria-hidden="true"></span><div class="analysis-loading-copy"><p class="analysis-loading-title">궁합을 분석하고 있어요</p><p class="analysis-loading-description">두 사람의 기운과 관계의 흐름을 함께 읽고 있어요.</p></div><div class="analysis-loading-skeleton" aria-hidden="true"><span class="analysis-loading-bar"></span><span class="analysis-loading-bar"></span><span class="analysis-loading-bar"></span></div></section>';
 }
-function statusText(status) { return ({ pending: '승인을 기다려요', approved: '함께 볼 수 있어요', declined: '이번에는 사양했어요', cancelled: '요청을 취소했어요', revoked: '공유가 철회됐어요', expired: '시간이 지났어요' })[status] || ''; }
+function statusText(status, direction) { if(status === 'pending' && direction === 'incoming') return '궁합 요청이 도착했어요'; return ({ pending: '승인을 기다려요', approved: '함께 볼 수 있어요', declined: '이번에는 사양했어요', cancelled: '요청을 취소했어요', revoked: '공유가 철회됐어요', expired: '시간이 지났어요' })[status] || ''; }
 function requestActions(request) {
-  const labels = { approve: '승인하고 궁합 보기', decline: '사양하기', cancel: '요청 취소', result: '궁합 보기', revoke: '공유 철회' };
-  return availableActions(request).map(action => button(action, !isPeerFocus() && action === 'approve' ? '승인하고 함께 보기' : !isPeerFocus() && action === 'result' ? '궁합 다시 보기' : labels[action], `data-request-id="${request.id}" ${action === 'approve' || action === 'result' ? 'class="social-primary"' : ''}`)).join('');
+  const labels = { approve: '궁합 초대 확인', decline: '사양하기', cancel: '요청 취소', result: '궁합 보기', revoke: '공유 철회' };
+  return availableActions(request).map(action => button(action, !isPeerFocus() && action === 'result' ? '궁합 다시 보기' : labels[action], `data-request-id="${request.id}" ${action === 'approve' || action === 'result' ? 'class="social-primary"' : ''}`)).join('');
 }
 function visitorCard(visitor) {
   const active = state.requests.find(r => r.peer.id === visitor.id && ['pending', 'approved'].includes(r.status));
   const selected = state.selected === visitor.id;
   const here = snapshot(), distance = Math.hypot(here.x - visitor.x, here.z - visitor.z), nearby = distance <= 8;
-  return `<article class="social-person"><div class="social-avatar social-cloth-${visitor.outfit}" aria-hidden="true">人</div><div class="social-person-main"><h3>${esc(visitor.nickname)}${visitor.ilju ? ` <span class="social-ilju-tag">${esc(visitor.ilju)} 일주</span>` : ''}</h3><p>${active ? statusText(active.status) : (nearby ? '가까이에 머무는 나그네' : '마당을 산책하는 나그네')}</p></div>${button('choose', selected ? '접기' : '궁합 나누기', `data-visitor-id="${visitor.id}" aria-expanded="${selected}"`)}${selected ? `<div class="social-request-compose"><label>어떤 인연으로 만날까요?<select data-social-kind>${Object.entries(RELATION_KINDS).map(([key, label]) => `<option value="${key}" ${key === state.kind ? 'selected' : ''}>${label}</option>`).join('')}</select></label><p>요청을 보내는 것은 내 결과 공유에 동의하는 뜻이에요. 상대도 승인해야 두 사람이 같은 결과를 볼 수 있어요.</p>${!nearby ? `<p>서로 가까이 있어야 인연을 청할 수 있어요.</p>${button('approach', '이 나그네에게 다가가기', `class="social-primary" data-visitor-id="${visitor.id}"`)}` : active ? `<p>이미 나누고 있는 소식이 있어요. ‘궁합 소식’에서 이어 보세요.</p>${button('news', '궁합 소식 열기')}` : button('request', '이 관계로 궁합 요청', `class="social-primary" data-visitor-id="${visitor.id}"`)}</div>` : ''}</article>`;
+  return `<article class="social-person"><div class="social-avatar social-cloth-${decodeAppearance(visitor.outfit).palette}" aria-hidden="true">人</div><div class="social-person-main"><h3>${esc(visitor.nickname)}${visitor.ilju ? ` <span class="social-ilju-tag">${esc(visitor.ilju)} 일주</span>` : ''}</h3><p>${active ? statusText(active.status, active.direction) : (nearby ? '가까이에 머무는 나그네' : '마당을 산책하는 나그네')}</p></div>${button('choose', selected ? '접기' : '궁합 나누기', `data-visitor-id="${visitor.id}" aria-expanded="${selected}"`)}${selected ? `<div class="social-request-compose"><label>어떤 인연으로 만날까요?<select data-social-kind>${Object.entries(RELATION_KINDS).map(([key, label]) => `<option value="${key}" ${key === state.kind ? 'selected' : ''}>${label}</option>`).join('')}</select></label><p>요청을 보내는 것은 내 결과 공유에 동의하는 뜻이에요. 상대도 승인해야 두 사람이 같은 결과를 볼 수 있어요.</p>${!nearby ? `<p>서로 가까이 있어야 인연을 청할 수 있어요.</p>${button('approach', '이 나그네에게 다가가기', `class="social-primary" data-visitor-id="${visitor.id}"`)}` : active ? `<p>이미 나누고 있는 소식이 있어요. ‘궁합 소식’에서 이어 보세요.</p>${button('news', '궁합 소식 열기')}` : button('request', '이 관계로 궁합 요청', `class="social-primary" data-visitor-id="${visitor.id}"`)}</div>` : ''}</article>`;
 }
 function requestCard(request) {
-  return `<article class="social-request"><div class="social-request-label"><span>${request.direction === 'incoming' ? '받은 요청' : '보낸 요청'}</span><small>${esc(RELATION_KINDS[request.kind])}</small></div><h3>${esc(request.peer.nickname)}${request.direction === 'incoming' ? '에게서 온 궁합 초대' : '에게 보낸 궁합 초대'}</h3><p>${statusText(request.status)}</p><div class="social-request-actions">${requestActions(request)}</div></article>`;
+  return `<article class="social-request"><div class="social-request-label"><span>${request.direction === 'incoming' ? '받은 요청' : '보낸 요청'}</span><small>${esc(RELATION_KINDS[request.kind])}</small></div><h3>${esc(request.peer.nickname)}${request.direction === 'incoming' ? '에게서 온 궁합 초대' : '에게 보낸 궁합 초대'}</h3><p>${statusText(request.status, request.direction)}</p><div class="social-request-actions">${requestActions(request)}</div></article>`;
 }
 function resultMarkup() {
   const r = state.result, request = state.requests.find(item => item.id === state.resultId);
   if (!r || !request || request.status !== 'approved' || (isPeerFocus() && request.peer.id !== focusedPeerId)) return '';
   const names = r.names.a && r.names.b ? `${r.names.a} · ${r.names.b}` : `${profile()?.nickname || '나'} · ${request.peer.nickname}`;
   const text = value => esc(value).replace(/(^|[^A-Za-z])([AB])(?![A-Za-z])/g, (_m, pre, who) => pre + esc(who === 'A' ? r.names.a || '첫 번째 나그네' : r.names.b || '두 번째 나그네'));
-  const section = (title, values, content) => values.length ? `<section class="social-result-section"><h3>${title}</h3>${values.map(content).join('')}</section>` : '';
-  return `<div class="social-result">${button('news', isPeerFocus() ? '← 돌아가기' : '← 궁합 소식으로')}<p class="social-eyebrow">${esc(RELATION_KINDS[request.kind])} · 두 사람만의 해석</p><h3 class="social-pair-names">${esc(names)}</h3><div class="social-score" style="--score:${r.totalScore}" role="img" aria-label="관계 종합 ${r.totalScore}점"><strong>${r.totalScore < 10 ? '측정 어려움' : `${r.totalScore}<small>점</small>`}</strong></div><h4 class="social-verdict">${text(r.verdict)}</h4><p class="social-result-note">${r.confidence === null ? '' : `분석 신뢰도 ${r.confidence}% · `}삼라 궁합 엔진으로 계산했어요.${r.unknownTimeA || r.unknownTimeB ? ' 시간 미상이 포함되어 시주 풀이는 제외했어요.' : ''}</p><div class="social-result-visuals" data-social-result-visuals></div>${section('두 사람을 관통하는 이야기', r.narrative, row => `<article><h4>${esc(row.icon)} ${esc(row.label)}</h4><p>${text(row.text)}</p></article>`)}${section('함께 살릴 강점', r.strengths, row => `<article><h4>${esc(row.emoji)} ${esc(row.label)}</h4><p>${text(row.sub)}</p></article>`)}${section('서로 알아둘 조율점', r.cautions, row => `<article><h4>${esc(row.emoji)} ${esc(row.label)}</h4><p>${text(row.sub)}</p></article>`)}${r.iljuPair ? `<section class="social-result-section"><h3>일주가 만나는 결</h3><article><h4>${text(r.iljuPair.headline)}</h4><p>${text(r.iljuPair.detail)}</p><p>${text(r.iljuPair.advice)}</p></article></section>` : ''}${section('관계의 바탕', r.axes, row => `<article><span class="social-axis-tone">${esc(row.name)} · ${esc(row.tone)}</span><h4>${text(row.headline)}</h4><p>${text(row.detail)}</p></article>`)}<p class="social-result-note">점수는 서로의 방식을 이해하는 참고예요. 출생 원문은 상대에게 공개하지 않아요. 한 사람이 철회하면 이 화면을 다시 열 수 없어요.</p>${button('revoke', '이 궁합의 공유 철회', `data-request-id="${request.id}"`)}<div data-social-paid-offers></div></div>`;
+  const prose=value=>text(value).split(/\n{2,}/).filter(Boolean).map(part=>'<p>'+part+'</p>').join('');
+  const section = (title, values, content, key) => values.length ? `<section class="social-result-section" ${key ? `data-social-section="${key}" tabindex="-1"` : ''}><h3>${title}</h3>${values.map(content).join('')}</section>` : '';
+  const jumps = [['summary','한눈에'],['story','핵심 이야기'],['axes','세부 풀이'],['offers','더 읽기']].filter(([key])=>key !== 'story' || r.narrative.length).filter(([key])=>key !== 'axes' || r.axes.length);
+  const readingNav = `<nav class="social-result-nav" aria-label="궁합 해석 바로 가기">${jumps.map(([key,label])=>button('reading-jump',label,`data-reading-section="${key}"`)).join('')}</nav>`;
+  return `<div class="social-result">${button('news', isPeerFocus() ? '← 돌아가기' : '← 궁합 소식으로')}<p class="social-eyebrow">${esc(RELATION_KINDS[request.kind])} · 두 사람만의 해석</p><h3 class="social-pair-names">${esc(names)}</h3>${readingNav}<div data-social-section="summary" tabindex="-1" class="social-score" style="--score:${r.totalScore}" role="img" aria-label="관계 종합 ${r.totalScore}점"><strong>${r.totalScore < 10 ? '측정 어려움' : `${r.totalScore}<small>점</small>`}</strong></div><h4 class="social-verdict">${text(r.verdict)}</h4><p class="social-result-note">${r.confidence === null ? '' : `분석 신뢰도 ${r.confidence}% · `}삼라 궁합 엔진으로 계산했어요.${r.unknownTimeA || r.unknownTimeB ? ' 시간 미상이 포함되어 시주 풀이는 제외했어요.' : ''}</p><p class="social-role-note">풀이의 ‘본인’은 <strong>${esc(r.names.a || '첫 번째 나그네')}</strong>, ‘상대’는 <strong>${esc(r.names.b || '두 번째 나그네')}</strong>를 뜻해요. 두 사람에게 같은 기준으로 보여요.</p><div class="social-result-visuals" data-social-result-visuals></div>${section('두 사람을 관통하는 이야기', r.narrative, row => `<article><h4>${esc(row.icon)} ${esc(row.label)}</h4><div class="social-prose">${prose(row.text)}</div></article>`, 'story')}${section('함께 살릴 강점', r.strengths, row => `<article><h4>${esc(row.emoji)} ${esc(row.label)}</h4><p>${text(row.sub)}</p></article>`)}${section('서로 알아둘 조율점', r.cautions, row => `<article><h4>${esc(row.emoji)} ${esc(row.label)}</h4><p>${text(row.sub)}</p></article>`)}${r.iljuPair ? `<section class="social-result-section"><h3>일주가 만나는 결</h3><article><h4>${text(r.iljuPair.headline)}</h4><div class="social-prose">${prose(r.iljuPair.detail)}${prose(r.iljuPair.advice)}</div></article></section>` : ''}${section('관계의 바탕', r.axes, row => `<article><span class="social-axis-tone">${esc(row.name)} · ${esc(row.tone)}</span><h4>${text(row.headline)}</h4><div class="social-prose">${prose(row.detail)}</div></article>`, 'axes')}<p class="social-result-note">점수는 서로의 방식을 이해하는 참고예요. 출생 원문은 상대에게 공개하지 않아요. 한 사람이 철회하면 이 화면을 다시 열 수 없어요.</p>${button('revoke', '이 궁합의 공유 철회', `data-request-id="${request.id}"`)}<div data-social-paid-offers data-social-section="offers" tabindex="-1"></div></div>`;
 }
 function deleteButton() { return button('delete', state.deleteArmed ? '한 번 더 눌러 내 정보와 모든 공유 지우기' : '서버의 내 정보와 공유 지우기', state.deleteArmed ? 'class="social-delete-confirm"' : ''); }
 function peerMarkup() {
@@ -116,7 +121,7 @@ function peerMarkup() {
   const peer = visitor || focusedPeer || request?.peer;
   const nearby = visitor && Math.hypot(snapshot().x - visitor.x, snapshot().z - visitor.z) <= 8;
   const name = peer?.nickname || '이 나그네';
-  return `<section class="social-peer" aria-label="${esc(name)}와 궁합"><div class="social-peer-identity"><div class="social-avatar social-cloth-${esc(peer?.outfit || 'sage')}" aria-hidden="true">人</div><div><h3>${esc(name)}</h3>${peer?.ilju ? `<p class="social-peer-ilju">${esc(peer.ilju)} 일주</p>` : ''}</div></div>${!visitor ? `<p class="social-peer-away">${!state.joined ? '이 나그네와 궁합을 보려면 먼저 만남에 참여해 주세요.' : state.stale ? '연결을 확인하고 있어요. 잠시 후 다시 만나 주세요.' : '이 나그네가 잠시 자리를 비웠어요. 다시 만나면 궁합을 청할 수 있어요.'}</p>${state.joined ? button('refresh', '다시 확인', state.busy ? 'disabled' : '') : ''}` : ''}${request && ['pending', 'approved'].includes(request.status) ? `<div class="social-peer-request"><p class="social-peer-state">${request.direction === 'incoming' && request.status === 'pending' ? '궁합 요청이 도착했어요' : statusText(request.status)}</p><p>${esc(RELATION_KINDS[request.kind])} 관계 · ${request.status === 'approved' ? '두 사람 모두 승인한 궁합이에요.' : request.direction === 'incoming' ? '승인하면 두 사람이 같은 해석을 볼 수 있어요.' : '상대가 승인하면 함께 볼 수 있어요.'}</p><div class="social-request-actions">${requestActions(request)}</div></div>` : visitor ? `<div class="social-request-compose"><label for="socialPeerKind">어떤 관계로 볼까요?<select id="socialPeerKind" data-social-kind>${Object.entries(RELATION_KINDS).map(([key, label]) => `<option value="${key}" ${key === state.kind ? 'selected' : ''}>${label}</option>`).join('')}</select></label><p>상대가 승인하면 두 사람만 궁합을 볼 수 있어요. 출생 정보 원문은 공개되지 않아요.</p>${nearby ? button('request', '궁합 보기 요청', `class="social-primary" data-visitor-id="${visitor.id}"`) : `<p>조금 더 가까이 다가가서 궁합을 청해 보세요.</p>${button('approach', '다가가기', `class="social-primary" data-visitor-id="${visitor.id}"`)}`}</div>` : ''}</section>`;
+  return `<section class="social-peer" aria-label="${esc(name)}와 궁합"><div class="social-peer-identity"><div class="social-avatar social-cloth-${decodeAppearance(peer?.outfit).palette}" aria-hidden="true">人</div><div><h3>${esc(name)}</h3>${peer?.ilju ? `<p class="social-peer-ilju">${esc(peer.ilju)} 일주</p>` : ''}</div></div>${!visitor ? `<p class="social-peer-away">${!state.joined ? '이 나그네와 궁합을 보려면 먼저 만남에 참여해 주세요.' : state.stale ? '연결을 확인하고 있어요. 잠시 후 다시 만나 주세요.' : '이 나그네가 잠시 자리를 비웠어요. 다시 만나면 궁합을 청할 수 있어요.'}</p>${state.joined ? button('refresh', '다시 확인', state.busy ? 'disabled' : '') : ''}` : ''}${request && ['pending', 'approved'].includes(request.status) ? `<div class="social-peer-request"><p class="social-peer-state">${request.direction === 'incoming' && request.status === 'pending' ? '궁합 요청이 도착했어요' : statusText(request.status, request.direction)}</p><p>${esc(RELATION_KINDS[request.kind])} 관계 · ${request.status === 'approved' ? '두 사람 모두 승인한 궁합이에요.' : request.direction === 'incoming' ? '승인하면 두 사람이 같은 해석을 볼 수 있어요.' : '상대가 승인하면 함께 볼 수 있어요.'}</p><div class="social-request-actions">${requestActions(request)}</div></div>` : visitor ? `<div class="social-request-compose"><label for="socialPeerKind">어떤 관계로 볼까요?<select id="socialPeerKind" data-social-kind>${Object.entries(RELATION_KINDS).map(([key, label]) => `<option value="${key}" ${key === state.kind ? 'selected' : ''}>${label}</option>`).join('')}</select></label><p>상대가 승인하면 두 사람만 궁합을 볼 수 있어요. 출생 정보 원문은 공개되지 않아요.</p>${nearby ? button('request', '궁합 보기 요청', `class="social-primary" data-visitor-id="${visitor.id}"`) : `<p>조금 더 가까이 다가가서 궁합을 청해 보세요.</p>${button('approach', '다가가기', `class="social-primary" data-visitor-id="${visitor.id}"`)}`}</div>` : ''}</section>`;
 }
 function consentMarkup() {
   const own = profile(), destination = roomForKey(pendingRoom)?.label || roomForKey(state.roomKey)?.label || '신당 마당';
@@ -226,8 +231,19 @@ function heartbeat() {
     if (typeof ack.requests_stamp === 'string' && ack.requests_stamp.length <= 1024) {
       if (ack.requests_stamp !== lastRequestStamp) {
         // A missed socket hint must not leave a private result shared forever.
-        if (lastRequestStamp !== undefined && state.result) { resetResult(); render(); }
-        lastRequestStamp = ack.requests_stamp; queueSocialRefresh();
+        const reading=lastRequestStamp!==undefined&&state.result&&state.resultId?{id:state.resultId,encounter:encounterVersion,scroll:dialog.querySelector('.social-body')?.scrollTop||0}:null;
+        lastRequestStamp = ack.requests_stamp;
+        if(reading){
+          // Mask the old interpretation while checking consent. An unrelated
+          // request or our own approval must not abandon the page being read.
+          resetResult();const revision=resultVersion;
+          const checking={operation:version,encounter:reading.encounter,requestId:reading.id,phase:'result'};pendingAnalysis=checking;render();
+          await refresh();
+          if(version===operation&&reading.encounter===encounterVersion&&revision===resultVersion&&pendingAnalysis===checking&&state.joined&&!state.stale&&!document.hidden&&dialog.open&&state.requests.some(row=>row.id===reading.id&&row.status==='approved')){
+            pendingAnalysis=null;await showResult(reading.id);
+            if(reading.encounter===encounterVersion&&state.resultId===reading.id){const body=dialog.querySelector('.social-body');if(body)body.scrollTop=reading.scroll;}
+          }else if(pendingAnalysis===checking){pendingAnalysis=null;render();}
+        }else queueSocialRefresh();
       }
     } else queueSocialRefresh();
   } catch(error) {
@@ -436,6 +452,13 @@ dialog.addEventListener('click', async event => {
   if (action === 'rooms') { close(); document.dispatchEvent(new CustomEvent('sowon:rooms-open')); return; }
   if (action === 'profile') { close(); document.dispatchEvent(new CustomEvent('sowon:profile-open')); return; }
   if (state.busy) return;
+  if (action === 'reading-jump') {
+    const section = target.dataset.readingSection;
+    if (!state.result || !state.requests.some(item => item.id === state.resultId && item.status === 'approved') || !['summary','story','axes','offers'].includes(section)) return;
+    const destination = dialog.querySelector(`[data-social-section="${section}"]`);
+    destination?.scrollIntoView({ block: 'start', behavior: 'instant' });
+    destination?.focus({ preventScroll: true }); return;
+  }
   if (action === 'join') return join();
   if (action === 'refresh') { state.error = ''; if (!state.realtime) stopRealtime(); return refresh(); }
   if (action === 'visitors' || action === 'news') { state.tab = action; resetResult(); render(); dialog.querySelector('.social-body')?.scrollTo({ top: 0 }); return; }
@@ -444,7 +467,7 @@ dialog.addEventListener('click', async event => {
   if (action === 'request') {
     const kind = target.closest('.social-request-compose')?.querySelector('[data-social-kind]')?.value;
     if (!Object.hasOwn(RELATION_KINDS, kind) || !state.visitors.some(v => v.id === target.dataset.visitorId) || (isPeerFocus() && !focusedVisitor())) return;
-    state.tab = 'news'; return mutate('request', { target_id: target.dataset.visitorId, kind }, '궁합 요청을 보냈어요. 상대의 승인을 기다려 주세요.');
+    state.tab = 'news'; return mutate('request', { target_id: target.dataset.visitorId, kind }, '궁합 요청을 보냈어요. 아래에서 진행 상태를 확인해 주세요.');
   }
   const request = state.requests.find(item => item.id === id);
   if (isPeerFocus() && request && request.peer.id !== focusedPeerId) return;

@@ -1,18 +1,20 @@
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
-import { createWorld } from './world.js?v=20261102-hallfocus1';
-import { createAvatar } from './avatar.js?v=20261101-templeroom1';
-import { getSocialRoomState } from './social.js?v=20261103-paid1';
-import { getOwnIdentity } from './identity.js?v=20261103-paid1';
-import { getOwnProfile } from './profile.js?v=20261103-paid1';
-import { createLocomotion, isWalkable } from './locomotion.js?v=20261101-templeroom1';
-import { readJourney } from './hub-core.js?v=20261102-hallfocus1';
-import { readSettings, normalizeSettings, effectiveQuality, nearestInteraction, pickedInteraction, interactionDistance } from './experience-core.js?v=20261101-freepath4';
-import { createWayfinder } from './wayfinder.js?v=20261101-celebhouse1';
-import { HALLS, getFeature } from './hub-core.js?v=20261102-hallfocus1';
-import { createVisitors } from './visitors.js?v=20261103-hour1';
-import { createConversationFocus } from './conversation-focus.js?v=20261101-freepath4';
-import { portraitHallView } from './portrait-hall-view.js?v=20261101-celebhouse2';
+import { createWorld } from './world.js?v=20261103-benchmark2';
+import { createAvatar } from './avatar.js?v=20261103-benchmark2';
+import { getSocialRoomState } from './social.js?v=20261103-benchmark2';
+import { getOwnIdentity } from './identity.js?v=20261103-benchmark2';
+import { getOwnProfile } from './profile.js?v=20261103-benchmark2';
+import { createLocomotion, isWalkable } from './locomotion.js?v=20261103-benchmark2';
+import { readJourney } from './hub-core.js?v=20261103-benchmark2';
+import { readSettings, normalizeSettings, effectiveQuality, nearestInteraction, pickedInteraction, interactionDistance } from './experience-core.js?v=20261103-benchmark2';
+import { createWayfinder } from './wayfinder.js?v=20261103-benchmark2';
+import { HALLS, getFeature } from './hub-core.js?v=20261103-benchmark2';
+import { createVisitors } from './visitors.js?v=20261103-benchmark2';
+import { createConversationFocus } from './conversation-focus.js?v=20261103-benchmark2';
+import { portraitHallView } from './portrait-hall-view.js?v=20261103-benchmark2';
+import { createGuidedWalk } from './walk-core.js?v=20261103-benchmark2';
+import { createLanternMoment } from './lantern-moment.js?v=20261103-benchmark2';
 
 const host = document.getElementById('worldViewport');
 const body = document.body;
@@ -104,6 +106,8 @@ function setup() {
 
   world = createWorld();
   scene.add(world.group);
+  const lanternMoment=createLanternMoment(THREE);scene.add(lanternMoment.group);let lanternView=null;
+  function restoreLanternView(){if(!lanternView)return;camera.position.copy(lanternView.camera);orbit.target.copy(lanternView.target);setOverviewState(lanternView.overview);galleryViewActive=lanternView.gallery;orbit.update();cameraTransition=null;lanternView=null;}
   avatar = createAvatar();
   avatar.group.position.set(0, world.heightAt(0, 8), 8);
   avatar.group.rotation.y = Math.PI;
@@ -151,8 +155,8 @@ function setup() {
 
   movement = createLocomotion({
     camera, domElement: renderer.domElement, avatar, world, orbitControls: orbit,
-    onMove: source => { enter(); if(source!=='path')galleryViewActive=false; if (activeJourney && source !== 'path') { activeJourney = null; status('마음이 가는 곳으로 천천히 걸어보세요.', 2500); } },
-    onArrival: () => {},
+    onMove: source => { enter(); if(source!=='path'){lanternView=null;galleryViewActive=false;guidedWalk?.stop();} if (activeJourney && source !== 'path') { activeJourney = null; status('마음이 가는 곳으로 천천히 걸어보세요.', 2500); } },
+    onArrival: point => {for(const id of ['breath','myeongri','inyeon','stars','archive','celeb','rooms','wish']){const destination=world.destinations[id];if(destination&&interactionDistance(point,destination)<2)document.dispatchEvent(new CustomEvent('sowon:journey-action',{detail:{id:'visit:'+id}}));}},
     onPick: raycaster => {
       const hits=raycaster.intersectObjects([...world.group.children,...visitors.group.children],true);
       const first=hits.find(hit=>hit.object?.isMesh&&Number.isFinite(hit.distance));
@@ -165,10 +169,31 @@ function setup() {
 
   const name = document.getElementById('travelerName');
   function selectVisitor(visitorId){
-    activeJourney=null;movement.cancel();status('',0);
+    guidedWalk.stop();activeJourney=null;movement.cancel();status('',0);
     document.dispatchEvent(new CustomEvent('sowon:social-open',{detail:{visitorId}}));
   }
   const visitors=createVisitors({scene,world,camera,host:document.getElementById('visitorNames'),onSelect:selectVisitor});
+  const mediaFrames=new Set();
+  const guidedWalk=createGuidedWalk({
+    travel:(stop,arrived)=>{const point=world.destinations[stop.id];if(!point||!isWalkable(point,world))return false;return movement.goTo(point,arrived);},
+    onState:state=>{host.dataset.guidedWalk=state.phase;document.dispatchEvent(new CustomEvent('sowon:walk-state',{detail:state}));},
+    onVisit:stop=>document.dispatchEvent(new CustomEvent('sowon:journey-action',{detail:{id:'visit:'+stop.id}})),
+  });
+  listen(document,'sowon:guided-walk',event=>{
+    if(event.detail?.action==='stop'){guidedWalk.stop();movement.cancel();return;}
+    if(document.querySelector('dialog[open]')||body.classList.contains('ilju-interior-open'))return;
+    enter();movement.setEnabled(true);activeJourney=null;setCameraMode('walk');guidedWalk.start();
+  });
+  listen(document,'sowon:lantern-preview',()=>{
+    if(document.querySelector('dialog[open]')||body.classList.contains('ilju-interior-open'))return;
+    guidedWalk.stop();movement.cancel();activeJourney=null;enter();if(!lanternView)lanternView={camera:camera.position.clone(),target:orbit.target.clone(),overview,gallery:galleryViewActive};lanternMoment.preview();galleryViewActive=false;setOverviewState(false);
+    const p=avatar.group.position;cameraTransition={elapsed:0,camera:camera.position.clone(),target:orbit.target.clone(),overview:false,framing:{cameraOffset:[11-p.x,9-p.y,21-p.z],targetOffset:[-p.x,5-p.y,-5-p.z]}};
+  });
+  listen(document,'sowon:lantern-stop',()=>{lanternMoment.cancelPreview();restoreLanternView();});
+  listen(document,'sowon:scene-source',event=>{
+    if(body.classList.contains('ilju-interior-open'))return;
+    event.detail.source={canvas:renderer.domElement,label:'신당 마당',draw:()=>renderer.render(scene,camera),subscribe:fn=>{mediaFrames.add(fn);return()=>mediaFrames.delete(fn);}};
+  });
   let ownIdentity=getOwnIdentity();
   function applyProfile(){
     const profile=getOwnProfile();
@@ -236,7 +261,7 @@ function setup() {
   });
   const hudPoint=new THREE.Vector3();
   const wayfinder=createWayfinder(document.getElementById('worldWayfinder'),{destinations:world.destinations,bounds:world.bounds,onTravel:walkToAction,onCancel:()=>{
-    activeJourney=null;movement.cancel();status('잠깐 멈춰 섰어요. 마음이 가는 곳으로 다시 걸어보세요.',2600);
+    guidedWalk.stop();activeJourney=null;movement.cancel();status('잠깐 멈춰 섰어요. 마음이 가는 곳으로 다시 걸어보세요.',2600);
   }});
   let activeQuality=null, qualitySamples=[], autoReduced=false;
   function applyPreferences(value) {
@@ -275,6 +300,8 @@ function setup() {
   }
   function activateInteraction(item) {
     if(!item||document.querySelector('dialog[open]'))return;
+    guidedWalk.stop();
+    const place=item.hall||item.action;if(['breath','myeongri','inyeon','stars','archive','celeb','rooms','wish'].includes(place))document.dispatchEvent(new CustomEvent('sowon:journey-action',{detail:{id:'visit:'+place}}));
     activeJourney=null;movement.cancel();status('',0);
     galleryViewActive=item.id==='object-celebrity-gallery';
     if(galleryViewActive){applyGalleryView();renderer.render(scene,camera);}
@@ -372,6 +399,7 @@ function setup() {
     const delta = previousTime ? Math.min((time - previousTime) / 1000, .05) : 0;
     previousTime = time;
     const modalOpen = Boolean(document.querySelector('dialog[open]')) || body.classList.contains('ilju-interior-open');
+    if(modalOpen&&['walking','resting'].includes(guidedWalk.getState().phase))guidedWalk.stop();
     body.classList.toggle('world-modal-open', modalOpen);
     if (modalOpen && activeJourney) { activeJourney = null; status('', 0); }
     movement.setEnabled(!modalOpen);
@@ -392,7 +420,7 @@ function setup() {
     }
     if (cameraTransition) {
       cameraTransition.elapsed += delta;
-      const progress = reducedMotion.matches ? 1 : Math.min(1, cameraTransition.elapsed / 1.05);
+      const progress = (reducedMotion.matches||body.dataset.motion==='calm') ? 1 : Math.min(1, cameraTransition.elapsed / 1.05);
       const ease = progress * progress * (3 - 2 * progress);
       if(cameraTransition.overview){tweenCamera.set(28,25,45);tweenTarget.set(0,2,-2);}
       else if(cameraTransition.framing){tweenCamera.copy(avatar.group.position).add(new THREE.Vector3(...cameraTransition.framing.cameraOffset));tweenTarget.copy(avatar.group.position).add(new THREE.Vector3(...cameraTransition.framing.targetOffset));}
@@ -401,7 +429,8 @@ function setup() {
       orbit.target.lerpVectors(cameraTransition.target, tweenTarget, ease);
       if (progress >= 1) cameraTransition = null;
     }
-    world.update(reducedMotion.matches ? 0 : time / 1000, delta);
+    const moment=lanternMoment.update(Date.now(),{calm:reducedMotion.matches||body.dataset.motion==='calm'});host.dataset.lanternMoment=moment.active?moment.preview?'preview':'live':'idle';body.classList.toggle('is-lantern-preview',moment.preview);if(!moment.preview&&lanternView)restoreLanternView();if(moment.changed)document.dispatchEvent(new CustomEvent('sowon:lantern-state',{detail:{active:moment.active,preview:moment.preview}}));
+    world.update(reducedMotion.matches||body.dataset.motion==='calm' ? 0 : time / 1000,reducedMotion.matches||body.dataset.motion==='calm'?0:delta);
     orbit.update();
     updateHud(time,modalOpen);
     visitors.update(delta,{exploring,modalOpen,position:avatar.group.position});
@@ -420,6 +449,7 @@ function setup() {
       if (inFrame) { button.style.left = ((placePosition.x + 1) / 2 * 100) + '%'; button.style.top = ((1 - placePosition.y) / 2 * 100) + '%'; }
     });
     renderer.render(scene, camera);
+    mediaFrames.forEach(fn=>fn(time));
     // An observed frame rate, independent of the clamped movement delta. Modal
     // pauses and background gaps never count as slow rendering samples.
     if (!frameSampleStart || time - frameSampleStart > 2500) { frameSampleStart = time; frameSampleCount = 0; }
@@ -441,12 +471,13 @@ function setup() {
     event.preventDefault(); event.stopPropagation(); enter();
     renderer.domElement.focus({ preventScroll: true });
   });
-  listen(renderer.domElement, 'pointerdown', () => { cameraTransition = null;galleryViewActive=false; });
+  listen(renderer.domElement, 'pointerdown', () => { lanternView=null;cameraTransition = null;galleryViewActive=false; });
 
   const actionLabels = { wish: '소원 등불이 있는 신당', breath: '바람이 머무는 명상터', blessing: '마음을 전하는 소원나무', myeongri: '토정이 기다리는 명리전', inyeon: '설월이 기다리는 인연정', stars: '태어난 하늘을 펼치는 별마루', readers: '루나와 술사들이 있는 술사각', archive: '이야기가 쌓이는 서고', rooms: '같은 일주가 만나는 일주마당', celeb: '공개 명식을 읽는 연예인 사주관' };
   function walkToAction(action) {
     if(body.classList.contains('ilju-interior-open'))return;
     if (body.classList.contains('world-failed') || !world.destinations[action] || document.querySelector('dialog[open]')) return;
+    guidedWalk.stop();
     const personalHost=(world.interactions||[]).find(item=>item.type==='npc'&&item.hall===action);
     if(personalHost){approachInteraction(personalHost);return;}
     const galleryEntrance=action==='celeb'&&(world.interactions||[]).find(item=>item.id==='object-celebrity-gallery');
@@ -484,6 +515,7 @@ function setup() {
   });
 
   listen(document.getElementById('returnToGate'), 'click', () => {
+    guidedWalk.stop();
     activeJourney = null;
     galleryViewActive = false;
     cameraTransition = null;
@@ -506,7 +538,7 @@ function setup() {
     running = true; previousTime = 0; frame = requestAnimationFrame(render);
   }
   listen(document, 'visibilitychange', () => {
-    if (document.hidden) { activeJourney = null; status('', 0); running = false; cancelAnimationFrame(frame); previousTime = 0; }
+    if (document.hidden) { guidedWalk.stop();activeJourney = null; status('', 0); running = false; cancelAnimationFrame(frame); previousTime = 0; }
     else resume();
   });
   listen(window, 'pagehide', event => {
@@ -515,7 +547,7 @@ function setup() {
     if (event.persisted) return;
     cleanups.forEach(cleanup => cleanup());
     resizeObserver.disconnect();
-    conversationFocus.dispose();visitors.dispose();wayfinder.dispose();npcButtons.forEach(({button})=>button.remove());movement.dispose(); orbit.dispose(); avatar.dispose(); world.dispose(); renderer.dispose();
+    lanternMoment.dispose();conversationFocus.dispose();visitors.dispose();wayfinder.dispose();npcButtons.forEach(({button})=>button.remove());movement.dispose(); orbit.dispose(); avatar.dispose(); world.dispose(); renderer.dispose();
   });
   listen(window, 'pageshow', event => {
     if (event.persisted) resume();

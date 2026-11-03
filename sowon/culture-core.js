@@ -21,6 +21,26 @@ export function culturePath(raw){
   if(typeof raw!=='string')return null;
   return /^\/m\/[1-9]\d*\/$/.test(raw)||/^\/learn\/(?:read-chart|five-elements|ten-gods|unknown-birth-time|luck-cycles|combinations|twelve-stages)\/$/.test(raw)?raw:null;
 }
+export const CULTURE_LIBRARY_KEY='samra.sowon.public-reading-library.v1';
+/** Only public article paths are retained. Private readings and birth inputs never enter this record. */
+export function normalizeCultureLibrary(value,{knownPaths,now=Date.now()}={}){
+  const valid=path=>Boolean(culturePath(path))&&(!knownPaths||knownPaths.has(path));
+  if(!value||value.version!==1)return{version:1,saved:[],recent:[]};
+  const saved=[...new Set((Array.isArray(value.saved)?value.saved:[]).slice(0,1000).filter(valid))].slice(0,100);
+  const seen=new Set(),recent=(Array.isArray(value.recent)?value.recent:[]).slice(0,1000)
+    .filter(row=>row&&valid(row.path)&&Number.isSafeInteger(row.at)&&row.at>0&&row.at<=now+60000)
+    .sort((a,b)=>b.at-a.at).filter(row=>{if(seen.has(row.path))return false;seen.add(row.path);return true;})
+    .slice(0,20).map(row=>({path:row.path,at:row.at}));
+  return{version:1,saved,recent};
+}
+export function toggleCultureSaved(value,path,options){
+  const library=normalizeCultureLibrary(value,options);if(!culturePath(path)||options?.knownPaths&&!options.knownPaths.has(path))return library;
+  library.saved=library.saved.includes(path)?library.saved.filter(item=>item!==path):[path,...library.saved].slice(0,100);return library;
+}
+export function rememberCultureArticle(value,path,options={}){
+  const library=normalizeCultureLibrary(value,options);if(!culturePath(path)||options.knownPaths&&!options.knownPaths.has(path))return library;
+  return normalizeCultureLibrary({...library,recent:[{path,at:options.now??Date.now()},...library.recent]},options);
+}
 export function selectCulturePeople(people,{query='',role='all',element='',dayPillar='',sort='recommended'}={}){
   const day=normalizeCultureDayPillar(dayPillar);
   const result=people.filter(person=>cultureMatches([person.name,person.search,person.occupation,person.dayPillar,person.birth].join(' '),query)
