@@ -12,7 +12,7 @@
     }
   } catch (_) {}
   const people = p => STORE_INPUT[p.slug] === 'pair' ? '두 사람' : STORE_INPUT[p.slug] === 'pet' ? '나와 반려동물' : '한 사람';
-  const card = p => `<a class="shop-card" data-cta="store-product-${p.slug}" href="/store/product.html?id=${p.slug}"><div class="shop-cover"><img src="/store${(p.cover || '/store/art/covers/'+p.slug+'.webp')}" alt="" loading="lazy" width="400" height="300"></div><div class="shop-card-body"><span class="shop-category">${esc(CATS[p.cat].label)} · ${esc(READERS[p.reader].name)}</span><h3>${esc(p.title)}</h3><p class="shop-question">${esc(p.kicker || p.bullets)}</p><p class="shop-details">${people(p)} · ${p.chaptersN}장 · 약 ${p.readMin}분</p><strong>${won(priceOf(p.slug))}</strong></div></a>`;
+  const card = p => `<a class="shop-card" data-cta="store-product-${p.slug}" href="/store/product.html?id=${p.slug}"><div class="shop-cover"><img src="${coverOf(p)}" alt="" loading="lazy" width="400" height="300"></div><div class="shop-card-body"><span class="shop-category">${esc(CATS[p.cat].label)} · ${esc(READERS[p.reader].name)}</span><h3>${esc(p.title)}</h3><p class="shop-question">${esc(p.kicker || p.bullets)}</p><p class="shop-details">${people(p)} · ${p.chaptersN}장 · 약 ${p.readMin}분</p><strong>${won(priceOf(p.slug))}</strong></div></a>`;
   function render() {
     byId('chips').querySelectorAll('button').forEach(button => {
       const selected = button.dataset.category === category;
