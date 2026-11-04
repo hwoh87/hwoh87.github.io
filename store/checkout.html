@@ -570,6 +570,7 @@ $("#go").addEventListener("click", async () => {
 /* 웹 결제가 열려 있는지 먼저 묻는다 — 주문도 레이트리밋도 쓰지 않는 조회(webPayState).
    닫혀 있으면 폼을 채우기 전에 앱 인계로 갈아입어, 다 채우고 누른 뒤에야 알게 되는 일을 막는다. */
 async function checkPayment() {
+  err("");
   $("#go").disabled = true; $("#paymentRetry").hidden = true;
   const state = await webPayState(p.slug);
   if (!storeAvailable(p) || state === "ended") {
