@@ -577,7 +577,10 @@ async function checkPayment() {
     $("#go").textContent = "판매 종료"; return;
   }
   if (state === "closed") {
-    applyAppMode(false); $("#paymentState").textContent = "Google Play · 앱 주문서에서 최종 가격을 확인해 주세요.";
+    applyAppMode(false);
+    $("#paymentState").textContent = p.webOnly
+      ? "웹 전용 상품 · 결제 연결을 다시 확인해 주세요."
+      : "Google Play · 앱 주문서에서 최종 가격을 확인해 주세요.";
   } else if (state === "open") {
     PAY_MODE = "web"; $("#go").disabled = false; $("#go").textContent = won(priceOf(p.slug)) + " 결제하고 받기 →";
     $("#trust").hidden = false; $("#paymentState").textContent = "웹 · 토스페이먼츠 카드 결제";
