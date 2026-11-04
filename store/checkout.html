@@ -234,7 +234,8 @@ function applyAppMode(announce) {
   }
   if (announce) {
     $("#hdLate").hidden = false;
-    $("#handoff").scrollIntoView({ behavior: "smooth", block: "center" });
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    $("#handoff").scrollIntoView({ behavior: reduce ? "instant" : "smooth", block: "center" });
   }
 }
 
