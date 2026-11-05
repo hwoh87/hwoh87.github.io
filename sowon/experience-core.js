@@ -15,9 +15,9 @@ export function writeSettings(storage, raw) {
   const safe = normalizeSettings(raw);
   try { storage?.setItem(SETTINGS_KEY, JSON.stringify(safe)); return Boolean(storage); } catch (_) { return false; }
 }
-export function effectiveQuality(value, { coarse = false, memory = 8 } = {}) {
+export function effectiveQuality(value, { coarse = false, memory = 8, narrow = false } = {}) {
   if (value === 'smooth' || value === 'clear') return value;
-  return coarse || typeof memory === 'number' && memory <= 4 ? 'smooth' : 'clear';
+  return narrow || coarse || typeof memory === 'number' && memory <= 4 ? 'smooth' : 'clear';
 }
 const finitePoint = point => point && Number.isFinite(point.x) && Number.isFinite(point.z);
 export function interactionDistance(a, b) { return finitePoint(a) && finitePoint(b) ? Math.hypot(a.x - b.x, a.z - b.z) : Infinity; }

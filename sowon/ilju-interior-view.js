@@ -11,7 +11,7 @@ import { createIljuDemo } from './ilju-demo.js?v=20261103-benchmark2';
 import { createDemoWalk } from './ilju-demo-walk.js?v=20261103-benchmark2';
 import { getOwnProfile } from './profile.js?v=20261103-benchmark2';
 import { getOwnIdentity } from './identity.js?v=20261103-benchmark2';
-import { readSettings } from './experience-core.js?v=20261103-benchmark2';
+import { readSettings, effectiveQuality } from './experience-core.js?v=20261105-mobile1';
 import { enterSocialRoom, getSocialRoomState } from './social.js?v=20261103-benchmark2';
 
 const layer = document.createElement('section');
@@ -38,6 +38,7 @@ const sanctuary = document.querySelector('.sanctuary');
 const canvasHost = $('.interior-canvas');
 let active = null, engine = null, opener = null, pendingExit = false, activeSeat = null;
 let frame = 0, previous = 0, muralVersion = 0, muralTexture = null, transition = null, muralView = false, viewMode = 'overview';
+let frameSampleStart = 0, frameSampleCount = 0;
 let presence = null, oldInert = false, disposed = false, roomVersion = 0;
 let requestStates = [];
 let outsideTitle = '';
@@ -164,7 +165,10 @@ function applyAppearance(event) {
 function applyLightingQuality(settings) {
   if (!engine) return;
   if (!settings) { settings = latestSettings; if (!settings) { try { settings = readSettings(localStorage); } catch (_) {} } }
-  const quality = settings?.quality || 'auto', narrow = innerWidth < 760;
+  const narrow = innerWidth < 760;
+  const quality = effectiveQuality(settings?.quality || 'auto', {narrow, coarse:matchMedia('(pointer: coarse)').matches, memory:navigator.deviceMemory || 8});
+  engine.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, quality === 'smooth' ? 1 : narrow ? 1.35 : 1.7));
+  layer.dataset.quality = quality;
   engine.lighting.setQuality({quality, narrow});
   const shadows = quality !== 'smooth';
   if (engine.renderer.shadowMap.enabled !== shadows) {
@@ -327,13 +331,18 @@ function render(time) {
     const name = $('.interior-name'); name.hidden = modal || point.z > 1 || Math.abs(point.x) > .9 || Math.abs(point.y) > .8;
     if (!name.hidden) { name.style.left = `${(point.x + 1) * 50}%`; name.style.top = `${(1 - point.y) * 50}%`; }
     engine.renderer.render(engine.scene, engine.camera);
+    if (!frameSampleStart || time - frameSampleStart > 2500) { frameSampleStart = time; frameSampleCount = 0; }
+    else if (++frameSampleCount && time - frameSampleStart >= 1000) {
+      layer.dataset.fps = String(Math.round(frameSampleCount * 1000 / (time - frameSampleStart)));
+      frameSampleStart = time; frameSampleCount = 0;
+    }
     mediaFrames.forEach(fn=>fn(time));
     layer.dataset.position = `${engine.avatar.group.position.x.toFixed(2)},${engine.avatar.group.position.z.toFixed(2)}`;
     layer.dataset.moving = String(engine.movement.getState().moving); layer.dataset.seated = String(engine.avatar.getSeated?.() === true); layer.dataset.drawCalls = String(engine.renderer.info.render.calls);
-  } else { engine.visitors.hideLabels(); engine.demoVisitors.hideLabels(); $('.interior-name').hidden = true; }
+  } else { frameSampleStart = 0; frameSampleCount = 0; layer.dataset.fps = ''; layer.dataset.moving = 'false'; engine.visitors.hideLabels(); engine.demoVisitors.hideLabels(); $('.interior-name').hidden = true; }
   frame = requestAnimationFrame(render);
 }
-function start() { if (active && engine && !frame && !document.hidden) { previous = 0; frame = requestAnimationFrame(render); } }
+function start() { if (active && engine && !frame && !document.hidden) { previous = 0; frameSampleStart = 0; frameSampleCount = 0; frame = requestAnimationFrame(render); } }
 export async function openIljuInterior(key) {
   if (disposed) return false;
   if (key === 'courtyard') return leaveRoom();

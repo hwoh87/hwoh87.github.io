@@ -349,3 +349,20 @@
   .interface-shell .experience-tools .interface-tool-label { font-size:9px; }
   .interface-shell.interface-overview .world-place { font-size:10px; }
 }
+/* Keep the next destination and a real stop control visible during a walk. */
+.move-controls,.interior-stick,.interior-status,.world-viewport,.interior-canvas {
+  -webkit-user-select:none;
+  user-select:none;
+  -webkit-touch-callout:none;
+}
+.interface-shell .wf-root.wf-travelling:not(.wf-expanded) { width:min(218px,calc(100vw - 160px)); }
+.interface-shell .wf-root.wf-travelling:not(.wf-expanded) .wf-toggle { flex-direction:row; justify-content:flex-start; gap:8px; padding:6px 10px; min-height:44px; }
+.interface-shell .wf-root.wf-travelling:not(.wf-expanded) .wf-toggle::after { content:none; }
+.interface-shell .wf-root.wf-travelling:not(.wf-expanded) .wf-toggle-copy { display:block; }
+.interface-shell .wf-root.wf-travelling:not(.wf-expanded) .wf-toggle-copy small { display:none; }
+.interface-shell .wf-root.wf-travelling:not(.wf-expanded) .wf-journey { display:block; }
+.interface-shell .wf-root.wf-travelling .wf-journey-top { font-size:12px; line-height:1.7; }
+.interface-shell .wf-root.wf-travelling .wf-cancel { margin-top:9px; min-height:44px; padding:8px 10px; border:1px solid #cad6bf; border-radius:4px; background:#e9eee2; color:#365338; font-size:13px; text-align:center; }
+@media(max-width:760px) {
+  .interface-shell .wf-root.wf-travelling:not(.wf-expanded) { width:min(198px,calc(100vw - 160px)); }
+}

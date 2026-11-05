@@ -46,10 +46,11 @@ export function createWayfinder(host,{destinations={},onTravel,onCancel,bounds=D
   function setExpanded(value){if(disposed)return;const changed=expanded!==Boolean(value);expanded=Boolean(value);panel.hidden=!expanded;root.classList.toggle('wf-expanded',expanded);toggle.setAttribute('aria-expanded',String(expanded));toggle.setAttribute('aria-label','신당 지도 '+(expanded?'접기':'펼치기'));host.setAttribute('data-expanded',String(expanded));chevron.textContent=expanded?'⌃':'⌄';if(!expanded&&panel.contains(document.activeElement))toggle.focus({preventScroll:true});if(changed)host.dispatchEvent(new CustomEvent('sowon:wayfinder',{detail:{expanded},bubbles:true}));}
   toggle.addEventListener('click',()=>setExpanded(!expanded),{signal:controller.signal});
   panel.addEventListener('keydown',event=>{if(event.key==='Escape'&&expanded){event.preventDefault();setExpanded(false);}},{signal:controller.signal});
-  cancel.addEventListener('click',()=>{if(disposed)return;if(typeof onCancel==='function')onCancel();else document.dispatchEvent(new CustomEvent('sowon:cancel'));announce('걷기를 멈췄어요.');},{signal:controller.signal});
+  cancel.addEventListener('click',()=>{if(disposed)return;if(typeof onCancel==='function')onCancel();else document.dispatchEvent(new CustomEvent('sowon:cancel'));announce('걷기를 멈췄어요.');toggle.focus({preventScroll:true});},{signal:controller.signal});
   function update({position,rotation=0,path=[],target=null,action=null,exploring=false}={}){
     if(disposed)return;const point=map(position);if(!point||!exploring)player.setAttribute('display','none');else player.removeAttribute('display');if(point){player.setAttribute('transform',`translate(${point.x.toFixed(2)} ${point.y.toFixed(2)})`);heading.setAttribute('transform',`rotate(${headingDegrees(rotation)??180})`);}
-    const active=validPoint(position)&&validPoint(target);
+    const active=Boolean(exploring&&validPoint(position)&&validPoint(target));
+    root.classList.toggle('wf-travelling',active);
     for(const[key,stop]of stops)stop.classList.toggle('wf-stop--active',active&&key===action);
     if(active){
       const name=PLACES[action]?.name||'선택한 자리';

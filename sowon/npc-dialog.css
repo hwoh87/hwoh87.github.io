@@ -527,3 +527,10 @@ dialog.xp-dialog.npc-dialog::backdrop {
   .npc-dialog .npc-choice, .npc-dialog .npc-message-action, .npc-dialog .npc-pair-action { border-color: ButtonText; }
   .npc-dialog :is(button,a):focus-visible { outline-color: Highlight; }
 }
+/* Make the free personal reading a clear, finger-sized next action. */
+@media(max-width:599px) {
+  .npc-dialog .npc-toolbar { gap:0 12px; padding-bottom:9px; }
+  .npc-dialog .npc-toolbar :is(button,a) { min-height:44px; font-size:12px; }
+  .npc-dialog .npc-toolbar .npc-reading-action { justify-content:center; min-height:44px; padding:8px 12px; border-radius:4px; background:#365540; color:#fff; font-size:13px; font-weight:600; text-decoration:none; }
+  .npc-dialog .npc-toolbar .npc-reading-action:hover { background:#284430; color:#fff; text-decoration:none; }
+}

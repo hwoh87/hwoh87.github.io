@@ -7,8 +7,8 @@ import { getOwnIdentity } from './identity.js?v=20261103-benchmark2';
 import { getOwnProfile } from './profile.js?v=20261103-benchmark2';
 import { createLocomotion, isWalkable } from './locomotion.js?v=20261103-benchmark2';
 import { readJourney } from './hub-core.js?v=20261103-benchmark2';
-import { readSettings, normalizeSettings, effectiveQuality, nearestInteraction, pickedInteraction, interactionDistance } from './experience-core.js?v=20261103-benchmark2';
-import { createWayfinder } from './wayfinder.js?v=20261103-benchmark2';
+import { readSettings, normalizeSettings, effectiveQuality, nearestInteraction, pickedInteraction, interactionDistance } from './experience-core.js?v=20261105-mobile1';
+import { createWayfinder } from './wayfinder.js?v=20261105-mobile1';
 import { HALLS, getFeature } from './hub-core.js?v=20261103-benchmark2';
 import { createVisitors } from './visitors.js?v=20261103-benchmark2';
 import { createConversationFocus } from './conversation-focus.js?v=20261103-benchmark2';
@@ -277,9 +277,11 @@ function setup() {
       const point=atmosphere.keyPosition;moonlight.position.set(point.x,point.y,point.z);
     }
     avatar.setAppearance?.(preferences.outfit);
-    const quality=preferences.quality==='auto'&&autoReduced?'smooth':effectiveQuality(preferences.quality,{coarse:matchMedia('(pointer: coarse)').matches,memory:navigator.deviceMemory||8});
+    const quality=preferences.quality==='auto'&&autoReduced?'smooth':effectiveQuality(preferences.quality,{narrow:innerWidth<760,coarse:matchMedia('(pointer: coarse)').matches,memory:navigator.deviceMemory||8});
+    const ratio=Math.min(devicePixelRatio||1,quality==='smooth'?1:innerWidth<760?1.5:1.8);
+    if(renderer.getPixelRatio()!==ratio)renderer.setPixelRatio(ratio);
     if(activeQuality!==quality){
-      activeQuality=quality;renderer.setPixelRatio(Math.min(devicePixelRatio||1,quality==='smooth'?1:innerWidth<760?1.5:1.8));
+      activeQuality=quality;
       renderer.shadowMap.enabled=quality==='clear';world.setQuality?.(quality);
       world.group.traverse(node=>{if(node.material)(Array.isArray(node.material)?node.material:[node.material]).forEach(material=>{material.needsUpdate=true;});});
       resize();
@@ -361,7 +363,7 @@ function setup() {
     if (conversationNpc) focusConversation(conversationNpc);
     else if(galleryViewActive)applyGalleryView();
   }
-  resizeObserver = new ResizeObserver(resize);
+  resizeObserver = new ResizeObserver(()=>{resize();applyPreferences(preferences);});
   resizeObserver.observe(host);
   resize();
   applyPreferences(preferences);
@@ -405,6 +407,7 @@ function setup() {
     movement.setEnabled(!modalOpen);
     if (modalOpen) {
       frameSampleStart = 0; frameSampleCount = 0; host.dataset.fps = '';
+      host.dataset.moving = 'false';
       name.hidden = true;
       visitors.hideLabels();
       nearCard.hidden=true;caption.hidden=true;npcButtons.forEach(({button})=>{button.hidden=true;});
