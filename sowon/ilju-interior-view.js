@@ -11,7 +11,7 @@ import { createIljuDemo } from './ilju-demo.js?v=20261103-benchmark2';
 import { createDemoWalk } from './ilju-demo-walk.js?v=20261103-benchmark2';
 import { getOwnProfile } from './profile.js?v=20261103-benchmark2';
 import { getOwnIdentity } from './identity.js?v=20261103-benchmark2';
-import { readSettings, effectiveQuality } from './experience-core.js?v=20261105-mobile1';
+import { readSettings, effectiveQuality } from './experience-core.js?v=20261105-mobile3';
 import { enterSocialRoom, getSocialRoomState } from './social.js?v=20261103-benchmark2';
 
 const layer = document.createElement('section');

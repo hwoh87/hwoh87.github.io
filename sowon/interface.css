@@ -365,4 +365,5 @@
 .interface-shell .wf-root.wf-travelling .wf-cancel { margin-top:9px; min-height:44px; padding:8px 10px; border:1px solid #cad6bf; border-radius:4px; background:#e9eee2; color:#365338; font-size:13px; text-align:center; }
 @media(max-width:760px) {
   .interface-shell .wf-root.wf-travelling:not(.wf-expanded) { width:min(198px,calc(100vw - 160px)); }
+  body.is-exploring .interface-shell .nearby-card { bottom:calc(218px + env(safe-area-inset-bottom)); }
 }

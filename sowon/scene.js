@@ -7,7 +7,7 @@ import { getOwnIdentity } from './identity.js?v=20261103-benchmark2';
 import { getOwnProfile } from './profile.js?v=20261103-benchmark2';
 import { createLocomotion, isWalkable } from './locomotion.js?v=20261103-benchmark2';
 import { readJourney } from './hub-core.js?v=20261103-benchmark2';
-import { readSettings, normalizeSettings, effectiveQuality, nearestInteraction, pickedInteraction, interactionDistance } from './experience-core.js?v=20261105-mobile1';
+import { readSettings, normalizeSettings, effectiveQuality, walkingCameraOffset, nearestInteraction, pickedInteraction, interactionDistance } from './experience-core.js?v=20261105-mobile3';
 import { createWayfinder } from './wayfinder.js?v=20261105-mobile1';
 import { HALLS, getFeature } from './hub-core.js?v=20261103-benchmark2';
 import { createVisitors } from './visitors.js?v=20261103-benchmark2';
@@ -128,7 +128,7 @@ function setup() {
 
   const conversationFocus = createConversationFocus({ camera, orbit, world, avatar });
   let conversationNpc = null, conversationOverview = false;
-  let galleryViewActive = false;
+  let galleryViewActive = false, routeViewActive = false;
   function releaseConversation() {
     const restored = conversationFocus.restore();
     conversationNpc = null;
@@ -155,7 +155,7 @@ function setup() {
 
   movement = createLocomotion({
     camera, domElement: renderer.domElement, avatar, world, orbitControls: orbit,
-    onMove: source => { enter(); if(source!=='path'){lanternView=null;galleryViewActive=false;guidedWalk?.stop();} if (activeJourney && source !== 'path') { activeJourney = null; status('마음이 가는 곳으로 천천히 걸어보세요.', 2500); } },
+    onMove: source => { enter(); if(source!=='path'){lanternView=null;galleryViewActive=false;routeViewActive=false;cameraTransition=null;guidedWalk?.stop();} if (activeJourney && source !== 'path') { activeJourney = null; status('마음이 가는 곳으로 천천히 걸어보세요.', 2500); } },
     onArrival: point => {for(const id of ['breath','myeongri','inyeon','stars','archive','celeb','rooms','wish']){const destination=world.destinations[id];if(destination&&interactionDistance(point,destination)<2)document.dispatchEvent(new CustomEvent('sowon:journey-action',{detail:{id:'visit:'+id}}));}},
     onPick: raycaster => {
       const hits=raycaster.intersectObjects([...world.group.children,...visitors.group.children],true);
@@ -250,6 +250,37 @@ function setup() {
   const nameOffset = new THREE.Vector3(0, 1.7, 0);
   const tweenCamera = new THREE.Vector3();
   const tweenTarget = new THREE.Vector3();
+  const routeOffset = new THREE.Vector3();
+  const routeRay = new THREE.Raycaster(), routeHead = new THREE.Vector3(), routeEye = new THREE.Vector3(), routeDirection = new THREE.Vector3();
+  const lastRoutePoint = new THREE.Vector3(Infinity,0,Infinity);
+  let lastRouteCheck = 0;
+  function routeViewClear(offset) {
+    routeHead.copy(avatar.group.position); routeHead.y+=1.2;
+    routeEye.set(...offset).add(avatar.group.position);
+    const opaque=hit=>{
+      if(hit.object.userData?.pickProxy)return false;
+      for(let node=hit.object;node;node=node.parent)if(!node.visible)return false;
+      const materials=Array.isArray(hit.object.material)?hit.object.material:[hit.object.material];
+      return materials.some(material=>material&&material.visible!==false&&(!material.transparent||material.opacity>=.35));
+    };
+    // Check both directions so a one-sided roof also blocks a view from below.
+    for(const reverse of [false,true]){
+      const from=reverse?routeEye:routeHead,to=reverse?routeHead:routeEye;
+      routeDirection.subVectors(to,from);const distance=routeDirection.length();
+      routeRay.set(from,routeDirection.normalize());routeRay.near=.35;routeRay.far=distance-.35;
+      if(routeRay.intersectObjects(world.group.children,true).some(opaque))return false;
+    }
+    return true;
+  }
+  function routeCameraOffset() {
+    const point=avatar.group.position;
+    const now=performance.now();
+    if(now-lastRouteCheck>=200||point.distanceToSquared(lastRoutePoint)>.64){
+      routeOffset.fromArray(walkingCameraOffset(point,routeViewClear));
+      lastRoutePoint.copy(point);lastRouteCheck=now;
+    }
+    return routeOffset;
+  }
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const nearCard=document.getElementById('nearbyCard');
   const caption=document.getElementById('placeCaption');
@@ -289,7 +320,8 @@ function setup() {
     body.dataset.mood=preferences.mood;host.dataset.quality=quality;host.dataset.outfit=preferences.outfit;
     if(document.querySelector('dialog[open]'))renderer.render(scene,camera);
   }
-  function setCameraMode(mode, framing = null) {
+  function setCameraMode(mode, framing = null, route = false) {
+    routeViewActive = route;
     galleryViewActive=Boolean(framing);
     setOverviewState(mode==='overview');
     cameraTransition={elapsed:0,camera:camera.position.clone(),target:orbit.target.clone(),overview,framing};
@@ -321,7 +353,7 @@ function setup() {
     enter();movement.setEnabled(true);
     if(interactionDistance(item.point,avatar.group.position)<=item.radius){activateInteraction(item);return;}
     const gallery=item.id==='object-celebrity-gallery';
-    activeJourney=item.id;setCameraMode('walk',gallery?galleryFraming():null);status(item.type==='npc'?npcName(item)+'에게 다가가고 있어요.':gallery?'연예인 사주관으로 가고 있어요.':'선택한 물건을 살펴보러 가고 있어요.',0);
+    activeJourney=item.id;setCameraMode('walk',gallery?galleryFraming():null,!gallery);status(item.type==='npc'?npcName(item)+'에게 다가가고 있어요.':gallery?'연예인 사주관으로 가고 있어요.':'선택한 물건을 살펴보러 가고 있어요.',0);
     const accepted=movement.goTo(item.point,()=>{if(activeJourney===item.id)activateInteraction(item);});
     if(!accepted){activeJourney=null;status('조금 더 가까운 바닥을 눌러 다가가 보세요.',3000);}
   }
@@ -427,10 +459,16 @@ function setup() {
       const ease = progress * progress * (3 - 2 * progress);
       if(cameraTransition.overview){tweenCamera.set(28,25,45);tweenTarget.set(0,2,-2);}
       else if(cameraTransition.framing){tweenCamera.copy(avatar.group.position).add(new THREE.Vector3(...cameraTransition.framing.cameraOffset));tweenTarget.copy(avatar.group.position).add(new THREE.Vector3(...cameraTransition.framing.targetOffset));}
-      else{tweenCamera.copy(avatar.group.position).add(cameraOffset);tweenTarget.copy(avatar.group.position).add(targetOffset);}
+      else{tweenCamera.copy(avatar.group.position).add(routeViewActive?routeCameraOffset():cameraOffset);tweenTarget.copy(avatar.group.position).add(targetOffset);}
       camera.position.lerpVectors(cameraTransition.camera, tweenCamera, ease);
       orbit.target.lerpVectors(cameraTransition.target, tweenTarget, ease);
       if (progress >= 1) cameraTransition = null;
+    }
+    if (routeViewActive && activeJourney && !cameraTransition) {
+      tweenCamera.copy(avatar.group.position).add(routeCameraOffset());
+      tweenTarget.copy(avatar.group.position).add(targetOffset);
+      const follow = 1 - Math.exp(-delta * 3);
+      camera.position.lerp(tweenCamera, follow); orbit.target.lerp(tweenTarget, follow);
     }
     const moment=lanternMoment.update(Date.now(),{calm:reducedMotion.matches||body.dataset.motion==='calm'});host.dataset.lanternMoment=moment.active?moment.preview?'preview':'live':'idle';body.classList.toggle('is-lantern-preview',moment.preview);if(!moment.preview&&lanternView)restoreLanternView();if(moment.changed)document.dispatchEvent(new CustomEvent('sowon:lantern-state',{detail:{active:moment.active,preview:moment.preview}}));
     world.update(reducedMotion.matches||body.dataset.motion==='calm' ? 0 : time / 1000,reducedMotion.matches||body.dataset.motion==='calm'?0:delta);
@@ -474,7 +512,7 @@ function setup() {
     event.preventDefault(); event.stopPropagation(); enter();
     renderer.domElement.focus({ preventScroll: true });
   });
-  listen(renderer.domElement, 'pointerdown', () => { lanternView=null;cameraTransition = null;galleryViewActive=false; });
+  listen(renderer.domElement, 'pointerdown', () => { lanternView=null;cameraTransition = null;galleryViewActive=false;routeViewActive=false; });
 
   const actionLabels = { wish: '소원 등불이 있는 신당', breath: '바람이 머무는 명상터', blessing: '마음을 전하는 소원나무', myeongri: '토정이 기다리는 명리전', inyeon: '설월이 기다리는 인연정', stars: '태어난 하늘을 펼치는 별마루', readers: '루나와 술사들이 있는 술사각', archive: '이야기가 쌓이는 서고', rooms: '같은 일주가 만나는 일주마당', celeb: '공개 명식을 읽는 연예인 사주관' };
   function walkToAction(action) {
@@ -490,6 +528,7 @@ function setup() {
     // resumed movement. Re-enable here instead of treating that pause as no path.
     movement.setEnabled(true);
     activeJourney = action;
+    setCameraMode('walk',null,true);
     status(`${actionLabels[action]}에 가고 있어요 · 바닥을 누르면 자유롭게 이동해요.`);
     const result = movement.goTo(world.destinations[action], () => {
       if (activeJourney !== action) return;

@@ -20,6 +20,22 @@ export function effectiveQuality(value, { coarse = false, memory = 8, narrow = f
   return narrow || coarse || typeof memory === 'number' && memory <= 4 ? 'smooth' : 'clear';
 }
 const finitePoint = point => point && Number.isFinite(point.x) && Number.isFinite(point.z);
+// Side halls need a view from the courtyard, rather than from the roof behind them.
+export function walkingCameraOffset(position, isClear = () => true) {
+  if (!finitePoint(position)) return [0, 4.6, 9.7];
+  const weight = Math.min(1, Math.max(0, (Math.abs(position.x) - 6) / 6));
+  const inwardX = -position.x, inwardZ = 4 - position.z;
+  const distance = Math.hypot(inwardX, inwardZ) || 1;
+  const x = inwardX / distance * weight;
+  const z = (1 - weight) + inwardZ / distance * weight;
+  const length = Math.hypot(x, z);
+  const preferredX = x / length * 9.7, preferredZ = z / length * 9.7;
+  for (const angle of [0, Math.PI / 4, -Math.PI / 4, Math.PI / 2, -Math.PI / 2, Math.PI * .75, -Math.PI * .75, Math.PI]) {
+    const offset = [preferredX * Math.cos(angle) - preferredZ * Math.sin(angle), 4.6, preferredX * Math.sin(angle) + preferredZ * Math.cos(angle)];
+    if (isClear(offset)) return offset;
+  }
+  return [0, 4.6, 9.7];
+}
 export function interactionDistance(a, b) { return finitePoint(a) && finitePoint(b) ? Math.hypot(a.x - b.x, a.z - b.z) : Infinity; }
 export function nearestInteraction(items, position, currentId = null) {
   if (!Array.isArray(items) || !finitePoint(position)) return null;
