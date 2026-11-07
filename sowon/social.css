@@ -32,3 +32,32 @@
 .social-result-section article p,.social-peer-dialog .social-result-section article p{font-size:14px;line-height:1.95;color:#635e55}
 .social-axis-tone{font-size:11px;color:#876a50}.social-result>button:last-child{font-size:13px;min-height:46px}
 @media(max-width:600px){.social-dialog:has(.social-result),.social-peer-dialog.social-peer-result{width:calc(100vw - 16px);height:calc(100svh - 20px);max-height:calc(100svh - 20px)}.social-dialog:has(.social-result) .social-body{padding:23px 15px}.social-result>.social-eyebrow{margin-top:17px}.social-pair-names{font-size:25px}.social-score{width:132px;height:132px}.social-score strong{font-size:40px}.social-verdict{font-size:20px}.social-result-note{font-size:12px}.social-result-section>h3{font-size:20px}.social-result-section article,.social-peer-dialog .social-result-section article{padding:17px 15px}.social-result-section article p,.social-peer-dialog .social-result-section article p{font-size:13px}.social-result-visuals{margin:25px 0 30px}}
+
+/* One visible next step from meeting to a shared reading. */
+.social-dialog .social-progress{display:flex;gap:8px;list-style:none;padding:0;margin:0 0 23px;border:0;background:none;letter-spacing:0}
+.social-dialog .social-progress li{flex:1;display:flex;align-items:center;gap:6px;min-width:0;margin:0;padding:9px 0;border-bottom:2px solid #dde2d8;color:#76816f;font-size:12px;line-height:1.5;white-space:nowrap}
+.social-dialog .social-progress li span{display:grid;place-items:center;flex:none;width:21px;height:21px;border:1px solid #d5ddce;border-radius:50%;font-size:11px;font-variant-numeric:tabular-nums}
+.social-dialog .social-progress li[aria-current=step]{border-color:#42634a;color:#304f38;font-weight:600}
+.social-dialog .social-progress li[aria-current=step] span,.social-dialog .social-progress li.is-done span{background:#42634a;border-color:#42634a;color:#fff}
+.social-dialog .social-welcome h3{font-size:25px;line-height:1.5;margin:0 0 14px}
+.social-dialog .social-welcome>.social-prepare-note{margin-bottom:12px}
+.social-dialog .social-welcome>.social-primary{width:100%;min-height:46px;font-size:14px;margin:0 0 23px}
+.social-dialog .social-scope{padding:20px 0;margin:20px 0;border-top:1px solid #dbe0d5;border-bottom:1px solid #dbe0d5;text-align:left}
+.social-dialog .social-scope h4{font-size:15px;font-weight:600;margin:0 0 13px}
+.social-dialog .social-scope p{font-size:14px;line-height:1.85;color:#586a51;margin:10px 0;word-break:keep-all;overflow-wrap:anywhere}
+.social-dialog .social-scope p strong{font-weight:600;color:#34503d}
+.social-dialog .social-scope summary{font-size:13px;line-height:1.8;min-height:44px;display:list-item;align-content:center;cursor:pointer;color:#486345}
+.social-dialog .social-scope details>p{font-size:13px;margin-top:8px}
+.social-dialog .social-consent{font-size:14px;line-height:1.85;align-items:flex-start}
+.social-dialog .social-consent input{margin-top:5px;flex:none}
+.social-dialog .social-request-actions button,.social-dialog .social-confirm button{min-height:44px;font-size:14px}
+.social-dialog .social-header button.social-close{min-width:44px;width:44px;min-height:44px}
+.social-dialog .social-result .social-progress{margin-top:18px}
+.social-dialog .social-result button.social-read-first{width:100%;font-size:14px;min-height:46px;margin:0 0 14px}
+.social-dialog .social-result .social-result-section article p{font-size:16px;line-height:1.95;overflow-wrap:anywhere}
+.social-dialog .social-peer .social-peer-request>p{font-size:14px;line-height:1.85}
+@media(max-width:350px){.social-dialog .social-progress{gap:5px}.social-dialog .social-progress li{gap:4px;font-size:11px}.social-dialog .social-progress li span{width:18px;height:18px;font-size:10px}}
+
+body.interface-active .social-dialog .social-welcome .social-progress{padding:0;margin:0 0 23px;border:0;background:none}
+
+.social-dialog .social-welcome>p.social-consent-error{font-size:14px;line-height:1.8;color:#8a453a;margin:5px 0 14px;text-align:left}
