@@ -291,7 +291,7 @@
 <p><strong>사화(四化)</strong>는 화록(祿)·화권(權)·화과(科)·화기(忌) 네 가지 변화예요. 같은 별이라도 사화가 붙으면 그 별의 작동 방식이 달라져요. <strong>대한(大限)</strong>은 10년 단위로 명반을 옮겨 읽는 구간이고요.</p>
 <p class="note">이 계산기는 절입시각과 음력 변환을 반영한 정통 배성법으로 명반을 세워요. 앱과 같은 엔진이에요.</p>
 
-<div class="toolrail"><a href="/calc/" data-cta="tool-saju" data-carry="saju"><span class="tk">사주</span><strong>사주팔자 명식</strong><span class="sub">명식·십신·12운성·신살·대운과 격국·용신까지</span></a><a href="/calc/gunghap/" data-cta="tool-gunghap" data-carry="gunghap"><span class="tk">궁합</span><strong>1:1 궁합</strong><span class="sub">여덟 글자 전체로 보는 두 사람의 결 — 17개 축</span></a><a href="/calc/star/" data-cta="tool-star" data-carry="star"><span class="tk">별자리</span><strong>출생 차트</strong><span class="sub">행성 배치·ASC/MC·주요 각과 기질 해석</span></a></div>
+<div class="toolrail"><a href="/calc/" data-cta="tool-saju" data-carry="saju"><span class="tk">사주</span><strong>사주팔자 명식</strong><span class="sub">명식·십신·12운성·신살·대운과 격국·용신까지</span></a><a href="/calc/gunghap/" data-cta="tool-gunghap" data-carry="gunghap"><span class="tk">궁합</span><strong>1:1 궁합</strong><span class="sub">여덟 글자 전체로 보는 두 사람의 결 — 17개 축</span></a><a href="/calc/star/" data-cta="tool-star" data-carry="star"><span class="tk">별자리</span><strong>출생 차트</strong><span class="sub">행성 배치·ASC/MC·주요 각과 기질 해석</span></a><a href="/2027/" data-cta="tool-newyear" data-carry="newyear"><span class="tk">2027 신년운세</span><strong>2027 정미년 지도</strong><span class="sub">정미년이 내 사주와 만나는 자리·열두 달 흐름</span></a></div>
 </div></main>
 <footer class="foot">
   <p><a href="/">삼라만상</a> — 사주 · 자미두수 · 별자리 · 궁합</p>
@@ -311,7 +311,7 @@ function loadEngine(){
     var s = document.createElement("script");
     /* ⚠️ 파일명이 고정이라 엔진을 고쳐 배포해도 돌아온 방문자는 캐시된 구버전을 계속 쓴다
        (예전 '본원 오표기' 수정도 이런 식으로 늦게 도착했다). 내용 해시를 붙여 강제로 새로 받게 한다. */
-    s.src = "/calc/saju-engine.js?v=c180302e2c";
+    s.src = "/calc/saju-engine.js?v=800585b9a4";
     s.onload = function(){ res(window["engine-core"]); };
     s.onerror = function(){ __engP = null; rej(new Error("engine")); };
     document.head.appendChild(s);

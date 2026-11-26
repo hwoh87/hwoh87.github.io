@@ -287,7 +287,7 @@
 <p><strong>하우스</strong>는 그 기운이 삶의 어느 영역에서 쓰이는지를 나타내고, <strong>각(아스펙트)</strong>은 행성끼리 이루는 각도예요 — 삼각·육각은 흐름이 매끄럽고, 사각·충은 마찰이 있지만 그만큼 힘이 실려요.</p>
 <p class="note">천체 위치는 Moshier 천체력으로 계산해요. 별도 데이터 파일 없이 브라우저에서 직접 계산하고, 계산은 브라우저 안에서 끝나요 — 입력값을 저희 서버로 올리지 않아요.</p>
 
-<div class="toolrail"><a href="/calc/" data-cta="tool-saju" data-carry="saju"><span class="tk">사주</span><strong>사주팔자 명식</strong><span class="sub">명식·십신·12운성·신살·대운과 격국·용신까지</span></a><a href="/calc/gunghap/" data-cta="tool-gunghap" data-carry="gunghap"><span class="tk">궁합</span><strong>1:1 궁합</strong><span class="sub">여덟 글자 전체로 보는 두 사람의 결 — 17개 축</span></a><a href="/calc/jami/" data-cta="tool-jami" data-carry="jami"><span class="tk">자미두수</span><strong>자미두수 명반</strong><span class="sub">12궁 주성·사화·대한 — 궁마다 풀이와 행동 처방</span></a></div>
+<div class="toolrail"><a href="/calc/" data-cta="tool-saju" data-carry="saju"><span class="tk">사주</span><strong>사주팔자 명식</strong><span class="sub">명식·십신·12운성·신살·대운과 격국·용신까지</span></a><a href="/calc/gunghap/" data-cta="tool-gunghap" data-carry="gunghap"><span class="tk">궁합</span><strong>1:1 궁합</strong><span class="sub">여덟 글자 전체로 보는 두 사람의 결 — 17개 축</span></a><a href="/calc/jami/" data-cta="tool-jami" data-carry="jami"><span class="tk">자미두수</span><strong>자미두수 명반</strong><span class="sub">12궁 주성·사화·대한 — 궁마다 풀이와 행동 처방</span></a><a href="/2027/" data-cta="tool-newyear" data-carry="newyear"><span class="tk">2027 신년운세</span><strong>2027 정미년 지도</strong><span class="sub">정미년이 내 사주와 만나는 자리·열두 달 흐름</span></a></div>
 </div></main>
 <footer class="foot">
   <p><a href="/">삼라만상</a> — 사주 · 자미두수 · 별자리 · 궁합</p>
@@ -307,7 +307,7 @@ function loadEngine(){
     var s = document.createElement("script");
     /* ⚠️ 파일명이 고정이라 엔진을 고쳐 배포해도 돌아온 방문자는 캐시된 구버전을 계속 쓴다
        (예전 '본원 오표기' 수정도 이런 식으로 늦게 도착했다). 내용 해시를 붙여 강제로 새로 받게 한다. */
-    s.src = "/calc/saju-engine.js?v=c180302e2c";
+    s.src = "/calc/saju-engine.js?v=800585b9a4";
     s.onload = function(){ res(window["engine-core"]); };
     s.onerror = function(){ __engP = null; rej(new Error("engine")); };
     document.head.appendChild(s);
