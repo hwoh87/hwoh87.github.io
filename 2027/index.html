@@ -563,6 +563,9 @@ function cop(w){
   return ((c - 0xAC00) % 28) ? "이에요" : "예요";
 }
 
+/* 공동격 조사 — 받침이 있으면 '과', 없으면 '와'(丑(축)와 ✕ → 丑(축)과). */
+function wa(w){ return cop(w) === "이에요" ? "과" : "와"; }
+
 var SHARE_LABEL = "", LAST = null, PICK = -1;
 function run(){ withEngine("go", runNow); }
 function runNow(){
@@ -750,7 +753,7 @@ function pickMonth(i){
   li.push('천간 ' + s + '(' + HKR[s] + ') — 내 일간에게 <b>' + esc(m.stemSipsin) + '</b>, ' + favKr(m.stemFav) +
     (sr.length ? ' · 일간과 ' + sr.join("·") : '') + '.');
   var bRel = m.branchRel.map(function(x){ return REL_KR[x.type] || x.type; });
-  li.push('지지 ' + br + '(' + HKR[br] + ') — ' + favKr(m.branchFav) + ' · 내 일지 ' + LAST.dayBranch + '(' + HKR[LAST.dayBranch] + ')와 ' +
+  li.push('지지 ' + br + '(' + HKR[br] + ') — ' + favKr(m.branchFav) + ' · 내 일지 ' + LAST.dayBranch + '(' + HKR[LAST.dayBranch] + ')' + wa(HKR[LAST.dayBranch]) + ' ' +
     (bRel.length ? '<b>' + bRel.join("·") + '</b>' : '따로 맺는 관계 없음') + '.');
   var tip = tr === "good" ? "새로 시작하거나 사람을 만나는 일에 힘을 실어 보기 좋은 달이에요."
           : tr === "rest" ? "속도를 한 박자 늦추고, 벌인 일을 정리하며 몸을 챙기기 좋은 달이에요."
