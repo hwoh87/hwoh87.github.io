@@ -185,6 +185,23 @@
 .ny-why h3{margin:0 0 6px;font-size:15px;color:#F4F1FF}
 .ny-why ul{margin:0;padding-left:18px}
 .ny-why .yong{color:#7FBF8F;font-weight:700}.ny-why .gi{color:#D9B978;font-weight:700}
+.ny-dom{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 10px}
+@media (max-width:420px){.ny-dom{grid-template-columns:1fr 1fr}}
+.ny-dom button{font:inherit;cursor:pointer;text-align:left;padding:11px 12px;border-radius:16px;background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.08);color:#F4F1FF}
+.ny-dom button.on{border-color:rgba(167,139,250,.7);background:rgba(167,139,250,.08)}
+.ny-dom button b{display:block;font-size:15px;font-weight:800}
+.ny-dom button span{display:block;font-size:12px;font-weight:700;margin-top:3px}
+.sg-bright{color:#7FBF8F}.sg-steady{color:#9FB3C8}.sg-care{color:#E8A86B}
+.ny-domd{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px 15px;margin:0 0 10px;
+  font-size:13.5px;line-height:1.7;color:rgba(255,255,255,.72)}
+.ny-domd h3{margin:0 0 6px;font-size:16px;color:#F4F1FF}
+.ny-domd ul{margin:0 0 10px;padding-left:18px}
+.ny-domd .mc{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px}
+.ny-domd .mc span{padding:4px 10px;border-radius:999px;font-size:12.5px;font-weight:700;background:rgba(255,255,255,.05)}
+.ny-domd .tip{border-left:3px solid rgba(167,139,250,.6);padding:4px 0 4px 10px;margin:0 0 8px}
+.ny-domd .tip i{display:block;font-style:normal;font-size:11.5px;font-weight:800;color:rgba(255,255,255,.45);letter-spacing:.04em}
+.ny-domd .go{display:inline-block;margin-top:4px;font-weight:700;color:#C9B8FF;text-decoration:none}
 .ny-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:rgba(255,255,255,.55);margin:0 0 14px}
 .ny-legend span::before{content:"";display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:0;background:currentColor}
 .ny-proc{margin:18px 0 0;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.02)}
@@ -327,6 +344,10 @@
 <section id="result">
   <div class="ny-head" id="nyHead"></div>
   <div class="ny-notes" id="nyNotes"></div>
+
+  <h2 id="sec-domain">영역별로 보면</h2>
+  <div class="ny-dom" id="nyDom" role="group" aria-label="영역 고르기"></div>
+  <div class="ny-domd" id="nyDomD" aria-live="polite"></div>
 
   <h2 id="sec-map">정미년이 내 사주와 만나는 자리</h2>
   <div class="ny-map" id="nyMap"></div>
@@ -566,6 +587,204 @@ function cop(w){
 /* 공동격 조사 — 받침이 있으면 '과', 없으면 '와'(丑(축)와 ✕ → 丑(축)과). */
 function wa(w){ return cop(w) === "이에요" ? "과" : "와"; }
 
+/* 영역별로 보면 — 돈·일·관계·건강. 앱 NewYearDomains.kt 와 같은 판정(새 산식 없음):
+   그 해 천간·지지의 십신과 반기는/덜어 쓸 기운, 영역이 맡는 기둥과의 합·충, 12운성, 열두 달의 결.
+   ⚠️ 판정을 바꾸면 앱 NewYearDomains.kt 도 같이 고칠 것 — 두 화면의 신호가 엇갈리면 안 된다. */
+var DOMAINS = [
+  {key:"money", label:"돈", slug:"money-2027", title:"2027, 돈이 모이는 달과 새는 달"},
+  {key:"work", label:"일", slug:"career-2027", title:"2027, 내 일은 어디로 갈까"},
+  {key:"people", label:"관계", slug:"love-2027", title:"2027, 내 인연은 언제 움직일까"},
+  {key:"health", label:"건강", slug:null, title:null}
+];
+var SG_KR = {bright:"힘 받는 해", steady:"고르게 가는 해", care:"살피며 가는 해"};
+var SS = {bigeop:["비견","겁재"], siksang:["식신","상관"], jae:["편재","정재"], gwan:["편관","정관"], in_:["편인","정인"]};
+function inSet(x, names){ return names.some(function(n){ return SS[n].indexOf(x) >= 0; }); }
+var DOM_SET = {money:["jae","siksang"], work:["gwan","in_","siksang"], people:["bigeop","siksang"], health:[]};
+var UNSEONG_EASY = {"장생":"막 태어나 자라기 시작하는 때","목욕":"처음 세상에 나와 이것저것 겪어 보는 때","관대":"어른 옷을 입고 사회에 나서는 때",
+  "건록":"제 몫을 해내며 자리를 잡는 때","제왕":"힘이 가장 꽉 찬 때","쇠":"한창때를 지나 노련해지는 때","병":"속도를 줄이고 몸을 챙길 때",
+  "사":"하던 일을 마무리하고 내려놓을 때","묘":"거둔 것을 창고에 넣어 두는 때","절":"끊고 새로 시작할 준비를 하는 때",
+  "태":"새 계획이 마음속에 생겨나는 때","양":"조용히 힘을 기르는 때"};
+var STRONG_STAGES = ["장생","관대","건록","제왕"], REST_STAGES = ["병","사","묘","절"];
+function domSipsinText(d, s){
+  if (d === "money"){
+    if (inSet(s, ["jae"])) return "돈 자체를 뜻하는 기운이에요. 수입·거래·씀씀이가 눈에 띄게 움직이기 쉬워요.";
+    if (inSet(s, ["siksang"])) return "재주와 표현이 돈으로 이어지는 기운이에요. 만들어 팔거나 부업에 손이 가기 쉬워요.";
+    if (inSet(s, ["bigeop"])) return "나와 닮은 기운이라 돈을 함께 쓰거나 나눌 일이 늘기 쉬워요.";
+  } else if (d === "work"){
+    if (inSet(s, ["gwan"])) return "조직·직책·책임을 뜻하는 기운이에요. 맡는 일이 또렷해지고 평가받을 일이 늘어요.";
+    if (inSet(s, ["in_"])) return "배움·자격·윗사람의 도움을 뜻해요. 공부해 둔 것이 일에 쓰이기 좋아요.";
+    if (inSet(s, ["siksang"])) return "내 실력을 꺼내 보이는 기운이에요. 결과물로 말하기 좋고, 일하는 틀을 바꾸고 싶은 마음도 커져요.";
+  } else if (d === "people"){
+    if (inSet(s, ["bigeop"])) return "친구·동료처럼 나와 비슷한 사람이 곁에 모이는 기운이에요.";
+    if (inSet(s, ["siksang"])) return "마음을 밖으로 꺼내는 기운이라 먼저 다가가고 표현하기 쉬워요.";
+  }
+  return null;
+}
+function domFavNote(f){ return f === "yong" ? "내 사주가 반기는 쪽이라 이 영역에 힘이 실려요." : f === "gi" ? "내 사주에 이미 넉넉한 쪽이라 욕심보다 관리가 먼저예요." : ""; }
+function domFavScore(f){ return f === "yong" ? 1 : f === "gi" ? -1 : 0; }
+/* 같은 기둥·같은 줄의 관계를 한 묶음으로 — 도식의 선 하나와 같다. */
+function domLinks(r){
+  var g = {}, out = [];
+  r.relations.forEach(function(x){
+    var k = x.row + ":" + x.pos;
+    if (!g[k]){ g[k] = {row:x.row, pos:x.pos, names:[], pull:true}; out.push(g[k]); }
+    var nm = REL_KR[x.rel.type] || x.rel.type;
+    if (g[k].names.indexOf(nm) < 0) g[k].names.push(nm);
+    if (!PULL[x.rel.type]) g[k].pull = false;
+  });
+  return out;
+}
+/* "충" + "충·형" → "충·형" (천간·지지 양쪽에 같은 관계가 걸려도 한 번만) */
+function domRelNames(ls){
+  var o = []; ls.forEach(function(l){ l.names.forEach(function(n){ if (o.indexOf(n) < 0) o.push(n); }); }); return o.join("·");
+}
+function domPull(ls){
+  var p = ls.filter(function(l){ return l.pull; }).length, v = p - (ls.length - p);
+  return Math.max(-1, Math.min(1, v));
+}
+function domRead(r, d){
+  var t = r.target, links = domLinks(r), reasons = [], score = 0;
+  var pieces = [
+    {part:"천간", glyph:t.ganzi[0], kr:t.stemKr, sipsin:t.stemSipsin, fav:t.stemFav},
+    {part:"지지", glyph:t.ganzi[1], kr:t.branchKr, sipsin:t.branchSipsin, fav:t.branchFav}
+  ];
+  var seen = {};
+  pieces.forEach(function(p){
+    if (!inSet(p.sipsin, DOM_SET[d])) return;
+    var k = p.sipsin + "|" + p.fav; if (seen[k]) return; seen[k] = 1;
+    var body = domSipsinText(d, p.sipsin); if (!body) return;
+    reasons.push((p.part + " " + p.glyph + "(" + p.kr + ") = " + p.sipsin + " — " + body + " " + domFavNote(p.fav)).trim());
+    score += domFavScore(p.fav);
+  });
+  if (d === "money"){
+    var bg = pieces.filter(function(p){ return inSet(p.sipsin, ["bigeop"]) && p.fav === "gi"; })[0];
+    if (bg){
+      reasons.push(bg.part + " " + bg.glyph + "(" + bg.kr + ") = " + bg.sipsin + " — " + domSipsinText(d, bg.sipsin) + " 들어오는 만큼 나가는 길도 열리기 쉬워요.");
+      score -= 1;
+    }
+  }
+  function posLinks(pos){ return links.filter(function(l){ return l.pos === pos; }); }
+  function allPull(ls){ return ls.every(function(l){ return l.pull; }); }
+  if (d === "work"){
+    var w = posLinks("month");
+    if (w.length){
+      score += domPull(w);
+      reasons.push("일터 자리(월주)와 " + domRelNames(w) + " — " + (allPull(w) ? "함께 손잡을 사람이나 기회가 생기기 쉬워요."
+        : "자리·부서·역할이 바뀌는 움직임이 생기기 쉬워요. 나쁨이 아니라 흔들림이에요."));
+    }
+  } else if (d === "people"){
+    var dy = posLinks("day");
+    if (dy.length){
+      score += domPull(dy);
+      reasons.push("가장 가까운 관계의 자리(일주)와 " + domRelNames(dy) + " — " + (allPull(dy) ? "가까운 사이에 따뜻한 끌림이 생기기 쉬워요."
+        : "가까운 사이에서 서운함이 생기기 쉬워요. 서로의 속도를 맞춰 주세요."));
+    }
+    var yr = posLinks("year");
+    if (yr.length){
+      score += domPull(yr);
+      reasons.push("바깥 인연의 자리(년주)와 " + domRelNames(yr) + " — " + (allPull(yr) ? "새 모임·새 사람과 이어질 일이 생기기 쉬워요."
+        : "오래된 모임이나 집안 일로 정리할 관계가 생기기 쉬워요."));
+    }
+  } else if (d === "health"){
+    var strong = STRONG_STAGES.indexOf(t.unseong) >= 0, weak = REST_STAGES.indexOf(t.unseong) >= 0;
+    if (strong) score += 1; else if (weak) score -= 1;
+    if (UNSEONG_EASY[t.unseong]){
+      reasons.push("12운성 " + t.unseong + "(" + t.unseongHanja + ") — 사람의 한 생으로 치면 " + UNSEONG_EASY[t.unseong] + "예요." +
+        (strong ? " 기운이 차오르는 쪽이라 몸을 쓰는 계획을 세우기 좋아요." : weak ? " 무리하기보다 회복에 시간을 쓰는 쪽이 맞아요." : ""));
+    }
+    var cl = posLinks("day").filter(function(l){ return l.row === "branch" && l.names.indexOf("충") >= 0; });
+    if (cl.length){
+      score -= 1;
+      reasons.push("내 자리(일지)와 " + domRelNames(cl) + " — 생활 리듬이 흔들리기 쉬워요. 잠·식사 시간을 먼저 지켜 주세요.");
+    }
+  }
+  // 열두 달 — 건강은 일지와 정면으로 부딪치는 충만 센다.
+  function clash(m){ return m.branchRel.some(function(x){ return x.type === "沖"; }); }
+  function relevant(m){
+    var ss = [m.stemSipsin, m.branchSipsin];
+    if (d === "health") return true;
+    if (d === "people") return ss.some(function(s){ return inSet(s, ["bigeop","siksang"]); }) || m.branchRel.length > 0;
+    return ss.some(function(s){ return inSet(s, DOM_SET[d]); });
+  }
+  var star = [], care = [];
+  r.months.forEach(function(m){
+    var tr = tier(m.tone);
+    if (relevant(m) && tr === "good" && !(d === "health" && clash(m))) star.push(m.month);
+    if (d === "health" ? (tr === "rest" || clash(m)) : (relevant(m) && tr === "rest")) care.push(m.month);
+  });
+  var diff = star.length - care.length;
+  var starWord = d === "health" ? "기운 좋은 달" : "힘 실을 달", careWord = d === "health" ? "몸 챙길 달" : "살필 달";
+  if (diff >= 2){
+    score += 1;
+    reasons.push("열두 달 중 " + starWord + " " + star.length + "개 · " + careWord + " " + care.length + "개 — 달의 흐름이 이 영역을 받쳐 줘요.");
+  } else if (diff <= -2){
+    score -= 1;
+    reasons.push("열두 달 중 " + starWord + " " + star.length + "개 · " + careWord + " " + care.length + "개 — 쉬어 가는 달이 더 많아 속도 조절이 필요해요.");
+  }
+  if (!reasons.some(function(x){ return x.indexOf("열두 달 중") !== 0; })){
+    reasons.unshift({
+      money:"올해 천간·지지에는 돈을 직접 움직이는 기운(재성·식상)이 없어요. 큰 판보다 달마다 오는 흐름을 타는 해예요.",
+      work:"올해 천간·지지에는 일의 틀을 직접 흔드는 기운(관성·인성·식상)이 없어요. 하던 자리를 다지는 해로 읽어요.",
+      people:"올해 기운이 가까운 관계의 자리와 따로 맺는 합·충이 없어요. 관계는 내가 움직이는 만큼 움직여요.",
+      health:"올해 기운이 몸의 리듬을 크게 흔드는 자리는 없어요."
+    }[d]);
+  }
+  var sg = score > 0 ? "bright" : score < 0 ? "care" : "steady";
+  return {signal:sg, headline:DOM_HEAD[d][sg], reasons:reasons, tip:DOM_TIP[d][sg], star:star, care:care};
+}
+var DOM_HEAD = {
+  money:{bright:"들어오는 길이 넓어지는 해", steady:"모은 만큼 지키는 해", care:"들어오는 만큼 새는 길도 보는 해"},
+  work:{bright:"내 몫이 또렷해지는 해", steady:"하던 자리를 다지는 해", care:"자리가 움직이니 준비가 먼저인 해"},
+  people:{bright:"사람이 모여드는 해", steady:"있는 인연을 가꾸는 해", care:"속도를 맞춰 주면 깊어지는 해"},
+  health:{bright:"몸을 쓰기 좋은 달이 많은 해", steady:"리듬만 지키면 되는 해", care:"쉬는 것도 계획에 넣는 해"}
+};
+var DOM_TIP = {
+  money:{bright:"들어오는 달에 맞춰 통장을 하나 더 나눠 두세요. 늘어난 만큼 바로 쓰지 않는 게 올해의 기술이에요.",
+    steady:"큰 결정보다 고정비 점검이 먼저예요. 새는 구멍 하나만 막아도 한 해가 달라져요.",
+    care:"보증·동업·빌려주는 돈은 한 번 더 생각하세요. 함께 쓰는 돈은 처음부터 몫을 적어 두면 좋아요."},
+  work:{bright:"맡은 일을 숫자와 결과물로 남겨 두세요. 평가받을 때 그대로 힘이 돼요.",
+    steady:"자격증 하나, 기술 하나처럼 작게 쌓을 목표를 정해 두면 좋아요.",
+    care:"바뀌는 자리를 피하기보다, 옮겨도 쓸 수 있는 실력을 정리해 두세요."},
+  people:{bright:"모임 제안은 가볍게 받아 보세요. 올해 만난 사람이 오래 가기 쉬워요.",
+    steady:"자주 보는 사람에게 먼저 안부를 건네 보세요. 있는 인연이 단단해져요.",
+    care:"서운한 일은 쌓아 두지 말고 그때그때 짧게 말해 주세요."},
+  health:{bright:"운동을 새로 시작하기 좋은 해예요. 무리한 목표보다 오래 갈 습관 하나를 고르세요.",
+    steady:"잠드는 시간과 식사 시간만 일정하게 지켜도 충분해요.",
+    care:"살필 달에는 일정을 하나 덜어 내고 쉬는 날을 먼저 달력에 적어 두세요."}
+};
+var DOM_HEALTH_NOTE = "사주는 몸의 리듬을 읽는 참고일 뿐이에요. 불편한 곳은 꼭 진료로 확인하세요.";
+var DOM_LAST = [], DOM_PICK = 0;
+function renderDomains(r){
+  DOM_LAST = DOMAINS.map(function(x){ return domRead(r, x.key); });
+  var box = document.getElementById("nyDom");
+  box.innerHTML = DOMAINS.map(function(x, i){
+    var rd = DOM_LAST[i];
+    return '<button type="button" data-i="' + i + '" aria-label="' + x.label + ' · ' + SG_KR[rd.signal] + '">' +
+      '<b>' + x.label + '</b><span class="sg-' + rd.signal + '">' + SG_KR[rd.signal] + '</span></button>';
+  }).join("");
+  Array.prototype.forEach.call(box.querySelectorAll("button"), function(b){
+    b.addEventListener("click", function(){ pickDomain(+b.dataset.i); });
+  });
+  pickDomain(DOM_PICK);
+}
+function domMonths(ls){ return ls.length ? ls.join("·") + "월" : "없음"; }
+function pickDomain(i){
+  DOM_PICK = i;
+  var x = DOMAINS[i], rd = DOM_LAST[i], hl = x.key === "health";
+  Array.prototype.forEach.call(document.querySelectorAll("#nyDom button"), function(b){
+    b.classList.toggle("on", +b.dataset.i === i);
+    b.setAttribute("aria-pressed", +b.dataset.i === i ? "true" : "false");
+  });
+  var h = '<h3>' + x.label + ' · <span class="sg-' + rd.signal + '">' + esc(rd.headline) + '</span></h3>' +
+    '<ul><li>' + rd.reasons.map(esc).join('</li><li>') + '</li></ul>' +
+    '<div class="mc"><span class="tn-good">' + (hl ? "기운 좋은 달" : "힘 실을 달") + ' · ' + domMonths(rd.star) + '</span>' +
+    '<span class="tn-rest">' + (hl ? "몸 챙길 달" : "살필 달") + ' · ' + domMonths(rd.care) + '</span></div>' +
+    '<p class="tip"><i>올해 해볼 한 가지</i>' + esc(rd.tip) + '</p>';
+  if (hl) h += '<p class="note" style="margin:0">' + DOM_HEALTH_NOTE + '</p>';
+  if (x.slug) h += '<a class="go" href="/store/product.html?id=' + x.slug + '" data-cta="domain-2027-' + x.key + '">달마다 무엇을 할지는 「' + x.title + '」에서 →</a>';
+  document.getElementById("nyDomD").innerHTML = h;
+}
+
 var SHARE_LABEL = "", LAST = null, PICK = -1;
 function run(){ withEngine("go", runNow); }
 function runNow(){
@@ -610,6 +829,7 @@ function render(r, v){
   }
   if (r.unknownTime) notes.push('<p>태어난 시간을 비워 두셔서 <b>시주는 빼고</b> 계산했어요. 시간을 넣으면 시주와의 관계까지 함께 봐요.</p>');
   document.getElementById("nyNotes").innerHTML = notes.join("");
+  renderDomains(r);
 
   drawMap(r);
   renderRelations(r);
